@@ -1,0 +1,678 @@
+###############################################################################
+#
+# IAR ELF Linker V8.40.2.214/W32 for ARM                  06/Mar/2022  17:22:27
+# Copyright 2007-2019 IAR Systems AB.
+#
+#    Output file  =
+#        G:\Jyothi\DIN Rail Meter\Project\Debug\Exe\DIN Rail Meter Ver1.0.out
+#    Map file     =
+#        G:\Jyothi\DIN Rail Meter\Project\Debug\List\DIN Rail Meter Ver1.0.map
+#    Command line =
+#        -f C:\Users\hp\AppData\Local\Temp\EW5FDD.tmp ("G:\Jyothi\DIN Rail
+#        Meter\Project\Debug\Obj\Clock_DIN.o" "G:\Jyothi\DIN Rail
+#        Meter\Project\Debug\Obj\Comm.o" "G:\Jyothi\DIN Rail
+#        Meter\Project\Debug\Obj\DataManagment.o" "G:\Jyothi\DIN Rail
+#        Meter\Project\Debug\Obj\Delay.o" "G:\Jyothi\DIN Rail
+#        Meter\Project\Debug\Obj\Display_DIN.o" "G:\Jyothi\DIN Rail
+#        Meter\Project\Debug\Obj\EditPara_DIN.o" "G:\Jyothi\DIN Rail
+#        Meter\Project\Debug\Obj\EpulseInterrupt.o" "G:\Jyothi\DIN Rail
+#        Meter\Project\Debug\Obj\FlashCoeff.o" "G:\Jyothi\DIN Rail
+#        Meter\Project\Debug\Obj\I2CDriver.o" "G:\Jyothi\DIN Rail
+#        Meter\Project\Debug\Obj\InitMeter.o" "G:\Jyothi\DIN Rail
+#        Meter\Project\Debug\Obj\Interrupt.o" "G:\Jyothi\DIN Rail
+#        Meter\Project\Debug\Obj\InterruptHandler_DIN.o" "G:\Jyothi\DIN Rail
+#        Meter\Project\Debug\Obj\Main.o" "G:\Jyothi\DIN Rail
+#        Meter\Project\Debug\Obj\Metrology.o" "G:\Jyothi\DIN Rail
+#        Meter\Project\Debug\Obj\SetMeterPara_DIN.o" "G:\Jyothi\DIN Rail
+#        Meter\Project\Debug\Obj\startup_stm32f37x.o" "G:\Jyothi\DIN Rail
+#        Meter\Project\Debug\Obj\stm32f37x_flash.o" "G:\Jyothi\DIN Rail
+#        Meter\Project\Debug\Obj\SystemInitialization_DIN.o" --no_out_extension
+#        -o "G:\Jyothi\DIN Rail Meter\Project\Debug\Exe\DIN Rail Meter
+#        Ver1.0.out" --map "G:\Jyothi\DIN Rail Meter\Project\Debug\List\DIN
+#        Rail Meter Ver1.0.map" --config "G:\Jyothi\DIN Rail
+#        Meter\Project\..\Code\Common\Kwh373Meter.icf" --semihosting --entry
+#        __iar_program_start --vfe --text_out locale)
+#
+###############################################################################
+
+*******************************************************************************
+*** RUNTIME MODEL ATTRIBUTES
+***
+
+CppFlavor       = *
+__SystemLibrary = DLib
+__dlib_version  = 6
+
+
+*******************************************************************************
+*** HEAP SELECTION
+***
+
+The basic heap was selected because no calls to memory allocation
+functions were found in the application outside of system library
+functions, and there are calls to deallocation functions in the
+application.
+
+
+*******************************************************************************
+*** PLACEMENT SUMMARY
+***
+
+"A0":  place at address 0x800'0000 { ro section .intvec };
+"P1":  place in [from 0x800'f800 to 0x800'ffff] {
+          ro section FLASH_COEFF_SECTION };
+"P2":  place in [from 0x800'0000 to 0x800'f7ff] { ro };
+define block CSTACK with size = 4K, alignment = 8 { };
+define block HEAP with size = 4K, alignment = 8 { };
+"P3":  place in [from 0x2000'0000 to 0x2000'3fff] {
+          rw, block CSTACK, block HEAP };
+initialize by copy { rw };
+
+  Section              Kind         Address    Size  Object
+  -------              ----         -------    ----  ------
+"A0":                                         0x188
+  .intvec              ro code   0x800'0000   0x188  startup_stm32f37x.o [1]
+                               - 0x800'0188   0x188
+
+"P2":                                        0x3d46
+  .text                ro code   0x800'0188   0xb90  Interrupt.o [1]
+  .text                ro code   0x800'0d18   0x17c  DataManagment.o [1]
+  .text                ro code   0x800'0e94   0x454  SystemInitialization_DIN.o [1]
+  .text                ro code   0x800'12e8   0x278  Display_DIN.o [1]
+  .text                ro code   0x800'1560   0x270  SetMeterPara_DIN.o [1]
+  .text                ro code   0x800'17d0   0x19a  I2CDriver.o [1]
+  .text                ro code   0x800'196a    0x20  Delay.o [1]
+  .text                ro code   0x800'198a    0x3a  zero_init3.o [4]
+  .text                ro code   0x800'19c4    0x48  FltToDbl.o [3]
+  .text                ro code   0x800'1a0c   0x102  sqrt.o [3]
+  .text                ro code   0x800'1b10   0x1a2  DblMul.o [3]
+  .text                ro code   0x800'1cb4    0x68  DblToFlt.o [3]
+  .text                ro code   0x800'1d1c   0x530  Main.o [1]
+  .text                ro code   0x800'224c   0x2a4  InitMeter.o [1]
+  .text                ro code   0x800'24f0   0x250  Comm.o [1]
+  .text                ro code   0x800'2740   0x246  DblDiv.o [3]
+  .text                ro code   0x800'2988    0x28  EditPara_DIN.o [1]
+  .text                ro code   0x800'29b0   0x112  stm32f37x_flash.o [1]
+  .text                ro code   0x800'2ac4    0x2a  math_wrappers64.o [3]
+  .text                ro code   0x800'2af0   0x17a  DblAdd.o [3]
+  .text                ro code   0x800'2c6c    0xe2  DblSub.o [3]
+  .text                ro code   0x800'2d50    0xc8  acos64.o [3]
+  .text                ro code   0x800'2e18   0x444  cos_sin64.o [3]
+  .text                ro code   0x800'325c    0x2e  DblCmpLe.o [3]
+  .text                ro code   0x800'328c   0x1d0  iar_Atan64.o [3]
+  .text                ro code   0x800'345c    0x3a  DblToS32.o [3]
+  .text                ro code   0x800'3498    0x22  S32ToDbl.o [3]
+  .text                ro code   0x800'34bc    0x20  DblCmpEq.o [3]
+  .text                ro code   0x800'34dc    0x2e  DblCmpGe.o [3]
+  .rodata              const     0x800'350c   0x200  Interrupt.o [1]
+  .rodata              const     0x800'370c   0x1c8  EditPara_DIN.o [1]
+  .text                ro code   0x800'38d4   0x100  Clock_DIN.o [1]
+  .text                ro code   0x800'39d4    0xf0  InterruptHandler_DIN.o [1]
+  .text                ro code   0x800'3ac4    0x64  EpulseInterrupt.o [1]
+  .rodata              const     0x800'3b28    0x98  Display_DIN.o [1]
+  .rodata              const     0x800'3bc0    0x40  iar_Atan64.o [3]
+  .text                ro code   0x800'3c00    0x38  packbits_init_single.o [4]
+  .text                ro code   0x800'3c38    0x28  data_init.o [4]
+  .text                ro code   0x800'3c60    0x22  fpinit_M.o [3]
+  .iar.init_table      const     0x800'3c84    0x20  - Linker created -
+  .text                ro code   0x800'3ca4    0x1e  cmain.o [4]
+  .text                ro code   0x800'3cc2     0x4  low_level_init.o [2]
+  .text                ro code   0x800'3cc6     0x4  exit.o [2]
+  .text                ro code   0x800'3ccc     0xa  cexit.o [4]
+  .text                ro code   0x800'3cd8    0x14  exit.o [5]
+  .text                ro code   0x800'3cec    0x10  startup_stm32f37x.o [1]
+  .rodata              const     0x800'3cfc     0xc  Display_DIN.o [1]
+  .text                ro code   0x800'3d08     0xc  cstartup_M.o [4]
+  .rodata              const     0x800'3d14     0x8  EditPara_DIN.o [1]
+  .rodata              const     0x800'3d1c     0x8  EditPara_DIN.o [1]
+  .rodata              const     0x800'3d24     0x8  EditPara_DIN.o [1]
+  .rodata              const     0x800'3d2c     0x8  EditPara_DIN.o [1]
+  .rodata              const     0x800'3d34     0x8  EditPara_DIN.o [1]
+  .rodata              const     0x800'3d3c     0x8  EditPara_DIN.o [1]
+  .rodata              const     0x800'3d44     0x8  EditPara_DIN.o [1]
+  .rodata              const     0x800'3d4c     0x8  EditPara_DIN.o [1]
+  .rodata              const     0x800'3d54     0x8  EditPara_DIN.o [1]
+  .rodata              const     0x800'3d5c     0x8  EditPara_DIN.o [1]
+  .rodata              const     0x800'3d64     0x8  EditPara_DIN.o [1]
+  .rodata              const     0x800'3d6c     0x8  EditPara_DIN.o [1]
+  .rodata              const     0x800'3d74     0x8  EditPara_DIN.o [1]
+  .rodata              const     0x800'3d7c     0x8  EditPara_DIN.o [1]
+  .rodata              const     0x800'3d84     0x8  EditPara_DIN.o [1]
+  .rodata              const     0x800'3d8c     0x8  EditPara_DIN.o [1]
+  .rodata              const     0x800'3d94     0x8  EditPara_DIN.o [1]
+  .rodata              const     0x800'3d9c     0x8  EditPara_DIN.o [1]
+  .rodata              const     0x800'3da4     0x8  EditPara_DIN.o [1]
+  .rodata              const     0x800'3dac     0x8  EditPara_DIN.o [1]
+  .rodata              const     0x800'3db4     0x8  EditPara_DIN.o [1]
+  .rodata              const     0x800'3dbc     0x8  EditPara_DIN.o [1]
+  .rodata              const     0x800'3dc4     0x8  EditPara_DIN.o [1]
+  .rodata              const     0x800'3dcc     0x8  EditPara_DIN.o [1]
+  .rodata              const     0x800'3dd4     0x8  EditPara_DIN.o [1]
+  .rodata              const     0x800'3ddc     0x4  Display_DIN.o [1]
+  .text                ro code   0x800'3de0     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3de4     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3de8     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3dec     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3df0     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3df4     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3df8     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3dfc     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e00     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e04     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e08     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e0c     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e10     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e14     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e18     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e1c     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e20     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e24     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e28     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e2c     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e30     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e34     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e38     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e3c     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e40     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e44     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e48     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e4c     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e50     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e54     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e58     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e5c     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e60     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e64     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e68     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e6c     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e70     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e74     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e78     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e7c     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e80     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e84     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e88     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e8c     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e90     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e94     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e98     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3e9c     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3ea0     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3ea4     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3ea8     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3eac     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3eb0     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3eb4     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3eb8     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3ebc     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3ec0     0x4  startup_stm32f37x.o [1]
+  .text                ro code   0x800'3ec4     0x4  startup_stm32f37x.o [1]
+  .rodata              const     0x800'3ec8     0x0  zero_init3.o [4]
+  .rodata              const     0x800'3ec8     0x0  packbits_init_single.o [4]
+  Initializer bytes    const     0x800'3ec8     0x6  <for P3-1>
+                               - 0x800'3ece  0x3d46
+
+"P1":                                          0x64
+  FLASH_COEFF_SECTION  const     0x800'f800    0x64  FlashCoeff.o [1]
+                               - 0x800'f864    0x64
+
+"P3", part 1 of 3:                             0x78
+  P3-1                          0x2000'0000    0x78  <Init block>
+    .data              inited   0x2000'0000    0x78  Main.o [1]
+                              - 0x2000'0078    0x78
+
+"P3", part 2 of 3:                           0x2070
+  .bss                 zero     0x2000'0078  0x15e4  Main.o [1]
+  .bss                 zero     0x2000'165c   0x264  Main.o [1]
+  .bss                 zero     0x2000'18c0   0x140  Main.o [1]
+  .bss                 zero     0x2000'1a00    0xcc  Main.o [1]
+  .bss                 zero     0x2000'1acc    0xcc  Main.o [1]
+  .bss                 zero     0x2000'1b98    0xcc  Main.o [1]
+  .bss                 zero     0x2000'1c64    0x80  Main.o [1]
+  .bss                 zero     0x2000'1ce4    0x6c  Interrupt.o [1]
+  .bss                 zero     0x2000'1d50    0x64  Main.o [1]
+  .bss                 zero     0x2000'1db4    0x64  Main.o [1]
+  .bss                 zero     0x2000'1e18    0x60  DataManagment.o [1]
+  .bss                 zero     0x2000'1e78    0x60  Main.o [1]
+  .bss                 zero     0x2000'1ed8    0x58  Main.o [1]
+  .bss                 zero     0x2000'1f30    0x54  Main.o [1]
+  .bss                 zero     0x2000'1f84    0x34  SetMeterPara_DIN.o [1]
+  .bss                 zero     0x2000'1fb8    0x32  Display_DIN.o [1]
+  .bss                 zero     0x2000'1fea     0x2  Interrupt.o [1]
+  .bss                 zero     0x2000'1fec    0x30  Display_DIN.o [1]
+  .bss                 zero     0x2000'201c    0x30  Main.o [1]
+  .bss                 zero     0x2000'204c    0x18  Main.o [1]
+  .bss                 zero     0x2000'2064    0x14  Comm.o [1]
+  .bss                 zero     0x2000'2078    0x10  SetMeterPara_DIN.o [1]
+  .bss                 zero     0x2000'2088     0x8  Comm.o [1]
+  .bss                 zero     0x2000'2090     0x8  Main.o [1]
+  .bss                 zero     0x2000'2098     0x4  Main.o [1]
+  .bss                 zero     0x2000'209c     0x4  Main.o [1]
+  .bss                 zero     0x2000'20a0     0x4  Main.o [1]
+  .bss                 zero     0x2000'20a4     0x4  Main.o [1]
+  .bss                 zero     0x2000'20a8     0x4  Main.o [1]
+  .bss                 zero     0x2000'20ac     0x4  Main.o [1]
+  .bss                 zero     0x2000'20b0     0x4  Main.o [1]
+  .bss                 zero     0x2000'20b4     0x4  Main.o [1]
+  .bss                 zero     0x2000'20b8     0x4  Main.o [1]
+  .bss                 zero     0x2000'20bc     0x4  Main.o [1]
+  .bss                 zero     0x2000'20c0     0x2  Main.o [1]
+  .bss                 zero     0x2000'20c2     0x2  Main.o [1]
+  .bss                 zero     0x2000'20c4     0x2  Main.o [1]
+  .bss                 zero     0x2000'20c6     0x2  Main.o [1]
+  .bss                 zero     0x2000'20c8     0x2  Main.o [1]
+  .bss                 zero     0x2000'20ca     0x2  Main.o [1]
+  .bss                 zero     0x2000'20cc     0x2  Main.o [1]
+  .bss                 zero     0x2000'20ce     0x2  Main.o [1]
+  .bss                 zero     0x2000'20d0     0x2  Main.o [1]
+  .bss                 zero     0x2000'20d2     0x2  Main.o [1]
+  .bss                 zero     0x2000'20d4     0x2  Main.o [1]
+  .bss                 zero     0x2000'20d6     0x2  Main.o [1]
+  .bss                 zero     0x2000'20d8     0x2  Main.o [1]
+  .bss                 zero     0x2000'20da     0x2  Main.o [1]
+  .bss                 zero     0x2000'20dc     0x2  Main.o [1]
+  .bss                 zero     0x2000'20de     0x2  SystemInitialization_DIN.o [1]
+  .bss                 zero     0x2000'20e0     0x1  InterruptHandler_DIN.o [1]
+  .bss                 zero     0x2000'20e1     0x1  Main.o [1]
+  .bss                 zero     0x2000'20e2     0x1  Main.o [1]
+  .bss                 zero     0x2000'20e3     0x1  Main.o [1]
+  .bss                 zero     0x2000'20e4     0x1  Main.o [1]
+  .bss                 zero     0x2000'20e5     0x1  Main.o [1]
+  .bss                 zero     0x2000'20e6     0x1  Main.o [1]
+                              - 0x2000'20e7  0x206f
+
+"P3", part 3 of 3:                           0x1000
+  CSTACK                        0x2000'20e8  0x1000  <Block>
+    CSTACK             uninit   0x2000'20e8  0x1000  <Block tail>
+                              - 0x2000'30e8  0x1000
+
+Unused ranges:
+
+         From           To    Size
+         ----           --    ----
+   0x800'3ece   0x800'f7ff  0xb932
+   0x800'f864   0x800'ffff   0x79c
+  0x2000'30e8  0x2000'3fff   0xf18
+
+
+*******************************************************************************
+*** INIT TABLE
+***
+
+          Address      Size
+          -------      ----
+Zero (__iar_zero_init3)
+    1 destination range, total size 0x206f:
+          0x2000'0078  0x206f
+
+Copy/packbits (__iar_packbits_init_single3)
+    1 source range, total size 0x6 (5% of destination):
+           0x800'3ec8     0x6
+    1 destination range, total size 0x78:
+          0x2000'0000    0x78
+
+
+
+*******************************************************************************
+*** MODULE SUMMARY
+***
+
+    Module                      ro code  ro data  rw data
+    ------                      -------  -------  -------
+command line/config:
+    -----------------------------------------------------
+    Total:
+
+G:\Jyothi\DIN Rail Meter\Project\Debug\Obj: [1]
+    Clock_DIN.o                     256
+    Comm.o                          592                28
+    DataManagment.o                 380                96
+    Delay.o                          32
+    Display_DIN.o                   632      168       98
+    EditPara_DIN.o                   40      656
+    EpulseInterrupt.o               100
+    FlashCoeff.o                             100
+    I2CDriver.o                     410
+    InitMeter.o                     676
+    Interrupt.o                   2'960      512      110
+    InterruptHandler_DIN.o          240                 1
+    Main.o                        1'328        6    8'020
+    SetMeterPara_DIN.o              624                68
+    SystemInitialization_DIN.o    1'108                 2
+    startup_stm32f37x.o             640
+    stm32f37x_flash.o               274
+    -----------------------------------------------------
+    Total:                       10'292    1'442    8'423
+
+dl7M_tln.a: [2]
+    exit.o                            4
+    low_level_init.o                  4
+    -----------------------------------------------------
+    Total:                            8
+
+m7M_tls.a: [3]
+    DblAdd.o                        378
+    DblCmpEq.o                       32
+    DblCmpGe.o                       46
+    DblCmpLe.o                       46
+    DblDiv.o                        582
+    DblMul.o                        418
+    DblSub.o                        226
+    DblToFlt.o                      104
+    DblToS32.o                       58
+    FltToDbl.o                       72
+    S32ToDbl.o                       34
+    acos64.o                        200
+    cos_sin64.o                   1'092
+    fpinit_M.o                       34
+    iar_Atan64.o                    464       64
+    math_wrappers64.o                42
+    sqrt.o                          258
+    -----------------------------------------------------
+    Total:                        4'086       64
+
+rt7M_tl.a: [4]
+    cexit.o                          10
+    cmain.o                          30
+    cstartup_M.o                     12
+    data_init.o                      40
+    packbits_init_single.o           56
+    zero_init3.o                     58
+    -----------------------------------------------------
+    Total:                          206
+
+shb_l.a: [5]
+    exit.o                           20
+    -----------------------------------------------------
+    Total:                           20
+
+    Gaps                             24        4
+    Linker created                            32    4'096
+---------------------------------------------------------
+    Grand Total:                 14'636    1'542   12'519
+
+
+*******************************************************************************
+*** ENTRY LIST
+***
+
+Entry                       Address    Size  Type      Object
+-----                       -------    ----  ----      ------
+.iar.init_table$$Base    0x800'3c84           --   Gb  - Linker created -
+.iar.init_table$$Limit   0x800'3ca4           --   Gb  - Linker created -
+?main                    0x800'3ca5          Code  Gb  cmain.o [4]
+A                       0x2000'2074     0x4  Data  Gb  Comm.o [1]
+AdcDataInArray          0x2000'201c    0x30  Data  Gb  Main.o [1]
+B                       0x2000'2070     0x4  Data  Gb  Comm.o [1]
+BCurSample              0x2000'1d08    0x10  Data  Gb  Interrupt.o [1]
+BVolSample              0x2000'1d38    0x10  Data  Gb  Interrupt.o [1]
+BufferAlfaB             0x2000'1b98    0xcc  Data  Gb  Main.o [1]
+BufferAlfaR             0x2000'1a00    0xcc  Data  Gb  Main.o [1]
+BufferAlfaY             0x2000'1acc    0xcc  Data  Gb  Main.o [1]
+BufferBetaB             0x2000'17f4    0xcc  Data  Gb  Main.o [1]
+BufferBetaR             0x2000'165c    0xcc  Data  Gb  Main.o [1]
+BufferBetaY             0x2000'1728    0xcc  Data  Gb  Main.o [1]
+BufferForDisplay        0x2000'1fb8    0x30  Data  Gb  Display_DIN.o [1]
+BufferToDisplay         0x2000'1fec    0x30  Data  Gb  Display_DIN.o [1]
+BusFault_Handler         0x800'39db     0x2  Code  Gb  InterruptHandler_DIN.o [1]
+CHAR_ALFA_14_SEG         0x800'3b28    0x98  Data  Gb  Display_DIN.o [1]
+CHAR_ALFA_7_SEG          0x800'1544    0x1c  Data  Gb  Display_DIN.o [1]
+CRCCalculation           0x800'0d19    0x4a  Code  Gb  DataManagment.o [1]
+CSTACK$$Base            0x2000'20e8           --   Gb  - Linker created -
+CSTACK$$Limit           0x2000'30e8           --   Gb  - Linker created -
+CTPrimary               0x2000'207c     0x4  Data  Gb  SetMeterPara_DIN.o [1]
+CTSecondary             0x2000'2084     0x4  Data  Gb  SetMeterPara_DIN.o [1]
+CalBuffer               0x2000'1d50    0x64  Data  Gb  Main.o [1]
+CalCtPtRatio             0x800'15a9   0x194  Code  Gb  SetMeterPara_DIN.o [1]
+CalPF                    0x800'253d   0x1da  Code  Gb  Comm.o [1]
+CalculateFreqYBPhase     0x800'0ad5    0x9e  Code  Gb  Interrupt.o [1]
+CalibrationCoeff         0x800'f800    0x64  Data  Gb  FlashCoeff.o [1]
+CalibrationGapCounter   0x2000'0004     0x1  Data  Gb  Main.o [1]
+CaptureSumCounter       0x2000'20c2     0x2  Data  Gb  Main.o [1]
+CaptureValueSav         0x2000'0038     0x2  Data  Gb  Main.o [1]
+CaptureValueSum         0x2000'20ac     0x4  Data  Gb  Main.o [1]
+Check485DirCount        0x2000'1d48     0x4  Data  Gb  Interrupt.o [1]
+Check485DirCounter      0x2000'1d4c     0x4  Data  Gb  Interrupt.o [1]
+CheckEpromFree           0x800'1925    0x32  Code  Gb  I2CDriver.o [1]
+ComInUsed               0x2000'1fe8     0x2  Data  Gb  Display_DIN.o [1]
+CopySetPara             0x2000'000c    0x28  Data  Gb  Main.o [1]
+CosTable                 0x800'350c   0x100  Data  Gb  Interrupt.o [1]
+CounterSendComplete     0x2000'1ce6     0x2  Data  Gb  Interrupt.o [1]
+CtPtRatio               0x2000'20a0     0x4  Data  Gb  Main.o [1]
+CtRatio                 0x2000'2098     0x4  Data  Gb  Main.o [1]
+CycleCounter            0x2000'20e5     0x1  Data  Gb  Main.o [1]
+D                       0x2000'206c     0x4  Data  Gb  Comm.o [1]
+DIS_REX                  0x800'1540     0x4  Data  Gb  Display_DIN.o [1]
+DIS_SEL_BAUD             0x800'3da4     0x8  Data  Gb  EditPara_DIN.o [1]
+DIS_SEL_BIT              0x800'3dcc     0x8  Data  Gb  EditPara_DIN.o [1]
+DIS_SEL_COM              0x800'3db4     0x8  Data  Gb  EditPara_DIN.o [1]
+DIS_SEL_CONF             0x800'3d8c     0x8  Data  Gb  EditPara_DIN.o [1]
+DIS_SEL_CT_PRIMARY       0x800'3d5c     0x8  Data  Gb  EditPara_DIN.o [1]
+DIS_SEL_CT_SECONDARY     0x800'3d64     0x8  Data  Gb  EditPara_DIN.o [1]
+DIS_SEL_CURR             0x800'3d2c     0x8  Data  Gb  EditPara_DIN.o [1]
+DIS_SEL_DEC              0x800'3d44     0x8  Data  Gb  EditPara_DIN.o [1]
+DIS_SEL_DEVICE           0x800'3d94     0x8  Data  Gb  EditPara_DIN.o [1]
+DIS_SEL_DISP             0x800'3dd4     0x8  Data  Gb  EditPara_DIN.o [1]
+DIS_SEL_END              0x800'3d74     0x8  Data  Gb  EditPara_DIN.o [1]
+DIS_SEL_ENE              0x800'3d1c     0x8  Data  Gb  EditPara_DIN.o [1]
+DIS_SEL_ID               0x800'3d9c     0x8  Data  Gb  EditPara_DIN.o [1]
+DIS_SEL_KVA              0x800'3d6c     0x8  Data  Gb  EditPara_DIN.o [1]
+DIS_SEL_PAR              0x800'3dbc     0x8  Data  Gb  EditPara_DIN.o [1]
+DIS_SEL_PT_PRIMARY       0x800'3d34     0x8  Data  Gb  EditPara_DIN.o [1]
+DIS_SEL_PT_SECONDARY     0x800'3d54     0x8  Data  Gb  EditPara_DIN.o [1]
+DIS_SEL_RATE             0x800'3dac     0x8  Data  Gb  EditPara_DIN.o [1]
+DIS_SEL_RESO             0x800'3d14     0x8  Data  Gb  EditPara_DIN.o [1]
+DIS_SEL_STOP             0x800'3dc4     0x8  Data  Gb  EditPara_DIN.o [1]
+DIS_SEL_STRT             0x800'3d24     0x8  Data  Gb  EditPara_DIN.o [1]
+DIS_SEL_SYSTEM           0x800'3d84     0x8  Data  Gb  EditPara_DIN.o [1]
+DIS_SEL_TYPE             0x800'3d7c     0x8  Data  Gb  EditPara_DIN.o [1]
+DIS_SEL_UNIT             0x800'3d4c     0x8  Data  Gb  EditPara_DIN.o [1]
+DIS_SEL_VALUE            0x800'3d3c     0x8  Data  Gb  EditPara_DIN.o [1]
+DMA1_Channel1_IRQHandler
+                         0x800'39e7     0x2  Code  Gb  InterruptHandler_DIN.o [1]
+DMA1_Channel2_IRQHandler
+                         0x800'3a5d    0x3e  Code  Gb  InterruptHandler_DIN.o [1]
+DataSaveCounter         0x2000'003a     0x2  Data  Gb  Main.o [1]
+DebugMon_Handler         0x800'39e1     0x2  Code  Gb  InterruptHandler_DIN.o [1]
+Delay1Msec12Mhz          0x800'196b    0x20  Code  Gb  Delay.o [1]
+DisplayDebarCounter     0x2000'0005     0x1  Data  Gb  Main.o [1]
+DisplayDisabled          0x800'1503    0x1e  Code  Gb  Display_DIN.o [1]
+DisplayParameterBuffer  0x2000'1f84    0x34  Data  Gb  SetMeterPara_DIN.o [1]
+DisplayParameterUpdate   0x800'173d    0x2e  Code  Gb  SetMeterPara_DIN.o [1]
+DisplaySetup            0x2000'0008     0x4  Data  Gb  Main.o [1]
+DisplayString            0x800'12e9    0x76  Code  Gb  Display_DIN.o [1]
+Dummy                   0x2000'20e0     0x1  Data  Gb  InterruptHandler_DIN.o [1]
+EditParameters           0x800'370c   0x1c8  Data  Gb  EditPara_DIN.o [1]
+EepromWrite              0x800'195d     0xe  Code  Gb  I2CDriver.o [1]
+EnergyDisplayUnit       0x2000'20e1     0x1  Data  Gb  Main.o [1]
+EnergyOverflowLimit     0x2000'2090     0x8  Data  Gb  Main.o [1]
+FLASH_ErasePage          0x800'29d7    0x3a  Code  Gb  stm32f37x_flash.o [1]
+FLASH_GetStatus          0x800'2a6b    0x22  Code  Gb  stm32f37x_flash.o [1]
+FLASH_Lock               0x800'29c9     0xe  Code  Gb  stm32f37x_flash.o [1]
+FLASH_ProgramWord        0x800'2a11    0x5a  Code  Gb  stm32f37x_flash.o [1]
+FLASH_Unlock             0x800'29b1    0x18  Code  Gb  stm32f37x_flash.o [1]
+FLASH_WaitForLastOperation
+                         0x800'2aa1    0x22  Code  Gb  stm32f37x_flash.o [1]
+FftSampleData           0x2000'0078  0x15e4  Data  Gb  Main.o [1]
+FilOut_1                0x2000'20da     0x2  Data  Gb  Main.o [1]
+FillCurrentGainArray     0x800'1da1   0x202  Code  Gb  Main.o [1]
+FillDefaultValue         0x800'2989    0x1e  Code  Gb  EditPara_DIN.o [1]
+FlagDirectCalibration   0x2000'0003     0x1  Data  Gb  Main.o [1]
+FreqFlag                0x2000'0001     0x1  Data  Gb  Main.o [1]
+FreqSampleFlag          0x2000'0002     0x1  Data  Gb  Main.o [1]
+FrequencyTimer           0x800'10ab    0x3a  Code  Lc  SystemInitialization_DIN.o [1]
+HardFault_Handler        0x800'39d7     0x2  Code  Gb  InterruptHandler_DIN.o [1]
+I2CRead                  0x800'17d1    0xb4  Code  Gb  I2CDriver.o [1]
+I2CWrite                 0x800'1885    0xa0  Code  Gb  I2CDriver.o [1]
+InitI2C                  0x800'1031    0x1a  Code  Gb  SystemInitialization_DIN.o [1]
+InitPort                 0x800'0ead    0xb2  Code  Lc  SystemInitialization_DIN.o [1]
+InitUart                 0x800'112f   0x118  Code  Gb  SystemInitialization_DIN.o [1]
+InitWatchDog             0x800'0ff5    0x3c  Code  Gb  SystemInitialization_DIN.o [1]
+InitializeHardware       0x800'0fcd    0x28  Code  Gb  SystemInitialization_DIN.o [1]
+InitilisationError       0x800'24c3     0xa  Code  Gb  InitMeter.o [1]
+InstantPara             0x2000'18c0   0x140  Data  Gb  Main.o [1]
+IntBPrevSample          0x2000'20bc     0x4  Data  Gb  Main.o [1]
+IntDataSave             0x2000'1ed8    0x58  Data  Gb  Main.o [1]
+IntDataSum              0x2000'1f30    0x54  Data  Gb  Main.o [1]
+IntRPrevSample          0x2000'20b4     0x4  Data  Gb  Main.o [1]
+IntTimerCount           0x2000'0034     0x4  Data  Gb  Main.o [1]
+IntWattPerPulseTick     0x2000'20a8     0x4  Data  Gb  Main.o [1]
+IntYPrevSample          0x2000'20b8     0x4  Data  Gb  Main.o [1]
+InterruptDisplayRefresh
+                         0x800'1391   0x172  Code  Gb  Display_DIN.o [1]
+InterruptFlag           0x2000'0070     0x4  Data  Gb  Main.o [1]
+LcdEpromBuffer          0x2000'1c64    0x80  Data  Gb  Main.o [1]
+MemManage_Handler        0x800'39d9     0x2  Code  Gb  InterruptHandler_DIN.o [1]
+MeterInit                0x800'2375    0x12  Code  Gb  InitMeter.o [1]
+MeterPassword           0x2000'20c8     0x2  Data  Gb  Main.o [1]
+NMI_Handler              0x800'39d5     0x2  Code  Gb  InterruptHandler_DIN.o [1]
+NewMeterInit             0x800'224d    0xf2  Code  Gb  InitMeter.o [1]
+OldData                 0x2000'1e18    0x60  Data  Gb  DataManagment.o [1]
+OneSecCounter           0x2000'1ce4     0x2  Data  Gb  Interrupt.o [1]
+OneSecFlag              0x2000'20c6     0x2  Data  Gb  Main.o [1]
+PTPrimary               0x2000'2078     0x4  Data  Gb  SetMeterPara_DIN.o [1]
+PTSecondary             0x2000'2080     0x4  Data  Gb  SetMeterPara_DIN.o [1]
+ParaBlockIndex          0x2000'0000     0x1  Data  Gb  Main.o [1]
+ParaLocUpdate            0x800'233f    0x36  Code  Gb  InitMeter.o [1]
+PendSV_Handler           0x800'39e3     0x2  Code  Gb  InterruptHandler_DIN.o [1]
+PhasenRadian            0x2000'2068     0x4  Data  Gb  Comm.o [1]
+PowerDownDataSave        0x800'0e0d    0x66  Code  Gb  DataManagment.o [1]
+PowerFailCounter        0x2000'20e2     0x1  Data  Gb  Main.o [1]
+PowerUpCounter          0x2000'0006     0x1  Data  Gb  Main.o [1]
+PrevSampleVol           0x2000'20d8     0x2  Data  Gb  Main.o [1]
+PreviousCaptureCount    0x2000'20c0     0x2  Data  Gb  Main.o [1]
+Process1SecInterrupt     0x800'3ac5     0xc  Code  Gb  EpulseInterrupt.o [1]
+ProcessFreqCapture       0x800'3ad1    0x3e  Code  Gb  EpulseInterrupt.o [1]
+ProcessMainInterrupt     0x800'01a9   0x92c  Code  Gb  Interrupt.o [1]
+PtRatio                 0x2000'209c     0x4  Data  Gb  Main.o [1]
+RCurSample              0x2000'1ce8    0x10  Data  Gb  Interrupt.o [1]
+RVolSample              0x2000'1d18    0x10  Data  Gb  Interrupt.o [1]
+RYFreqMeasDuration      0x2000'20b0     0x4  Data  Gb  Main.o [1]
+ReadSwitches             0x800'0b73    0xde  Code  Gb  Interrupt.o [1]
+ReceiveLength           0x2000'20e6     0x1  Data  Gb  Main.o [1]
+RecieveArray            0x2000'1db4    0x64  Data  Gb  Main.o [1]
+Region$$Table$$Base      0x800'3c84           --   Gb  - Linker created -
+Region$$Table$$Limit     0x800'3ca4           --   Gb  - Linker created -
+SCREEN_SEQ_1P_MAIN       0x800'3ddc     0x4  Data  Gb  Display_DIN.o [1]
+SCREEN_SEQ_3P_MAIN       0x800'3cfc     0xc  Data  Gb  Display_DIN.o [1]
+SVC_Handler              0x800'39df     0x2  Code  Gb  InterruptHandler_DIN.o [1]
+SampleCounter           0x2000'20c4     0x2  Data  Gb  Main.o [1]
+SaveFlashData            0x800'24f1    0x18  Code  Gb  Comm.o [1]
+SaveFreqMeasDuration    0x2000'0074     0x4  Data  Gb  Main.o [1]
+SaveOldData              0x800'0d65    0xa8  Code  Gb  DataManagment.o [1]
+ScrollSaveCounter       0x2000'0007     0x1  Data  Gb  Main.o [1]
+Set1SecTimer             0x800'107b    0x30  Code  Lc  SystemInitialization_DIN.o [1]
+SetAdc                   0x800'0fab    0x22  Code  Lc  SystemInitialization_DIN.o [1]
+SetDmaRegisters          0x800'0f95    0x16  Code  Lc  SystemInitialization_DIN.o [1]
+SetInitialDisplay        0x800'135f    0x2c  Code  Gb  Display_DIN.o [1]
+SetMeterParameters       0x800'1561    0x46  Code  Gb  SetMeterPara_DIN.o [1]
+SetPwrRegisters          0x800'0f5f    0x36  Code  Lc  SystemInitialization_DIN.o [1]
+SetSDADC                 0x800'10e5    0x4a  Code  Lc  SystemInitialization_DIN.o [1]
+SetSysClock              0x800'392d    0x90  Code  Lc  Clock_DIN.o [1]
+SetSystemTimer           0x800'104b    0x30  Code  Lc  SystemInitialization_DIN.o [1]
+SetWorkingGainBuffer     0x800'1fa9   0x260  Code  Gb  Main.o [1]
+SinTable                 0x800'360c   0x100  Data  Gb  Interrupt.o [1]
+StepHigh                0x2000'20dc     0x1  Data  Gb  Main.o [1]
+StepLow                 0x2000'20dd     0x1  Data  Gb  Main.o [1]
+StorageBuffer           0x2000'1e78    0x60  Data  Gb  Main.o [1]
+StoredDataVerification   0x800'2387   0x13c  Code  Gb  InitMeter.o [1]
+SwFlag                  0x2000'20ce     0x2  Data  Gb  Main.o [1]
+SwPressed               0x2000'003c     0x2  Data  Gb  Main.o [1]
+SwPrev                  0x2000'20ca     0x2  Data  Gb  Main.o [1]
+SwTimeOverflow          0x2000'20d2     0x2  Data  Gb  Main.o [1]
+SwTimeOverflow2         0x2000'20d4     0x2  Data  Gb  Main.o [1]
+SwTimeOverflow3         0x2000'20d6     0x2  Data  Gb  Main.o [1]
+SwTimer                 0x2000'20cc     0x2  Data  Gb  Main.o [1]
+SwValue                 0x2000'20d0     0x2  Data  Gb  Main.o [1]
+SysTick_Handler          0x800'39e5     0x2  Code  Gb  InterruptHandler_DIN.o [1]
+SystemInit               0x800'38d5    0x58  Code  Gb  Clock_DIN.o [1]
+TIM2_IRQHandler          0x800'39e9     0xa  Code  Gb  InterruptHandler_DIN.o [1]
+TIM3_IRQHandler          0x800'39fd     0xa  Code  Gb  InterruptHandler_DIN.o [1]
+TIM4_IRQHandler          0x800'39f3     0xa  Code  Gb  InterruptHandler_DIN.o [1]
+Tc20ms                  0x2000'20e3     0x1  Data  Gb  Main.o [1]
+Temp_Start_Add          0x2000'2088     0x2  Data  Gb  Comm.o [1]
+TimeOutCommTx           0x2000'20de     0x2  Data  Gb  SystemInitialization_DIN.o [1]
+Timer                   0x2000'208c     0x4  Data  Gb  Comm.o [1]
+USART3_IRQHandler        0x800'3a07    0x56  Code  Gb  InterruptHandler_DIN.o [1]
+UpdateDisplay           0x2000'20e4     0x1  Data  Gb  Main.o [1]
+UsageFault_Handler       0x800'39dd     0x2  Code  Gb  InterruptHandler_DIN.o [1]
+VIOffset                0x2000'204c    0x18  Data  Gb  Main.o [1]
+W                       0x2000'2064     0x4  Data  Gb  Comm.o [1]
+WattPerPulseTick        0x2000'20a4     0x4  Data  Gb  Main.o [1]
+WorkingCopyGain         0x2000'0040    0x30  Data  Gb  Main.o [1]
+WriteFlashData           0x800'2509    0x32  Code  Gb  Comm.o [1]
+YCurSample              0x2000'1cf8    0x10  Data  Gb  Interrupt.o [1]
+YVolSample              0x2000'1d28    0x10  Data  Gb  Interrupt.o [1]
+__NVIC_EnableIRQ         0x800'0e95    0x18  Code  Lc  SystemInitialization_DIN.o [1]
+__NVIC_SystemReset       0x800'0189    0x1e  Code  Lc  Interrupt.o [1]
+__aeabi_cdcmpeq          0x800'34bd          Code  Gb  DblCmpEq.o [3]
+__aeabi_cdcmple          0x800'325d          Code  Gb  DblCmpLe.o [3]
+__aeabi_cdrcmple         0x800'34dd          Code  Gb  DblCmpGe.o [3]
+__aeabi_d2f              0x800'1cb5          Code  Gb  DblToFlt.o [3]
+__aeabi_d2iz             0x800'345d          Code  Gb  DblToS32.o [3]
+__aeabi_dadd             0x800'2af1          Code  Gb  DblAdd.o [3]
+__aeabi_ddiv             0x800'2741          Code  Gb  DblDiv.o [3]
+__aeabi_dmul             0x800'1b11          Code  Gb  DblMul.o [3]
+__aeabi_dsub             0x800'2c6d          Code  Gb  DblSub.o [3]
+__aeabi_f2d              0x800'19c5          Code  Gb  FltToDbl.o [3]
+__aeabi_i2d              0x800'3499          Code  Gb  S32ToDbl.o [3]
+__cmain                  0x800'3ca5          Code  Gb  cmain.o [4]
+__exit                   0x800'3cd9    0x14  Code  Gb  exit.o [5]
+__iar_Atan64             0x800'328d   0x1d0  Code  Gb  iar_Atan64.o [3]
+__iar_Sin64              0x800'2e19   0x3aa  Code  Lc  cos_sin64.o [3]
+__iar_acos64             0x800'2d51    0xc8  Code  Gb  acos64.o [3]
+__iar_cos64              0x800'3255     0x4  Code  Gb  cos_sin64.o [3]
+__iar_cos_medium         0x800'3255     0x4  Code  Gb  cos_sin64.o [3]
+__iar_cos_medium64       0x800'3255     0x4  Code  Gb  cos_sin64.o [3]
+__iar_cos_mediuml        0x800'3255     0x4  Code  Gb  cos_sin64.o [3]
+__iar_dadd               0x800'2c7d          Code  Gb  DblSub.o [3]
+__iar_data_init3         0x800'3c39    0x28  Code  Gb  data_init.o [4]
+__iar_dsub               0x800'2b01          Code  Gb  DblAdd.o [3]
+__iar_dsubStart          0x800'2b13          Code  Gb  DblAdd.o [3]
+__iar_init_vfp           0x800'3c61          Code  Gb  fpinit_M.o [3]
+__iar_packbits_init_single3
+                         0x800'3c01    0x38  Code  Gb  packbits_init_single.o [4]
+__iar_program_start      0x800'3d09          Code  Gb  cstartup_M.o [4]
+__iar_sin64              0x800'3259     0x4  Code  Gb  cos_sin64.o [3]
+__iar_sin_medium         0x800'3259     0x4  Code  Gb  cos_sin64.o [3]
+__iar_sin_medium64       0x800'3259     0x4  Code  Gb  cos_sin64.o [3]
+__iar_sin_mediuml        0x800'3259     0x4  Code  Gb  cos_sin64.o [3]
+__iar_sqrt64             0x800'1a1d          Code  Gb  sqrt.o [3]
+__iar_vfp___iar_sqrt64   0x800'1a0d          Code  Gb  sqrt.o [3]
+__iar_vfp_acos           0x800'2acb     0xc  Code  Gb  math_wrappers64.o [3]
+__iar_vfp_cos            0x800'2ad7     0xc  Code  Gb  math_wrappers64.o [3]
+__iar_vfp_sin            0x800'2ae3     0xc  Code  Gb  math_wrappers64.o [3]
+__iar_vfp_sqrt           0x800'1a0d          Code  Gb  sqrt.o [3]
+__iar_vfp_sqrtl          0x800'1a0d          Code  Gb  sqrt.o [3]
+__iar_zero_init3         0x800'198b    0x3a  Code  Gb  zero_init3.o [4]
+__low_level_init         0x800'3cc3     0x4  Code  Gb  low_level_init.o [2]
+__vector_table           0x800'0000          Data  Gb  startup_stm32f37x.o [1]
+_call_main               0x800'3cb1          Code  Gb  cmain.o [4]
+_exit                    0x800'3ccd          Code  Gb  cexit.o [4]
+_main                    0x800'3cbf          Code  Gb  cmain.o [4]
+a                        0x800'3bc0    0x40  Data  Lc  iar_Atan64.o [3]
+acos                     0x800'2d51    0xc8  Code  Gb  acos64.o [3]
+acosl                    0x800'2d51    0xc8  Code  Gb  acos64.o [3]
+cos                      0x800'3255     0x4  Code  Gb  cos_sin64.o [3]
+cosl                     0x800'3255     0x4  Code  Gb  cos_sin64.o [3]
+exit                     0x800'3cc7     0x4  Code  Gb  exit.o [2]
+freqcounter             0x2000'1fea     0x2  Data  Gb  Interrupt.o [1]
+main                     0x800'1d1d    0x82  Code  Gb  Main.o [1]
+sin                      0x800'3259     0x4  Code  Gb  cos_sin64.o [3]
+sinl                     0x800'3259     0x4  Code  Gb  cos_sin64.o [3]
+sqrt                     0x800'1a1d          Code  Gb  sqrt.o [3]
+sqrtl                    0x800'1a1d          Code  Gb  sqrt.o [3]
+
+
+[1] = G:\Jyothi\DIN Rail Meter\Project\Debug\Obj
+[2] = dl7M_tln.a
+[3] = m7M_tls.a
+[4] = rt7M_tl.a
+[5] = shb_l.a
+
+  14'636 bytes of readonly  code memory
+   1'542 bytes of readonly  data memory
+  12'519 bytes of readwrite data memory
+
+Errors: none
+Warnings: none

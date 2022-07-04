@@ -1,0 +1,819 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+    <fileVersion>4</fileVersion>
+    <fileChecksum>2779094353</fileChecksum>
+    <configuration>
+        <name>Debug</name>
+        <outputs>
+            <file>$PROJ_DIR$\Debug\List\REX-1900 Ver1.0.map</file>
+            <file>$PROJ_DIR$\Debug\List\REX-2330 Ver1.0.map</file>
+            <file>$PROJ_DIR$\Debug\List\REX-2411 Ver1.0.map</file>
+            <file>$PROJ_DIR$\Debug\List\REX-1500 Ver1.0.map</file>
+            <file>$PROJ_DIR$\Debug\List\REX-1100 Ver1.0.map</file>
+            <file>$PROJ_DIR$\Debug\List\REX-1200 Ver1.0.map</file>
+            <file>$PROJ_DIR$\Debug\Exe\REX-1500 Ver1.0.out</file>
+            <file>$PROJ_DIR$\Debug\Exe\REX-1500 Ver1.0.hex</file>
+            <file>$PROJ_DIR$\Debug\Exe\REX-1900 Ver1.0.out</file>
+            <file>$PROJ_DIR$\Debug\Exe\REX-1900 Ver1.0.hex</file>
+            <file>$PROJ_DIR$\Debug\Exe\REX-2140 Ver1.0.out</file>
+            <file>$PROJ_DIR$\Debug\Exe\REX-2140 Ver1.0.hex</file>
+            <file>$PROJ_DIR$\Debug\Exe\REX-2330 Ver1.0.out</file>
+            <file>$PROJ_DIR$\Debug\List\REX-1400 Ver1.0.map</file>
+            <file>$PROJ_DIR$\Debug\Exe\REX-1200 Ver1.0.out</file>
+            <file>$PROJ_DIR$\Debug\List\REX-2550 Ver1.0.map</file>
+            <file>$PROJ_DIR$\Debug\List\REX-2440 Ver1.0.map</file>
+            <file>$PROJ_DIR$\Debug\List\REX-2140 Ver1.0.map</file>
+            <file>$PROJ_DIR$\Debug\List\REX-1300 Ver1.0.map</file>
+            <file>$PROJ_DIR$\Debug\Exe\REX-1200 Ver1.0.hex</file>
+            <file>$PROJ_DIR$\..\Code\Common\extern_includes.h</file>
+            <file>$PROJ_DIR$\..\Code\Common\Struct_edit.h</file>
+            <file>$PROJ_DIR$\..\Code\Common\Comm.h</file>
+            <file>$PROJ_DIR$\..\Code\Common\I2CDriver.h</file>
+            <file>$PROJ_DIR$\..\Code\Common\stm32f37x_flash.h</file>
+            <file>$PROJ_DIR$\..\Code\Common\I2CDriver.c</file>
+            <file>$PROJ_DIR$\..\Code\Common\CommFlagDef.h</file>
+            <file>$PROJ_DIR$\..\Code\Common\FlashCoeff.C</file>
+            <file>$PROJ_DIR$\..\Code\Common\includes.h</file>
+            <file>$PROJ_DIR$\..\Code\Common\EpulseInterrupt.c</file>
+            <file>$PROJ_DIR$\..\Code\Common\CosSinTable.h</file>
+            <file>$PROJ_DIR$\..\Code\Common\ModBus.h</file>
+            <file>$PROJ_DIR$\..\Code\Common\Struct.h</file>
+            <file>$PROJ_DIR$\..\Code\Common\DataManagment.c</file>
+            <file>$PROJ_DIR$\..\Code\Common\Comm.c</file>
+            <file>$PROJ_DIR$\..\Code\Common\Delay.c</file>
+            <file>$PROJ_DIR$\..\Code\Common\modbus_horizon.h</file>
+            <file>$PROJ_DIR$\Debug\Obj\DataManagment.o</file>
+            <file>$PROJ_DIR$\Debug\Obj\SetMeterPara_DIN.o</file>
+            <file>$TOOLKIT_DIR$\inc\c\string.h</file>
+            <file>$PROJ_DIR$\Debug\Obj\Clock_DIN.xcl</file>
+            <file>$PROJ_DIR$\Debug\Obj\Metrology.__cstat.et</file>
+            <file>$PROJ_DIR$\Debug\Obj\stm32f37x_flash.o</file>
+            <file>$PROJ_DIR$\Debug\Obj\InitMeter.__cstat.et</file>
+            <file>$PROJ_DIR$\Debug\Obj\Interrupt.o</file>
+            <file>$TOOLKIT_DIR$\CMSIS\Core\Include\core_cm4.h</file>
+            <file>$PROJ_DIR$\Debug\Obj\I2CDriver.o</file>
+            <file>$PROJ_DIR$\..\Code\Common\Kwh373Meter.icf</file>
+            <file>$PROJ_DIR$\Debug\Obj\EditPara_DIN.o</file>
+            <file>$PROJ_DIR$\Debug\Obj\EpulseInterrupt.o</file>
+            <file>$TOOLKIT_DIR$\inc\c\stdio.h</file>
+            <file>$PROJ_DIR$\Debug\Obj\Main.xcl</file>
+            <file>$PROJ_DIR$\Debug\Obj\EpulseInterrupt.xcl</file>
+            <file>$PROJ_DIR$\Debug\Obj\EpulseInterrupt.__cstat.et</file>
+            <file>$PROJ_DIR$\Debug\Obj\Display_DIN.o</file>
+            <file>$TOOLKIT_DIR$\inc\c\stddef.h</file>
+            <file>$PROJ_DIR$\Debug\Obj\Delay.xcl</file>
+            <file>$PROJ_DIR$\Debug\Obj\SystemInitialization_DIN.__cstat.et</file>
+            <file>$PROJ_DIR$\Debug\Obj\stm32f37x_flash.__cstat.et</file>
+            <file>$PROJ_DIR$\Debug\Obj\Display_DIN.__cstat.et</file>
+            <file>$TOOLKIT_DIR$\inc\c\DLib_Defaults.h</file>
+            <file>$PROJ_DIR$\Debug\Obj\Clock_DIN.o</file>
+            <file>$TOOLKIT_DIR$\CMSIS\DSP\Include\arm_const_structs.h</file>
+            <file>$PROJ_DIR$\Debug\Obj\SystemInitialization_DIN.xcl</file>
+            <file>$PROJ_DIR$\Debug\Obj\startup_stm32f37x.o</file>
+            <file>$TOOLKIT_DIR$\lib\dl7M_tln.a</file>
+            <file>$TOOLKIT_DIR$\inc\c\DLib_float_setup.h</file>
+            <file>$PROJ_DIR$\Debug\Obj\SetMeterPara_DIN.xcl</file>
+            <file>$PROJ_DIR$\Debug\Obj\SystemInitialization_DIN.o</file>
+            <file>$PROJ_DIR$\Debug\Obj\Display_DIN.xcl</file>
+            <file>$TOOLKIT_DIR$\inc\c\ycheck.h</file>
+            <file>$PROJ_DIR$\Debug\Obj\Comm.o</file>
+            <file>$TOOLKIT_DIR$\inc\c\iar_intrinsics_common.h</file>
+            <file>$PROJ_DIR$\Debug\Obj\InterruptHandler_DIN.xcl</file>
+            <file>$PROJ_DIR$\Debug\Obj\Main.__cstat.et</file>
+            <file>$PROJ_DIR$\Debug\Obj\DataManagment.__cstat.et</file>
+            <file>$PROJ_DIR$\Debug\Obj\Metrology.xcl</file>
+            <file>$PROJ_DIR$\Debug\Obj\Main.o</file>
+            <file>$TOOLKIT_DIR$\lib\m7M_tls.a</file>
+            <file>$PROJ_DIR$\Debug\Obj\Clock_DIN.__cstat.et</file>
+            <file>$TOOLKIT_DIR$\inc\c\ysizet.h</file>
+            <file>$PROJ_DIR$\Debug\Obj\Delay.__cstat.et</file>
+            <file>$PROJ_DIR$\Debug\Obj\EditPara_DIN.xcl</file>
+            <file>$TOOLKIT_DIR$\inc\c\yvals.h</file>
+            <file>$TOOLKIT_DIR$\CMSIS\Core\Include\cmsis_iccarm.h</file>
+            <file>$PROJ_DIR$\..\Code\System\Clock_DIN.c</file>
+            <file>$TOOLKIT_DIR$\inc\c\stdint.h</file>
+            <file>$TOOLKIT_DIR$\inc\c\math.h</file>
+            <file>$PROJ_DIR$\Debug\Obj\Comm.xcl</file>
+            <file>$PROJ_DIR$\Debug\Obj\Interrupt.__cstat.et</file>
+            <file>$PROJ_DIR$\Debug\Obj\EditPara_DIN.__cstat.et</file>
+            <file>$TOOLKIT_DIR$\lib\rt7M_tl.a</file>
+            <file>$PROJ_DIR$\Debug\List\REX-2551 Ver1.0.map</file>
+            <file>$PROJ_DIR$\..\Code\System\stm32f37x_flash.c</file>
+            <file>$PROJ_DIR$\..\Code\System\startup_stm32f37x.s</file>
+            <file>$PROJ_DIR$\Debug\Obj\DataManagment.xcl</file>
+            <file>$PROJ_DIR$\Debug\Obj\FlashCoeff.__cstat.et</file>
+            <file>$PROJ_DIR$\Debug\Exe\REX-2551 Ver1.0.hex</file>
+            <file>$TOOLKIT_DIR$\inc\c\DLib_Product.h</file>
+            <file>$PROJ_DIR$\Debug\Obj\Delay.o</file>
+            <file>$TOOLKIT_DIR$\lib\shb_l.a</file>
+            <file>$PROJ_DIR$\Debug\Exe\REX-2551 Ver1.0.out</file>
+            <file>$PROJ_DIR$\Debug\Obj\Metrology.o</file>
+            <file>$TOOLKIT_DIR$\inc\c\intrinsics.h</file>
+            <file>$PROJ_DIR$\Debug\Obj\SetMeterPara_DIN.__cstat.et</file>
+            <file>$PROJ_DIR$\Debug\Obj\stm32f37x_flash.xcl</file>
+            <file>$PROJ_DIR$\Debug\Obj\Comm.__cstat.et</file>
+            <file>$PROJ_DIR$\Debug\Obj\I2CDriver.__cstat.et</file>
+            <file>$PROJ_DIR$\Debug\Obj\FlashCoeff.xcl</file>
+            <file>$PROJ_DIR$\Debug\Obj\InterruptHandler_DIN.o</file>
+            <file>$TOOLKIT_DIR$\inc\c\DLib_Config_Normal.h</file>
+            <file>$TOOLKIT_DIR$\CMSIS\Core\Include\cmsis_version.h</file>
+            <file>$TOOLKIT_DIR$\CMSIS\DSP\Include\arm_math.h</file>
+            <file>$PROJ_DIR$\Debug\Obj\DIN Rail Meter.pbd</file>
+            <file>$TOOLKIT_DIR$\inc\c\DLib_Product_string.h</file>
+            <file>$PROJ_DIR$\..\Code\User\DIN_MOD_MODEL.h</file>
+            <file>$PROJ_DIR$\..\Code\System\SystemInitialization_DIN.c</file>
+            <file>$PROJ_DIR$\..\Code\User\SetMeterPara_DIN.c</file>
+            <file>$PROJ_DIR$\..\Code\User\EditPara_DIN.c</file>
+            <file>$TOOLKIT_DIR$\inc\c\iccarm_builtin.h</file>
+            <file>$PROJ_DIR$\Debug\Obj\FlashCoeff.o</file>
+            <file>$PROJ_DIR$\..\Code\User\fonts_DIN.h</file>
+            <file>$PROJ_DIR$\..\Code\User\Parameter_DIN.h</file>
+            <file>$PROJ_DIR$\..\Code\User\FlagDef_DIN.h</file>
+            <file>$TOOLKIT_DIR$\CMSIS\Core\Include\mpu_armv7.h</file>
+            <file>$PROJ_DIR$\..\Code\User\Model_DIN.h</file>
+            <file>$PROJ_DIR$\..\Code\User\Display_DIN.c</file>
+            <file>$PROJ_DIR$\..\Code\System\InterruptHandler_DIN.c</file>
+            <file>$PROJ_DIR$\..\Code\User\EditPara_DIN.h</file>
+            <file>$PROJ_DIR$\..\Code\User\Display_DIN.h</file>
+            <file>$TOOLKIT_DIR$\CMSIS\Core\Include\cmsis_compiler.h</file>
+            <file>$PROJ_DIR$\Debug\Obj\InitMeter.xcl</file>
+            <file>$PROJ_DIR$\..\Code\User\DIN_Struct.h</file>
+            <file>$PROJ_DIR$\Debug\Obj\InterruptHandler_DIN.__cstat.et</file>
+            <file>$TOOLKIT_DIR$\CMSIS\DSP\Include\arm_common_tables.h</file>
+            <file>$PROJ_DIR$\Debug\Obj\Interrupt.xcl</file>
+            <file>$PROJ_DIR$\Debug\Obj\I2CDriver.xcl</file>
+            <file>$PROJ_DIR$\Debug\Obj\InitMeter.o</file>
+            <file>$PROJ_DIR$\..\Code\Common\InitMeter.c</file>
+            <file>$PROJ_DIR$\..\Code\Common\Main.c</file>
+            <file>$PROJ_DIR$\..\Code\System\stm32f37x.h</file>
+            <file>$PROJ_DIR$\..\Code\Common\Metrology.c</file>
+            <file>$PROJ_DIR$\..\Code\Common\Interrupt.c</file>
+            <file>$PROJ_DIR$\Debug\Exe\REX-1100 Ver1.0.out</file>
+            <file>$PROJ_DIR$\Debug\Exe\REX-1100 Ver1.0.hex</file>
+            <file>$PROJ_DIR$\Debug\Exe\REX-1300 Ver1.0.out</file>
+            <file>$PROJ_DIR$\Debug\Exe\REX-1300 Ver1.0.hex</file>
+            <file>$PROJ_DIR$\Debug\Exe\REX-1400 Ver1.0.out</file>
+            <file>$PROJ_DIR$\Debug\Exe\REX-1400 Ver1.0.hex</file>
+            <file>$PROJ_DIR$\Debug\Exe\REX-2330 Ver1.0.hex</file>
+            <file>$PROJ_DIR$\Debug\Exe\REX-2440 Ver1.0.out</file>
+            <file>$PROJ_DIR$\Debug\Exe\REX-2440 Ver1.0.hex</file>
+            <file>$PROJ_DIR$\Debug\Exe\REX-2411 Ver1.0.out</file>
+            <file>$PROJ_DIR$\Debug\Exe\REX-2411 Ver1.0.hex</file>
+            <file>$PROJ_DIR$\Debug\Exe\REX-2550 Ver1.0.out</file>
+            <file>$PROJ_DIR$\Debug\Exe\REX-2550 Ver1.0.hex</file>
+        </outputs>
+        <file>
+            <name>[ROOT_NODE]</name>
+            <outputs>
+                <tool>
+                    <name>ILINK</name>
+                    <file> 154 15 101</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\Debug\Exe\REX-1500 Ver1.0.out</name>
+            <outputs>
+                <tool>
+                    <name>OBJCOPY</name>
+                    <file> 7</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ILINK</name>
+                    <file> 47 61 71 37 99 54 48 49 120 46 137 44 109 77 102 38 64 42 68 100 91 78 65</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\Debug\Exe\REX-1900 Ver1.0.out</name>
+            <outputs>
+                <tool>
+                    <name>OBJCOPY</name>
+                    <file> 9</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ILINK</name>
+                    <file> 47 61 71 37 99 54 48 49 120 46 137 44 109 77 102 38 64 42 68 100 91 78 65</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\Debug\Exe\REX-2140 Ver1.0.out</name>
+            <outputs>
+                <tool>
+                    <name>OBJCOPY</name>
+                    <file> 11</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ILINK</name>
+                    <file> 47 61 71 37 99 54 48 49 120 46 137 44 109 77 102 38 64 42 68 100 91 78 65</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\Debug\Exe\REX-2330 Ver1.0.out</name>
+            <outputs>
+                <tool>
+                    <name>OBJCOPY</name>
+                    <file> 149</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ILINK</name>
+                    <file> 47 61 71 37 99 54 48 49 120 46 137 44 109 77 102 38 64 42 68 100 91 78 65</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\Debug\Exe\REX-1200 Ver1.0.out</name>
+            <outputs>
+                <tool>
+                    <name>OBJCOPY</name>
+                    <file> 19</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ILINK</name>
+                    <file> 47 61 71 37 99 54 48 49 120 46 137 44 109 77 102 38 64 42 68 100 91 78 65</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Code\Common\I2CDriver.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 46</file>
+                </tool>
+                <tool>
+                    <name>__cstat</name>
+                    <file> 107</file>
+                </tool>
+                <tool>
+                    <name>BICOMP</name>
+                    <file> 136</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 140 45 86 70 83 60 110 98 111 130 84 119 124 26 55 80 103 72 123 50 122 125 115</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Code\Common\FlashCoeff.C</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 120</file>
+                </tool>
+                <tool>
+                    <name>__cstat</name>
+                    <file> 96</file>
+                </tool>
+                <tool>
+                    <name>BICOMP</name>
+                    <file> 108</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 140 45 86 70 83 60 110 98 111 130 84 119 124 50 80 32</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Code\Common\EpulseInterrupt.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 49</file>
+                </tool>
+                <tool>
+                    <name>__cstat</name>
+                    <file> 53</file>
+                </tool>
+                <tool>
+                    <name>BICOMP</name>
+                    <file> 52</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 140 45 86 70 83 60 110 98 111 130 84 119 124 26 55 80 103 72 123 50 122 125 115 32 24 87 66 20</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Code\Common\DataManagment.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 37</file>
+                </tool>
+                <tool>
+                    <name>__cstat</name>
+                    <file> 75</file>
+                </tool>
+                <tool>
+                    <name>BICOMP</name>
+                    <file> 95</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 140 45 86 70 83 60 110 98 111 130 84 119 124 50 80 26 55 103 72 123 122 125 115 32 24 20</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Code\Common\Comm.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 71</file>
+                </tool>
+                <tool>
+                    <name>__cstat</name>
+                    <file> 106</file>
+                </tool>
+                <tool>
+                    <name>BICOMP</name>
+                    <file> 88</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 140 45 86 70 83 60 110 98 111 130 84 119 124 22 26 55 80 103 72 123 50 122 125 115 87 66 32 21 20 31 24</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Code\Common\Delay.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 99</file>
+                </tool>
+                <tool>
+                    <name>__cstat</name>
+                    <file> 81</file>
+                </tool>
+                <tool>
+                    <name>BICOMP</name>
+                    <file> 56</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 140 45 86 70 83 60 110 98 111 130 84 119 124 50 80 103 72</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Code\System\Clock_DIN.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 61</file>
+                </tool>
+                <tool>
+                    <name>__cstat</name>
+                    <file> 79</file>
+                </tool>
+                <tool>
+                    <name>BICOMP</name>
+                    <file> 40</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 140 45 86 70 83 60 110 98 111 130 84 119 124</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Code\System\stm32f37x_flash.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 42</file>
+                </tool>
+                <tool>
+                    <name>__cstat</name>
+                    <file> 58</file>
+                </tool>
+                <tool>
+                    <name>BICOMP</name>
+                    <file> 105</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 140 45 86 70 83 60 110 98 111 130 84 119 124 24</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Code\System\startup_stm32f37x.s</name>
+            <outputs>
+                <tool>
+                    <name>AARM</name>
+                    <file> 64</file>
+                </tool>
+            </outputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\Debug\Exe\REX-2551 Ver1.0.out</name>
+            <outputs>
+                <tool>
+                    <name>OBJCOPY</name>
+                    <file> 97</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ILINK</name>
+                    <file> 47 61 71 37 99 54 48 49 120 46 137 44 109 77 102 38 64 42 68 100 91 78 65</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Code\System\SystemInitialization_DIN.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 68</file>
+                </tool>
+                <tool>
+                    <name>__cstat</name>
+                    <file> 57</file>
+                </tool>
+                <tool>
+                    <name>BICOMP</name>
+                    <file> 63</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 140 45 86 70 83 60 110 98 111 130 84 119 124 50 80 24 26 55 103 72 123 122 125 115 20</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Code\User\SetMeterPara_DIN.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 38</file>
+                </tool>
+                <tool>
+                    <name>__cstat</name>
+                    <file> 104</file>
+                </tool>
+                <tool>
+                    <name>BICOMP</name>
+                    <file> 67</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 140 45 86 70 83 60 110 98 111 130 84 119 124 26 55 80 103 72 123 50 122 125 115 32 24 20 87 66</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Code\User\EditPara_DIN.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 48</file>
+                </tool>
+                <tool>
+                    <name>__cstat</name>
+                    <file> 90</file>
+                </tool>
+                <tool>
+                    <name>BICOMP</name>
+                    <file> 82</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 140 45 86 70 83 60 110 98 111 130 84 119 124 26 55 80 103 72 123 50 122 125 115 128 21 32 24 20</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Code\User\Display_DIN.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 54</file>
+                </tool>
+                <tool>
+                    <name>__cstat</name>
+                    <file> 59</file>
+                </tool>
+                <tool>
+                    <name>BICOMP</name>
+                    <file> 69</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 140 45 86 70 83 60 110 98 111 130 84 119 124 50 80 132 32 26 55 103 72 123 122 125 115 20 24 129 121</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Code\System\InterruptHandler_DIN.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 109</file>
+                </tool>
+                <tool>
+                    <name>__cstat</name>
+                    <file> 133</file>
+                </tool>
+                <tool>
+                    <name>BICOMP</name>
+                    <file> 73</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 140 45 86 70 83 60 110 98 111 130 84 119 124 26 55 80 103 72 123 50 122 125 115 32 20</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Code\Common\InitMeter.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 137</file>
+                </tool>
+                <tool>
+                    <name>__cstat</name>
+                    <file> 43</file>
+                </tool>
+                <tool>
+                    <name>BICOMP</name>
+                    <file> 131</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 140 45 86 70 83 60 110 98 111 130 84 119 124 26 55 80 103 72 123 50 122 125 115 32 24 20 87 66</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Code\Common\Main.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 77</file>
+                </tool>
+                <tool>
+                    <name>__cstat</name>
+                    <file> 74</file>
+                </tool>
+                <tool>
+                    <name>BICOMP</name>
+                    <file> 51</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 140 45 86 70 83 60 110 98 111 130 84 119 124 28 26 55 80 103 72 123 50 122 125 115 32 24 87 66</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Code\Common\Metrology.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 102</file>
+                </tool>
+                <tool>
+                    <name>__cstat</name>
+                    <file> 41</file>
+                </tool>
+                <tool>
+                    <name>BICOMP</name>
+                    <file> 76</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 140 45 86 70 83 60 110 98 111 130 84 119 124 50 80 26 55 103 72 123 122 125 115 32 87 66 112 39 114 62 134 20</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Code\Common\Interrupt.c</name>
+            <outputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 44</file>
+                </tool>
+                <tool>
+                    <name>__cstat</name>
+                    <file> 89</file>
+                </tool>
+                <tool>
+                    <name>BICOMP</name>
+                    <file> 135</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ICCARM</name>
+                    <file> 140 45 86 70 83 60 110 98 111 130 84 119 124 26 55 80 103 72 123 50 122 125 115 32 87 66 24 30 20</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\Debug\Exe\REX-1100 Ver1.0.out</name>
+            <outputs>
+                <tool>
+                    <name>OBJCOPY</name>
+                    <file> 144</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ILINK</name>
+                    <file> 47 61 71 37 99 54 48 49 120 46 137 44 109 77 102 38 64 42 68 100 91 78 65</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\Debug\Exe\REX-1300 Ver1.0.out</name>
+            <outputs>
+                <tool>
+                    <name>OBJCOPY</name>
+                    <file> 146</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ILINK</name>
+                    <file> 47 61 71 37 99 54 48 49 120 46 137 44 109 77 102 38 64 42 68 100 91 78 65</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\Debug\Exe\REX-1400 Ver1.0.out</name>
+            <outputs>
+                <tool>
+                    <name>OBJCOPY</name>
+                    <file> 148</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ILINK</name>
+                    <file> 47 61 71 37 99 54 48 49 120 46 137 44 109 77 102 38 64 42 68 100 91 78 65</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\Debug\Exe\REX-2440 Ver1.0.out</name>
+            <outputs>
+                <tool>
+                    <name>OBJCOPY</name>
+                    <file> 151</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ILINK</name>
+                    <file> 47 61 71 37 99 54 48 49 120 46 137 44 109 77 102 38 64 42 68 100 91 78 65</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\Debug\Exe\REX-2411 Ver1.0.out</name>
+            <outputs>
+                <tool>
+                    <name>OBJCOPY</name>
+                    <file> 153</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ILINK</name>
+                    <file> 47 61 71 37 99 54 48 49 120 46 137 44 109 77 102 38 64 42 68 100 91 78 65</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\Debug\Exe\REX-2550 Ver1.0.out</name>
+            <outputs>
+                <tool>
+                    <name>ILINK</name>
+                    <file> 15</file>
+                </tool>
+                <tool>
+                    <name>OBJCOPY</name>
+                    <file> 155</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>ILINK</name>
+                    <file> 47 61 71 37 99 54 48 49 120 46 137 44 109 77 102 38 64 42 68 100 91 78 65</file>
+                </tool>
+            </inputs>
+        </file>
+        <forcedrebuild>
+            <name>[MULTI_TOOL]</name>
+            <tool>ILINK</tool>
+        </forcedrebuild>
+        <forcedrebuild>
+            <name>$PROJ_DIR$\Debug\Exe\REX-1500 Ver1.0.out</name>
+            <tool>OBJCOPY</tool>
+        </forcedrebuild>
+        <forcedrebuild>
+            <name>$PROJ_DIR$\Debug\Exe\REX-1900 Ver1.0.out</name>
+            <tool>OBJCOPY</tool>
+        </forcedrebuild>
+        <forcedrebuild>
+            <name>$PROJ_DIR$\Debug\Exe\REX-2140 Ver1.0.out</name>
+            <tool>OBJCOPY</tool>
+        </forcedrebuild>
+        <forcedrebuild>
+            <name>$PROJ_DIR$\Debug\Exe\REX-2330 Ver1.0.out</name>
+            <tool>OBJCOPY</tool>
+        </forcedrebuild>
+        <forcedrebuild>
+            <name>$PROJ_DIR$\Debug\Exe\REX-1200 Ver1.0.out</name>
+            <tool>OBJCOPY</tool>
+        </forcedrebuild>
+        <forcedrebuild>
+            <name>$PROJ_DIR$\Debug\Exe\REX-2551 Ver1.0.out</name>
+            <tool>OBJCOPY</tool>
+        </forcedrebuild>
+        <forcedrebuild>
+            <name>$PROJ_DIR$\Debug\Exe\REX-1100 Ver1.0.out</name>
+            <tool>OBJCOPY</tool>
+        </forcedrebuild>
+        <forcedrebuild>
+            <name>$PROJ_DIR$\Debug\Exe\REX-1300 Ver1.0.out</name>
+            <tool>OBJCOPY</tool>
+        </forcedrebuild>
+        <forcedrebuild>
+            <name>$PROJ_DIR$\Debug\Exe\REX-1400 Ver1.0.out</name>
+            <tool>OBJCOPY</tool>
+        </forcedrebuild>
+        <forcedrebuild>
+            <name>$PROJ_DIR$\Debug\Exe\REX-2440 Ver1.0.out</name>
+            <tool>OBJCOPY</tool>
+        </forcedrebuild>
+        <forcedrebuild>
+            <name>$PROJ_DIR$\Debug\Exe\REX-2411 Ver1.0.out</name>
+            <tool>OBJCOPY</tool>
+        </forcedrebuild>
+        <forcedrebuild>
+            <name>$PROJ_DIR$\Debug\Exe\REX-2550 Ver1.0.out</name>
+            <tool>OBJCOPY</tool>
+        </forcedrebuild>
+    </configuration>
+    <configuration>
+        <name>Release</name>
+        <outputs />
+        <forcedrebuild>
+            <name>[MULTI_TOOL]</name>
+            <tool>ILINK</tool>
+        </forcedrebuild>
+    </configuration>
+</project>

@@ -1,0 +1,48 @@
+#Generating source browse information for project DIN Rail Meter
+
+
+#Abbreviations
+cc = C$:\Program$ Files$ (x86)\IAR$ Systems\Embedded$ Workbench$ 8.3\common\bin\SourceIndexer.exe
+ll = C$:\Program$ Files$ (x86)\IAR$ Systems\Embedded$ Workbench$ 8.3\common\bin\PbdLink.exe
+bd = C$:\Program$ Files$ (x86)\IAR$ Systems\Embedded$ Workbench$ 8.3\common\bin\makeBrowseData.exe
+
+
+
+#Rules
+rule index
+  depfile = $out.dep
+  command = $cc -out=$out -f $in
+rule link
+  command = $ll -M $out $in
+rule browsedata
+  command = $bd $in -output  $out
+
+
+
+#Build steps
+build Comm.pbi : index Comm.xcl
+build DataManagment.pbi : index DataManagment.xcl
+build Delay.pbi : index Delay.xcl
+build EpulseInterrupt.pbi : index EpulseInterrupt.xcl
+build FlashCoeff.pbi : index FlashCoeff.xcl
+build I2CDriver.pbi : index I2CDriver.xcl
+build InitMeter.pbi : index InitMeter.xcl
+build Interrupt.pbi : index Interrupt.xcl
+build Main.pbi : index Main.xcl
+build Metrology.pbi : index Metrology.xcl
+build Clock_DIN.pbi : index Clock_DIN.xcl
+build InterruptHandler_DIN.pbi : index InterruptHandler_DIN.xcl
+build stm32f37x_flash.pbi : index stm32f37x_flash.xcl
+build SystemInitialization_DIN.pbi : index SystemInitialization_DIN.xcl
+build Display_DIN.pbi : index Display_DIN.xcl
+build EditPara_DIN.pbi : index EditPara_DIN.xcl
+build SetMeterPara_DIN.pbi : index SetMeterPara_DIN.xcl
+build DIN$ Rail$ Meter_part0.pbi : link Comm.pbi DataManagment.pbi Delay.pbi EpulseInterrupt.pbi
+build DIN$ Rail$ Meter_part1.pbi : link FlashCoeff.pbi I2CDriver.pbi InitMeter.pbi Interrupt.pbi
+build DIN$ Rail$ Meter_part2.pbi : link Main.pbi Metrology.pbi Clock_DIN.pbi InterruptHandler_DIN.pbi
+build DIN$ Rail$ Meter_part3.pbi : link stm32f37x_flash.pbi SystemInitialization_DIN.pbi Display_DIN.pbi EditPara_DIN.pbi
+build DIN$ Rail$ Meter_part4.pbi : link SetMeterPara_DIN.pbi
+build DIN$ Rail$ Meter.pbd : link DIN$ Rail$ Meter_part0.pbi DIN$ Rail$ Meter_part1.pbi DIN$ Rail$ Meter_part2.pbi DIN$ Rail$ Meter_part3.pbi DIN$ Rail$ Meter_part4.pbi
+build DIN$ Rail$ Meter.pbw : browsedata DIN$ Rail$ Meter.pbd
+
+
