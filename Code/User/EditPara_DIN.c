@@ -346,8 +346,7 @@ void FindInitailCondition(void)
     BufferToDisplay[11] |=1;
     BufferToDisplay[13] |=1;
   }
-  //if(i)i+=1;
-  DisplayVariable((i-10),EditParameters[EditIndex].ParaMeterLength,ROW_TOP,DIGIT_1,EditTempData,0);  
+  DisplayVariable(i,EditParameters[EditIndex].ParaMeterLength,ROW_TOP,DIGIT_1,EditTempData,0);  
   UpdateDisplay=1;  
   
 }
