@@ -18,7 +18,7 @@ void NewMeterInit(void)
 
   if((CalibrationCoeff.INIT_DATA1!=METER_INIT_VALUE)||(CalibrationCoeff.INIT_DATA2!=METER_INIT_VALUE))
   {
-    //ProtectionReset(); 
+    ProtectionReset(); 
     for(i=0;i<64;i++)LcdEpromBuffer[i]=0; 
     for(i=0;i<200;i++) 
     {
