@@ -30,8 +30,6 @@ void main(void)
   SetInitialDisplay();
   RS485Receive;
   SWITCH_OFF_LED_COMM;
-  SWITCH_OFF_LED1_G;
-  SWITCH_OFF_LED1_B;
   SWITCH_OFF_LED2_R;
   SWITCH_OFF_LED2_G;
   SWITCH_OFF_LED2_B;

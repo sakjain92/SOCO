@@ -43,8 +43,8 @@
 #endif
 
 // UNDONE:
-// 1) We aren't measuring 5V (We have provision to measure 3V)
+// 1) We aren't measuring 5V (We have provision to measure 3V): This is needed for saving energy data
 // We should measure 3.3V or 5V so that we can save data in EEPROM as soon as power goes away to avoid losing data
 // 2) Check the resistor values for LEDs
 // 3) Need LEDs for indicating whether we are displaying Mains or Solar Current/Voltages
-// 4) Forgot about protection bit
+// 4) Remove resistors: R69, R71, R72, R73, R74

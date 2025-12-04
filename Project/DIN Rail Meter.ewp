@@ -78,7 +78,7 @@
                 </option>
                 <option>
                     <name>OGChipSelectEditMenu</name>
-                    <state>STM32F373R8	ST STM32F373R8</state>
+                    <state>STM32F373VB	ST STM32F373VB</state>
                 </option>
                 <option>
                     <name>GenLowLevelInterface</name>
@@ -138,7 +138,7 @@
                 </option>
                 <option>
                     <name>GFPUDeviceSlave</name>
-                    <state>STM32F373R8	ST STM32F373R8</state>
+                    <state>STM32F373VB	ST STM32F373VB</state>
                 </option>
                 <option>
                     <name>FPU2</name>
@@ -653,7 +653,7 @@
                 </option>
                 <option>
                     <name>OOCOutputFile</name>
-                    <state>REX-2551 Ver1.0.hex</state>
+                    <state>SOCO Ver1.0.hex</state>
                 </option>
                 <option>
                     <name>OOCCommandLineProducer</name>

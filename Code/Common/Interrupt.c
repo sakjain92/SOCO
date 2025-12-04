@@ -43,7 +43,7 @@ void ProcessMainInterrupt(void)
   int16_t TempInt;  
   uint8_t i;
 #ifdef MODEL_DATA_SAVE    
-  if(AdcDataInArray[ADC_POWER_SENSE]<POWER_FAIL_SENSE_VALUE)
+  if(/*AdcDataInArray[ADC_POWER_SENSE]<POWER_FAIL_SENSE_VALUE*/ 0)
   {
 
     if(!(InterruptFlag  & INT_DATA_SAVING_EEPROM))
