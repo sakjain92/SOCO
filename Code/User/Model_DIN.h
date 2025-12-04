@@ -42,3 +42,9 @@
     #define MODEL_DIS_OLD_DATA   
 #endif
 
+// UNDONE:
+// 1) We aren't measuring 5V (We have provision to measure 3V)
+// We should measure 3.3V or 5V so that we can save data in EEPROM as soon as power goes away to avoid losing data
+// 2) Check the resistor values for LEDs
+// 3) Need LEDs for indicating whether we are displaying Mains or Solar Current/Voltages
+// 4) Forgot about protection bit

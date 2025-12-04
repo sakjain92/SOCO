@@ -188,7 +188,7 @@ Ret: None
 void ProcessIntCycleOver(void)
 {
 #ifdef MODEL_RS485  
-  if((USART3->CR1 & 0x0D)!=0X0D)
+  if((USART2->CR1 & 0x0D)!=0X0D)
   {
     InitUart(CopySetPara[PARA_BAUD_RATE],CopySetPara[PARA_PARITY],CopySetPara[PARA_STOP_BIT]);
     RS485Receive;

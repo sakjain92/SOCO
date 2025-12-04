@@ -108,16 +108,16 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 
 
 
-#define     DISP_COM1_ENB       (GPIOC->BRR  = 0X100)
-#define     DISP_COM1_DIS       (GPIOC->BSRR = 0X100)
-#define     DISP_COM2_ENB       (GPIOC->BRR  = 0X80)
-#define     DISP_COM2_DIS       (GPIOC->BSRR = 0X80)
-#define     DISP_COM3_ENB       (GPIOC->BRR  = 0X40)
-#define     DISP_COM3_DIS       (GPIOC->BSRR = 0X40)
-#define     DISP_COM4_ENB       (GPIOC->BRR  = 0X20)
-#define     DISP_COM4_DIS       (GPIOC->BSRR = 0X20)
-#define     DISP_COM5_ENB       (GPIOC->BRR  = 0X10)
-#define     DISP_COM5_DIS       (GPIOC->BSRR = 0X10)
+#define     DISP_COM1_ENB       (GPIOF->BRR  = PORT_BIT_9)
+#define     DISP_COM1_DIS       (GPIOF->BSRR = PORT_BIT_9)
+#define     DISP_COM2_ENB       (GPIOB->BRR  = PORT_BIT_7)
+#define     DISP_COM2_DIS       (GPIOB->BSRR = PORT_BIT_7)
+#define     DISP_COM3_ENB       (GPIOB->BRR  = PORT_BIT_6)
+#define     DISP_COM3_DIS       (GPIOB->BSRR = PORT_BIT_6)
+#define     DISP_COM4_ENB       (GPIOC->BRR  = PORT_BIT_12)
+#define     DISP_COM4_DIS       (GPIOC->BSRR = PORT_BIT_12)
+#define     DISP_COM5_ENB       (GPIOA->BRR  = PORT_BIT_15)
+#define     DISP_COM5_DIS       (GPIOA->BSRR = PORT_BIT_15)
 
 
 #define     MAX_DIS_PARAMETER        18
@@ -254,8 +254,8 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 #define         PF_POWER_L_UPPER_LIMIT         (UPF_POWER_L_UPPER_LIMIT*0.5)
 #define         PF_POWER_L_LOWER_LIMIT         (UPF_POWER_L_LOWER_LIMIT *0.5)
 
-#define         PROTECTION_BIT_LOW           (!(GPIOD->IDR & 0X04))
-#define         PROTECTION_BIT_HIGH           (GPIOD->IDR & 0X04)
+#define         PROTECTION_BIT_LOW           (!(GPIOC->IDR & 0X200))
+#define         PROTECTION_BIT_HIGH           (GPIOC->IDR & 0X200)
 //OneSecFlag 
 #define         ONE_SEC_FLAG_1SEC_OVER      0x01
 
@@ -287,23 +287,17 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 #define LED_Y      2
 #define LED_B      3
 
-#define SWITCH_OFF_LED_COMM   GPIOA->BSRR = PORT_BIT_8  // Phb
-#define SWITCH_ON_LED_COMM    GPIOA->BRR  = PORT_BIT_8
+#define SWITCH_OFF_LED_COMM   GPIOD->BSRR = PORT_BIT_3
+#define SWITCH_ON_LED_COMM    GPIOD->BRR  = PORT_BIT_3
 
-#define SWITCH_OFF_LED1_G   GPIOA->BSRR = PORT_BIT_9  // Phb
-#define SWITCH_ON_LED1_G    GPIOA->BRR  = PORT_BIT_9
+#define SWITCH_OFF_LED2_R   GPIOD->BSRR = PORT_BIT_0 
+#define SWITCH_ON_LED2_R    GPIOD->BRR  = PORT_BIT_0
 
-#define SWITCH_OFF_LED1_B   GPIOA->BSRR = PORT_BIT_10  // Phb
-#define SWITCH_ON_LED1_B    GPIOA->BRR  = PORT_BIT_10
+#define SWITCH_OFF_LED2_G   GPIOD->BSRR = PORT_BIT_1 
+#define SWITCH_ON_LED2_G    GPIOD->BRR  = PORT_BIT_1
 
-#define SWITCH_OFF_LED2_R   GPIOA->BSRR = PORT_BIT_11  // Phb
-#define SWITCH_ON_LED2_R    GPIOA->BRR  = PORT_BIT_11
-
-#define SWITCH_OFF_LED2_G   GPIOA->BSRR = PORT_BIT_12  // Phb
-#define SWITCH_ON_LED2_G    GPIOA->BRR  = PORT_BIT_12
-
-#define SWITCH_OFF_LED2_B   GPIOC->BSRR = PORT_BIT_12  // Phb
-#define SWITCH_ON_LED2_B    GPIOC->BRR  = PORT_BIT_12
+#define SWITCH_OFF_LED2_B   GPIOD->BSRR = PORT_BIT_2 
+#define SWITCH_ON_LED2_B    GPIOD->BRR  = PORT_BIT_2
 
 
 
@@ -339,16 +333,11 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 
 #define Stopbit_one     0
 #define Stopbit_two     1
-#define    ADC_VR1              0
-#define    ADC_VY1              1
-#define    ADC_VB1              2
-#define    ADC_POWER_SENSE      3
-#define    ADC_VB2              4
-#define    ADC_VY2              5
-#define    ADC_VR2              6
-
-#define SDADC_CHANNEL_R    ((int16_t)SDADC1->JDATAR)
-#define SDADC_CHANNEL_Y    ((int16_t)SDADC2->JDATAR)
-#define SDADC_CHANNEL_B    ((int16_t)SDADC3->JDATAR)
+#define    ADC_IR1              0
+#define    ADC_VR1              1
+#define    ADC_IY1              2
+#define    ADC_VY1              3
+#define    ADC_IB1              4
+#define    ADC_VB1              5
 
 #endif

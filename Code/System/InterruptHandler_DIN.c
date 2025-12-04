@@ -147,26 +147,26 @@ void TIM3_IRQHandler(void)
 uint8_t Dummy;
   
 
-void USART3_IRQHandler(void)
+void USART2_IRQHandler(void)
 { 
-  if(USART3->ISR & 0X800)
+  if(USART2->ISR & 0X800)
   {
-    USART3->ICR|=0X800;
+    USART2->ICR|=0X800;
     Timer.End_Frame=1;
     
   }
-  else if(USART3->ISR & 1)
+  else if(USART2->ISR & 1)
   {
     Timer.ParityError =1;
-    USART3->ICR |=1;
+    USART2->ICR |=1;
   }
   else
   {
     if(ReceiveLength>=(MAX_BYTE_TO_RECIEVE-2))
-     Dummy = USART3->RDR;
+     Dummy = USART2->RDR;
     else 
     {
-      RecieveArray[ReceiveLength] = USART3->RDR;
+      RecieveArray[ReceiveLength] = USART2->RDR;
       ReceiveLength++;
     }
   }

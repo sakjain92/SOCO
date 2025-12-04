@@ -71,37 +71,38 @@ void ProcessMainInterrupt(void)
   }  
 #endif  
   TempInt=AdcDataInArray[ADC_VR1];
-  TempInt=TempInt+AdcDataInArray[ADC_VR2];
   TempInt=TempInt-0x1000;
   IntVolRPhase  =(float)TempInt-VIOffset.VolRPhase;
   IntVolRPhase *=WorkingCopyGain.VR_GAIN;
   
   
   TempInt=AdcDataInArray[ADC_VY1];
-  TempInt=TempInt+AdcDataInArray[ADC_VY2];
   TempInt=TempInt-0x1000;
   IntVolYPhase  =(float)TempInt-VIOffset.VolYPhase;
   IntVolYPhase *=WorkingCopyGain.VY_GAIN;
   
   
   TempInt=AdcDataInArray[ADC_VB1];
-  TempInt=TempInt+AdcDataInArray[ADC_VB2];
   TempInt=TempInt-0x1000;
   IntVolBPhase  =(float)TempInt-VIOffset.VolBPhase;
   IntVolBPhase *=WorkingCopyGain.VB_GAIN;
    
-  
-  TempInt=SDADC_CHANNEL_R;
-  IntCurRPhase=TempInt*WorkingCopyGain.IR_GAIN-VIOffset.CurRPhase;
-  
-  TempInt=SDADC_CHANNEL_Y;
-  IntCurYPhase=TempInt*WorkingCopyGain.IY_GAIN-VIOffset.CurYPhase;  
-  
-  TempInt=SDADC_CHANNEL_B;
-  IntCurBPhase=TempInt*WorkingCopyGain.IB_GAIN-VIOffset.CurBPhase;  
-  
+  TempInt=AdcDataInArray[ADC_IR1];
+  TempInt=TempInt-0x1000;
+  IntCurRPhase  =(float)TempInt-VIOffset.CurRPhase;
+  IntCurRPhase *=WorkingCopyGain.IR_GAIN;
+
+  TempInt=AdcDataInArray[ADC_IY1];
+  TempInt=TempInt-0x1000;
+  IntCurYPhase  =(float)TempInt-VIOffset.CurYPhase;
+  IntCurYPhase *=WorkingCopyGain.IY_GAIN;
+
+  TempInt=AdcDataInArray[ADC_IB1];
+  TempInt=TempInt-0x1000;
+  IntCurBPhase  =(float)TempInt-VIOffset.CurBPhase;
+  IntCurBPhase *=WorkingCopyGain.IB_GAIN;
+
   ADC1->CR2 |=ADC_CR2_SWSTART;   // Start New conversion 
-  SDADC1->CR2 |=SDADC_CR2_JSWSTART;
   
   TempGainMult=(RCurSample.PrevIn_2+IntCurRPhase)*FILT_600_COEFF_X1+\
                 RCurSample.PrevIn_1*FILT_600_COEFF_X2+\
@@ -376,7 +377,7 @@ void ProcessMainInterrupt(void)
   if((Timer.transfercomplete)||(Timer.TransmissionFailed))
   {
     TempInt=TimeOutCommTx;
-    if(((USART3->ISR & 0X40) == 0x40)||(CounterSendComplete==TempInt)||(Timer.TransmissionFailed))
+    if(((USART2->ISR & 0X40) == 0x40)||(CounterSendComplete==TempInt)||(Timer.TransmissionFailed))
     {
       RS485Receive;
       SWITCH_OFF_LED_COMM;
@@ -445,9 +446,9 @@ void CalculateFreqYBPhase(int16_t TempIntFreqVol)
   {
    SwPressed=0; 
 
-   if(!(GPIOB->IDR & 0x010))SwPressed |=0x01;
-   if(!(GPIOB->IDR & 0x08))SwPressed |=0x02;
-   if(!(GPIOB->IDR & 0x04))SwPressed |=0x04;
+   if(!(GPIOF->IDR & PORT_BIT_4))SwPressed |=KEY_NEXT;
+   if(!(GPIOA->IDR & PORT_BIT_8))SwPressed |=KEY_DEC;
+   if(!(GPIOF->IDR & PORT_BIT_6))SwPressed |=KEY_INC;
    
    if((SwPressed==0)||(SwPressed!=SwPrev))
    {
