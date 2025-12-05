@@ -95,3 +95,8 @@
 // 39) Check 5V on oscilloscope with 38V input / 160VAC and all relays on and see if there is
 // bi ripple
 // 40) Do we need to get EMI/EMC tests done also?
+// 41) Add cuts below optocoupler. Also do we need 10kV isolated opto-couplers?
+// 42) Should we have BAV99 protection in current section like in COP?
+// 43) X-caps on voltage measurement/current section for dv/dt?
+// 44) Have to go through whole code and check at metrology. There is a bug in digital filter at 600Hz in Interrupt.c. Similarly have to check other things.
+//

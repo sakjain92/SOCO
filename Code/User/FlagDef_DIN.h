@@ -125,27 +125,26 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 
 
 // Burden 20E
-#define   VOLTAGE_COEFF            2.33090E-03f
+#define   VOLTAGE_COEFF            4.26321E-03f
 #define   PH_VOLTAGE_COEFF         (VOLTAGE_COEFF)
-#define   FUND_VOL_COEFF           2.9136E-03f
+#define   FUND_VOL_COEFF           5.3290E-03f
 
-#define   CURRENT_COEFF            6.7974E-06f
+#define   CURRENT_COEFF            1.4566E-03f
 #define   NEU_CURRENT_COEFF        (CURRENT_COEFF)
 
-#define   FUND_CURRENT_COEFF       8.4968E-06f
+#define   FUND_CURRENT_COEFF       1.8207E-03f
 
 
-#define   POWER_COEFF_3P4W         1.5844E-08f
+#define   POWER_COEFF_3P4W         3.1049E-06f
 
-#define  FUND_POWER_COEFF          2.4757E-08f
+#define  FUND_POWER_COEFF          9.7028E-06f
 
-#define   MIN_VOL_LIMIT            10.0f
-#define   MIN_VOL_LIMIT_PH_PH      17.0f
-#define   MIN_TOTAL_CUR_LIMIT      0.04f
-#define   MIN_NEU_CUR_LIMIT        0.005f
-
-
-#define        FREQ_COEFF                 8800000              
+// Minimum voltage to maintain 0.5% accuracy is about 24VAC. Taking some margin
+//
+#define   MIN_VOL_LIMIT            50.0f
+#define   MIN_VOL_LIMIT_PH_PH      (MIN_VOL_LIMIT * 1.732f)
+#define   MIN_TOTAL_CUR_LIMIT      0.5f
+#define   MIN_NEU_CUR_LIMIT        0.05f
 
 #define        T_20MS                                 64  // 20 msec delay
 #define        T_5MS                                  10  // 20 msec delay
