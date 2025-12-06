@@ -125,9 +125,9 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 
 
 // Burden 20E
-#define   VOLTAGE_COEFF            4.26321E-03f
+#define   VOLTAGE_COEFF            5.63843E-03f
 #define   PH_VOLTAGE_COEFF         (VOLTAGE_COEFF)
-#define   FUND_VOL_COEFF           5.3290E-03f
+#define   FUND_VOL_COEFF           7.0480E-03f
 
 #define   CURRENT_COEFF            1.4566E-03f
 #define   NEU_CURRENT_COEFF        (CURRENT_COEFF)
@@ -135,13 +135,13 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 #define   FUND_CURRENT_COEFF       1.8207E-03f
 
 
-#define   POWER_COEFF_3P4W         3.1049E-06f
+#define   POWER_COEFF_3P4W         4.1065E-06f
 
-#define  FUND_POWER_COEFF          9.7028E-06f
+#define  FUND_POWER_COEFF          1.2833E-05f
 
-// Minimum voltage to maintain 0.5% accuracy is about 24VAC. Taking some margin
+// Minimum voltage to maintain 0.5% accuracy is about 33VAC. Taking some margin
 //
-#define   MIN_VOL_LIMIT            50.0f
+#define   MIN_VOL_LIMIT            70.0f
 #define   MIN_VOL_LIMIT_PH_PH      (MIN_VOL_LIMIT * 1.732f)
 #define   MIN_TOTAL_CUR_LIMIT      0.5f
 #define   MIN_NEU_CUR_LIMIT        0.05f
@@ -350,10 +350,9 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 #define FILT_600_COEFF_Y2   -0.20971536f
 
 
-#define RS485Receive (GPIOA->BRR  =  PORT_BIT_15)
-#define RS485Transmit (GPIOA->BSRR =  PORT_BIT_15)
-
-#define RS485TransmitOn ( GPIOA->ODR & PORT_BIT_15)
+#define RS485Receive (GPIOB->BRR  =  PORT_BIT_5)
+#define RS485Transmit (GPIOB->BSRR =  PORT_BIT_5)
+#define RS485TransmitOn ( GPIOB->ODR & PORT_BIT_5)
 
 #define BaudRate_1200   0
 #define BaudRate_2400   1

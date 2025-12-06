@@ -720,11 +720,11 @@ void SendData_UART(uint8_t Add, uint8_t Func,  uint8_t Send_Length)
       SWITCH_ON_LED_COMM;
       RS485Transmit;
       Delay1Msec12Mhz(4);
-      DMA1_Channel2->CCR &=~ 0x01;
-      DMA1_Channel2->CMAR = (unsigned int) &Mod_TransmitFrame.Slave_Address;
-      DMA1_Channel2->CNDTR = (uint32_t)(Send_Length+4);
-      DMA1_Channel2->CCR |= 0x0A;
-      DMA1_Channel2->CCR |= 0x01;
+      DMA1_Channel7->CCR &=~ 0x01;
+      DMA1_Channel7->CMAR = (unsigned int) &Mod_TransmitFrame.Slave_Address;
+      DMA1_Channel7->CNDTR = (uint32_t)(Send_Length+4);
+      DMA1_Channel7->CCR |= 0x0A;
+      DMA1_Channel7->CCR |= 0x01;
       
 
   }

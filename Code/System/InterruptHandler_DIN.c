@@ -162,8 +162,11 @@ void USART2_IRQHandler(void)
   }
   else
   {
+    
     if(ReceiveLength>=(MAX_BYTE_TO_RECIEVE-2))
+    {
      Dummy = USART2->RDR;
+    }
     else 
     {
       RecieveArray[ReceiveLength] = USART2->RDR;
@@ -174,18 +177,18 @@ void USART2_IRQHandler(void)
 
 
 
-void DMA1_Channel2_IRQHandler(void)
+void DMA1_Channel7_IRQHandler(void)
 {
-  if(DMA1->ISR & DMA_ISR_TCIF2)
+  if(DMA1->ISR & DMA_ISR_TCIF7)
   {
     Timer.transfercomplete=1;
   }
-  else if(DMA1->ISR & DMA_ISR_TEIF2)
+  else if(DMA1->ISR & DMA_ISR_TEIF7)
   {
     Timer.TransmissionFailed = 1;
   }
-  DMA1_Channel2->CCR &=~ 0x0A;
-  DMA1->IFCR |= 0x10;
+  DMA1_Channel7->CCR &=~ 0x0A;
+  DMA1->IFCR |= (1 << (4 * (7-1)));
   SWITCH_OFF_LED_COMM;
 }
 

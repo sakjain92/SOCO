@@ -44,13 +44,11 @@
 
 // UNDONE:
 // 1) We aren't measuring 5V (We have provision to measure 3V): This is needed for saving energy data
-// We should measure 3.3V or 5V so that we can save data in EEPROM as soon as power goes away to avoid losing data
+// We should measure 5V so that we can save data in EEPROM as soon as power goes away to avoid losing data
 // 2) Check the resistor values for LEDs
 // 3) Need LEDs for indicating whether we are displaying Mains or Solar Current/Voltages
 // 4) Remove resistors: R69, R71, R72, R73, R74 from top pcb
-// 5) Green LED is not working
 // 6) Connector for JTAG & USB needs to be fixed
-// 7) Check if R & B Led are inter-switched
 // 8) Add labels for kind of relay output (Solar, Grid, R Phase of solar etc)
 // 9) Change name of LEDs on sticker
 // 10) In panel, all PFC driven  by 48V DC. We should make provision for adding make of Fuse and it's rating
@@ -102,3 +100,6 @@
 // 45) The capacitor on opto-coupler to be changed as re reduced resistor values so increase capacitor values
 // 46) Use one of the digital inputs to check for presence of 48V. Also, export that over modbus. The resistor values (30K + 4.7k) on optocoupler indicates ~1mA current at 40V input. We can't go below this (opto-coupler datasheets starts at 1mA). But we can add TVS in parallel to the capacitor along with cut beneath the opto-coupler
 // 47) We should move to using SDADC if possible as it has 16 bits and also it has programmable gain so we can keep the actual input voltage low coming on the pin low
+// 48) Add cuts in the terminal pins where high voltage is coming. Probably should still use SDADC in single ended mode for current as it needs more accuracy at lower ranges
+// 49) Should do double calibration for better accuracy
+// 50) For all ADC inputs or SDADC input, put 10k in series and a 10nF capacitor at the pin (Check works at higher input frequency still)
