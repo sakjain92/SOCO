@@ -99,4 +99,6 @@
 // 42) Should we have BAV99 protection in current section like in COP?
 // 43) X-caps on voltage measurement/current section for dv/dt?
 // 44) Have to go through whole code and check at metrology. There is a bug in digital filter at 600Hz in Interrupt.c. Similarly have to check other things.
-//
+// 45) The capacitor on opto-coupler to be changed as re reduced resistor values so increase capacitor values
+// 46) Use one of the digital inputs to check for presence of 48V. Also, export that over modbus. The resistor values (30K + 4.7k) on optocoupler indicates ~1mA current at 40V input. We can't go below this (opto-coupler datasheets starts at 1mA). But we can add TVS in parallel to the capacitor along with cut beneath the opto-coupler
+// 47) We should move to using SDADC if possible as it has 16 bits and also it has programmable gain so we can keep the actual input voltage low coming on the pin low
