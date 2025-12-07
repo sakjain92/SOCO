@@ -171,7 +171,7 @@ static void InitPort(void)
   // PB9: LED7: Output, Push Pull, Pull Up
   // PB10-PB15:-
   GPIOB->MODER=0x5568F;
-  GPIOB->OTYPER=0;
+  GPIOB->OTYPER=0x140;
   GPIOB->OSPEEDR=0;
   GPIOB->PUPDR=0x50000;
   GPIOB->AFR[0]=0x77000;
@@ -314,6 +314,9 @@ static void SetAdc(void)
   ADC1->SMPR1=0x36DB6DB6;
   // 71.5 cycles for 0-9 channel
   ADC1->SMPR2=0x36DB6DB6;
+
+  // Mains
+  //
   // 1th Sequence: 6th channel (IRP_M)
   // 2th sequence: 10th channel (MVRP)
   // 3th sequence: 7th channel (IYP_M)
@@ -321,10 +324,23 @@ static void SetAdc(void)
   // 5th sequence: 5th channel (IYB_M)
   // 6th sequence: 12th squence (MVBP)
   ADC1->SQR3=0x18559D46;
-  // Sequence 7th: 10th channel
   ADC1->SQR2=0x0;
   // 6 total sequences
   ADC1->SQR1=0x500000;
+
+  // Solar
+  //
+  // 1th Sequence: 9th channel (IRP_P)
+  // 2th sequence: 13th channel (PVRP)
+  // 3th sequence: 4th channel (IYP_P)
+  // 4th channel: 14th channel (PVYP)
+  // 5th sequence: 8th channel (IYB_P)
+  // 6th sequence: 15th squence (PVBP)
+  ADC1->SQR3=0x1E8711A9;
+  ADC1->SQR2=0x0;
+  // 6 total sequences
+  ADC1->SQR1=0x500000;
+
   // ADC On, Enable Calibration, DMA enabled, JSWSRTART Trigger, SWSTART Trigger, Enable exrternal trigger
   ADC1->CR2=0X1E7105;
 
@@ -361,7 +377,9 @@ void InitWatchDog(void)
     IWDG->KR=0X5555;
     IWDG->RLR=0XFFF;
   }
+  
   IWDG->KR=0xCCCC; //Start
+
   // Halt: TIM2,3,46,7,12,13, 14.18.IWDG
   DBGMCU->APB1FZ=0x1BF7; // Halt peripherals in debug mode
   // Halt: TIM15,16,17,19
@@ -452,7 +470,11 @@ static void FrequencyTimer(void)
 void SetSDADC(void)
 {
   // Internal reference (1.2V)
-  SDADC1->CR1=0X4100;
+  SDADC1->CR1=0X100;
+  // Start SDADC1
+  SDADC1->CR2=0X01;
+  // Wait for SDADC stabilization
+  while(SDADC1->ISR & SDADC_ISR_STABIP);
 }
   
 volatile uint16_t TimeOutCommTx;
@@ -505,12 +527,10 @@ void InitUart(uint8_t baud,uint8_t parity1,uint8_t Stopbit1)
   USART2->CR3 =  0x80;                 // DMA
   USART2->ICR =  0;
   USART2->CR1 |= 1;
-  DMA1_Channel2->CPAR = (uint32_t)&USART2->TDR;
-  DMA1_Channel2->CCR = 0x1092;    // Memory inc, read from memory, tcie
+  DMA1_Channel7->CPAR = (uint32_t)&USART2->TDR;
+  DMA1_Channel7->CCR = 0x1092;    // Memory inc, read from memory, tcie
   NVIC_EnableIRQ(USART2_IRQn);
-  NVIC_EnableIRQ(DMA1_Channel2_IRQn);
-  
- 
+  NVIC_EnableIRQ(DMA1_Channel7_IRQn);
 }
   
 

@@ -104,3 +104,6 @@
 // 47) (IMPORTANT)We should move to using SDADC if possible as it has 16 bits and also it has programmable gain so we can keep the actual input voltage low coming on the pin low 
 // 48) Four quadrant net metering required
 // 49) Get panel and controller tested in labs
+// 50) Add cuts in the terminal pins where high voltage is coming. Probably should still use SDADC in single ended mode for current as it needs more accuracy at lower ranges
+// 51) Should do double voltage calibration for better accuracy
+// 52) For all ADC inputs or SDADC input, put 10k in series and a 10nF capacitor at the pin (Check works at higher input frequency still)
