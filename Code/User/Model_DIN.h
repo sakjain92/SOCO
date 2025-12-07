@@ -45,20 +45,20 @@
 // UNDONE:
 // 1) We aren't measuring 5V (We have provision to measure 3V): This is needed for saving energy data
 // We should measure 3.3V or 5V so that we can save data in EEPROM as soon as power goes away to avoid losing data
-// 2) Check the resistor values for LEDs
+// 2) (Partially Done)Check the resistor values for LEDs
 // 3) Need LEDs for indicating whether we are displaying Mains or Solar Current/Voltages
 // 4) Remove resistors: R69, R71, R72, R73, R74 from top pcb
-// 5) Green LED is not working
+// 5) (Done)Green LED is not working
 // 6) Connector for JTAG & USB needs to be fixed
-// 7) Check if R & B Led are inter-switched
+// 7) (Done)Check if R & B Led are inter-switched
 // 8) Add labels for kind of relay output (Solar, Grid, R Phase of solar etc)
 // 9) Change name of LEDs on sticker
 // 10) In panel, all PFC driven  by 48V DC. We should make provision for adding make of Fuse and it's rating
-// 11) In panel, K1, K2, K3 will be driven by grid voltages and not solar voltages
+// 11) In panel, K1, K2, K3 will be driven by grid voltages and not solar voltages. See v1.5 drawing
 // 12) Can remove extra Relay (6th) from BOM (Can we really drive it)?
-// 13) Add USB port and also code for DFU
+// 13) Add USB port and also code for DFU. USB port cutout needed
 // 14) LEDs and switches should be SMD. Check other components also. Try for SMD capacitors.
-// 15) Remove RTC battery?
+// 15) Remove RTC battery? Currently not used in code
 // 16) Fix power supply section layout (Tranformer and SMD components on corrct side of the PCB)
 // 17) Switches direction on PCB is wrong
 // 18) Remove R55 from Bottom pcb
@@ -97,8 +97,10 @@
 // 40) Do we need to get EMI/EMC tests done also?
 // 41) Add cuts below optocoupler. Also do we need 10kV isolated opto-couplers?
 // 42) Should we have BAV99 protection in current section like in COP?
-// 43) X-caps on voltage measurement/current section for dv/dt?
-// 44) Have to go through whole code and check at metrology. There is a bug in digital filter at 600Hz in Interrupt.c. Similarly have to check other things.
+// 43) X-caps on voltage measurement/current section for dv/dt? Isolation transformer?
+// 44) Have to go through whole code and check at metrology. There is a bug in digital filter at 600Hz in Interrupt.c. Similarly have to check other things. Test the whole code again
 // 45) The capacitor on opto-coupler to be changed as re reduced resistor values so increase capacitor values
 // 46) Use one of the digital inputs to check for presence of 48V. Also, export that over modbus. The resistor values (30K + 4.7k) on optocoupler indicates ~1mA current at 40V input. We can't go below this (opto-coupler datasheets starts at 1mA). But we can add TVS in parallel to the capacitor along with cut beneath the opto-coupler
-// 47) We should move to using SDADC if possible as it has 16 bits and also it has programmable gain so we can keep the actual input voltage low coming on the pin low
+// 47) (IMPORTANT)We should move to using SDADC if possible as it has 16 bits and also it has programmable gain so we can keep the actual input voltage low coming on the pin low 
+// 48) Four quadrant net metering required
+// 49) Get panel and controller tested in labs

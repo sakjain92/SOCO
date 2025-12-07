@@ -108,10 +108,11 @@ uint8_t LcdEpromBuffer[128],EnergyDisplayUnit;
 uint8_t SwitchPressed;
 uint8_t CommIndexRS232,discard,CommFlagRS232,TransmitLengthRS232,DiscardRS232;
 uint8_t KeyPressedCounter,EditIndex;
+// FreqSampleFlag: Defines which voltage phase to use to detect frequency
 uint8_t ParaBlockIndex,FreqSampleFlag;
 uint8_t PowerFailCounter,ScrollChangeCounter;
 uint8_t  Tc20ms,KWhLedOnCounter,UpdateDisplay;
-uint8_t FreqFlag,CycleCounter,FreqSampleFlag;
+uint8_t FreqFlag,CycleCounter;
 uint8_t FlagDirectCalibration,CalibrationGapCounter,DisplayDebarCounter;
 uint8_t OperatingSatatus,PowerUpCounter=0,SecondSourceActive,GenratorOnCounter;
 uint8_t RecieveArray[MAX_BYTE_TO_RECIEVE];

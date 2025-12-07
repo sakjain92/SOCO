@@ -98,6 +98,9 @@ Ret: None
 */
 void ProcessFreq(void)
 {
+  // UNDONE: We don't read frequency currently hence delete this code
+  // and read values at constant 3.2kHz frequency only
+  //
   float Frequency=0;
   if(FreqSampleFlag==1)
   {

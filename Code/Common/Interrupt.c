@@ -42,7 +42,10 @@ void ProcessMainInterrupt(void)
   float TempGainMult;
   int16_t TempInt;  
   uint8_t i;
-#ifdef MODEL_DATA_SAVE    
+#ifdef MODEL_DATA_SAVE   
+  // UNDONE: Fix this
+  // If we detect power supply is dropping, then save energy data immediately
+  //
   if(/*AdcDataInArray[ADC_POWER_SENSE]<POWER_FAIL_SENSE_VALUE*/ 0)
   {
 
@@ -103,7 +106,10 @@ void ProcessMainInterrupt(void)
   IntCurBPhase *=WorkingCopyGain.IB_GAIN;
 
   ADC1->CR2 |=ADC_CR2_SWSTART;   // Start New conversion 
-  
+ 
+  // UNDONE: There is a bug in this second order butterworth filter with cutoff
+  // at 600Hz
+  //
   TempGainMult=(RCurSample.PrevIn_2+IntCurRPhase)*FILT_600_COEFF_X1+\
                 RCurSample.PrevIn_1*FILT_600_COEFF_X2+\
                 RCurSample.PrevOut_1*FILT_600_COEFF_Y1-\
@@ -256,7 +262,12 @@ void ProcessMainInterrupt(void)
     KWhLedOnCounter=25;
   }
 #endif    
-#ifdef MODEL_RS485      
+#ifdef MODEL_RS485 
+  // This is an old code which states that if RS485 is stuck transmitting
+  // for more than 5 seconds, let's restart the USART module
+  // This was added due to a bug in RS485 code which has been resolved so
+  // this code isn't strictly required anymore
+  //
   if(RS485TransmitOn)
   {
     if(Check485DirCounter==Check485DirCount)
@@ -319,7 +330,9 @@ void ProcessMainInterrupt(void)
   
   
 // Phase compensation  y [n] = x[n]+ b x[n -1]
-
+  // This is probably phase compensation for the phase shift introduced
+  // by internal CTs
+  //
   TempGainMult=  (WorkingCopyGain.PR_BETA*IntRPrevSample);
   IntRPrevSample=IntVolRPhase;
   IntVolRPhase +=TempGainMult;

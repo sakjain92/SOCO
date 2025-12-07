@@ -318,7 +318,7 @@ void Metrology(void)
 
    
   TempFloat=TempFloat/(3600*1e7); // all energies are saved in whr
-  FloatMin=InstantPara.TotalReactPower*(float)IntDataSave.TimerCountValue/13500000.0f; //(5000*3600)  Reactive
+  FloatMin=InstantPara.TotalReactPower*(float)IntDataSave.TimerCountValue/13500000.0f; //(3750*3600)  Reactive
   FloatMax=InstantPara.TotalAppPower*(float)IntDataSave.TimerCountValue/13500000.0f; //Apparent
   
 #ifdef    MODEL_DATA_SAVE  
