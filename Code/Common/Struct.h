@@ -2,6 +2,7 @@
 #define STRUCT_H
 
 #include "stm32f37x.h"
+#include <stdbool.h>
 
 struct STORE 
 {
@@ -406,7 +407,7 @@ struct DigInputs
     bool MainsYPhaseContactorOn;
     bool MainsBPhaseContactorOn;
     bool LoadOnSolarContactorOn;
-    bool LoadOnMainsContactorOn;
+    bool LoadOnGridContactorOn;
     bool SPDFailed;             
     bool DGOff;              
     bool DC48Available;          

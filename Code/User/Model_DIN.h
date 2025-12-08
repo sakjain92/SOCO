@@ -1,4 +1,4 @@
-#define MODEL_RELEASED
+//#define MODEL_RELEASED
 
 #define MODEL_COMM_PROCOM
 #define MODEL_DATA_SAVE  
@@ -81,6 +81,7 @@
 // 55) For whole current, how do I calibrate at 100A?
 // 56) We should make it possible to see state of outputs/inputs on the controller otherwise will be difficult to debug issues in the field (contactor latching etc)
 // 57) Since we use NC or NO of a relay, do we want to just have one output per relay on board (less chances of mistake when making the panel)
+// 58) For four quarant metering, we need to fix P1/P2 & S1/S2 of CT with CT polarity correction. Possibly have to get it tested on panel side also via a WebUSB based RS485 testing software
 //
 // NOTES:
 // 1) For Apparent power, we are using RMS (IEC 60038) instead of (IEC 61000-4-7) where we just measure first harmonics as we need to match energy with utility meter (and SMPS will have noise)

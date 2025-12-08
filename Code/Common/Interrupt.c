@@ -451,60 +451,60 @@ void ReadInputs()
     struct DigInputState
     {
         bool* val;
-        uint8_t time;
+        uint8_t timer;
         bool (*read)(void);
     };
 
     // DEVNOTE: Keep this debouncing ticks to less than 1 sec in total
     //
-    const uint8_t maxDebouncingTicks = 5;
+#define MAX_DEBOUNCING_TICK 5
     static struct DigInputState dinStateArray[] =
     {
         {
             .val = &g_DigInputs.MainsRPhaseContactorOn,
-            .timer = maxDebouncingTicks,
+            .timer = MAX_DEBOUNCING_TICK,
             .read = IsRPhaseGridHealthyContactorOn,
         },
         {
             .val = &g_DigInputs.MainsYPhaseContactorOn,
-            .timer = maxDebouncingTicks,
+            .timer = MAX_DEBOUNCING_TICK,
             .read = IsYPhaseGridHealthyContactorOn,
         },
         {
             .val = &g_DigInputs.MainsBPhaseContactorOn,
-            .timer = maxDebouncingTicks,
+            .timer = MAX_DEBOUNCING_TICK,
             .read = IsBPhaseGridHealthyContactorOn,
         },
         {
             .val = &g_DigInputs.LoadOnSolarContactorOn,
-            .timer = maxDebouncingTicks,
+            .timer = MAX_DEBOUNCING_TICK,
             .read = IsLoadOnSolarContactorOn,
         },
         {
-            .val = &g_DigInputs.LoadOnMainsContactorOn,
-            .timer = maxDebouncingTicks,
-            .read = IsLoadOnMainsContactorOn,
+            .val = &g_DigInputs.LoadOnGridContactorOn,
+            .timer = MAX_DEBOUNCING_TICK,
+            .read = IsLoadOnGridContactorOn,
         },
         {
             .val = &g_DigInputs.SPDFailed,
-            .timer = maxDebouncingTicks,
+            .timer = MAX_DEBOUNCING_TICK,
             .read = IsSPDFailed,
         },
         {
             .val = &g_DigInputs.DGOff,
-            .timer = maxDebouncingTicks,
+            .timer = MAX_DEBOUNCING_TICK,
             .read = IsDGOff,
         },
         {
             .val = &g_DigInputs.DC48Available,
-            .timer = maxDebouncingTicks,
+            .timer = MAX_DEBOUNCING_TICK,
             .read = IsDC48Available,
         },
     };
 
     for (uint8_t i = 0; i < ARRAY_SIZE(dinStateArray); i++)
     {
-        struct DigInputState* dinState = dinStateArray[i];
+        struct DigInputState* dinState = &dinStateArray[i];
 
         if (dinState->read() != *dinState->val)
         {
@@ -515,14 +515,15 @@ void ReadInputs()
             if (!dinState->timer)
             {
                 *dinState->val = !*dinState->val;
-                dinState->timer = maxDebouncingTicks;
+                dinState->timer = MAX_DEBOUNCING_TICK;
             }
         }
         else
         {
-            dinState->timer = maxDebouncingTicks;
+            dinState->timer = MAX_DEBOUNCING_TICK;
         }
     }
+#undef MAX_DEBOUNCING_TICK
 }
 
 uint16_t freqcounter;

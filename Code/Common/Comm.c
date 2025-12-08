@@ -668,16 +668,16 @@ void ModBusCommunication(void)
               break;
             case 0x2 /*MODBUS_READ_INPUT_STATUS_CODE*/:
             {
-                Start_Add_High = Readarray_Modbus[2];
-                Start_Add_Low = Readarray_Modbus[3];
+                Start_Add_High = RecieveArray[2];
+                Start_Add_Low = RecieveArray[3];
                 Start_Add = (Start_Add_Low) + (Start_Add_High<<8);
-                NoOfReg_High = Readarray_Modbus[4];
-                NoOfReg_Low = Readarray_Modbus[5];
-                NoOfReg = (NoOfReg_Low) + (NoOfReg_High<<8);
+                NoOfBytes_High = RecieveArray[4];
+                NoOfBytes_Low = RecieveArray[5];
+                NoOfBytes = (NoOfBytes_Low) + (NoOfBytes_High<<8);
                 
-                uint32_t endReg = (uint32_t)(Start_Add) + (uint32_t)(NoOfReg) - 1;
+                uint32_t endReg = (uint32_t)(Start_Add) + (uint32_t)(NoOfBytes) - 1;
                 uint8_t maxRegs = sizeof(g_DigInputs);
-                if (endReg >= maxRegs || NoOfRegs == 0)
+                if (endReg >= maxRegs || NoOfBytes == 0)
                 {
                     Fun_Received |= 0x80;
                     Mod_TransmitFrame.Data_Array[0] = 0x02;
@@ -690,16 +690,17 @@ void ModBusCommunication(void)
                 uint8_t sourceBuffer[64] = {0};
                 uint8_t destBuffer[64] = {0};
 
+                uint8_t* source = (uint8_t*)(&g_DigInputs);
                 for (int i = 0; i < sizeof(g_DigInputs); i++)
                 {
-                    if (((uint8_t*)(g_DigInputs))[i])
+                    if (source[i])
                     {
                         int sourceByteIdx = i / 8;
                         int sourceBitIdx = i - 8 * sourceByteIdx;
                         sourceBuffer[sourceByteIdx] |= (1 << sourceBitIdx);
                     }
                 }
-                for (int bitIdx = 0; bitIdx < NoOfReg; bitIdx++)
+                for (int bitIdx = 0; bitIdx < NoOfBytes; bitIdx++)
                 {
                     int sourceBitIdx = bitIdx + Start_Add;
                     int sourceByteIdx = sourceBitIdx / 8;
@@ -713,7 +714,7 @@ void ModBusCommunication(void)
                         (((sourceBuffer[sourceByteIdx] >> sourceBitOffset) & 0x1) << destBitOffset);
                 }
 
-                uint8_t numBytesToSend = ROUNDUP_POW2(NoOfReg, 8) / 8;
+                uint8_t numBytesToSend = ROUNDUP_POW2(NoOfBytes, 8) / 8;
                 ModbusSendData(destBuffer, numBytesToSend, Fun_Received);
                 break;
             }

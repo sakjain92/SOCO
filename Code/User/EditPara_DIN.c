@@ -359,7 +359,7 @@ void UpdateEditSettings(void)
    Delay1Msec12Mhz(2);
    SetMeterParameters();
 #ifdef MODEL_DATA_SAVE
-   uint8_t i,k=0;
+   uint8_t k=0;
       
    InterruptFlag |=INT_DATA_SAVING_EEPROM;
    __no_operation();

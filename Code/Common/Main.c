@@ -10,6 +10,7 @@
 
 
 #include "includes.h"
+#include "extern_includes.h"
 
 extern const struct PH_COEFF_STRUCT CalibrationCoeff;
 
@@ -200,13 +201,13 @@ void ProcessRelays()
     };
 
     static bool initialized = false;
-    const uint16_t maxContactorChangeLatency = 2;
+#define MAX_CONTACTOR_CHANGE_LATENCY    3
 
     // By default, contactor is turned on when the controller is off
     // (Contactor coil tied to NC of the controller's relay).
     // So assume healthy state initially (except Load On Solar contactor)
     //
-    static struct PhaseVolState pvsArray = 
+    static struct PhaseVolState pvsArray[] = 
     {
         // Mains R Phase
         {
@@ -217,7 +218,7 @@ void ProcessRelays()
             SwitchOffContactorRPhaseGridHealthy,
             &g_DigInputs.MainsRPhaseContactorOn,
             true,
-            maxContactorChangeLatency,
+            MAX_CONTACTOR_CHANGE_LATENCY,
             false,
         },
         // Mains Y Phase
@@ -229,7 +230,7 @@ void ProcessRelays()
             SwitchOffContactorYPhaseGridHealthy,
             &g_DigInputs.MainsYPhaseContactorOn,
             true,
-            maxContactorChangeLatency,
+            MAX_CONTACTOR_CHANGE_LATENCY,
             false,
         },
         // Mains B Phase
@@ -241,9 +242,9 @@ void ProcessRelays()
             SwitchOffContactorBPhaseGridHealthy,
             &g_DigInputs.MainsBPhaseContactorOn,
             true,
-            maxContactorChangeLatency,
+            MAX_CONTACTOR_CHANGE_LATENCY,
             false,
-        }
+        },
         // Load On Solar
         //
         {
@@ -254,7 +255,7 @@ void ProcessRelays()
             SwitchOffContactorLoadOnSolar,
             &g_DigInputs.LoadOnSolarContactorOn,
             false,
-            maxContactorChangeLatency,
+            MAX_CONTACTOR_CHANGE_LATENCY,
             false,
         },
         // Load On Grid
@@ -267,7 +268,7 @@ void ProcessRelays()
             SwitchOffContactorLoadOnGrid,
             &g_DigInputs.LoadOnGridContactorOn,
             true,
-            maxContactorChangeLatency,
+            MAX_CONTACTOR_CHANGE_LATENCY,
             false,
         }
     };
@@ -284,7 +285,7 @@ void ProcessRelays()
     //
     for (uint8_t i = 0; i < 3; i++)
     {
-        struct PhaseVolState* pvs = pvsArray[i];
+        struct PhaseVolState* pvs = &pvsArray[i];
 
         if (pvs->isHealthy)
         {
@@ -301,7 +302,7 @@ void ProcessRelays()
                 if (!pvs->TimeLeft)
                 {
                     pvs->isHealthy = false;
-                    pvs->TimeLeft = CopySetPara[PARA_MAINS_RESET_DELAY];
+                    pvs->TimeLeft = CopySetPara[PARA_MAINS_RETURN_DELAY];
                 }
             }
             else
@@ -328,12 +329,12 @@ void ProcessRelays()
             }
             else
             {
-                pvs->TimeLeft = CopySetPara[PARA_MAINS_RESET_DELAY];
+                pvs->TimeLeft = CopySetPara[PARA_MAINS_RETURN_DELAY];
             }
         }
     }
 
-    struct PhaseVolState* solarPvs = pvsArray[3];
+    struct PhaseVolState* solarPvs = &pvsArray[3];
 
     // We can't read solar's voltages when any of the R/Y/B contactor is still
     // on. Note: Feedback makes only sense when 48VDC is available
@@ -349,32 +350,32 @@ void ProcessRelays()
     if (isAnyPhaseContactorOn)
     {
         solarPvs->isHealthy = false;
-        solarPvs->TimeLeft = CopySetPara[PARA_SOLAR_RESET_DELAY];
+        solarPvs->TimeLeft = CopySetPara[PARA_SOLAR_RETURN_DELAY];
     }
     else if (solarPvs->isHealthy)
     {
         // UNDONE: Check solar phases here
         //
         //bool curUnhealthy = 
-        //    (*pvs->vol > CopySetPara[PARA_SOLAR_OVER_VOLT]) ||
-        //    (*pvs->vol < CopySetPara[PARA_SOLAR_UNDER_VOLT]);
+        //    (*solarPvs->vol > CopySetPara[PARA_SOLAR_OVER_VOLT]) ||
+        //    (*solarPvs->vol < CopySetPara[PARA_SOLAR_UNDER_VOLT]);
         bool curUnhealthy = false;
 
         if (curUnhealthy)
         {
-            if (pvs->TimeLeft)
+            if (solarPvs->TimeLeft)
             {
-                pvs->TimeLeft--;
+                solarPvs->TimeLeft--;
             }
             else
             {
-                pvs->isHealthy = false;
-                pvs->TimeLeft = CopySetPara[PARA_SOLAR_RESET_DELAY];
+                solarPvs->isHealthy = false;
+                solarPvs->TimeLeft = CopySetPara[PARA_SOLAR_RETURN_DELAY];
             }
         }
         else
         {
-            pvs->TimeLeft = CopySetPara[PARA_SOLAR_FAIL_DELAY];
+            solarPvs->TimeLeft = CopySetPara[PARA_SOLAR_FAIL_DELAY];
         }
     }
     else
@@ -386,19 +387,19 @@ void ProcessRelays()
 
         if (curHealthy)
         {
-            if (pvs->TimeLeft)
+            if (solarPvs->TimeLeft)
             {
-                pvs->TimeLeft--;
+                solarPvs->TimeLeft--;
             }
             else
             {
-                pvs->isHealthy = true;
-                pvs->TimeLeft = CopySetPara[PARA_SOLAR_FAIL_DELAY];
+                solarPvs->isHealthy = true;
+                solarPvs->TimeLeft = CopySetPara[PARA_SOLAR_FAIL_DELAY];
             }
         }
         else
         {
-            pvs->TimeLeft = CopySetPara[PARA_SOLAR_RETURN_DELAY];
+            solarPvs->TimeLeft = CopySetPara[PARA_SOLAR_RETURN_DELAY];
         }
     }
 
@@ -443,21 +444,21 @@ void ProcessRelays()
     // So hence should put load on solar. For that, need to shut off the
     // phase contactors
     //
-    pvsArray[0].shouldContactorBeOn = pvsArray[0].isHeathly &&
+    pvsArray[0].shouldContactorBeOn = pvsArray[0].isHealthy &&
                                         !pvsArray[3].isContactorStuck;
-    pvsArray[1].shouldContactorBeOn = pvsArray[0].isHeathly &&
-                                        pvsArray[1].isHeathly &&
+    pvsArray[1].shouldContactorBeOn = pvsArray[0].isHealthy &&
+                                        pvsArray[1].isHealthy &&
                                         !pvsArray[3].isContactorStuck;
-    pvsArray[2].shouldContactorBeOn = pvsArray[0].isHeathly &&
-                                        pvsArray[2].isHeathly &&
+    pvsArray[2].shouldContactorBeOn = pvsArray[0].isHealthy &&
+                                        pvsArray[2].isHealthy &&
                                         !pvsArray[3].isContactorStuck;
-    pvsArray[3].shouldContactorBeOn = pvsArray[3].isHeathly &&
-                                        (g_DigInputs.DgOff || !g_DigInputs.DC48Available) &&
+    pvsArray[3].shouldContactorBeOn = pvsArray[3].isHealthy &&
+                                        (g_DigInputs.DGOff || !g_DigInputs.DC48Available) &&
                                         !pvsArray[0].isContactorStuck &&
                                         !pvsArray[1].isContactorStuck &&
                                         !pvsArray[2].isContactorStuck &&
                                         !pvsArray[4].isContactorStuck;
-    pvsArray[4].shouldContactorBeOn = pvsArray[0].isHeathly &&
+    pvsArray[4].shouldContactorBeOn = pvsArray[0].isHealthy &&
                                         !pvsArray[3].isContactorStuck;
 
     for (uint8_t i = 0; i < 5; i++)
@@ -483,16 +484,17 @@ void ProcessRelays()
             }
             if (!pvsArray[i].ContactorChangeTimeLeft)
             {
-                pvsArray[i].ContactorChangeTimeLeft = maxContactorChangeLatency;
+                pvsArray[i].ContactorChangeTimeLeft = MAX_CONTACTOR_CHANGE_LATENCY;
                 pvsArray[i].isContactorStuck = true;
             }
         }
         else
         {
-            pvsArray[i].ContactorChangeTimeLeft = maxContactorChangeLatency;
+            pvsArray[i].ContactorChangeTimeLeft = MAX_CONTACTOR_CHANGE_LATENCY;
             pvsArray[i].isContactorStuck = false;
         }
     }
+#undef MAX_CONTACTOR_CHANGE_LATENCY
 }
 
 /*
@@ -826,17 +828,17 @@ void StartCalibration(void)
    if (FlagDirectCalibration >= CALIBRATE_IN_START &&
         FlagDirectCalibration <= CALIBRATE_IN_8)
    {
-       const uint8_t* inputs[] = 
+       const bool* inputs[] = 
        {
            &g_DigInputs.MainsRPhaseContactorOn,
            &g_DigInputs.MainsYPhaseContactorOn,
            &g_DigInputs.MainsBPhaseContactorOn,
            &g_DigInputs.LoadOnSolarContactorOn,
-           &g_DigInputs.LoadOnMainsContactorOn,
+           &g_DigInputs.LoadOnGridContactorOn,
            &g_DigInputs.SPDFailed,
            &g_DigInputs.DGOff,
            &g_DigInputs.DC48Available
-       }
+       };
        if (FlagDirectCalibration == CALIBRATE_IN_START)
        {
             for (uint8_t i = 0; i < ARRAY_SIZE(inputs); i++)
@@ -859,14 +861,14 @@ void StartCalibration(void)
    if (FlagDirectCalibration >= CALIBRATE_OUT_1 &&
        FlagDirectCalibration <= CALIBRATE_OUT_5)
    {
-       void (*outputs)(void)[] = 
+       void (*outputs[])(void) = 
        {
            SwitchOnContactorRPhaseGridHealthy,
            SwitchOnContactorYPhaseGridHealthy,
            SwitchOnContactorBPhaseGridHealthy,
            SwitchOnContactorLoadOnSolar,
            SwitchOnContactorLoadOnGrid
-       }
+       };
        uint8_t idx = FlagDirectCalibration - CALIBRATE_OUT_1;
        DisplayOutputX(idx + 1);
        outputs[idx]();
@@ -924,7 +926,7 @@ void SetWorkingGainBuffer(void)
     else
     {
       Slope=(CalibrationCoeff.IR_HIGH_GAIN-CalibrationCoeff.IR_MID_GAIN)/(CUR_HIGH_CAL_POINT-CUR_MID_CAL_POINT);
-      Offset=CalibrationCoeff.IR_HIGH_GAIN-*CUR_HIGH_CAL_POINTSlope;
+      Offset=CalibrationCoeff.IR_HIGH_GAIN-CUR_HIGH_CAL_POINT*Slope;
       WorkingCopyGain.IR_GAIN=Offset+Slope*InstantPara.CurrentR;
     }
   }

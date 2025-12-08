@@ -6,7 +6,6 @@
 #include "stm32f37x_flash.h"
 #include <Math.h>
 #include <stdio.h>
-#include <stdbool.h>
 #include <string.h>
 
 /* Local functions included */
@@ -131,15 +130,5 @@ uint16_t BufferToDisplay[24];
 uint8_t DisplayParameterBuffer[50],dispStartCnt,DisParalast;
 
 struct DigInputs g_DigInputs;
-
-#define RUNNING_MODE_IMPORT  0
-
-#define TO_BOOL(x)      (!!(x))
-
-#define ARRAY_SIZE(a)           (sizeof(a) / sizeof(a[0]))
-
-// Rounds up X (integer) to an upper integer multiple of 'factor' where 'factor' is power of two
-//
-#define ROUNDUP_POW2(x, factor)  ((((x)+(factor)-1) & ~((factor) - 1)))
 
 #endif

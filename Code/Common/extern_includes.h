@@ -1,6 +1,8 @@
 #ifndef EXTERN_INCLUDES_H
 #define EXTERN_INCLUDES_H
 
+#include <string.h>
+
 extern void Delay1Msec12Mhz( uint32_t Delay);
 extern void DisplayParameterUpdate(void); 
 extern void ProtectionReset(void); 
@@ -116,5 +118,17 @@ extern void SwitchOnContactorBPhaseGridHealthy();
 extern void SwitchOffContactorLoadOnSolar();
 extern void SwitchOnContactorLoadOnSolar();
 extern void SwitchOffContactorLoadOnGrid();
-extern void SwitchOnContactorLoadOnGrid(;)
+extern void SwitchOnContactorLoadOnGrid();
+
+
+#define RUNNING_MODE_IMPORT  0
+
+#define TO_BOOL(x)      (!!(x))
+
+#define ARRAY_SIZE(a)           (sizeof(a) / sizeof(a[0]))
+
+// Rounds up X (integer) to an upper integer multiple of 'factor' where 'factor' is power of two
+//
+#define ROUNDUP_POW2(x, factor)  ((((x)+(factor)-1) & ~((factor) - 1)))
+
 #endif
