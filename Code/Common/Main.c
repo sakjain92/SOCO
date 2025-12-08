@@ -138,6 +138,363 @@ void ProcessFreq(void)
   }
 }
 
+void SwitchOffContactorRPhaseGridHealthy()
+{
+    SWITCH_OFF_CONTACTOR_R_PHASE_GRID_HEALTHY;
+}
+void SwitchOnContactorRPhaseGridHealthy()
+{
+    SWITCH_ON_CONTACTOR_R_PHASE_GRID_HEALTHY;
+}
+void SwitchOffContactorYPhaseGridHealthy()
+{
+    SWITCH_OFF_CONTACTOR_Y_PHASE_GRID_HEALTHY;
+}
+void SwitchOnContactorYPhaseGridHealthy()
+{
+    SWITCH_ON_CONTACTOR_Y_PHASE_GRID_HEALTHY;
+}
+void SwitchOffContactorBPhaseGridHealthy()
+{
+    SWITCH_OFF_CONTACTOR_B_PHASE_GRID_HEALTHY;
+}
+void SwitchOnContactorBPhaseGridHealthy()
+{
+    SWITCH_ON_CONTACTOR_B_PHASE_GRID_HEALTHY;
+}
+void SwitchOffContactorLoadOnSolar()
+{
+    SWITCH_OFF_CONTACTOR_LOAD_ON_SOLAR;
+}
+void SwitchOnContactorLoadOnSolar()
+{
+    SWITCH_ON_CONTACTOR_LOAD_ON_SOLAR;
+}
+void SwitchOffContactorLoadOnGrid()
+{
+    SWITCH_OFF_CONTACTOR_LOAD_ON_GRID;
+}
+void SwitchOnContactorLoadOnGrid()
+{
+    SWITCH_ON_CONTACTOR_LOAD_ON_GRID;
+}
+
+// Controls the logic controlling the relays outputs
+// This function is called once every 1 second
+// DEVNOTE: This function should consider the possibility of contactors
+// getting stuck and not following the state as driven by the relays
+//
+void ProcessRelays()
+{
+    struct PhaseVolState
+    {
+        bool isHealthy;
+        uint16_t TimeLeft;
+        float* vol;
+        void (*turnContactorOn)(void);
+        void (*turnContactorOff)(void);
+        bool* contactorFeedback;
+        bool shouldContactorBeOn;
+        uint16_t ContactorChangeTimeLeft;
+        bool isContactorStuck;
+    };
+
+    static bool initialized = false;
+    const uint16_t maxContactorChangeLatency = 2;
+
+    // By default, contactor is turned on when the controller is off
+    // (Contactor coil tied to NC of the controller's relay).
+    // So assume healthy state initially (except Load On Solar contactor)
+    //
+    static struct PhaseVolState pvsArray = 
+    {
+        // Mains R Phase
+        {
+            true,
+            0,
+            &InstantPara.VolR,
+            SwitchOnContactorRPhaseGridHealthy,
+            SwitchOffContactorRPhaseGridHealthy,
+            &g_DigInputs.MainsRPhaseContactorOn,
+            true,
+            maxContactorChangeLatency,
+            false,
+        },
+        // Mains Y Phase
+        {
+            true,
+            0,
+            &InstantPara.VolY,
+            SwitchOnContactorYPhaseGridHealthy,
+            SwitchOffContactorYPhaseGridHealthy,
+            &g_DigInputs.MainsYPhaseContactorOn,
+            true,
+            maxContactorChangeLatency,
+            false,
+        },
+        // Mains B Phase
+        {
+            true,
+            0,
+            &InstantPara.VolB,
+            SwitchOnContactorBPhaseGridHealthy,
+            SwitchOffContactorBPhaseGridHealthy,
+            &g_DigInputs.MainsBPhaseContactorOn,
+            true,
+            maxContactorChangeLatency,
+            false,
+        }
+        // Load On Solar
+        //
+        {
+            false,
+            0,
+            NULL,
+            SwitchOnContactorLoadOnSolar,
+            SwitchOffContactorLoadOnSolar,
+            &g_DigInputs.LoadOnSolarContactorOn,
+            false,
+            maxContactorChangeLatency,
+            false,
+        },
+        // Load On Grid
+        //
+        {
+            true,
+            0,
+            NULL,
+            SwitchOnContactorLoadOnGrid,
+            SwitchOffContactorLoadOnGrid,
+            &g_DigInputs.LoadOnGridContactorOn,
+            true,
+            maxContactorChangeLatency,
+            false,
+        }
+    };
+
+    if (!initialized)
+    {
+        initialized = true;
+        pvsArray[0].TimeLeft = pvsArray[1].TimeLeft = pvsArray[2].TimeLeft =
+            pvsArray[4].TimeLeft = CopySetPara[PARA_MAINS_FAIL_DELAY];
+        pvsArray[3].TimeLeft = CopySetPara[PARA_SOLAR_RETURN_DELAY];
+    }
+
+    // DEVNOTE: Data in CopySetPara[] can change at any point of time
+    //
+    for (uint8_t i = 0; i < 3; i++)
+    {
+        struct PhaseVolState* pvs = pvsArray[i];
+
+        if (pvs->isHealthy)
+        {
+            bool curUnhealthy = 
+                (*pvs->vol > CopySetPara[PARA_MAINS_OVER_VOLT]) ||
+                (*pvs->vol < CopySetPara[PARA_MAINS_UNDER_VOLT]);
+
+            if (curUnhealthy)
+            {
+                if (pvs->TimeLeft)
+                {
+                    pvs->TimeLeft--;
+                }
+                if (!pvs->TimeLeft)
+                {
+                    pvs->isHealthy = false;
+                    pvs->TimeLeft = CopySetPara[PARA_MAINS_RESET_DELAY];
+                }
+            }
+            else
+            {
+                pvs->TimeLeft = CopySetPara[PARA_MAINS_FAIL_DELAY];
+            }
+        }
+        else 
+        {
+            bool curHealthy = 
+                (*pvs->vol <= CopySetPara[PARA_MAINS_OVER_VOLT_RESET]) ||
+                (*pvs->vol >= CopySetPara[PARA_MAINS_UNDER_VOLT_RESET]);
+            if (curHealthy)
+            {
+                if (pvs->TimeLeft)
+                {
+                    pvs->TimeLeft--;
+                }
+                if (!pvs->TimeLeft)
+                {
+                    pvs->isHealthy = true;
+                    pvs->TimeLeft = CopySetPara[PARA_MAINS_FAIL_DELAY];
+                }
+            }
+            else
+            {
+                pvs->TimeLeft = CopySetPara[PARA_MAINS_RESET_DELAY];
+            }
+        }
+    }
+
+    struct PhaseVolState* solarPvs = pvsArray[3];
+
+    // We can't read solar's voltages when any of the R/Y/B contactor is still
+    // on. Note: Feedback makes only sense when 48VDC is available
+    //
+    bool isAnyPhaseContactorOn = g_DigInputs.DC48Available ?
+        (g_DigInputs.MainsRPhaseContactorOn  ||
+            g_DigInputs.MainsYPhaseContactorOn ||
+            g_DigInputs.MainsBPhaseContactorOn) :
+        (pvsArray[0].shouldContactorBeOn ||
+         pvsArray[1].shouldContactorBeOn ||
+         pvsArray[2].shouldContactorBeOn);
+
+    if (isAnyPhaseContactorOn)
+    {
+        solarPvs->isHealthy = false;
+        solarPvs->TimeLeft = CopySetPara[PARA_SOLAR_RESET_DELAY];
+    }
+    else if (solarPvs->isHealthy)
+    {
+        // UNDONE: Check solar phases here
+        //
+        //bool curUnhealthy = 
+        //    (*pvs->vol > CopySetPara[PARA_SOLAR_OVER_VOLT]) ||
+        //    (*pvs->vol < CopySetPara[PARA_SOLAR_UNDER_VOLT]);
+        bool curUnhealthy = false;
+
+        if (curUnhealthy)
+        {
+            if (pvs->TimeLeft)
+            {
+                pvs->TimeLeft--;
+            }
+            else
+            {
+                pvs->isHealthy = false;
+                pvs->TimeLeft = CopySetPara[PARA_SOLAR_RESET_DELAY];
+            }
+        }
+        else
+        {
+            pvs->TimeLeft = CopySetPara[PARA_SOLAR_FAIL_DELAY];
+        }
+    }
+    else
+    {
+        //bool curHealthy = 
+        //    (*pvs->vol <= CopySetPara[PARA_SOLAR_OVER_VOLT_RESET]) ||
+        //    (*pvs->vol >= CopySetPara[PARA_SOLAR_UNDER_VOLT_RESET]);
+        bool curHealthy = true;
+
+        if (curHealthy)
+        {
+            if (pvs->TimeLeft)
+            {
+                pvs->TimeLeft--;
+            }
+            else
+            {
+                pvs->isHealthy = true;
+                pvs->TimeLeft = CopySetPara[PARA_SOLAR_FAIL_DELAY];
+            }
+        }
+        else
+        {
+            pvs->TimeLeft = CopySetPara[PARA_SOLAR_RETURN_DELAY];
+        }
+    }
+
+    // First turn all contactors that need to turn off as off or else
+    // wait for them to be declared stuck (Break before make)
+    //
+    uint8_t remainingToBeTurnedOff = 5;
+    for (uint8_t i = 0; i < 5; i++)
+    {
+        // Check if contactor is off or already marked as stuck
+        // before the "shouldContactorBeOn" fields are calculated
+        //
+        if (pvsArray[i].shouldContactorBeOn ||
+            (!pvsArray[i].contactorFeedback || !g_DigInputs.DC48Available) || 
+            pvsArray[i].isContactorStuck)
+        {
+            remainingToBeTurnedOff--;
+        }
+    }
+
+    // Don't turn the Mains Phase Contactor On if
+    // a) the Load is stuck on solar
+    // as then the neutral is connected to local earth as we don't want
+    // to connect grid's netural to local earth 
+    // or 
+    // b) if R Phase of Grid is unhealthy (as we wouldn't be able to drive
+    // the load on Mains as R phase controlls that contactor). So hence
+    // better to drive the solar contactor instead
+    //
+    // Don't put the load on Solar if any phase contactor is on
+    // (As we don't want to connect grid neutral to local earth
+    // which is done when Solar contactor is turned on)
+    // OR
+    //  if the DG is running
+    // (For the edge case where the Mains is not available and Solar isn't
+    // able to drive the load. In this case, if the load is kept on solar,
+    // DG will not start as solar voltage will always be available but
+    // solar will keep tripping when trying to start the load)
+    //
+    // No sense of turning B/Y phase of mains on incase the R phase of mains
+    // is unhealthy as R Phase unhealthy indicates Load can't be put on mains.
+    // So hence should put load on solar. For that, need to shut off the
+    // phase contactors
+    //
+    pvsArray[0].shouldContactorBeOn = pvsArray[0].isHeathly &&
+                                        !pvsArray[3].isContactorStuck;
+    pvsArray[1].shouldContactorBeOn = pvsArray[0].isHeathly &&
+                                        pvsArray[1].isHeathly &&
+                                        !pvsArray[3].isContactorStuck;
+    pvsArray[2].shouldContactorBeOn = pvsArray[0].isHeathly &&
+                                        pvsArray[2].isHeathly &&
+                                        !pvsArray[3].isContactorStuck;
+    pvsArray[3].shouldContactorBeOn = pvsArray[3].isHeathly &&
+                                        (g_DigInputs.DgOff || !g_DigInputs.DC48Available) &&
+                                        !pvsArray[0].isContactorStuck &&
+                                        !pvsArray[1].isContactorStuck &&
+                                        !pvsArray[2].isContactorStuck &&
+                                        !pvsArray[4].isContactorStuck;
+    pvsArray[4].shouldContactorBeOn = pvsArray[0].isHeathly &&
+                                        !pvsArray[3].isContactorStuck;
+
+    for (uint8_t i = 0; i < 5; i++)
+    {
+        if (!pvsArray[i].shouldContactorBeOn)
+        {
+            pvsArray[i].turnContactorOff();
+        }
+        else if (remainingToBeTurnedOff == 0)
+        {
+            pvsArray[i].turnContactorOn();
+        }
+        else
+        {
+            continue;
+        }
+        if ((*pvsArray[i].contactorFeedback != pvsArray[i].shouldContactorBeOn) &&
+                g_DigInputs.DC48Available)
+        {
+            if (pvsArray[i].ContactorChangeTimeLeft)
+            {
+                pvsArray[i].ContactorChangeTimeLeft--;
+            }
+            if (!pvsArray[i].ContactorChangeTimeLeft)
+            {
+                pvsArray[i].ContactorChangeTimeLeft = maxContactorChangeLatency;
+                pvsArray[i].isContactorStuck = true;
+            }
+        }
+        else
+        {
+            pvsArray[i].ContactorChangeTimeLeft = maxContactorChangeLatency;
+            pvsArray[i].isContactorStuck = false;
+        }
+    }
+}
+
 /*
 Inf: 1 sec process API
 Inp: None
@@ -178,7 +535,9 @@ void Process1SecOver(void)
   }
   if(DisplayDebarCounter>0)DisplayDebarCounter--;
   
-  if(ParaBlockIndex==0)CheckAutoScroll(); 
+  if(ParaBlockIndex==0)CheckAutoScroll();
+
+  if (FlagDirectCalibration==0)ProcessRelays();
 }
 
 /*
@@ -252,7 +611,8 @@ Inf: Calibration Process
 Inp: None
 Ret: None
 */
-
+// DEVNOTE: This function is called once every second
+//
 void StartCalibration(void)
 {
 
@@ -460,9 +820,69 @@ void StartCalibration(void)
      else
      {
         DirectCalibration();
-        NVIC_SystemReset();
+        FlagDirectCalibration = CALIBRATE_IN_START;
      }
    }
+   if (FlagDirectCalibration >= CALIBRATE_IN_START &&
+        FlagDirectCalibration <= CALIBRATE_IN_8)
+   {
+       const uint8_t* inputs[] = 
+       {
+           &g_DigInputs.MainsRPhaseContactorOn,
+           &g_DigInputs.MainsYPhaseContactorOn,
+           &g_DigInputs.MainsBPhaseContactorOn,
+           &g_DigInputs.LoadOnSolarContactorOn,
+           &g_DigInputs.LoadOnMainsContactorOn,
+           &g_DigInputs.SPDFailed,
+           &g_DigInputs.DGOff,
+           &g_DigInputs.DC48Available
+       }
+       if (FlagDirectCalibration == CALIBRATE_IN_START)
+       {
+            for (uint8_t i = 0; i < ARRAY_SIZE(inputs); i++)
+            {
+                if (*inputs[i])
+                {
+                    DisplayImproperSettings();
+                }
+            }
+            FlagDirectCalibration = CALIBRATE_IN_1;
+       }
+
+       uint8_t idx = FlagDirectCalibration - CALIBRATE_IN_1;
+       DisplayInputX(idx + 1);
+       if (*inputs[idx])
+       {
+           FlagDirectCalibration++;
+       }
+   }
+   if (FlagDirectCalibration >= CALIBRATE_OUT_1 &&
+       FlagDirectCalibration <= CALIBRATE_OUT_5)
+   {
+       void (*outputs)(void)[] = 
+       {
+           SwitchOnContactorRPhaseGridHealthy,
+           SwitchOnContactorYPhaseGridHealthy,
+           SwitchOnContactorBPhaseGridHealthy,
+           SwitchOnContactorLoadOnSolar,
+           SwitchOnContactorLoadOnGrid
+       }
+       uint8_t idx = FlagDirectCalibration - CALIBRATE_OUT_1;
+       DisplayOutputX(idx + 1);
+       outputs[idx]();
+       if (SwPressed==KEY_NEXT)
+       {
+           FlagDirectCalibration++;
+       }
+   }
+   if (FlagDirectCalibration > CALIBRATE_OUT_5)
+   {
+     DisplayDoneCal();
+     NVIC_SystemReset();
+   }
+   // UNDONE: Do a formal check of keys and also the 5V input incase
+   // we add support for measuring 5V.
+   //
 }
  
 /*
@@ -473,7 +893,7 @@ Ret: None
 void FillCurrentGainArray(void)
 {
   uint8_t  i;
-  StepHigh=(5-CUR_MID_CAL_POINT)*10;
+  StepHigh=(CUR_HIGH_CAL_POINT-CUR_MID_CAL_POINT)*10;
   StepLow=(CUR_MID_CAL_POINT-CUR_LOW_CAL_POINT)*10;
   
   for(i=0;i<StepHigh;i++)BufferBetaR[i]=CalibrationCoeff.IR_HIGH_PH_ERROR+(CalibrationCoeff.IR_MID_PH_ERROR-CalibrationCoeff.IR_HIGH_PH_ERROR)*i/StepHigh;
@@ -498,17 +918,17 @@ void SetWorkingGainBuffer(void)
 {
   uint8_t TempChar;
   float Slope,Offset;
-  if(InstantPara.CurrentR>=1.0)
+  if(InstantPara.CurrentR>=CUR_MID_CAL_POINT)
   {
-    if(InstantPara.CurrentR>4.9)WorkingCopyGain.IR_GAIN=CalibrationCoeff.IR_HIGH_GAIN;
+    if(InstantPara.CurrentR>=CUR_HIGH_CAL_POINT)WorkingCopyGain.IR_GAIN=CalibrationCoeff.IR_HIGH_GAIN;
     else
     {
-      Slope=(CalibrationCoeff.IR_HIGH_GAIN-CalibrationCoeff.IR_MID_GAIN)/(5-CUR_MID_CAL_POINT);
-      Offset=CalibrationCoeff.IR_HIGH_GAIN-5*Slope;
+      Slope=(CalibrationCoeff.IR_HIGH_GAIN-CalibrationCoeff.IR_MID_GAIN)/(CUR_HIGH_CAL_POINT-CUR_MID_CAL_POINT);
+      Offset=CalibrationCoeff.IR_HIGH_GAIN-*CUR_HIGH_CAL_POINTSlope;
       WorkingCopyGain.IR_GAIN=Offset+Slope*InstantPara.CurrentR;
     }
   }
-  else if(InstantPara.CurrentR>=0.1)
+  else if(InstantPara.CurrentR>=CUR_LOW_CAL_POINT)
   {
     Slope=(CalibrationCoeff.IR_MID_GAIN-CalibrationCoeff.IR_LOW_GAIN)/(CUR_MID_CAL_POINT-CUR_LOW_CAL_POINT);
     Offset=CalibrationCoeff.IR_MID_GAIN-Slope;
@@ -516,34 +936,34 @@ void SetWorkingGainBuffer(void)
   }
   else WorkingCopyGain.IR_GAIN=CalibrationCoeff.IR_LOW_GAIN;
  
-  if(InstantPara.CurrentY>=1.0)
+  if(InstantPara.CurrentY>=CUR_MID_CAL_POINT)
   {
-    if(InstantPara.CurrentY>4.9)WorkingCopyGain.IY_GAIN=CalibrationCoeff.IY_HIGH_GAIN;
+    if(InstantPara.CurrentY>CUR_HIGH_CAL_POINT)WorkingCopyGain.IY_GAIN=CalibrationCoeff.IY_HIGH_GAIN;
     else
     {
-      Slope=(CalibrationCoeff.IY_HIGH_GAIN-CalibrationCoeff.IY_MID_GAIN)/(5-CUR_MID_CAL_POINT);
-      Offset=CalibrationCoeff.IY_HIGH_GAIN-5*Slope;
+      Slope=(CalibrationCoeff.IY_HIGH_GAIN-CalibrationCoeff.IY_MID_GAIN)/(CUR_HIGH_CAL_POINT-CUR_MID_CAL_POINT);
+      Offset=CalibrationCoeff.IY_HIGH_GAIN-CUR_HIGH_CAL_POINT*Slope;
       WorkingCopyGain.IY_GAIN=Offset+Slope*InstantPara.CurrentY;
     }
   }
-  else if(InstantPara.CurrentY>=0.1)
+  else if(InstantPara.CurrentY>=CUR_LOW_CAL_POINT)
   {
     Slope=(CalibrationCoeff.IY_MID_GAIN-CalibrationCoeff.IY_LOW_GAIN)/(CUR_MID_CAL_POINT-CUR_LOW_CAL_POINT);
     Offset=CalibrationCoeff.IY_MID_GAIN-Slope;
     WorkingCopyGain.IY_GAIN=Offset+Slope*InstantPara.CurrentY;
   }
   else WorkingCopyGain.IY_GAIN=CalibrationCoeff.IY_LOW_GAIN;
-  if(InstantPara.CurrentB>=1.0)
+  if(InstantPara.CurrentB>=CUR_MID_CAL_POINT)
   {
-    if(InstantPara.CurrentB>4.9)WorkingCopyGain.IB_GAIN=CalibrationCoeff.IB_HIGH_GAIN;
+    if(InstantPara.CurrentB>=CUR_HIGH_CAL_POINT)WorkingCopyGain.IB_GAIN=CalibrationCoeff.IB_HIGH_GAIN;
     else
     {
-      Slope=(CalibrationCoeff.IB_HIGH_GAIN-CalibrationCoeff.IB_MID_GAIN)/(5-CUR_MID_CAL_POINT);
-      Offset=CalibrationCoeff.IB_HIGH_GAIN-5*Slope;
+      Slope=(CalibrationCoeff.IB_HIGH_GAIN-CalibrationCoeff.IB_MID_GAIN)/(CUR_HIGH_CAL_POINT-CUR_MID_CAL_POINT);
+      Offset=CalibrationCoeff.IB_HIGH_GAIN-CUR_HIGH_CAL_POINT*Slope;
       WorkingCopyGain.IB_GAIN=Offset+Slope*InstantPara.CurrentB;
     }
   }
-  else if(InstantPara.CurrentB>=0.1)
+  else if(InstantPara.CurrentB>=CUR_LOW_CAL_POINT)
   {
     Slope=(CalibrationCoeff.IB_MID_GAIN-CalibrationCoeff.IB_LOW_GAIN)/(CUR_MID_CAL_POINT-CUR_LOW_CAL_POINT);
     Offset=CalibrationCoeff.IB_MID_GAIN-Slope;

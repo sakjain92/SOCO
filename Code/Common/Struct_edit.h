@@ -2,7 +2,6 @@ struct Parameter
 {
   uint8_t             VariableIndex;
   const uint8_t       *DesArrayTop;
-  const uint8_t       *DesArrayMid;
   uint16_t            MinValue;
   uint16_t            MaxValue;
   uint8_t             StepValue;

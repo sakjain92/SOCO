@@ -465,43 +465,19 @@ void DisplayEnergy(double Data,uint8_t ScrIndex, uint8_t DisIndex, uint8_t led )
     Data=-1*Data;
     TempFlag |=0x01;
   }
-  if(CopySetPara[PARA_ENE_TYPE]==1)  // Counter type
+  if(Data>1e12)
   {
-    switch(EnergyDisplayUnit)
-    {
-    case MAX_ENERGY_SET_Wh:
-      Data=Data*1000;
-      break;
-    case MAX_ENERGY_SET_KWh:
-      TempFlag |=0x02; // display k 
-      break;
-    case MAX_ENERGY_SET_MWh: 
-      TempFlag |=0x04; //  display  M 
-      Data=Data/1e3;
-      break;  
-    case MAX_ENERGY_SET_GWh:
-      TempFlag |=0x02; // display k 
-      TempFlag |=0x04; //  display  M 
-      Data=Data/1e6;
-      break;  
-    }
+    Data=Data/1e6;
+    TempFlag |=0x04; //  display  M 
+    TempFlag |=0x02; // display k    
   }
-  else
+  if(Data>1e9)
   {
-    if(Data>1e12)
-    {
-      Data=Data/1e6;
-      TempFlag |=0x04; //  display  M 
-      TempFlag |=0x02; // display k
-      
-    }
-    if(Data>1e9)
-    {
-      Data=Data/1e3;
-      TempFlag |=0x04; //  display  M 
-    }
-    else TempFlag |=0x02; // display k 
-  } 
+    Data=Data/1e3;
+    TempFlag |=0x04; //  display  M 
+  }
+  else TempFlag |=0x02; // display k 
+  
   Temp32=(uint32_t)(Data/1000);
   //DisplayVariable(0,6,ROW_MID,DIGIT_1,(uint32_t)(Temp32));
   DisplayVariable(0,6,ROW_TOP,DIGIT_1,(uint32_t)(Temp32),led);
@@ -535,37 +511,18 @@ void DisplayOldEnergy(double Data,uint8_t ScrIndex, uint8_t DisIndex,uint8_t led
     TempFlag |=0x01;
   }
 
- /* switch(OldData.EnergyDispUnit)
+  if(Data>1e12)
   {
-  case MAX_ENERGY_SET_Wh:
-    Data=Data*1000;
-    break;
-  case MAX_ENERGY_SET_KWh:
-    TempFlag |=0x02; // display k 
-    break;
-  case MAX_ENERGY_SET_MWh: 
-    TempFlag |=0x04; //  display  M 
-    Data=Data/1e3;
-    break;  
-  case MAX_ENERGY_SET_GWh:
-    TempFlag |=0x02; // display k 
-    TempFlag |=0x04; //  display  M 
     Data=Data/1e6;
-    break;  
-  }*/
-   if(Data>1e12)
-    {
-      Data=Data/1e6;
-      TempFlag |=0x04; //  display  M 
-      TempFlag |=0x02; // display k
-      
-    }
-    if(Data>1e9)
-    {
-      Data=Data/1e3;
-      TempFlag |=0x04; //  display  M 
-    }
-    else TempFlag |=0x02; // display k 
+    TempFlag |=0x04; //  display  M 
+    TempFlag |=0x02; // display k  
+  }
+  if(Data>1e9)
+  {
+    Data=Data/1e3;
+    TempFlag |=0x04; //  display  M 
+  }
+  else TempFlag |=0x02; // display k 
   
   Temp32=(uint32_t)(Data/1000);
   //DisplayVariable(0,6,ROW_MID,DIGIT_1,(uint32_t)(Temp32));
@@ -710,7 +667,24 @@ void DisplayCalLowPF(void)
   DisplayString(ROW_TOP,DIGIT_5,(uint8_t *)DIS_LOWCALPF,0);
   UpdateDisplay=1;
   DisplayScrollCounter=10; 
+}
 
+void DisplayInputX(uint8_t idx)
+{
+  for (uint8_t i=0;i<16;i++)BufferToDisplay[i]=0;
+  DisplayString(ROW_TOP,DIGIT_4,(uint8_t *)"In",0);
+  DisplayVariable(0, 1, ROW_TOP, DIGIT_1, idx, LED_OFF);
+  UpdateDisplay=1;
+  DisplayScrollCounter=10; 
+}
+
+void DisplayOutputX(uint8_t idx)
+{
+  for (uint8_t i=0;i<16;i++)BufferToDisplay[i]=0;
+  DisplayString(ROW_TOP,DIGIT_4,(uint8_t *)"Out",0);
+  DisplayVariable(0, 1, ROW_TOP, DIGIT_1, idx, LED_OFF);
+  UpdateDisplay=1;
+  DisplayScrollCounter=10; 
 }
 
 void DisplayCalHighVI(void)
@@ -764,6 +738,13 @@ void DisplayImproperSettings(void)
   UpdateDisplay=1;
   while(1)RESET_WATCH_DOG;
 
+}
+
+void DisplayDoneCal(void)
+{
+  for (uint8_t i=0;i<16;i++)BufferToDisplay[i]=0;
+  DisplayString(ROW_TOP,DIGIT_6,(uint8_t *)DIS_CAL_DONE,0);
+  while(1)RESET_WATCH_DOG;    
 }
 
 #pragma optimize=none

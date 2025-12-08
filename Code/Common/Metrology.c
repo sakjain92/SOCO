@@ -41,21 +41,8 @@ void Metrology(void)
   else InterruptFlag &=~INT_B_PHASE_REV;
   CalculateVoCur();
   CalculateHarmonicComponents();
-  if(CopySetPara[PARA_SYSTEM_CONFIG]==SYSTEM_CONFIG_1P)
-  {
-    IntDataSave.VolYPhase=0;
-    IntDataSave.VolBPhase=0;
-    IntDataSave.CurYPhase=0;
-    IntDataSave.CurBPhase=0;
-    IntDataSave.CurNeutral=0;
-    IntDataSave.YPhasePower=0;
-    IntDataSave.BPhasePower=0;
-    IntDataSave.VolRYPhPh=0;
-    IntDataSave.VolYBPhPh=0;
-    IntDataSave.VolBRPhPh=0;
-  }
   
-  TempFloat=((float)CopySetPara[PARA_STARTING_CURRENT])/1000;
+  TempFloat=MIN_CURRENT_LIMIT;
   
   if(InstantPara.CurrentR<MIN_TOTAL_CUR_LIMIT)InstantPara.CurrentR=InstantPara.FunRCurr;
   if(InstantPara.CurrentR<TempFloat)
@@ -85,18 +72,9 @@ void Metrology(void)
     IntDataSave.BPhasePower=0;
   }
   
-  if(CopySetPara[PARA_SYSTEM_CONFIG]  ==SYSTEM_CONFIG_3P4W)
-  {
-    if(InstantPara.CurrentN<MIN_TOTAL_CUR_LIMIT)InstantPara.CurrentN=InstantPara.FunNCurr;
-    if(InstantPara.CurrentN<MIN_NEU_CUR_LIMIT)InstantPara.CurrentN=0;
-  }
-  else if(CopySetPara[PARA_SYSTEM_CONFIG]  ==SYSTEM_CONFIG_3P3W)
-  {
-    if(InstantPara.CurrentY<MIN_TOTAL_CUR_LIMIT)InstantPara.CurrentY=InstantPara.FunNCurr;
-    if(InstantPara.CurrentY<TempFloat)InstantPara.CurrentY=0;                                            
-  }
-   // Vol
-  
+  if(InstantPara.CurrentN<MIN_TOTAL_CUR_LIMIT)InstantPara.CurrentN=InstantPara.FunNCurr;
+  if(InstantPara.CurrentN<MIN_NEU_CUR_LIMIT)InstantPara.CurrentN=0;
+  // Vol
   if(InstantPara.VolR<MIN_VOL_LIMIT)
   {
     InstantPara.VolR=0;
@@ -144,18 +122,9 @@ void Metrology(void)
   
   if(PowerUpCounter>3)
   {
-    if(CopySetPara[PARA_SYSTEM_CONFIG]  ==SYSTEM_CONFIG_3P3W)
-    {
-      InstantPara.VrSum +=InstantPara.VolRY;
-      InstantPara.VySum +=InstantPara.VolYB;
-      InstantPara.VbSum +=InstantPara.VolBR;
-    }
-    else
-    {
-      InstantPara.VrSum +=InstantPara.VolR;
-      InstantPara.VySum +=InstantPara.VolY;
-      InstantPara.VbSum +=InstantPara.VolB;
-    }
+    InstantPara.VrSum +=InstantPara.VolR;
+    InstantPara.VySum +=InstantPara.VolY;
+    InstantPara.VbSum +=InstantPara.VolB;
     InstantPara.IrSum +=InstantPara.CurrentR;
     InstantPara.IySum +=InstantPara.CurrentY;
     InstantPara.IbSum +=InstantPara.CurrentB;
@@ -209,67 +178,18 @@ void Metrology(void)
 // Total Power  
   InstantPara.TotalPowerR=POWER_COEFF_3P4W*IntDataSave.RPhasePower;
   if(InstantPara.CurrentR==0)InstantPara.TotalPowerR=0; // Starting 
-  if(CopySetPara[PARA_SYSTEM_CONFIG]  ==SYSTEM_CONFIG_3P4W)
-  {
-      InstantPara.TotalPowerY=POWER_COEFF_3P4W*IntDataSave.YPhasePower;
-      if(InstantPara.CurrentY==0)InstantPara.TotalPowerY=0; // Starting 
-  }
-  else if(CopySetPara[PARA_SYSTEM_CONFIG]  ==SYSTEM_CONFIG_3P3W)
-  {
-    TempFloat=(POWER_COEFF_3P4W*IntDataSave.YRPower3P3W)+(POWER_COEFF_3P4W*IntDataSave.YBPower3P3W);
-    InstantPara.TotalPowerY=-TempFloat;
-  }
+  InstantPara.TotalPowerY=POWER_COEFF_3P4W*IntDataSave.YPhasePower;
+  if(InstantPara.CurrentY==0)InstantPara.TotalPowerY=0; // Starting 
  
   InstantPara.TotalPowerB=POWER_COEFF_3P4W*IntDataSave.BPhasePower;
   if(InstantPara.CurrentB==0)InstantPara.TotalPowerB=0; // Starting 
-#if ((defined MODEL_IMPORT_ONLY)||(defined  MODEL_DUAL_ENERGY))
-  
-  if(CopySetPara[PARA_SYSTEM_CONFIG]!=SYSTEM_CONFIG_3P3W)
-  {
-    InstantPara.SumTotalPower=0;
-    if(InterruptFlag  & INT_R_PHASE_REV)InstantPara.SumTotalPower -=InstantPara.TotalPowerR;
-    else InstantPara.SumTotalPower +=InstantPara.TotalPowerR;
-    if(InterruptFlag  & INT_Y_PHASE_REV)InstantPara.SumTotalPower -=InstantPara.TotalPowerY;
-    else InstantPara.SumTotalPower +=InstantPara.TotalPowerY;
-    if(InterruptFlag  & INT_B_PHASE_REV)InstantPara.SumTotalPower -=InstantPara.TotalPowerB;
-    else InstantPara.SumTotalPower +=InstantPara.TotalPowerB;
-  }
-  else 
-    InstantPara.SumTotalPower=(InstantPara.TotalPowerR+InstantPara.TotalPowerY+InstantPara.TotalPowerB);
-#else
   InstantPara.SumTotalPower=(InstantPara.TotalPowerR+InstantPara.TotalPowerY+InstantPara.TotalPowerB);
-#endif
 
   
   // VA
-  
-  if( CopySetPara[PARA_KVA_TYPE]==1) // Airthmatic
-  {
-    InstantPara.AppPowerR=(InstantPara.VolR*InstantPara.CurrentR);
-    InstantPara.AppPowerY=(InstantPara.VolY*InstantPara.CurrentY);
-    InstantPara.AppPowerB=(InstantPara.VolB*InstantPara.CurrentB);
-  }
-  else
-  {
-     TempFloat=InstantPara.FunRVol*InstantPara.FunRVol*InstantPara.FunRCurr*InstantPara.FunRCurr;
-     TempFloat +=(InstantPara.FunRVol*InstantPara.FunRVol*InstantPara.HarRPhaseCur*InstantPara.HarRPhaseCur);
-     TempFloat +=(InstantPara.HarRPhaseVol*InstantPara.HarRPhaseVol*InstantPara.FunRCurr*InstantPara.FunRCurr);
-     TempFloat +=(InstantPara.HarRPhaseVol*InstantPara.HarRPhaseVol*InstantPara.HarRPhaseCur*InstantPara.HarRPhaseCur);
-     InstantPara.AppPowerR=sqrt(TempFloat);
-     TempFloat=InstantPara.FunBVol*InstantPara.FunBVol*InstantPara.FunBCurr*InstantPara.FunBCurr;
-     TempFloat +=(InstantPara.FunBVol*InstantPara.FunBVol*InstantPara.HarBPhaseCur*InstantPara.HarBPhaseCur);
-     TempFloat +=(InstantPara.HarBPhaseVol*InstantPara.HarBPhaseVol*InstantPara.FunBCurr*InstantPara.FunBCurr);
-     TempFloat +=(InstantPara.HarBPhaseVol*InstantPara.HarBPhaseVol*InstantPara.HarBPhaseCur*InstantPara.HarBPhaseCur);
-     InstantPara.AppPowerB=sqrt(TempFloat);
-     TempFloat=InstantPara.FunYVol*InstantPara.FunYVol*InstantPara.FunYCurr*InstantPara.FunYCurr;
-     TempFloat +=(InstantPara.FunYVol*InstantPara.FunYVol*InstantPara.HarYPhaseCur*InstantPara.HarYPhaseCur);
-     TempFloat +=(InstantPara.HarYPhaseVol*InstantPara.HarYPhaseVol*InstantPara.FunYCurr*InstantPara.FunYCurr);
-     TempFloat +=(InstantPara.HarYPhaseVol*InstantPara.HarYPhaseVol*InstantPara.HarYPhaseCur*InstantPara.HarYPhaseCur);
-     InstantPara.AppPowerY=sqrt(TempFloat);
-     
-       
-     
-  }
+  InstantPara.AppPowerR=(InstantPara.VolR*InstantPara.CurrentR);
+  InstantPara.AppPowerY=(InstantPara.VolY*InstantPara.CurrentY);
+  InstantPara.AppPowerB=(InstantPara.VolB*InstantPara.CurrentB);
   
   if(InstantPara.AppPowerR< InstantPara.TotalPowerR)InstantPara.AppPowerR=InstantPara.TotalPowerR;
   if(InstantPara.AppPowerY< InstantPara.TotalPowerY)InstantPara.AppPowerY=InstantPara.TotalPowerY;
@@ -594,43 +514,23 @@ void CalculateHarmonicComponents(void)
   InstantPara.FunBCurr=FUND_CURRENT_COEFF*sqrt(TempBCur/50);
   InstantPara.FunNCurr=FUND_CURRENT_COEFF*sqrt(TempNCur/50);
   InstantPara.FunPowerR=FUND_POWER_COEFF*TempRW/50;
-  if(CopySetPara[PARA_SYSTEM_CONFIG]  ==SYSTEM_CONFIG_3P3W)
-    InstantPara.FunPowerY=-FUND_POWER_COEFF*TempNW/50;
-  else InstantPara.FunPowerY=FUND_POWER_COEFF*TempYW/50;
+  InstantPara.FunPowerY=FUND_POWER_COEFF*TempYW/50;
   InstantPara.FunPowerB=FUND_POWER_COEFF*TempBW/50;
   InstantPara.ReactPowerR=-FUND_POWER_COEFF*TempRVr/50;
   InstantPara.ReactPowerB=-FUND_POWER_COEFF*TempBVr/50;
  
-  if(CopySetPara[PARA_SYSTEM_CONFIG]  ==SYSTEM_CONFIG_3P3W)
-    InstantPara.FunYCurr=InstantPara.FunNCurr;
-  
-  
   InstantPara.SumFunPower=InstantPara.FunPowerR+InstantPara.FunPowerY+InstantPara.FunPowerB;
                                                 
   if((InstantPara.CurrentR==0)||((InstantPara.ReactPowerR<0.01)&&(InstantPara.ReactPowerR>-0.01)))InstantPara.ReactPowerR=0; 
   
-  if(CopySetPara[PARA_SYSTEM_CONFIG]  ==SYSTEM_CONFIG_3P4W) 
-  {
-    InstantPara.ReactPowerY=-FUND_POWER_COEFF*TempYVr/50;
-    if((InstantPara.CurrentY==0)||((InstantPara.ReactPowerY<0.01)&&(InstantPara.ReactPowerY>-0.01)))InstantPara.ReactPowerY=0; 
-  }
-  else if(CopySetPara[PARA_SYSTEM_CONFIG]  ==SYSTEM_CONFIG_3P3W)
-  {
-    InstantPara.ReactPowerY=FUND_POWER_COEFF*TempNVr/50;
-    if((InstantPara.CurrentR==0)&&(InstantPara.CurrentB==0))InstantPara.ReactPowerY=0; 
-    if((InstantPara.ReactPowerY<0.01)&&(InstantPara.ReactPowerY>-0.01))InstantPara.ReactPowerY=0; 
-  }
-  else InstantPara.ReactPowerY=0;                                              
-  if(CopySetPara[PARA_SYSTEM_CONFIG]  ==SYSTEM_CONFIG_1P)InstantPara.ReactPowerB=0;
+  InstantPara.ReactPowerY=-FUND_POWER_COEFF*TempYVr/50;
+  if((InstantPara.CurrentY==0)||((InstantPara.ReactPowerY<0.01)&&(InstantPara.ReactPowerY>-0.01)))InstantPara.ReactPowerY=0; 
   if((InstantPara.CurrentB==0)||((InstantPara.ReactPowerB<0.01)&&(InstantPara.ReactPowerB>-0.01)))InstantPara.ReactPowerB=0; 
     
   
-  if(CopySetPara[PARA_SYSTEM_CONFIG]  ==SYSTEM_CONFIG_3P4W) 
-  {
-    if(InterruptFlag & INT_R_PHASE_REV)InstantPara.ReactPowerR=-InstantPara.ReactPowerR;
-    if(InterruptFlag & INT_Y_PHASE_REV)InstantPara.ReactPowerY=-InstantPara.ReactPowerY;
-    if(InterruptFlag & INT_B_PHASE_REV)InstantPara.ReactPowerB=-InstantPara.ReactPowerB;
-  }
+  if(InterruptFlag & INT_R_PHASE_REV)InstantPara.ReactPowerR=-InstantPara.ReactPowerR;
+  if(InterruptFlag & INT_Y_PHASE_REV)InstantPara.ReactPowerY=-InstantPara.ReactPowerY;
+  if(InterruptFlag & INT_B_PHASE_REV)InstantPara.ReactPowerB=-InstantPara.ReactPowerB;
   InstantPara.TotalReactPower=InstantPara.ReactPowerR+InstantPara.ReactPowerY+InstantPara.ReactPowerB;  
   
 
@@ -669,12 +569,8 @@ void CalculateHarmonicComponents(void)
   if(InstantPara.CurrentR>0.02)
     InstantPara.ThdRPhaseCur=100*InstantPara.HarRPhaseCur/InstantPara.FunRCurr;
   else InstantPara.ThdRPhaseCur=0;
-  if(CopySetPara[PARA_SYSTEM_CONFIG]  ==SYSTEM_CONFIG_3P4W)
-  {
-    if(InstantPara.CurrentY>0.02)
-      InstantPara.ThdYPhaseCur=100*InstantPara.HarYPhaseCur/InstantPara.FunYCurr;
-    else InstantPara.ThdYPhaseCur=0;
-  }
+  if(InstantPara.CurrentY>0.02)
+    InstantPara.ThdYPhaseCur=100*InstantPara.HarYPhaseCur/InstantPara.FunYCurr;
   else InstantPara.ThdYPhaseCur=0;
   if(InstantPara.CurrentB>0.02)
     InstantPara.ThdBPhaseCur=100*InstantPara.HarBPhaseCur/InstantPara.FunBCurr;
@@ -696,16 +592,5 @@ void CalculateVoCur(void)
   InstantPara.VolYB=PH_VOLTAGE_COEFF*sqrt(IntDataSave.VolYBPhPh); 
   InstantPara.VolB=VOLTAGE_COEFF*sqrt(IntDataSave.VolBPhase); 
   InstantPara.VolBR=PH_VOLTAGE_COEFF*sqrt(IntDataSave.VolBRPhPh); 
-  
-  if(CopySetPara[PARA_SYSTEM_CONFIG]  ==SYSTEM_CONFIG_3P4W)
-  {
-    InstantPara.CurrentN=NEU_CURRENT_COEFF*sqrt(IntDataSave.CurNeutral); 
-  }
-  else if(CopySetPara[PARA_SYSTEM_CONFIG]  ==SYSTEM_CONFIG_3P3W)
-  {
-    InstantPara.CurrentY=NEU_CURRENT_COEFF*sqrt(IntDataSave.CurNeutral);                           
-    InstantPara.CurrentN=0;
-  }
+  InstantPara.CurrentN=NEU_CURRENT_COEFF*sqrt(IntDataSave.CurNeutral); 
 }
-
-

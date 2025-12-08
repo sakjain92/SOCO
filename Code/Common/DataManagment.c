@@ -50,7 +50,6 @@ void  SaveOldData(void)
   PowerFailCounter=0;
   DataSaveCounter=0;
   CalCtPtRatio();
-  StorageBuffer.EnergyDispUnit=EnergyDisplayUnit;
   PowerDownDataSave();
   Temp=StorageBuffer.StorageCounter;
   InterruptFlag &= ~INT_POWER_OK;

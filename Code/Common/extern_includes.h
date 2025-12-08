@@ -26,6 +26,9 @@ extern  void DisplaySetLowPF(void);
 extern  void DisplayCalHighPF(void);
 extern  void DisplayCalMidPF(void);
 extern  void DisplayCalLowPF(void);
+extern  void DisplayInputX(uint8_t idx);
+extern  void DisplayOutputX(uint8_t idx);
+extern void DisplayDoneCal(void);
 extern void InitUart(uint8_t baud,uint8_t parity1,uint8_t Stopbit1);
 extern void ClearCalAccumulatedData(void);
 extern void DisplayUpdate(void);
@@ -79,7 +82,7 @@ extern uint8_t FlagDirectCalibration,CalibrationGapCounter;
 extern uint8_t EditParaPassStatus;
 extern struct STORE StorageBuffer;
 extern  struct STORE OldData;
-extern uint8_t PowerFailCounter,EnergyDisplayUnit,PowerUpCounter,ScrollSaveCounter;
+extern uint8_t PowerFailCounter,PowerUpCounter,ScrollSaveCounter;
 extern uint16_t DataSaveCounter;
 extern uint32_t CaptureValueSum;
 extern uint16_t PreviousCaptureCount,CaptureValueSav,CaptureSumCounter;
@@ -103,4 +106,15 @@ extern uint8_t  KeyPressedCounter,EditIndex,UpdateDisplay;
 extern uint8_t ParaBlockIndex,DisplayParameterBuffer[50],dispStartCnt,DisParalast;
 extern uint8_t Dec2DCBArray[16];
 
+extern struct DigInputs g_DigInputs;
+extern void SwitchOffContactorRPhaseGridHealthy();
+extern void SwitchOnContactorRPhaseGridHealthy();
+extern void SwitchOffContactorYPhaseGridHealthy();
+extern void SwitchOnContactorYPhaseGridHealthy();
+extern void SwitchOffContactorBPhaseGridHealthy();
+extern void SwitchOnContactorBPhaseGridHealthy();
+extern void SwitchOffContactorLoadOnSolar();
+extern void SwitchOnContactorLoadOnSolar();
+extern void SwitchOffContactorLoadOnGrid();
+extern void SwitchOnContactorLoadOnGrid(;)
 #endif

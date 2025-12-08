@@ -6,6 +6,8 @@
 #include "stm32f37x_flash.h"
 #include <Math.h>
 #include <stdio.h>
+#include <stdbool.h>
+#include <string.h>
 
 /* Local functions included */
 void DisplayParameterUpdate(void); 
@@ -104,7 +106,7 @@ int16_t PrevSampleVol,FilOut_1,FilOut_2;
 volatile uint16_t CounterSendComplete;
 uint8_t ParaBlockIndex;
 uint8_t Dec2DCBArray[16],DisplayScrollCounter;
-uint8_t LcdEpromBuffer[128],EnergyDisplayUnit;
+uint8_t LcdEpromBuffer[128];
 uint8_t SwitchPressed;
 uint8_t CommIndexRS232,discard,CommFlagRS232,TransmitLengthRS232,DiscardRS232;
 uint8_t KeyPressedCounter,EditIndex;
@@ -128,9 +130,16 @@ uint32_t Check485DirCount,Check485DirCounter;
 uint16_t BufferToDisplay[24];
 uint8_t DisplayParameterBuffer[50],dispStartCnt,DisParalast;
 
+struct DigInputs g_DigInputs;
+
 #define RUNNING_MODE_IMPORT  0
 
+#define TO_BOOL(x)      (!!(x))
 
+#define ARRAY_SIZE(a)           (sizeof(a) / sizeof(a[0]))
 
+// Rounds up X (integer) to an upper integer multiple of 'factor' where 'factor' is power of two
+//
+#define ROUNDUP_POW2(x, factor)  ((((x)+(factor)-1) & ~((factor) - 1)))
 
 #endif

@@ -81,7 +81,7 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 
 
 
-#define MAX_PARAM_LIMIT  19
+#define MAX_PARAM_LIMIT  17
 #define POWER_FAIL_SENSE_VALUE    2200
 
 
@@ -143,8 +143,9 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 //
 #define   MIN_VOL_LIMIT            70.0f
 #define   MIN_VOL_LIMIT_PH_PH      (MIN_VOL_LIMIT * 1.732f)
-#define   MIN_TOTAL_CUR_LIMIT      0.5f
-#define   MIN_NEU_CUR_LIMIT        0.05f
+#define   MIN_TOTAL_CUR_LIMIT      1.5f
+#define   MIN_NEU_CUR_LIMIT        0.3f
+#define   MIN_CURRENT_LIMIT        0.3f
 
 #define        T_20MS                                 64  // 20 msec delay
 #define        T_5MS                                  10  // 20 msec delay
@@ -195,16 +196,29 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 #define         CALIBRATE_DIS_L_PF      11
 #define         CALIBRATE_L_PF          12
 
+#define         CALIBRATE_IN_START      13
+#define         CALIBRATE_IN_1          14
+#define         CALIBRATE_IN_2          15
+#define         CALIBRATE_IN_3          16
+#define         CALIBRATE_IN_4          17
+#define         CALIBRATE_IN_5          18
+#define         CALIBRATE_IN_6          19
+#define         CALIBRATE_IN_7          20
+#define         CALIBRATE_IN_8          21
 
+#define         CALIBRATE_OUT_1         22
+#define         CALIBRATE_OUT_2         23
+#define         CALIBRATE_OUT_3         24
+#define         CALIBRATE_OUT_4         25
+#define         CALIBRATE_OUT_5         26
 
-
-
-
-
-
-#define        CUR_MID_CAL_POINT                     1.0
-#define        CUR_LOW_CAL_POINT                     0.1
-#define        NO_OF_CAL_ACCUMULATION_VI                4
+// The ratio between CUR_HIGH_CAL_POINT/CUR_MID_CAL_POINT should be 5:1
+// The ratio between CUR_MID_CAL_POINT/CUR_LOW_CAL_POINT should be 10:1
+//
+#define        CUR_HIGH_CAL_POINT                    25.0
+#define        CUR_MID_CAL_POINT                     5.0
+#define        CUR_LOW_CAL_POINT                     0.5
+#define        NO_OF_CAL_ACCUMULATION_VI             4
 #define        NO_OF_CAL_ACCUMULATION_POW            10
 #define        CAL_ACC_DELAY                         8
 
@@ -253,8 +267,8 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 #define         PF_POWER_L_UPPER_LIMIT         (UPF_POWER_L_UPPER_LIMIT*0.5)
 #define         PF_POWER_L_LOWER_LIMIT         (UPF_POWER_L_LOWER_LIMIT *0.5)
 
-#define         PROTECTION_BIT_LOW           (!(GPIOC->IDR & 0X200))
-#define         PROTECTION_BIT_HIGH           (GPIOC->IDR & 0X200)
+#define         PROTECTION_BIT_LOW             TO_BOOL(!(GPIOC->IDR & 0X200))
+#define         PROTECTION_BIT_HIGH            TO_BOOL(GPIOC->IDR & 0X200)
 //OneSecFlag 
 #define         ONE_SEC_FLAG_1SEC_OVER      0x01
 
@@ -311,29 +325,38 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 #define SWITCH_ON_LED_SOLAR_HEALTHY     GPIOB->BRR = PORT_BIT_9
 
 
+// All contactors (except "Load on Solar") are connected to the NC of the relays
+// Relays are turned on by driving GPIO Pins high
+//
+#define SWITCH_OFF_CONTACTOR_R_PHASE_GRID_HEALTHY  GPIOD->BSRR = PORT_BIT_8
+#define SWITCH_ON_CONTACTOR_R_PHASE_GRID_HEALTHY   GPIOD->BRR = PORT_BIT_8
 
-#define SWITCH_OFF_RELAY_R_PHASE_GRID_HEALTHY  GPIOD->BRR = PORT_BIT_8
-#define SWITCH_ON_RELAY_R_PHASE_GRID_HEALTHY   GPIOD->BSRR = PORT_BIT_8
+#define SWITCH_OFF_CONTACTOR_Y_PHASE_GRID_HEALTHY  GPIOD->BSRR = PORT_BIT_9
+#define SWITCH_ON_CONTACTOR_Y_PHASE_GRID_HEALTHY   GPIOD->BRR = PORT_BIT_9
 
-#define SWITCH_OFF_RELAY_Y_PHASE_GRID_HEALTHY  GPIOD->BRR = PORT_BIT_9
-#define SWITCH_ON_RELAY_Y_PHASE_GRID_HEALTHY   GPIOD->BSRR = PORT_BIT_9
+#define SWITCH_OFF_CONTACTOR_B_PHASE_GRID_HEALTHY  GPIOE->BSRR = PORT_BIT_8
+#define SWITCH_ON_CONTACTOR_B_PHASE_GRID_HEALTHY   GPIOE->BRR = PORT_BIT_8
 
-#define SWITCH_OFF_RELAY_B_PHASE_GRID_HEALTHY  GPIOE->BRR = PORT_BIT_8
-#define SWITCH_ON_RELAY_B_PHASE_GRID_HEALTHY   GPIOE->BSRR = PORT_BIT_8
+#define SWITCH_OFF_CONTACTOR_LOAD_ON_SOLAR         GPIOE->BRR = PORT_BIT_9
+#define SWITCH_ON_CONTACTOR_LOAD_ON_SOLAR          GPIOE->BSRR = PORT_BIT_9
 
-#define SWITCH_OFF_RELAY_LOAD_ON_SOLAR         GPIOE->BRR = PORT_BIT_9
-#define SWITCH_ON_RELAY_LOAD_ON_SOLAR          GPIOE->BSRR = PORT_BIT_9
+#define SWITCH_OFF_CONTACTOR_LOAD_ON_GRID          GPIOD->BSRR = PORT_BIT_10
+#define SWITCH_ON_CONTACTOR_LOAD_ON_GRID           GPIOD->BRR = PORT_BIT_10
 
-#define SWITCH_OFF_RELAY_LOAD_ON_GRID          GPIOD->BRR = PORT_BIT_10
-#define SWITCH_ON_RELAY_LOAD_ON_GRID           GPIOD->BSRR = PORT_BIT_10
-
-#define INPUT_R_PHASE_GRID_HEALTHY             (!(GPIOE->IDR & PORT_BIT_0)
-#define INPUT_Y_PHASE_GRID_HEALTHY             (!(GPIOE->IDR & PORT_BIT_1)
-#define INPUT_B_PHASE_GRID_HEALTHY             (!(GPIOE->IDR & PORT_BIT_2)
-#define INPUT_LOAD_ON_SOLAR                    (!(GPIOE->IDR & PORT_BIT_3)
-#define INPUT_LOAD_ON_GRID                     (!(GPIOE->IDR & PORT_BIT_4)
-#define INPUT_SPD_HEALTHY                      (GPIOE->IDR & PORT_BIT_6)
-#define INPUT_DG_RUNNING                       (GPIOE->IDR & PORT_BIT_4)
+// Inputs are Active Low
+// Inputs from contactors are NO when they are open
+// Input from SPD is NO when it's healthy
+// Input from 48V is NC when it's healthy
+// Input from DG is NO when it's running
+//
+#define INPUT_R_PHASE_GRID_HEALTHY_CONTACTOR_ON    TO_BOOL(!(GPIOE->IDR & PORT_BIT_0)
+#define INPUT_Y_PHASE_GRID_HEALTHY_CONTACTOR_ON    TO_BOOL(!(GPIOE->IDR & PORT_BIT_1)
+#define INPUT_B_PHASE_GRID_HEALTHY_CONTACTOR_ON    TO_BOOL(!(GPIOE->IDR & PORT_BIT_2)
+#define INPUT_LOAD_ON_SOLAR_CONTACTOR_ON           TO_BOOL(!(GPIOE->IDR & PORT_BIT_3)
+#define INPUT_LOAD_ON_GRID_CONTACTOR_ON            TO_BOOL(!(GPIOE->IDR & PORT_BIT_4)
+#define INPUT_SPD_HEALTHY                          TO_BOOL(GPIOE->IDR & PORT_BIT_5)
+#define INPUT_DG_RUNNING                           TO_BOOL(GPIOE->IDR & PORT_BIT_6)
+#define INPUT_48V_AVAILABLE                        TO_BOOL(!(GPIOF->IDR & PORT_BIT_10))
 
 #define PARA_ONLY_DATA  1
 #define PARA_WITH_DEC   2

@@ -1,45 +1,14 @@
 #define MODEL_RELEASED
 
 #define MODEL_COMM_PROCOM
-
-
-//#define MODEL_DUAL_ENERGY
-
-// The models are defined here. This is done for easy display configuration. 
-
-
-//#define MODEL_REX_1100
-//#define MODEL_REX_1200
-//#define MODEL_REX_1300
-//#define MODEL_REX_1400
-//#define MODEL_REX_1500
-//#define MODEL_REX_1900
-//#define MODEL_REX_2140
-//#define MODEL_REX_2330
-//#define MODEL_REX_2440
-//#define MODEL_REX_2411
-//#define MODEL_REX_2550
-#define MODEL_REX_2551
-
+#define MODEL_DATA_SAVE  
+#define MODEL_IMPORT_ONLY
+//#define MODEL_DIS_OLD_DATA   
 
 #ifdef MODEL_COMM_PROCOM
-     #define MODBUS_MAP_PROCOM
-     #define MODEL_COMM_SETTING
-     #define MODEL_RS485
-     #define MODBUS_EDIT_PARA
-#endif
-
-
-#if ((defined MODEL_REX_1100) || (defined MODEL_REX_1200) || (defined MODEL_REX_1300) || (defined MODEL_REX_1400) || (defined MODEL_REX_1500) ||\
-    (defined MODEL_REX_1900) || (defined MODEL_REX_2140) || (defined MODEL_REX_2330) || (defined MODEL_REX_2440) || (defined MODEL_REX_2550) )                                                                                                          // import only model
-    #define MODEL_DATA_SAVE  
-    #define MODEL_IMPORT_ONLY
-#endif
-
-#if ((defined MODEL_REX_2411) || (defined MODEL_REX_2551))                     // import only model
-    #define MODEL_DATA_SAVE  
-    #define MODEL_IMPORT_ONLY
-    #define MODEL_DIS_OLD_DATA   
+    #define MODBUS_MAP_PROCOM
+    #define MODEL_RS485
+    #define MODBUS_EDIT_PARA
 #endif
 
 // UNDONE:
@@ -107,3 +76,12 @@
 // 50) Add cuts in the terminal pins where high voltage is coming. Probably should still use SDADC in single ended mode for current as it needs more accuracy at lower ranges
 // 51) Should do double voltage calibration for better accuracy
 // 52) For all ADC inputs or SDADC input, put 10k in series and a 10nF capacitor at the pin (Check works at higher input frequency still)
+// 53) Check that we aren't showing Energy & Old Energy in decimals when we actually can show it in decimal. Check what other data we aren't showing in decimal
+// 54) Check what should be an appropriate minimum starting current
+// 55) For whole current, how do I calibrate at 100A?
+// 56) We should make it possible to see state of outputs/inputs on the controller otherwise will be difficult to debug issues in the field (contactor latching etc)
+// 57) Since we use NC or NO of a relay, do we want to just have one output per relay on board (less chances of mistake when making the panel)
+//
+// NOTES:
+// 1) For Apparent power, we are using RMS (IEC 60038) instead of (IEC 61000-4-7) where we just measure first harmonics as we need to match energy with utility meter (and SMPS will have noise)
+// 2) We sh

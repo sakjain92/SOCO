@@ -152,6 +152,7 @@ const uint8_t StrOldInterr[]="O INTR";
 const uint8_t StrBlank[]="";
 const uint8_t StrDash[]="_";
 const uint8_t DIS_CHECK_IN[]="CHK IN";
+const uint8_t DIS_CAL_DONE[]="CAL OK";
 const uint8_t DIS_IN[]="IN";
 const uint8_t DIS_PUT[]="PUT";
 const uint8_t DIS_PRO[]="PRO";

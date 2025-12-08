@@ -17,6 +17,7 @@
 #include "extern_includes.h"
 
 void ReadSwitches(void);
+void ReadInputs(void);
 void CalculateFreqYBPhase(int16_t TempIntFreqVol);
 
  
@@ -318,11 +319,8 @@ void ProcessMainInterrupt(void)
   IntNeuCurrent=0;
   if(InterruptFlag & INT_R_PHASE_REV)IntNeuCurrent -=IntCurRPhase;
   else IntNeuCurrent +=IntCurRPhase;
-  if(CopySetPara[PARA_SYSTEM_CONFIG]  ==SYSTEM_CONFIG_3P4W)
-  {
-    if(InterruptFlag & INT_Y_PHASE_REV)IntNeuCurrent -=IntCurYPhase;
-    else IntNeuCurrent +=IntCurYPhase;
-  }
+  if(InterruptFlag & INT_Y_PHASE_REV)IntNeuCurrent -=IntCurYPhase;
+  else IntNeuCurrent +=IntCurYPhase;
   if(InterruptFlag & INT_B_PHASE_REV)IntNeuCurrent -=IntCurBPhase;
   else IntNeuCurrent +=IntCurBPhase;
   
@@ -408,10 +406,125 @@ void ProcessMainInterrupt(void)
     if(pwrDlyFlag==0)++StartDelayCount;
     else StartDelayCount = 0;
     ReadSwitches();
+    ReadInputs();
   }
- 
-       
 }
+
+static bool IsRPhaseGridHealthyContactorOn()
+{
+    return INPUT_R_PHASE_GRID_HEALTHY_CONTACTOR_ON;
+}
+static bool IsYPhaseGridHealthyContactorOn()
+{
+    return INPUT_Y_PHASE_GRID_HEALTHY_CONTACTOR_ON;
+}
+static bool IsBPhaseGridHealthyContactorOn()
+{
+    return INPUT_B_PHASE_GRID_HEALTHY_CONTACTOR_ON;
+}
+static bool IsLoadOnSolarContactorOn()
+{
+    return INPUT_LOAD_ON_SOLAR_CONTACTOR_ON;
+}
+static bool IsLoadOnGridContactorOn()
+{
+    return INPUT_LOAD_ON_GRID_CONTACTOR_ON;
+}
+static bool IsSPDFailed()
+{
+    return !INPUT_SPD_HEALTHY;
+}
+static bool IsDGOff()
+{
+    return !INPUT_DG_RUNNING;
+}
+static bool IsDC48Available()
+{
+    return INPUT_48V_AVAILABLE;
+}
+
+// This is called to read digital inputs (debouncing)
+// This function is called once every 20 msec
+//
+void ReadInputs()
+{
+    struct DigInputState
+    {
+        bool* val;
+        uint8_t time;
+        bool (*read)(void);
+    };
+
+    // DEVNOTE: Keep this debouncing ticks to less than 1 sec in total
+    //
+    const uint8_t maxDebouncingTicks = 5;
+    static struct DigInputState dinStateArray[] =
+    {
+        {
+            .val = &g_DigInputs.MainsRPhaseContactorOn,
+            .timer = maxDebouncingTicks,
+            .read = IsRPhaseGridHealthyContactorOn,
+        },
+        {
+            .val = &g_DigInputs.MainsYPhaseContactorOn,
+            .timer = maxDebouncingTicks,
+            .read = IsYPhaseGridHealthyContactorOn,
+        },
+        {
+            .val = &g_DigInputs.MainsBPhaseContactorOn,
+            .timer = maxDebouncingTicks,
+            .read = IsBPhaseGridHealthyContactorOn,
+        },
+        {
+            .val = &g_DigInputs.LoadOnSolarContactorOn,
+            .timer = maxDebouncingTicks,
+            .read = IsLoadOnSolarContactorOn,
+        },
+        {
+            .val = &g_DigInputs.LoadOnMainsContactorOn,
+            .timer = maxDebouncingTicks,
+            .read = IsLoadOnMainsContactorOn,
+        },
+        {
+            .val = &g_DigInputs.SPDFailed,
+            .timer = maxDebouncingTicks,
+            .read = IsSPDFailed,
+        },
+        {
+            .val = &g_DigInputs.DGOff,
+            .timer = maxDebouncingTicks,
+            .read = IsDGOff,
+        },
+        {
+            .val = &g_DigInputs.DC48Available,
+            .timer = maxDebouncingTicks,
+            .read = IsDC48Available,
+        },
+    };
+
+    for (uint8_t i = 0; i < ARRAY_SIZE(dinStateArray); i++)
+    {
+        struct DigInputState* dinState = dinStateArray[i];
+
+        if (dinState->read() != *dinState->val)
+        {
+            if (dinState->timer)
+            {
+                dinState->timer--;
+            }
+            if (!dinState->timer)
+            {
+                *dinState->val = !*dinState->val;
+                dinState->timer = maxDebouncingTicks;
+            }
+        }
+        else
+        {
+            dinState->timer = maxDebouncingTicks;
+        }
+    }
+}
+
 uint16_t freqcounter;
 void CalculateFreqYBPhase(int16_t TempIntFreqVol)
 {

@@ -324,6 +324,18 @@ Ret: None
 
 #ifdef MODEL_RS485
 
+// Sends data over modbus
+// @param buffer: Buffer containing data to be sent over modbus (should be in big endian)
+// @param length; Length of data in bytes to be sent
+// @param func: The current function code to be sent over
+//
+static void ModbusSendData(uint8_t* buffer, uint8_t length, uint8_t func)
+{
+  memcpy(&Mod_TransmitFrame.Data_Array[1], buffer, length);
+  Mod_TransmitFrame.Data_Array[0] = length;
+  SendData_UART((uint8_t)CopySetPara[PARA_DEVICE_ID], func, (length+1));
+}
+
 #ifdef MODBUS_MAP_PROCOM
 void ModBusCommunication(void)
 {
@@ -654,7 +666,58 @@ void ModBusCommunication(void)
                
               }
               break;
-               
+            case 0x2 /*MODBUS_READ_INPUT_STATUS_CODE*/:
+            {
+                Start_Add_High = Readarray_Modbus[2];
+                Start_Add_Low = Readarray_Modbus[3];
+                Start_Add = (Start_Add_Low) + (Start_Add_High<<8);
+                NoOfReg_High = Readarray_Modbus[4];
+                NoOfReg_Low = Readarray_Modbus[5];
+                NoOfReg = (NoOfReg_Low) + (NoOfReg_High<<8);
+                
+                uint32_t endReg = (uint32_t)(Start_Add) + (uint32_t)(NoOfReg) - 1;
+                uint8_t maxRegs = sizeof(g_DigInputs);
+                if (endReg >= maxRegs || NoOfRegs == 0)
+                {
+                    Fun_Received |= 0x80;
+                    Mod_TransmitFrame.Data_Array[0] = 0x02;
+                    SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received,1);
+                    break;
+                }
+
+                // We need to shift certain bits if Start_Add != 0
+                //
+                uint8_t sourceBuffer[64] = {0};
+                uint8_t destBuffer[64] = {0};
+
+                for (int i = 0; i < sizeof(g_DigInputs); i++)
+                {
+                    if (((uint8_t*)(g_DigInputs))[i])
+                    {
+                        int sourceByteIdx = i / 8;
+                        int sourceBitIdx = i - 8 * sourceByteIdx;
+                        sourceBuffer[sourceByteIdx] |= (1 << sourceBitIdx);
+                    }
+                }
+                for (int bitIdx = 0; bitIdx < NoOfReg; bitIdx++)
+                {
+                    int sourceBitIdx = bitIdx + Start_Add;
+                    int sourceByteIdx = sourceBitIdx / 8;
+                    int sourceBitOffset = sourceBitIdx - sourceByteIdx * 8;
+
+                    int destBitIdx = bitIdx;
+                    int destByteIdx = destBitIdx / 8;
+                    int destBitOffset = destBitIdx - destByteIdx * 8;
+
+                    destBuffer[destByteIdx] |=
+                        (((sourceBuffer[sourceByteIdx] >> sourceBitOffset) & 0x1) << destBitOffset);
+                }
+
+                uint8_t numBytesToSend = ROUNDUP_POW2(NoOfReg, 8) / 8;
+                ModbusSendData(destBuffer, numBytesToSend, Fun_Received);
+                break;
+            }
+
        ///// Exception Response for Illegal Function //////    
           default:
             if((Fun_Received != 0x03))
@@ -740,7 +803,6 @@ void ModbusUpdateParameter(uint16_t Address,uint16_t NoOfBytes)
 {
     uint32_t Temp32,TempParaSetting;//TempReset;
     uint8_t error = 0;
-    float CTPrimary,PTPrimary,MaxPower;
     
     for( Temp32=0;Temp32<MAX_PARAM_LIMIT;Temp32++)ModCopySetPara[Temp32]=CopySetPara[Temp32];
     for(uint16_t CopyLength = 0; CopyLength<NoOfBytes/2; CopyLength++)
@@ -750,11 +812,6 @@ void ModbusUpdateParameter(uint16_t Address,uint16_t NoOfBytes)
       ModCopySetPara[CopyLength+Address] = (uint16_t)Temp32;    
     }
     Temp32=0;
-    CTPrimary= (float)ModCopySetPara[PARA_CT_PRIMARY];
-    if(ModCopySetPara[PARA_CT_PRI_UNIT]==1)CTPrimary =CTPrimary*10;
-    PTPrimary= (float)ModCopySetPara[PARA_PT_PRIMARY];
-    if(ModCopySetPara[PARA_PT_PRI_UNIT]==1)PTPrimary =PTPrimary*10;
-    MaxPower=sqrt(3)*CTPrimary*PTPrimary;
     while(Temp32<(MAX_PARAM_LIMIT))
     {
       TempParaSetting=ModCopySetPara[Temp32];
@@ -765,10 +822,6 @@ void ModbusUpdateParameter(uint16_t Address,uint16_t NoOfBytes)
       }
       else if(EditParameters[Temp32].DisableType ==0)error = 1;
       Temp32++;
-    }
-    if(MaxPower>100e6)
-    {
-      error = 1;
     }
     if(error || (!EditParaPassStatus))
     {

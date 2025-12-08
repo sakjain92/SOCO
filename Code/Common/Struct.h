@@ -389,4 +389,27 @@ struct LCD_ARRAY
   uint8_t RAM[50];
 };
 
+// All digital inputs:
+// DEVNOTE: Keep them such that each of these inputs are off when nothing
+// is attached to the controller (When the input is open, the corresponding
+// entry in this struct should be 0)
+// E.g. SPD has a NO contact which becomes NC when SPD Fails. So the entry
+// "SPDFailed" is 0 when nothing is connected to the controller (as that indicates
+// NO input which indicates SPD is healthy)
+//
+// DEVNOTE: This is sent over modbus. Keep digital inputs in order.
+// Also, using one bool per input
+//
+struct DigInputs
+{
+    bool MainsRPhaseContactorOn; 
+    bool MainsYPhaseContactorOn;
+    bool MainsBPhaseContactorOn;
+    bool LoadOnSolarContactorOn;
+    bool LoadOnMainsContactorOn;
+    bool SPDFailed;             
+    bool DGOff;              
+    bool DC48Available;          
+};
+
 #endif

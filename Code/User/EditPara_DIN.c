@@ -357,48 +357,33 @@ void UpdateEditSettings(void)
    for ( i=0;i<16;i++)BufferToDisplay[i]=0;
    UpdateDisplay=1; 
    Delay1Msec12Mhz(2);
-   StorageBuffer.EnergyDispUnit=EnergyDisplayUnit;
    SetMeterParameters();
-   if(EnergyDisplayUnit==MAX_ENERGY_SET_GWh)
-   {
-     DisplayString(ROW_TOP,DIGIT_6,(uint8_t *)DIS_CT_PT,0);
-     UpdateDisplay=1;
-     while(SwPressed!=KEY_INC)
-     {
-       RESET_WATCH_DOG;
-     }
-     NVIC_SystemReset();
-   }
-   else
-   {
-  #ifdef MODEL_DATA_SAVE
-      uint8_t i,k=0;
+#ifdef MODEL_DATA_SAVE
+   uint8_t i,k=0;
       
-      InterruptFlag |=INT_DATA_SAVING_EEPROM;
-      __no_operation();
-      I2CRead(PROGRAM_DATA_LOC1_START,20,EXT_EEPROM,LcdEpromBuffer );    
-      InterruptFlag &=~INT_DATA_SAVING_EEPROM;
-      for(i=0;i<9;i++)
-      { 
-        if(CopySetPara[i] != *((uint16_t *)(LcdEpromBuffer+i*2)))k=1;
-      }
-       
-      if(k==1)
-      {
-        RESET_WATCH_DOG;
-        //__disable_interrupt();
-       //__no_operation();
-        SaveOldData();
-        //SaveTripData();
-        DisplaySetup.DisplayScanPage=0;
-        DisplaySetup.DisplayScrollStatus=0;
-        EepromWrite(SCROLL_LOCK_LOC,2,EXT_EEPROM,(uint8_t *)&DisplaySetup.DisplayScrollStatus );
-        DisplayDisabled();
-       // __enable_interrupt();
-      }     
-  #endif
-      ParaSettingUpdate();
+   InterruptFlag |=INT_DATA_SAVING_EEPROM;
+   __no_operation();
+   I2CRead(PROGRAM_DATA_LOC1_START,20,EXT_EEPROM,LcdEpromBuffer );    
+   InterruptFlag &=~INT_DATA_SAVING_EEPROM;
+   for(i=0;i<9;i++)
+   { 
+     if(CopySetPara[i] != *((uint16_t *)(LcdEpromBuffer+i*2)))k=1;
    }
+   if(k==1)
+   {
+      RESET_WATCH_DOG;
+      //__disable_interrupt();
+      //__no_operation();
+      SaveOldData();
+      //SaveTripData();
+      DisplaySetup.DisplayScanPage=0;
+      DisplaySetup.DisplayScrollStatus=0;
+      EepromWrite(SCROLL_LOCK_LOC,2,EXT_EEPROM,(uint8_t *)&DisplaySetup.DisplayScrollStatus );
+      DisplayDisabled();
+      // __enable_interrupt();
+    }     
+#endif
+    ParaSettingUpdate();
     OutOfEdit();
     InterruptFlag &=~(PASSWORD_CHECK_ON+PASSWORD_VERIFIED+PASSWORD_FOR_VIEW);
 }

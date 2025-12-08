@@ -8,24 +8,23 @@
 #define  DISPLAY_PAGE8  0xB7
 
 
-#define     PARA_PT_PRIMARY             0
-#define     PARA_PT_PRIMARY_DEC         1
-#define     PARA_PT_PRI_UNIT            2
-#define     PARA_PT_SECONDARY           3
-#define     PARA_CT_PRIMARY             4
-#define     PARA_CT_PRIMARY_DEC         5
-#define     PARA_CT_PRI_UNIT            6
-#define     PARA_CT_SECONDARY           7
-#define     PARA_SYSTEM_CONFIG          8
-#define     PARA_KVA_TYPE               9
-#define     PARA_STARTING_CURRENT      10 
-#define     PARA_DISP_RESO             11
-#define     PARA_ENE_TYPE              12
-#define     PARA_DEVICE_ID             13
-#define     PARA_BAUD_RATE             14
-#define     PARA_PARITY                15
-#define     PARA_STOP_BIT              16
-#define     PARA_ENDIAN                17
+#define     PARA_MAINS_UNDER_VOLT       0
+#define     PARA_MAINS_OVER_VOLT        1
+#define     PARA_MAINS_UNDER_VOLT_RESET 2
+#define     PARA_MAINS_OVER_VOLT_RESET  3
+#define     PARA_MAINS_FAIL_DELAY       4
+#define     PARA_MAINS_RETURN_DELAY     5
+#define     PARA_SOLAR_UNDER_VOLT       6
+#define     PARA_SOLAR_OVER_VOLT        7
+#define     PARA_SOLAR_UNDER_VOLT_RESET 8
+#define     PARA_SOLAR_OVER_VOLT_RESET  9
+#define     PARA_SOLAR_FAIL_DELAY      10
+#define     PARA_SOLAR_RETURN_DELAY    11
+#define     PARA_DEVICE_ID             12
+#define     PARA_BAUD_RATE             13
+#define     PARA_PARITY                14
+#define     PARA_STOP_BIT              15
+#define     PARA_ENDIAN                16
 
 
 
