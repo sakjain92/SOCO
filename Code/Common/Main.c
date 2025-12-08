@@ -313,7 +313,7 @@ void ProcessRelays()
         else 
         {
             bool curHealthy = 
-                (*pvs->vol <= CopySetPara[PARA_MAINS_OVER_VOLT_RESET]) ||
+                (*pvs->vol <= CopySetPara[PARA_MAINS_OVER_VOLT_RESET]) &&
                 (*pvs->vol >= CopySetPara[PARA_MAINS_UNDER_VOLT_RESET]);
             if (curHealthy)
             {
@@ -828,6 +828,12 @@ void StartCalibration(void)
    if (FlagDirectCalibration >= CALIBRATE_IN_START &&
         FlagDirectCalibration <= CALIBRATE_IN_8)
    {
+       SwitchOffContactorRPhaseGridHealthy();
+       SwitchOffContactorYPhaseGridHealthy();
+       SwitchOffContactorBPhaseGridHealthy();
+       SwitchOffContactorLoadOnSolar();
+       SwitchOffContactorLoadOnGrid();
+
        const bool* inputs[] = 
        {
            &g_DigInputs.MainsRPhaseContactorOn,

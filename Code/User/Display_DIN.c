@@ -40,7 +40,6 @@ extern const uint16_t CHAR_ALFA_14_SEG[];
 extern  const uint8_t CHAR_NEU_7_SEG[];
 extern  const uint8_t CHAR_ALFA_7_SEG[];
 uint16_t BufferForDisplay[24],ComInUsed;
-const uint8_t  VERSION_NO=100;
 void LedProcess(uint8_t LED_Type);
 
 void DisplayUpdate(void)
@@ -595,7 +594,7 @@ void DisplayString(uint8_t DV_Row,uint8_t DV_Digit, uint8_t *DV_String,uint8_t L
 
 void CheckAutoScroll(void)
 {
-  if(SwPressed==KEY_INC)ScrollChangeCounter++;
+  if(SwPressed==KEY_NEXT)ScrollChangeCounter++;
   else ScrollChangeCounter=0;
   if(ScrollChangeCounter==2)
   {
@@ -713,7 +712,7 @@ void DisplayCalLowVI(void)
 void SetInitialDisplay(void)
 {
     for (uint8_t i=0;i<16;i++)BufferToDisplay[i]=0;
-    DisplayString(ROW_TOP,DIGIT_4,(uint8_t *)DIS_REX,0);
+    DisplayString(ROW_TOP,DIGIT_4,(uint8_t *)DIS_SOCO,0);
     UpdateDisplay=1;
 
 }
@@ -727,7 +726,8 @@ void SetVersionDisplay(void)
 }
 
 
-
+// UNDONE: This doesn't show up on the screen due to while(1)
+//
 void DisplayImproperSettings(void)
 {
   for (uint8_t i=0;i<16;i++)BufferToDisplay[i]=0;
@@ -740,6 +740,8 @@ void DisplayImproperSettings(void)
 
 }
 
+// UNDONE: This doesn't show up on the screen due to while (1)
+//
 void DisplayDoneCal(void)
 {
   for (uint8_t i=0;i<16;i++)BufferToDisplay[i]=0;

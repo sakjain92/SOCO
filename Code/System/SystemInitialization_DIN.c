@@ -328,6 +328,7 @@ static void SetAdc(void)
   // 6 total sequences
   ADC1->SQR1=0x500000;
 
+#if 0
   // Solar
   //
   // 1th Sequence: 9th channel (IRP_P)
@@ -340,7 +341,7 @@ static void SetAdc(void)
   ADC1->SQR2=0x0;
   // 6 total sequences
   ADC1->SQR1=0x500000;
-
+#endif
   // ADC On, Enable Calibration, DMA enabled, JSWSRTART Trigger, SWSTART Trigger, Enable exrternal trigger
   ADC1->CR2=0X1E7105;
 

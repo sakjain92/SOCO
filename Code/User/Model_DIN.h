@@ -1,4 +1,9 @@
-//#define MODEL_RELEASED
+#define MODEL_RELEASED
+
+// 3 digit version number
+// Shown on display as X.YY
+//
+#define VERSION_NO  200
 
 #define MODEL_COMM_PROCOM
 #define MODEL_DATA_SAVE  
@@ -82,6 +87,13 @@
 // 56) We should make it possible to see state of outputs/inputs on the controller otherwise will be difficult to debug issues in the field (contactor latching etc)
 // 57) Since we use NC or NO of a relay, do we want to just have one output per relay on board (less chances of mistake when making the panel)
 // 58) For four quarant metering, we need to fix P1/P2 & S1/S2 of CT with CT polarity correction. Possibly have to get it tested on panel side also via a WebUSB based RS485 testing software
+// 59) Remove label of Indotech from external CT before giving panels to Jio
+// 60) Connectors are very near to screws on the IPR backside PCB. Can maybe only have 2 terminals per relay
+// 61) LED display needs to be in centre
+// 62) I don't think we are measuring per-phase energy (KWh, KVAh, KVARh). Jio requires this.
+// 63) Retest full code and accuracy and also that at no current/voltage applied, all parameters are 0 (noise ignored)
+// 64) Check spacing for wirewond resistors on PCB
+// 65) In self test, we should check power supply from all 3 inputs
 //
 // NOTES:
 // 1) For Apparent power, we are using RMS (IEC 60038) instead of (IEC 61000-4-7) where we just measure first harmonics as we need to match energy with utility meter (and SMPS will have noise)

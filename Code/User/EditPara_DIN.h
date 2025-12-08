@@ -293,7 +293,7 @@ const struct Parameter EditParameters[MAX_PARAM_LIMIT]=
          3,                                       //ParaMeterLength
          0,                                       //DisableType
          0,                                       //DataWithDecUnit
-         270,                                     //Default Value
+         5,                                     //Default Value
     },
 
     {    

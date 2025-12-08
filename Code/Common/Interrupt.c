@@ -573,9 +573,9 @@ void CalculateFreqYBPhase(int16_t TempIntFreqVol)
   {
    SwPressed=0; 
 
-   if(!(GPIOF->IDR & PORT_BIT_4))SwPressed |=KEY_NEXT;
-   if(!(GPIOA->IDR & PORT_BIT_8))SwPressed |=KEY_DEC;
-   if(!(GPIOF->IDR & PORT_BIT_6))SwPressed |=KEY_INC;
+   if(!(GPIOF->IDR & PORT_BIT_4))SwPressed |=KEY_INC;
+   if(!(GPIOA->IDR & PORT_BIT_8))SwPressed |=KEY_NEXT;
+   if(!(GPIOF->IDR & PORT_BIT_6))SwPressed |=KEY_DEC;
    
    if((SwPressed==0)||(SwPressed!=SwPrev))
    {

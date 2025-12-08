@@ -65,7 +65,7 @@ void CheckKey(void)
     else 
     {
   
-      if ((SwPressed==KEY_NEXT)&&(FlagDirectCalibration==0))
+      if ((SwPressed==KEY_INC)&&(FlagDirectCalibration==0))
       {
         DisplaySetup.DisplayScanPage++;
         if(DisplayParameterBuffer[DisplaySetup.DisplayScanPage]==0xff)DisplaySetup.DisplayScanPage=0;
