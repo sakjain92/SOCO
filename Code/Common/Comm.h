@@ -36,7 +36,7 @@ void CheckPasswordEdit(uint16_t Address,uint16_t NoOfBytes);
 
 uint8_t Add_Received=0xFF,Fun_Received,CRC_Received_Low,CRC_Received_High;
 float CalVolR,CalVolY,CalVolB,CalCurR,CalCurY,CalCurB;
-float CalVolRSSolar,CalVolYSolar,CalVolBSolar;
+float CalVolRSolar,CalVolYSolar,CalVolBSolar;
 float CalPowR,CalPowY,CalPowB;
 struct Field Mod_TransmitFrame;
 uint8_t NoOfBytes_Low,NoOfBytes_High,Start_Add_Low,Start_Add_High;

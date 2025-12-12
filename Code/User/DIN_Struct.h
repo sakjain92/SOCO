@@ -174,7 +174,7 @@ struct object
 };
 
 
-const struct object Screen[61][3]=
+const struct object Screen[][3]=
 {
 // SCREEN 0: Line to Line Voltage 3P RY
   {
@@ -482,22 +482,22 @@ const struct object Screen[61][3]=
   // SCREEN 54:Angle 3Phase R
   
    { 
-      {DATA_TYPE_STRING,       0,                          0,      0,                    DIGIT_2,         StrAN,        LED_R   }, 
-      { DATA_TYPE_VARIABLE,     &InstantPara.AngleRPhase,  4,      DIS_VAL_ANGLE,        DIGIT_3,         0,            LED_R   },
+      {DATA_TYPE_STRING,       0,                          0,      0,                    DIGIT_2,         StrAN,        LED_GRID_R   }, 
+      { DATA_TYPE_VARIABLE,     &InstantPara.AngleRPhase,  4,      DIS_VAL_ANGLE,        DIGIT_3,         0,            LED_GRID_R   },
       { 0xff,                   0,                         0,     0,                     DIGIT_3,         0,            0       }
    },
    // SCREEN 55:Angle 3Phase Y
   
    { 
-      {DATA_TYPE_STRING,       0,                          0,      0,                    DIGIT_2,         StrAN,        LED_Y   },  
-      { DATA_TYPE_VARIABLE,     &InstantPara.AngleYPhase,  4,      DIS_VAL_ANGLE,        DIGIT_3,         0,            LED_Y   },
+      {DATA_TYPE_STRING,       0,                          0,      0,                    DIGIT_2,         StrAN,        LED_GRID_Y   },  
+      { DATA_TYPE_VARIABLE,     &InstantPara.AngleYPhase,  4,      DIS_VAL_ANGLE,        DIGIT_3,         0,            LED_GRID_Y   },
       { 0xff,                   0,                         0,     0,                     DIGIT_3,         0,            0       }
    },
    // SCREEN 56:Angle 3Phase B
   
    { 
-      {DATA_TYPE_STRING,       0,                          0,      0,                    DIGIT_2,         StrAN,        LED_B   }, 
-      { DATA_TYPE_VARIABLE,     &InstantPara.AngleBPhase,  4,      DIS_VAL_ANGLE,        DIGIT_3,         0,            LED_B   },
+      {DATA_TYPE_STRING,       0,                          0,      0,                    DIGIT_2,         StrAN,        LED_GRID_B   }, 
+      { DATA_TYPE_VARIABLE,     &InstantPara.AngleBPhase,  4,      DIS_VAL_ANGLE,        DIGIT_3,         0,            LED_GRID_B   },
       { 0xff,                   0,                         0,     0,                     DIGIT_3,         0,            0       }
    },
    
