@@ -140,13 +140,15 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 #define  FUND_POWER_COEFF          1.2833E-05f
 
 // Minimum voltage to maintain 0.5% accuracy is about 33VAC. Taking some margin
-// UNDONE: Figure out the correct minimum value for Currents
+// UNDONE: Figure out the correct minimum value for Currents as per metering
+// standard for 0.5 class metering.
+// Currently using ADC (not SDADC) gives a ~0.08 current without any input attached
 //
 #define   MIN_VOL_LIMIT            70.0f
 #define   MIN_VOL_LIMIT_PH_PH      (MIN_VOL_LIMIT * 1.732f)
 #define   MIN_TOTAL_CUR_LIMIT      0.5f
-#define   MIN_NEU_CUR_LIMIT        0.05f
-#define   MIN_CURRENT_LIMIT        0.05f
+#define   MIN_NEU_CUR_LIMIT        0.1f
+#define   MIN_CURRENT_LIMIT        0.1f
 
 #define        T_20MS                                 64  // 20 msec delay
 #define        T_5MS                                  10  // 20 msec delay
@@ -227,9 +229,10 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 #define        CAL_CURRENT_SETTING_HIGH              CUR_HIGH_CAL_POINT
 #define        CAL_CURRENT_SETTING_MID               CUR_MID_CAL_POINT
 #define        CAL_CURRENT_SETTING_LOW               CUR_LOW_CAL_POINT
-#define        CURRENT_TOLRERANCE                    0.2f
-#define        VOLTAGE_TOLERANCE                     0.1f
-#define        POWER_TOLERANCE                       0.4f
+#define        CURRENT_TOLRERANCE                    0.2f   // UNDONE: This was 0.1 earlier but in our board at lower end of calibration needed to increase error range
+                                                            // We should use SDADC to get better accuracy
+#define        VOLTAGE_TOLERANCE                     0.1f   // UNDONE: This was 0.1 earlier but in our board there is wider variation hence changing this
+#define        POWER_TOLERANCE                       0.4f 
 
 
 #define         CAL_UPF_POWER_SETTING_HIGH     ( NO_OF_CAL_ACCUMULATION_POW*CAL_VOLTAGE_SETTING_HIGH*CAL_CURRENT_SETTING_HIGH)
@@ -334,17 +337,17 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 #define TURN_RELAY1_ON                              GPIOD->BSRR = PORT_BIT_8
 #define TURN_RELAY1_OFF                             GPIOD->BRR = PORT_BIT_8
 
-#define TURN_RELAY2_ON                              GPIOD->BSRR = PORT_BIT_8
-#define TURN_RELAY2_OFF                             GPIOD->BRR = PORT_BIT_8
+#define TURN_RELAY2_ON                              GPIOD->BSRR = PORT_BIT_9
+#define TURN_RELAY2_OFF                             GPIOD->BRR = PORT_BIT_9
 
-#define TURN_RELAY3_ON                              GPIOD->BSRR = PORT_BIT_8
-#define TURN_RELAY3_OFF                             GPIOD->BRR = PORT_BIT_8
+#define TURN_RELAY3_ON                              GPIOE->BSRR = PORT_BIT_8
+#define TURN_RELAY3_OFF                             GPIOE->BRR = PORT_BIT_8
 
-#define TURN_RELAY4_ON                              GPIOD->BSRR = PORT_BIT_8
-#define TURN_RELAY4_OFF                             GPIOD->BRR = PORT_BIT_8
+#define TURN_RELAY4_ON                              GPIOE->BSRR = PORT_BIT_9
+#define TURN_RELAY4_OFF                             GPIOE->BRR = PORT_BIT_9
 
-#define TURN_RELAY5_ON                              GPIOD->BSRR = PORT_BIT_8
-#define TURN_RELAY5_OFF                             GPIOD->BRR = PORT_BIT_8
+#define TURN_RELAY5_ON                              GPIOD->BSRR = PORT_BIT_10
+#define TURN_RELAY5_OFF                             GPIOD->BRR = PORT_BIT_10
 
 
 #define SWITCH_OFF_CONTACTOR_R_PHASE_GRID_HEALTHY  TURN_RELAY1_ON

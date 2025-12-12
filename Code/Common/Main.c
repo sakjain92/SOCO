@@ -21,6 +21,7 @@ Inp: None
 Ret: None
 */
 
+
 void main(void)
 {
   InitWatchDog();  
@@ -185,11 +186,30 @@ void SwitchOnContactorLoadOnGrid()
 // DEVNOTE: This function should consider the possibility of contactors
 // getting stuck and not following the state as driven by the relays
 //
+// UNDONE: Check all logic here thoroughly. There is a bug here that 
+// if contactor feedback is not matching it's actual state we are trying to
+// set it to, the contactors can change simuntaneously whereas there should
+// always be some delay when changing one or more contactors that impact
+// each other
+//
 void ProcessRelays()
 {
+    enum StuckState
+    {
+        CONTACTOR_NOT_STUCK,
+        CONTACTOR_STUCK_IN_OPEN,
+        CONTACTOR_STUCK_IN_CLOSED,
+    };
+
     struct PhaseVolState
     {
         bool isHealthy;
+        uint8_t overVoltParaIdx;
+        uint8_t underVoltParaIdx;
+        uint8_t overVoltResetParaIdx;
+        uint8_t underVoltResetParaIdx;
+        uint8_t failDelayParaIdx;
+        uint8_t returnDelayParaIdx;
         uint16_t TimeLeft;
         float* vol;
         void (*turnContactorOn)(void);
@@ -197,11 +217,20 @@ void ProcessRelays()
         bool* contactorFeedback;
         bool shouldContactorBeOn;
         uint16_t ContactorChangeTimeLeft;
-        bool isContactorStuck;
+        bool isPrevContactorOn; // Records previous state of contactor before transition
+                                // till we don't register the actual contactor change.
+                                // This is to allow contactors to first turn off before
+                                // turning other contactors (after some delay)
+        enum StuckState contactorStuckState;
     };
 
     static bool initialized = false;
-#define MAX_CONTACTOR_CHANGE_LATENCY    3
+
+    // UNDONE: Make this a setting
+    //
+#define MAX_CONTACTOR_CHANGE_LATENCY    5
+
+    static float solarRPhaseVolt = 240;
 
     // By default, contactor is turned on when the controller is off
     // (Contactor coil tied to NC of the controller's relay).
@@ -211,65 +240,102 @@ void ProcessRelays()
     {
         // Mains R Phase
         {
-            true,
-            0,
-            &InstantPara.VolR,
-            SwitchOnContactorRPhaseGridHealthy,
-            SwitchOffContactorRPhaseGridHealthy,
-            &g_DigInputs.MainsRPhaseContactorOn,
-            true,
-            MAX_CONTACTOR_CHANGE_LATENCY,
-            false,
+            .isHealthy = true,
+            .overVoltParaIdx = PARA_MAINS_OVER_VOLT,
+            .underVoltParaIdx = PARA_MAINS_UNDER_VOLT,
+            .overVoltResetParaIdx = PARA_MAINS_OVER_VOLT_RESET,
+            .underVoltResetParaIdx = PARA_MAINS_UNDER_VOLT_RESET,
+            .failDelayParaIdx = PARA_MAINS_FAIL_DELAY,
+            .returnDelayParaIdx = PARA_MAINS_RETURN_DELAY,
+            .TimeLeft = 0,
+            .vol = &InstantPara.VolR,
+            .turnContactorOn = SwitchOnContactorRPhaseGridHealthy,
+            .turnContactorOff = SwitchOffContactorRPhaseGridHealthy,
+            .contactorFeedback = &g_DigInputs.MainsRPhaseContactorOn,
+            .shouldContactorBeOn = true,
+            .ContactorChangeTimeLeft = MAX_CONTACTOR_CHANGE_LATENCY,
+            .isPrevContactorOn = true,
+            .contactorStuckState = CONTACTOR_NOT_STUCK,
         },
         // Mains Y Phase
         {
-            true,
-            0,
-            &InstantPara.VolY,
-            SwitchOnContactorYPhaseGridHealthy,
-            SwitchOffContactorYPhaseGridHealthy,
-            &g_DigInputs.MainsYPhaseContactorOn,
-            true,
-            MAX_CONTACTOR_CHANGE_LATENCY,
-            false,
+            .isHealthy = true,
+            .overVoltParaIdx = PARA_MAINS_OVER_VOLT,
+            .underVoltParaIdx = PARA_MAINS_UNDER_VOLT,
+            .overVoltResetParaIdx = PARA_MAINS_OVER_VOLT_RESET,
+            .underVoltResetParaIdx = PARA_MAINS_UNDER_VOLT_RESET,
+            .failDelayParaIdx = PARA_MAINS_FAIL_DELAY,
+            .returnDelayParaIdx = PARA_MAINS_RETURN_DELAY,
+            .TimeLeft = 0,
+            .vol = &InstantPara.VolY,
+            .turnContactorOn = SwitchOnContactorYPhaseGridHealthy,
+            .turnContactorOff = SwitchOffContactorYPhaseGridHealthy,
+            .contactorFeedback = &g_DigInputs.MainsYPhaseContactorOn,
+            .shouldContactorBeOn = true,
+            .ContactorChangeTimeLeft = MAX_CONTACTOR_CHANGE_LATENCY,
+            .isPrevContactorOn = true,
+            .contactorStuckState = CONTACTOR_NOT_STUCK,
         },
         // Mains B Phase
         {
-            true,
-            0,
-            &InstantPara.VolB,
-            SwitchOnContactorBPhaseGridHealthy,
-            SwitchOffContactorBPhaseGridHealthy,
-            &g_DigInputs.MainsBPhaseContactorOn,
-            true,
-            MAX_CONTACTOR_CHANGE_LATENCY,
-            false,
+            .isHealthy = true,
+            .overVoltParaIdx = PARA_MAINS_OVER_VOLT,
+            .underVoltParaIdx = PARA_MAINS_UNDER_VOLT,
+            .overVoltResetParaIdx = PARA_MAINS_OVER_VOLT_RESET,
+            .underVoltResetParaIdx = PARA_MAINS_UNDER_VOLT_RESET,
+            .failDelayParaIdx = PARA_MAINS_FAIL_DELAY,
+            .returnDelayParaIdx = PARA_MAINS_RETURN_DELAY,
+            .TimeLeft = 0,
+            .vol = &InstantPara.VolB,
+            .turnContactorOn = SwitchOnContactorBPhaseGridHealthy,
+            .turnContactorOff = SwitchOffContactorBPhaseGridHealthy,
+            .contactorFeedback = &g_DigInputs.MainsBPhaseContactorOn,
+            .shouldContactorBeOn = true,
+            .ContactorChangeTimeLeft = MAX_CONTACTOR_CHANGE_LATENCY,
+            .isPrevContactorOn = true,
+            .contactorStuckState = CONTACTOR_NOT_STUCK,
         },
         // Load On Solar
         //
         {
-            false,
-            0,
-            NULL,
-            SwitchOnContactorLoadOnSolar,
-            SwitchOffContactorLoadOnSolar,
-            &g_DigInputs.LoadOnSolarContactorOn,
-            false,
-            MAX_CONTACTOR_CHANGE_LATENCY,
-            false,
+            .isHealthy = false,
+            .overVoltParaIdx = PARA_SOLAR_OVER_VOLT,
+            .underVoltParaIdx = PARA_SOLAR_UNDER_VOLT,
+            .overVoltResetParaIdx = PARA_SOLAR_OVER_VOLT_RESET,
+            .underVoltResetParaIdx = PARA_SOLAR_UNDER_VOLT_RESET,
+            .failDelayParaIdx = PARA_SOLAR_FAIL_DELAY,
+            .returnDelayParaIdx = PARA_SOLAR_RETURN_DELAY,
+            .TimeLeft = 0,
+            // UNDONE: Change this to actual solar R Phase
+            //
+            .vol = &solarRPhaseVolt,
+            .turnContactorOn = SwitchOnContactorLoadOnSolar,
+            .turnContactorOff = SwitchOffContactorLoadOnSolar,
+            .contactorFeedback = &g_DigInputs.LoadOnSolarContactorOn,
+            .shouldContactorBeOn = false,
+            .ContactorChangeTimeLeft = MAX_CONTACTOR_CHANGE_LATENCY,
+            .isPrevContactorOn = false,
+            .contactorStuckState = CONTACTOR_NOT_STUCK,
         },
         // Load On Grid
         //
         {
-            true,
-            0,
-            NULL,
-            SwitchOnContactorLoadOnGrid,
-            SwitchOffContactorLoadOnGrid,
-            &g_DigInputs.LoadOnGridContactorOn,
-            true,
-            MAX_CONTACTOR_CHANGE_LATENCY,
-            false,
+            .isHealthy = true,
+            .overVoltParaIdx = PARA_MAINS_OVER_VOLT,
+            .underVoltParaIdx = PARA_MAINS_UNDER_VOLT,
+            .overVoltResetParaIdx = PARA_MAINS_OVER_VOLT_RESET,
+            .underVoltResetParaIdx = PARA_MAINS_UNDER_VOLT_RESET,
+            .failDelayParaIdx = PARA_MAINS_FAIL_DELAY,
+            .returnDelayParaIdx = PARA_MAINS_RETURN_DELAY,
+            .TimeLeft = 0,
+            .vol = &InstantPara.VolR,
+            .turnContactorOn = SwitchOnContactorLoadOnGrid,
+            .turnContactorOff = SwitchOffContactorLoadOnGrid,
+            .contactorFeedback = &g_DigInputs.LoadOnGridContactorOn,
+            .shouldContactorBeOn = true,
+            .ContactorChangeTimeLeft = MAX_CONTACTOR_CHANGE_LATENCY,
+            .isPrevContactorOn = true,
+            .contactorStuckState = CONTACTOR_NOT_STUCK,
         }
     };
 
@@ -281,17 +347,22 @@ void ProcessRelays()
         pvsArray[3].TimeLeft = CopySetPara[PARA_SOLAR_RETURN_DELAY];
     }
 
+    bool isAnyPhaseContactorOn = 
+        pvsArray[0].isPrevContactorOn ||
+        pvsArray[1].isPrevContactorOn ||
+        pvsArray[2].isPrevContactorOn;
+
     // DEVNOTE: Data in CopySetPara[] can change at any point of time
     //
-    for (uint8_t i = 0; i < 3; i++)
+    for (uint8_t i = 0; i < ARRAY_SIZE(pvsArray); i++)
     {
         struct PhaseVolState* pvs = &pvsArray[i];
 
         if (pvs->isHealthy)
         {
             bool curUnhealthy = 
-                (*pvs->vol > CopySetPara[PARA_MAINS_OVER_VOLT]) ||
-                (*pvs->vol < CopySetPara[PARA_MAINS_UNDER_VOLT]);
+                (*pvs->vol > CopySetPara[pvs->overVoltParaIdx]) ||
+                (*pvs->vol < CopySetPara[pvs->underVoltParaIdx]);
 
             if (curUnhealthy)
             {
@@ -302,19 +373,19 @@ void ProcessRelays()
                 if (!pvs->TimeLeft)
                 {
                     pvs->isHealthy = false;
-                    pvs->TimeLeft = CopySetPara[PARA_MAINS_RETURN_DELAY];
+                    pvs->TimeLeft = CopySetPara[pvs->returnDelayParaIdx];
                 }
             }
             else
             {
-                pvs->TimeLeft = CopySetPara[PARA_MAINS_FAIL_DELAY];
+                pvs->TimeLeft = CopySetPara[pvs->failDelayParaIdx];
             }
         }
         else 
         {
             bool curHealthy = 
-                (*pvs->vol <= CopySetPara[PARA_MAINS_OVER_VOLT_RESET]) &&
-                (*pvs->vol >= CopySetPara[PARA_MAINS_UNDER_VOLT_RESET]);
+                (*pvs->vol <= CopySetPara[pvs->overVoltResetParaIdx]) &&
+                (*pvs->vol >= CopySetPara[pvs->underVoltResetParaIdx]);
             if (curHealthy)
             {
                 if (pvs->TimeLeft)
@@ -324,100 +395,23 @@ void ProcessRelays()
                 if (!pvs->TimeLeft)
                 {
                     pvs->isHealthy = true;
-                    pvs->TimeLeft = CopySetPara[PARA_MAINS_FAIL_DELAY];
+                    pvs->TimeLeft = CopySetPara[pvs->failDelayParaIdx];
                 }
             }
             else
             {
-                pvs->TimeLeft = CopySetPara[PARA_MAINS_RETURN_DELAY];
+                pvs->TimeLeft = CopySetPara[pvs->returnDelayParaIdx];
             }
         }
     }
-
-    struct PhaseVolState* solarPvs = &pvsArray[3];
 
     // We can't read solar's voltages when any of the R/Y/B contactor is still
-    // on. Note: Feedback makes only sense when 48VDC is available
+    // on
     //
-    bool isAnyPhaseContactorOn = g_DigInputs.DC48Available ?
-        (g_DigInputs.MainsRPhaseContactorOn  ||
-            g_DigInputs.MainsYPhaseContactorOn ||
-            g_DigInputs.MainsBPhaseContactorOn) :
-        (pvsArray[0].shouldContactorBeOn ||
-         pvsArray[1].shouldContactorBeOn ||
-         pvsArray[2].shouldContactorBeOn);
-
     if (isAnyPhaseContactorOn)
     {
-        solarPvs->isHealthy = false;
-        solarPvs->TimeLeft = CopySetPara[PARA_SOLAR_RETURN_DELAY];
-    }
-    else if (solarPvs->isHealthy)
-    {
-        // UNDONE: Check solar phases here
-        //
-        //bool curUnhealthy = 
-        //    (*solarPvs->vol > CopySetPara[PARA_SOLAR_OVER_VOLT]) ||
-        //    (*solarPvs->vol < CopySetPara[PARA_SOLAR_UNDER_VOLT]);
-        bool curUnhealthy = false;
-
-        if (curUnhealthy)
-        {
-            if (solarPvs->TimeLeft)
-            {
-                solarPvs->TimeLeft--;
-            }
-            else
-            {
-                solarPvs->isHealthy = false;
-                solarPvs->TimeLeft = CopySetPara[PARA_SOLAR_RETURN_DELAY];
-            }
-        }
-        else
-        {
-            solarPvs->TimeLeft = CopySetPara[PARA_SOLAR_FAIL_DELAY];
-        }
-    }
-    else
-    {
-        //bool curHealthy = 
-        //    (*pvs->vol <= CopySetPara[PARA_SOLAR_OVER_VOLT_RESET]) ||
-        //    (*pvs->vol >= CopySetPara[PARA_SOLAR_UNDER_VOLT_RESET]);
-        bool curHealthy = true;
-
-        if (curHealthy)
-        {
-            if (solarPvs->TimeLeft)
-            {
-                solarPvs->TimeLeft--;
-            }
-            else
-            {
-                solarPvs->isHealthy = true;
-                solarPvs->TimeLeft = CopySetPara[PARA_SOLAR_FAIL_DELAY];
-            }
-        }
-        else
-        {
-            solarPvs->TimeLeft = CopySetPara[PARA_SOLAR_RETURN_DELAY];
-        }
-    }
-
-    // First turn all contactors that need to turn off as off or else
-    // wait for them to be declared stuck (Break before make)
-    //
-    uint8_t remainingToBeTurnedOff = 5;
-    for (uint8_t i = 0; i < 5; i++)
-    {
-        // Check if contactor is off or already marked as stuck
-        // before the "shouldContactorBeOn" fields are calculated
-        //
-        if (pvsArray[i].shouldContactorBeOn ||
-            (!pvsArray[i].contactorFeedback || !g_DigInputs.DC48Available) || 
-            pvsArray[i].isContactorStuck)
-        {
-            remainingToBeTurnedOff--;
-        }
+        pvsArray[3].isHealthy = false;
+        pvsArray[3].TimeLeft = CopySetPara[pvsArray[3].returnDelayParaIdx]; 
     }
 
     // Don't turn the Mains Phase Contactor On if
@@ -444,54 +438,105 @@ void ProcessRelays()
     // So hence should put load on solar. For that, need to shut off the
     // phase contactors
     //
+    // UNDONE: We can have an optimization that if we detect that K5
+    // is stuck in open condition, we can shift load to solar once it's available.
+    // For now, not doing this optimization as it will require turning off K5
+    // but remembering that it is stuck.
+    //
     pvsArray[0].shouldContactorBeOn = pvsArray[0].isHealthy &&
-                                        !pvsArray[3].isContactorStuck;
+                                        !pvsArray[3].isPrevContactorOn;
     pvsArray[1].shouldContactorBeOn = pvsArray[0].isHealthy &&
                                         pvsArray[1].isHealthy &&
-                                        !pvsArray[3].isContactorStuck;
+                                        !pvsArray[3].isPrevContactorOn;
     pvsArray[2].shouldContactorBeOn = pvsArray[0].isHealthy &&
                                         pvsArray[2].isHealthy &&
-                                        !pvsArray[3].isContactorStuck;
+                                        !pvsArray[3].isPrevContactorOn;
+    // If 48V is not present, DG PFC is not reliable.
+    // But if DG is running, 48V should be available.
+    // So if 48V is not present we assume DG is not running.
+    //
+    // Also, can't turn on Solar contactor if any of the mains contactor is stuck
+    // in open condition
+    //
     pvsArray[3].shouldContactorBeOn = pvsArray[3].isHealthy &&
+                                      !pvsArray[4].isHealthy &&
                                         (g_DigInputs.DGOff || !g_DigInputs.DC48Available) &&
-                                        !pvsArray[0].isContactorStuck &&
-                                        !pvsArray[1].isContactorStuck &&
-                                        !pvsArray[2].isContactorStuck &&
-                                        !pvsArray[4].isContactorStuck;
-    pvsArray[4].shouldContactorBeOn = pvsArray[0].isHealthy &&
-                                        !pvsArray[3].isContactorStuck;
+                                        !pvsArray[0].isPrevContactorOn &&
+                                        !pvsArray[1].isPrevContactorOn &&
+                                        !pvsArray[2].isPrevContactorOn &&
+                                        !pvsArray[4].isPrevContactorOn;
+    pvsArray[4].shouldContactorBeOn = pvsArray[4].isHealthy &&
+                                        !pvsArray[3].isPrevContactorOn;
 
-    for (uint8_t i = 0; i < 5; i++)
+    // DEVNOTE: Follow break before make for all contactors
+    // DEVNOTE: There should be gap between turning off a contactor & then
+    // turning on other contactors
+    //
+    for (uint8_t i = 0; i < ARRAY_SIZE(pvsArray); i++)
     {
         if (!pvsArray[i].shouldContactorBeOn)
         {
             pvsArray[i].turnContactorOff();
         }
-        else if (remainingToBeTurnedOff == 0)
+        else
         {
             pvsArray[i].turnContactorOn();
         }
-        else
+        
+        // Even if feedback is not available, wait for some time for contactor
+        // to actually change before marking it as changed
+        //
+        bool feedbackNotMatches =
+            ((*pvsArray[i].contactorFeedback != pvsArray[i].shouldContactorBeOn) &&
+                g_DigInputs.DC48Available);
+        bool contactorStateChanged =
+            pvsArray[i].shouldContactorBeOn != pvsArray[i].isPrevContactorOn;
+
+        // UNDONE: If feedback doesn't match (i.e. suddenly the contactor
+        // goes stuck-open or stuck-close), we will have some delay before
+        // we do anything about it
+        //
+        if (contactorStateChanged)
         {
-            continue;
-        }
-        if ((*pvsArray[i].contactorFeedback != pvsArray[i].shouldContactorBeOn) &&
-                g_DigInputs.DC48Available)
-        {
-            if (pvsArray[i].ContactorChangeTimeLeft)
+            if ((pvsArray[i].contactorStuckState == CONTACTOR_NOT_STUCK) ||
+                !feedbackNotMatches)
             {
-                pvsArray[i].ContactorChangeTimeLeft--;
+                if (pvsArray[i].ContactorChangeTimeLeft)
+                {
+                    pvsArray[i].ContactorChangeTimeLeft--;
+                }
             }
+            else
+            {
+                pvsArray[i].ContactorChangeTimeLeft = MAX_CONTACTOR_CHANGE_LATENCY;
+            }
+
             if (!pvsArray[i].ContactorChangeTimeLeft)
             {
                 pvsArray[i].ContactorChangeTimeLeft = MAX_CONTACTOR_CHANGE_LATENCY;
-                pvsArray[i].isContactorStuck = true;
+                if (feedbackNotMatches)
+                {
+                    pvsArray[i].isPrevContactorOn = *pvsArray[i].contactorFeedback;
+                    pvsArray[i].contactorStuckState = *pvsArray[i].contactorFeedback ?
+                            CONTACTOR_STUCK_IN_CLOSED : CONTACTOR_STUCK_IN_OPEN;
+                }
+                else
+                {
+                    pvsArray[i].isPrevContactorOn = pvsArray[i].shouldContactorBeOn;
+                    pvsArray[i].contactorStuckState = CONTACTOR_NOT_STUCK;
+                }
             }
+        }
+        else if (!feedbackNotMatches)
+        {
+            pvsArray[i].ContactorChangeTimeLeft = MAX_CONTACTOR_CHANGE_LATENCY;
+            pvsArray[i].isPrevContactorOn = pvsArray[i].shouldContactorBeOn;
+            pvsArray[i].contactorStuckState = CONTACTOR_NOT_STUCK;
         }
         else
         {
-            pvsArray[i].ContactorChangeTimeLeft = MAX_CONTACTOR_CHANGE_LATENCY;
-            pvsArray[i].isContactorStuck = false;
+            // UNDONE: Add logic here
+            //
         }
     }
 #undef MAX_CONTACTOR_CHANGE_LATENCY

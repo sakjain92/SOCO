@@ -28,7 +28,7 @@ void Metrology(void)
   
   uint16_t tempc;
   float TempFloat,FloatMin,FloatMax;
-  
+
   for(tempc=0;tempc<6;tempc++)
   {
     *((float *)&VIOffset.VolRPhase+tempc) +=(*((float *)&IntDataSave.OffsetVolRPhase+tempc)/NO_OF_SAMPLES);

@@ -69,6 +69,8 @@ float TempFloat;
   
  if(FlagDirectCalibration==CALIBRATE_L_PF)
  {
+   // UNDONE: Should the guard rails be on average or instant parameters
+   //
    if(
      (InstantPara.CurrentR >I_L_LOWER_LIMIT) && (InstantPara.CurrentR<I_L_UPPER_LIMIT)&&
       (InstantPara.CurrentY >I_L_LOWER_LIMIT)&& (InstantPara.CurrentY<I_L_UPPER_LIMIT)&&
