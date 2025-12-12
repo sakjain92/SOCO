@@ -28,11 +28,17 @@ void Metrology(void)
   
   uint16_t tempc;
   float TempFloat,FloatMin,FloatMax;
+  
+  VIOffset.VolRPhase += IntDataSave.OffsetVolRPhase/NO_OF_SAMPLES;
+  VIOffset.VolYPhase += IntDataSave.OffsetVolYPhase/NO_OF_SAMPLES;
+  VIOffset.VolBPhase += IntDataSave.OffsetVolBPhase/NO_OF_SAMPLES;
+  VIOffset.CurRPhase += IntDataSave.OffsetCurRPhase/NO_OF_SAMPLES;
+  VIOffset.CurYPhase += IntDataSave.OffsetCurYPhase/NO_OF_SAMPLES;
+  VIOffset.CurBPhase += IntDataSave.OffsetCurBPhase/NO_OF_SAMPLES;
+  VIOffset.VolRSolarPhase += IntDataSave.OffsetVolRSolarPhase/NO_OF_SAMPLES;
+  VIOffset.VolYSolarPhase += IntDataSave.OffsetVolYSolarPhase/NO_OF_SAMPLES;
+  VIOffset.VolBSolarPhase += IntDataSave.OffsetVolBSolarPhase/NO_OF_SAMPLES;
 
-  for(tempc=0;tempc<6;tempc++)
-  {
-    *((float *)&VIOffset.VolRPhase+tempc) +=(*((float *)&IntDataSave.OffsetVolRPhase+tempc)/NO_OF_SAMPLES);
-  }
   if(IntDataSave.RPhasePower<0)InterruptFlag |=INT_R_PHASE_REV;
   else InterruptFlag &=~INT_R_PHASE_REV;
   if(IntDataSave.YPhasePower<0)InterruptFlag |=INT_Y_PHASE_REV;
@@ -104,7 +110,28 @@ void Metrology(void)
   }
   
   if(InstantPara.VolBR<MIN_VOL_LIMIT_PH_PH)InstantPara.VolBR=0;
+ 
+ if(InstantPara.VolRSolar<MIN_VOL_LIMIT)
+  {
+    InstantPara.VolRSolar=0;
+  }
   
+  if(InstantPara.VolRYSolar<MIN_VOL_LIMIT_PH_PH)InstantPara.VolRYSolar=0;
+  
+  if(InstantPara.VolYSolar<MIN_VOL_LIMIT)
+  {
+    InstantPara.VolY=0;
+  }
+  
+  if(InstantPara.VolYBSolar<MIN_VOL_LIMIT_PH_PH)InstantPara.VolYBSolar=0;
+  
+  if(InstantPara.VolBSolar<MIN_VOL_LIMIT)
+  {
+    InstantPara.VolBSolar=0;
+  }
+  
+  if(InstantPara.VolBRSolar<MIN_VOL_LIMIT_PH_PH)InstantPara.VolBRSolar=0;
+
   // Min/Max
   /*
   InstantPara.CurrentR=1.234;
@@ -592,5 +619,12 @@ void CalculateVoCur(void)
   InstantPara.VolYB=PH_VOLTAGE_COEFF*sqrt(IntDataSave.VolYBPhPh); 
   InstantPara.VolB=VOLTAGE_COEFF*sqrt(IntDataSave.VolBPhase); 
   InstantPara.VolBR=PH_VOLTAGE_COEFF*sqrt(IntDataSave.VolBRPhPh); 
-  InstantPara.CurrentN=NEU_CURRENT_COEFF*sqrt(IntDataSave.CurNeutral); 
+  InstantPara.CurrentN=NEU_CURRENT_COEFF*sqrt(IntDataSave.CurNeutral);
+
+  InstantPara.VolRSolar=VOLTAGE_COEFF*sqrt(IntDataSave.VolRSolarPhase); 
+  InstantPara.VolRYSolar=PH_VOLTAGE_COEFF*sqrt(IntDataSave.VolRYSolarPhPh); 
+  InstantPara.VolYSolar=VOLTAGE_COEFF*sqrt(IntDataSave.VolYSolarPhase); 
+  InstantPara.VolYBSolar=PH_VOLTAGE_COEFF*sqrt(IntDataSave.VolYBSolarPhPh); 
+  InstantPara.VolBSolar=VOLTAGE_COEFF*sqrt(IntDataSave.VolBSolarPhase); 
+  InstantPara.VolBRSolar=PH_VOLTAGE_COEFF*sqrt(IntDataSave.VolBRSolarPhPh); 
 }

@@ -299,12 +299,17 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 #define DIGIT_5    4
 #define DIGIT_6    4
 
-#define LED_OFF    0
-#define LED_R      1
-#define LED_Y      2
-#define LED_B      3
-
-
+#define LED_OFF         0
+#define LED_GRID_NONE   1
+#define LED_GRID_R      2
+#define LED_GRID_Y      3
+#define LED_GRID_B      4
+#define LED_GRID_TOTAL  5
+#define LED_SOLAR_NONE  6
+#define LED_SOLAR_R     7
+#define LED_SOLAR_Y     8
+#define LED_SOLAR_B     9
+#define LED_SOLAR_TOTAL 10
 
 #define SWITCH_OFF_LED2_R               GPIOD->BSRR = PORT_BIT_0 
 #define SWITCH_ON_LED2_R                GPIOD->BRR  = PORT_BIT_0
@@ -417,5 +422,11 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 #define    ADC_VY1              3
 #define    ADC_IB1              4
 #define    ADC_VB1              5
+#define    ADC_IR_SOLAR         6
+#define    ADC_VR_SOLAR         7
+#define    ADC_IY_SOLAR         8
+#define    ADC_VY_SOLAR         9
+#define    ADC_IB_SOLAR        10
+#define    ADC_VB_SOLAR        11
 
 #endif

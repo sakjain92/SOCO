@@ -209,32 +209,83 @@ void LedProcess(uint8_t LED_Type)
   switch(LED_Type)
   {
     case LED_OFF:
+      SWITCH_OFF_GRID_DISPLAY;
+      SWITCH_OFF_SOLAR_DISPLAY;
       SWITCH_OFF_LED2_R;
       SWITCH_OFF_LED2_G;
       SWITCH_OFF_LED2_B;
       break;
-    case LED_R:
+    case LED_GRID_NONE:
+      SWITCH_ON_GRID_DISPLAY;
+      SWITCH_OFF_SOLAR_DISPLAY;
+      SWITCH_OFF_LED2_R;
+      SWITCH_OFF_LED2_G;
+      SWITCH_OFF_LED2_B;
+      break;
+    case LED_GRID_R:
+      SWITCH_ON_GRID_DISPLAY;
+      SWITCH_OFF_SOLAR_DISPLAY;
       SWITCH_ON_LED2_R;
       SWITCH_OFF_LED2_G;
       SWITCH_OFF_LED2_B;
       break;
-    case LED_Y:
+    case LED_GRID_Y:
+      SWITCH_ON_GRID_DISPLAY;
+      SWITCH_OFF_SOLAR_DISPLAY;
       SWITCH_ON_LED2_R;
       SWITCH_ON_LED2_G;
       SWITCH_OFF_LED2_B;
       break;
-    case LED_B:
+    case LED_GRID_B:
+      SWITCH_ON_GRID_DISPLAY;
+      SWITCH_OFF_SOLAR_DISPLAY;
       SWITCH_OFF_LED2_R;
       SWITCH_OFF_LED2_G;
       SWITCH_ON_LED2_B;
       break;
-    default:
+    case LED_GRID_TOTAL:
+      SWITCH_ON_GRID_DISPLAY;
+      SWITCH_OFF_SOLAR_DISPLAY;
+      SWITCH_ON_LED2_R;
+      SWITCH_ON_LED2_G;
+      SWITCH_ON_LED2_B;
+      break;
+    case LED_SOLAR_NONE:
+      SWITCH_OFF_GRID_DISPLAY;
+      SWITCH_ON_SOLAR_DISPLAY;
       SWITCH_OFF_LED2_R;
       SWITCH_OFF_LED2_G;
       SWITCH_OFF_LED2_B;
-    
+      break;
+    case LED_SOLAR_R:
+      SWITCH_OFF_GRID_DISPLAY;
+      SWITCH_ON_SOLAR_DISPLAY;
+      SWITCH_ON_LED2_R;
+      SWITCH_OFF_LED2_G;
+      SWITCH_OFF_LED2_B;
+      break;
+    case LED_SOLAR_Y:
+      SWITCH_OFF_GRID_DISPLAY;
+      SWITCH_ON_SOLAR_DISPLAY;
+      SWITCH_ON_LED2_R;
+      SWITCH_ON_LED2_G;
+      SWITCH_OFF_LED2_B;
+      break;
+    case LED_SOLAR_B:
+      SWITCH_OFF_GRID_DISPLAY;
+      SWITCH_ON_SOLAR_DISPLAY;
+      SWITCH_OFF_LED2_R;
+      SWITCH_OFF_LED2_G;
+      SWITCH_ON_LED2_B;
+      break;
+    case LED_SOLAR_TOTAL:
+      SWITCH_OFF_GRID_DISPLAY;
+      SWITCH_ON_SOLAR_DISPLAY;
+      SWITCH_ON_LED2_R;
+      SWITCH_ON_LED2_G;
+      SWITCH_ON_LED2_B;
+      break;
   }
-  
 }
 
 void DisplayVariable(uint8_t DV_Decimal,uint8_t DV_NoDigit,uint8_t DV_Row,uint8_t DV_Digit, uint32_t DV_Variable,uint8_t LED_Type)
@@ -828,11 +879,11 @@ void StartCheckCTPolarity(void)
   
   for (uint8_t i=0;i<16;i++)BufferToDisplay[i]=0;
   if(InterruptFlag  & INT_R_PHASE_REV)
-    DisplayString(ROW_TOP,DIGIT_3,(uint8_t *)DIS_INV_R,LED_R);
+    DisplayString(ROW_TOP,DIGIT_3,(uint8_t *)DIS_INV_R,LED_GRID_R);
   if(InterruptFlag  & INT_Y_PHASE_REV);
-    DisplayString(ROW_TOP,DIGIT_2,(uint8_t *)DIS_INV_Y,LED_Y);
+    DisplayString(ROW_TOP,DIGIT_2,(uint8_t *)DIS_INV_Y,LED_GRID_Y);
   if(InterruptFlag  & INT_B_PHASE_REV);
-    DisplayString(ROW_TOP,DIGIT_1,(uint8_t *)DIS_INV_B,LED_B);
+    DisplayString(ROW_TOP,DIGIT_1,(uint8_t *)DIS_INV_B,LED_GRID_B);
   UpdateDisplay=1;
   DisplayScrollCounter=10; 
 }

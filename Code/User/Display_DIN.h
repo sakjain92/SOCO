@@ -69,50 +69,57 @@
 #define SCREEN_OLD_INT_STR              59
 #define SCREEN_OLD_INT_VAL              60
 
+// Solar Voltage
+#define SCREEN_VOL_LN_R_SOLAR           61
+#define SCREEN_VOL_LN_Y_SOLAR           62
+#define SCREEN_VOL_LN_B_SOLAR           63
+
   const uint8_t SCREEN_SEQ_3P_MAIN[]=  
   {
-   SCREEN_VOL_LN_R,             //3
-   SCREEN_VOL_LN_Y,             //4
-   SCREEN_VOL_LN_B,             //5
-   SCREEN_CUR_R,                //6
-   SCREEN_CUR_Y,                //7
-   SCREEN_CUR_B,                //8
-   SCREEN_NEU_CURR,             //9
-   SCREEN_W_R,                  //14
-   SCREEN_W_Y,                  //15
-   SCREEN_W_B,                  //16
-   SCREEN_SUM_W_3P,             //17
-   SCREEN_VA_R,                 //18
-   SCREEN_VA_Y,                 //19
-   SCREEN_VA_B,                 //20
-   SCREEN_SUM_VA_3P,            //21
-   SCREEN_VAR_R,                //22
-   SCREEN_VAR_Y,                //23
-   SCREEN_VAR_B,                //24
-   SCREEN_SUM_VAR_3P,           //25
-   SCREEN_PF_R,                 //26
-   SCREEN_PF_Y,                 //27
-   SCREEN_PF_B,                 //28
-   SCREEN_SUM_PF_3P,            //29
-   SCREEN_IMP_ENE_W_STR,        //30
-   SCREEN_IMP_ENE_W_VAL,        //31
-   SCREEN_IMP_ENE_VA_STR,       //32
-   SCREEN_IMP_ENE_VA_VAL,       //33
-   SCREEN_IMP_ENE_VAR_POS_STR,  //34
-   SCREEN_IMP_ENE_VAR_POS_VAL,  //35
-   SCREEN_IMP_ENE_VAR_NEG_STR,  //36
-   SCREEN_IMP_ENE_VAR_NEG_VAL,  //37
+   SCREEN_VOL_LN_R,             
+   SCREEN_VOL_LN_Y,             
+   SCREEN_VOL_LN_B, 
+   SCREEN_VOL_LN_R_SOLAR,
+   SCREEN_VOL_LN_B_SOLAR,
+   SCREEN_VOL_LN_Y_SOLAR,
+   SCREEN_CUR_R,                
+   SCREEN_CUR_Y,                
+   SCREEN_CUR_B,                
+   SCREEN_W_R,                  
+   SCREEN_W_Y,                  
+   SCREEN_W_B,                  
+   SCREEN_SUM_W_3P,             
+   SCREEN_VA_R,                 
+   SCREEN_VA_Y,                 
+   SCREEN_VA_B,                 
+   SCREEN_SUM_VA_3P,            
+   SCREEN_VAR_R,                
+   SCREEN_VAR_Y,                
+   SCREEN_VAR_B,                
+   SCREEN_SUM_VAR_3P,           
+   SCREEN_PF_R,                 
+   SCREEN_PF_Y,                 
+   SCREEN_PF_B,                 
+   SCREEN_SUM_PF_3P,            
+   SCREEN_IMP_ENE_W_STR,        
+   SCREEN_IMP_ENE_W_VAL,        
+   SCREEN_IMP_ENE_VA_STR,       
+   SCREEN_IMP_ENE_VA_VAL,       
+   SCREEN_IMP_ENE_VAR_POS_STR,  
+   SCREEN_IMP_ENE_VAR_POS_VAL,  
+   SCREEN_IMP_ENE_VAR_NEG_STR,  
+   SCREEN_IMP_ENE_VAR_NEG_VAL,  
    0XFF,
   };
   const uint8_t SCREEN_SEQ_OLD_DATA[]=
   {
-   SCREEN_IMP_OLD_ENE_W_STR,    //42
-   SCREEN_IMP_OLD_ENE_W_VAL,    //43
-   SCREEN_IMP_OLD_ENE_VA_STR,   //44
-   SCREEN_IMP_OLD_ENE_VA_VAL,   //45
-   SCREEN_IMP_OLD_ENE_VAR_POS_STR,//46
-   SCREEN_IMP_OLD_ENE_VAR_POS_VAL,//47
-   SCREEN_IMP_OLD_ENE_VAR_NEG_STR,//48
-   SCREEN_IMP_OLD_ENE_VAR_NEG_VAL,//49
+   SCREEN_IMP_OLD_ENE_W_STR,    
+   SCREEN_IMP_OLD_ENE_W_VAL,    
+   SCREEN_IMP_OLD_ENE_VA_STR,   
+   SCREEN_IMP_OLD_ENE_VA_VAL,   
+   SCREEN_IMP_OLD_ENE_VAR_POS_STR,
+   SCREEN_IMP_OLD_ENE_VAR_POS_VAL,
+   SCREEN_IMP_OLD_ENE_VAR_NEG_STR,
+   SCREEN_IMP_OLD_ENE_VAR_NEG_VAL,
    0XFF,
   };

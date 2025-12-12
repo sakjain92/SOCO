@@ -127,6 +127,27 @@
 // 93) Check stray current coming on mains current (~100mA) when solar voltage is applied
 // 94) Check SOCO sticker & switches alignment and check if it fits 
 // 95) Add 10nF capacitor near: all current & voltage measurement section + 10k series resistor after that + on all digital inputs (PFCs)
+// 96) We can use SDADC in single-ended mode to read many voltages (probably can read all voltages/currents in single ended mode but have to check the timing)
+// 97) Add separate Vref for currents also
+// 98) Add TVS near input of CTs. Also, make sure CTs can never be open. Also, all filtering of inputs should be wrt to Chassis right and not MCU ground? Also, add ferrite beads with surge protection on current and voltage protection
+// 99) Can modify the product to just run on 48VDC (Reduce MOV voltage and protect the circuit much better)
+// 100) We need to protect the power supply for Common mode surge (Route surge to earth/chassis)
+// 101) Check MOV in RS485 section is 175V and not 305V
+// 102) Can change MOV in DC 48V power supply to be 175V MOV (In ECON, also the BTS from 48V can be changed to 175V MOV instead of 320V MOV)
+// 103) For better MCU pin protection in current section, if 10K input impedence is not possible, can use a 1K ferrite bead for noise suppression
+// 98) We need to change R59 & R60 to be 6.2k
+// The equation of op-amp is as follows:
+// Vout = ((Rp + Rf)*(Rn*Vb + Rb*Vn)/(Rn + Rb) - Vp*Rf)/Rp (Note the output is inverted voltage so 180 phase shift)
+// Where Rp = Resistor on Phase input = 3 * 1Mohm
+// Rn = Resistor on Neutral input = 3 * 1 Mohm
+// Rb = Resistor on Bias voltage = 6.2k 
+// Rf = Feedback resistor = 6.2k
+// Vp = Phase voltage wrt to ground
+// Vn = Neutral voltage wrt to ground
+// Vb = Bias voltage = 1.35V
+// For equation to make sense, it's important that Rn = Rp && Rf = Rb. But note that for this we also need to factor in tolerance of resistors and TCR if we want no fluctuation.
+// (I don't think there is any other way out to match the accuracy). We probably need 0.25% or 0.1% resistors for 0.5% class here for both MELF and 6.2k resistors.
+//
 //
 // NOTES:
 // 1) For Apparent power, we are using RMS (IEC 60038) instead of (IEC 61000-4-7) where we just measure first harmonics as we need to match energy with utility meter (and SMPS will have noise)
@@ -145,4 +166,8 @@
 // 7) Need to make a proper mechanical drawing of the encloure with all the mechanical details and find a good vendor for panel (Current panel manufacturer isn't great at quality)
 // 8) Take Mains voltage measurement from SPD terminals and power supply for controller also.
 // 9) We can potentially remove 2 MCB from panel to save cost. Also, do they need to be 6A or can they be lower rating.
+// 10) We can connect SPD remote indication & door lock indication to EMS box instead of our controller (saves 1 input + 1 output relay). Also, use 24VDC from output of EMS for running all PFCs instead of 48V as the 24V will be isolated and safer
+// 11) Is Panel door also need to be Earth? No components on it.
+// 12) Have to check if 25mm armoured cable can bend to go to terminal in panel (Get 25mm alumnium for testing)
+// 13) We also use ring type thimble. Should be okay but Jio specified only pin & boot type. Maybe that's for control wiring.
 //

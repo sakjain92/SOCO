@@ -190,13 +190,17 @@ float TempFloat;
    if(
      (InstantPara.VolR >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolR<VOLTAGE_HIGHER_LIMIT) &&  
       (InstantPara.VolY >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolY<VOLTAGE_HIGHER_LIMIT)&& 
-      (InstantPara.VolB >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolB<VOLTAGE_HIGHER_LIMIT) && 
+      (InstantPara.VolB >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolB<VOLTAGE_HIGHER_LIMIT) &&
       (InstantPara.CurrentR >I_H_LOWER_LIMIT) && (InstantPara.CurrentR<I_H_UPPER_LIMIT)&&
       (InstantPara.CurrentY >I_H_LOWER_LIMIT)&& (InstantPara.CurrentY<I_H_UPPER_LIMIT)&&
       (InstantPara.CurrentB >I_H_LOWER_LIMIT) && (InstantPara.CurrentB<I_H_UPPER_LIMIT)&&
       (InstantPara.TotalPowerR<PF_POWER_H_UPPER_LIMIT)&&(InstantPara.TotalPowerR>PF_POWER_H_LOWER_LIMIT)&&
       (InstantPara.TotalPowerY<PF_POWER_H_UPPER_LIMIT)&&(InstantPara.TotalPowerY>PF_POWER_H_LOWER_LIMIT)&&
-      (InstantPara.TotalPowerB<PF_POWER_H_UPPER_LIMIT)&&(InstantPara.TotalPowerB>PF_POWER_H_LOWER_LIMIT))  
+      (InstantPara.TotalPowerB<PF_POWER_H_UPPER_LIMIT)&&(InstantPara.TotalPowerB>PF_POWER_H_LOWER_LIMIT)&&
+      (InstantPara.VolRSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolRSolar<VOLTAGE_HIGHER_LIMIT) &&  
+      (InstantPara.VolYSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolYSolar<VOLTAGE_HIGHER_LIMIT)&& 
+      (InstantPara.VolBSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolBSolar<VOLTAGE_HIGHER_LIMIT)
+    )  
    {
 
       ProtectionReset();              
@@ -229,7 +233,11 @@ float TempFloat;
       (InstantPara.CurrentB >I_H_LOWER_LIMIT) && (InstantPara.CurrentB<I_H_UPPER_LIMIT)&&
       (InstantPara.TotalPowerR<PF_POWER_H_UPPER_LIMIT)&&(InstantPara.TotalPowerR>PF_POWER_H_LOWER_LIMIT)&&
       (InstantPara.TotalPowerY<PF_POWER_H_UPPER_LIMIT)&&(InstantPara.TotalPowerY>PF_POWER_H_LOWER_LIMIT)&&
-      (InstantPara.TotalPowerB<PF_POWER_H_UPPER_LIMIT)&&(InstantPara.TotalPowerB>PF_POWER_H_LOWER_LIMIT))  
+      (InstantPara.TotalPowerB<PF_POWER_H_UPPER_LIMIT)&&(InstantPara.TotalPowerB>PF_POWER_H_LOWER_LIMIT) &&
+      (InstantPara.VolRSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolRSolar<VOLTAGE_HIGHER_LIMIT) &&  
+      (InstantPara.VolYSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolYSolar<VOLTAGE_HIGHER_LIMIT)&& 
+      (InstantPara.VolBSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolBSolar<VOLTAGE_HIGHER_LIMIT)
+    )  
 
    {
 
@@ -249,6 +257,12 @@ float TempFloat;
       CalBuffer.IY_HIGH_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_HIGH*(float)CalBuffer.IY_HIGH_GAIN)/CalCurY);
       
       CalBuffer.IB_HIGH_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_HIGH*(float)CalBuffer.IB_HIGH_GAIN)/CalCurB);
+
+      CalBuffer.VR_SOLAR_240_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_VOLTAGE_SETTING_HIGH*CalBuffer.VR_SOLAR_240_GAIN)/CalVolRSolar);
+      
+      CalBuffer.VY_SOLAR_240_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_VOLTAGE_SETTING_HIGH*CalBuffer.VY_SOLAR_240_GAIN)/CalVolYSolar);
+      
+      CalBuffer.VB_SOLAR_240_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_VOLTAGE_SETTING_HIGH*CalBuffer.VB_SOLAR_240_GAIN)/CalVolBSolar);
    }
       
    else DisplayImproperSettings();
@@ -278,6 +292,10 @@ void AccumulateDataForCalibration(void)
    CalPowR+=InstantPara.TotalPowerR;
    CalPowY+=InstantPara.TotalPowerY;
    CalPowB+=InstantPara.TotalPowerB;
+
+   CalVolRSolar+=InstantPara.VolRSolar;
+   CalVolYSolar+=InstantPara.VolYSolar;
+   CalVolBSolar+=InstantPara.VolBSolar;
  }
 
 /*
@@ -296,6 +314,10 @@ void ClearCalAccumulatedData(void)
    CalPowR=0;
    CalPowY=0;
    CalPowB=0;
+
+   CalVolRSolar=0;
+   CalVolYSolar=0;
+   CalVolBSolar=0;
 }
 
 /*

@@ -28,6 +28,11 @@ struct SAMPLE   RVolSample;
 struct SAMPLE   YVolSample;
 struct SAMPLE   BVolSample;
 
+struct SAMPLE   RSolarVolSample;
+struct SAMPLE   YSolarVolSample;
+struct SAMPLE   BSolarVolSample;
+
+
 extern volatile uint16_t TimeOutCommTx;
 
 uint16_t OneSecCounter;
@@ -38,6 +43,7 @@ void ProcessMainInterrupt(void)
 {
 
   float IntVolRPhase,IntVolYPhase,IntVolBPhase;
+  float IntVolRSolarPhase,IntVolYSolarPhase,IntVolBSolarPhase;
   float IntCurRPhase,IntCurYPhase,IntCurBPhase;
   float IntNeuCurrent;
   float TempGainMult;
@@ -106,6 +112,23 @@ void ProcessMainInterrupt(void)
   IntCurBPhase  =(float)TempInt-VIOffset.CurBPhase;
   IntCurBPhase *=WorkingCopyGain.IB_GAIN;
 
+  TempInt=AdcDataInArray[ADC_VR_SOLAR];
+  TempInt=TempInt-0x1000;
+  IntVolRSolarPhase  =(float)TempInt-VIOffset.VolRSolarPhase;
+  IntVolRSolarPhase *=WorkingCopyGain.VR_SOLAR_GAIN;
+
+  TempInt=AdcDataInArray[ADC_VY_SOLAR];
+  TempInt=TempInt-0x1000;
+  IntVolYSolarPhase  =(float)TempInt-VIOffset.VolYSolarPhase;
+  IntVolYSolarPhase *=WorkingCopyGain.VY_SOLAR_GAIN;
+
+  TempInt=AdcDataInArray[ADC_VB_SOLAR];
+  TempInt=TempInt-0x1000;
+  IntVolBSolarPhase  =(float)TempInt-VIOffset.VolBSolarPhase;
+  IntVolBSolarPhase *=WorkingCopyGain.VB_SOLAR_GAIN;
+
+  // UNDONE: Do the current & power calculation for solar
+
   ADC1->CR2 |=ADC_CR2_SWSTART;   // Start New conversion 
  
   // UNDONE: There is a bug in this second order butterworth filter with cutoff
@@ -171,7 +194,36 @@ void ProcessMainInterrupt(void)
   BVolSample.PrevIn_1=IntVolBPhase;
   IntVolBPhase=TempGainMult;
   
-  
+  TempGainMult=(RSolarVolSample.PrevIn_2+IntVolRSolarPhase)*FILT_600_COEFF_X1+\
+                RSolarVolSample.PrevIn_1*FILT_600_COEFF_X2+\
+                RSolarVolSample.PrevOut_1*FILT_600_COEFF_Y1-\
+                RSolarVolSample.PrevOut_2*FILT_600_COEFF_Y2;
+  RSolarVolSample.PrevOut_2=RSolarVolSample.PrevOut_1;
+  RSolarVolSample.PrevOut_2=TempGainMult;
+  RSolarVolSample.PrevIn_2=RSolarVolSample.PrevIn_1;
+  RSolarVolSample.PrevIn_1=IntVolRSolarPhase;
+  IntVolRSolarPhase=TempGainMult;
+
+  TempGainMult=(YSolarVolSample.PrevIn_2+IntVolYSolarPhase)*FILT_600_COEFF_X1+\
+                YSolarVolSample.PrevIn_1*FILT_600_COEFF_X2+\
+                YSolarVolSample.PrevOut_1*FILT_600_COEFF_Y1-\
+                YSolarVolSample.PrevOut_2*FILT_600_COEFF_Y2;
+  YSolarVolSample.PrevOut_2=YSolarVolSample.PrevOut_1;
+  YSolarVolSample.PrevOut_2=TempGainMult;
+  YSolarVolSample.PrevIn_2=YSolarVolSample.PrevIn_1;
+  YSolarVolSample.PrevIn_1=IntVolYSolarPhase;
+  IntVolYSolarPhase=TempGainMult;
+
+  TempGainMult=(BSolarVolSample.PrevIn_2+IntVolBSolarPhase)*FILT_600_COEFF_X1+\
+                BSolarVolSample.PrevIn_1*FILT_600_COEFF_X2+\
+                BSolarVolSample.PrevOut_1*FILT_600_COEFF_Y1-\
+                BSolarVolSample.PrevOut_2*FILT_600_COEFF_Y2;
+  BSolarVolSample.PrevOut_2=BSolarVolSample.PrevOut_1;
+  BSolarVolSample.PrevOut_2=TempGainMult;
+  BSolarVolSample.PrevIn_2=BSolarVolSample.PrevIn_1;
+  BSolarVolSample.PrevIn_1=IntVolBSolarPhase;
+  IntVolBSolarPhase=TempGainMult;
+
   OneSecCounter++;
   if(SampleCounter==(NO_OF_SAMPLES-1))
   {
@@ -208,12 +260,19 @@ void ProcessMainInterrupt(void)
     IntDataSave.OffsetCurRPhase=IntDataSum.OffsetCurRPhase;
     IntDataSave.OffsetCurYPhase=IntDataSum.OffsetCurYPhase;
     IntDataSave.OffsetCurBPhase=IntDataSum.OffsetCurBPhase;
-      
-    for(i=0;i<21;i++)
-    {
-      *(&IntDataSum.VolRPhase+i)=0;
-    }
-    
+     
+    IntDataSave.VolRSolarPhase=IntDataSum.VolRSolarPhase;
+    IntDataSave.VolYSolarPhase=IntDataSum.VolYSolarPhase;
+    IntDataSave.VolBSolarPhase=IntDataSum.VolBSolarPhase;
+    IntDataSave.VolRYSolarPhPh=IntDataSum.VolRYSolarPhPh;
+    IntDataSave.VolYBSolarPhPh=IntDataSum.VolYBSolarPhPh;
+    IntDataSave.VolBRSolarPhPh=IntDataSum.VolBRSolarPhPh;
+    IntDataSave.OffsetVolRSolarPhase=IntDataSum.OffsetVolRSolarPhase;
+    IntDataSave.OffsetVolYSolarPhase=IntDataSum.OffsetVolYSolarPhase;
+    IntDataSave.OffsetVolBSolarPhase=IntDataSum.OffsetVolBSolarPhase;
+
+    memset(&IntDataSum, 0, sizeof(IntDataSum));
+ 
     for(i=0;i<50;i++)
     {
       
@@ -295,7 +354,6 @@ void ProcessMainInterrupt(void)
   IntDataSum.OffsetCurYPhase +=IntCurYPhase;
   IntDataSum.OffsetCurBPhase +=IntCurBPhase;
   
-  
    
   IntDataSum.CurRPhase += IntCurRPhase*IntCurRPhase;
   IntDataSum.CurYPhase += IntCurYPhase*IntCurYPhase;
@@ -307,11 +365,8 @@ void ProcessMainInterrupt(void)
   
   TempGainMult=(IntVolRPhase-IntVolYPhase);
   IntDataSum.VolRYPhPh += TempGainMult*TempGainMult;
-
-  
   TempGainMult=(IntVolBPhase-IntVolRPhase);
   IntDataSum.VolBRPhPh += TempGainMult*TempGainMult;
-  
   TempGainMult=(IntVolBPhase-IntVolYPhase);
   IntDataSum.VolYBPhPh += TempGainMult*TempGainMult;
   
@@ -325,7 +380,6 @@ void ProcessMainInterrupt(void)
   else IntNeuCurrent +=IntCurBPhase;
   
   IntDataSum.CurNeutral +=IntNeuCurrent*IntNeuCurrent;
-  
   
 // Phase compensation  y [n] = x[n]+ b x[n -1]
   // This is probably phase compensation for the phase shift introduced
@@ -352,6 +406,21 @@ void ProcessMainInterrupt(void)
   
   IntDataSum.YRPower3P3W +=IntVolYPhase*IntCurRPhase; //in case of 3P3W
   IntDataSum.YBPower3P3W +=IntVolYPhase*IntCurBPhase; //in case of 3P3W
+
+  IntDataSum.OffsetVolRSolarPhase +=IntVolRSolarPhase;
+  IntDataSum.OffsetVolYSolarPhase +=IntVolYSolarPhase;
+  IntDataSum.OffsetVolBSolarPhase +=IntVolBSolarPhase;
+  
+  IntDataSum.VolRSolarPhase += IntVolRSolarPhase*IntVolRSolarPhase;
+  IntDataSum.VolYSolarPhase += IntVolYSolarPhase*IntVolYSolarPhase;
+  IntDataSum.VolBSolarPhase += IntVolBSolarPhase*IntVolBSolarPhase;
+
+  TempGainMult=(IntVolRSolarPhase-IntVolYSolarPhase);
+  IntDataSum.VolRYSolarPhPh += TempGainMult*TempGainMult;
+  TempGainMult=(IntVolBSolarPhase-IntVolRSolarPhase);
+  IntDataSum.VolBRSolarPhPh += TempGainMult*TempGainMult;
+  TempGainMult=(IntVolBSolarPhase-IntVolYSolarPhase);
+  IntDataSum.VolYBSolarPhPh += TempGainMult*TempGainMult;
 
   // Summation for FFT Purpose
   
@@ -620,11 +689,7 @@ void ClearInterruptVariables(void)
 {
   uint32_t i;
   SampleCounter=0;
-  for(i=0;i<11;i++)*(&IntDataSum.VolRPhase+i)=0;
-
-  for(i=0;i<3;i++)*(&IntDataSum.VolRYPhPh+i)=0;
-
-  for(i=0;i<6;i++)*(&IntDataSum.OffsetVolRPhase+i)=0;
+  memset(&IntDataSum, 0, sizeof(IntDataSum));
 
   for(i=0;i<50;i++)
   {

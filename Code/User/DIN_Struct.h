@@ -178,186 +178,186 @@ const struct object Screen[61][3]=
 {
 // SCREEN 0: Line to Line Voltage 3P RY
   {
-      { DATA_TYPE_STRING,       0,                      0,      0,                      DIGIT_2,         StrRY,         LED_OFF   },   
-      { DATA_TYPE_VARIABLE,     &InstantPara.VolRY,     4,      DIS_VAL_VOLTAGE,        DIGIT_3,         0,             LED_OFF   },
-      { 0xff,                   0,                      0,     0,                       DIGIT_3,         0,             0         }
+      { DATA_TYPE_STRING,       0,                      0,      0,                      DIGIT_2,         StrRY,         LED_GRID_NONE   },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.VolRY,     4,      DIS_VAL_VOLTAGE,        DIGIT_3,         0,             LED_GRID_NONE   },
+      { 0xff,                   0,                      0,     0,                       DIGIT_3,         0,             0               }
   },
   // SCREEN 1: Line to Line Voltage 3P YB
   {
-      { DATA_TYPE_STRING,       0,                      0,      0,                      DIGIT_2,         StrYB,         LED_OFF   }, 
-      { DATA_TYPE_VARIABLE,     &InstantPara.VolYB,     4,      DIS_VAL_VOLTAGE,        DIGIT_3,         0,             LED_OFF   },
-      { 0xff,                   0,                      0,     0,                       DIGIT_3,         0,             0         }
+      { DATA_TYPE_STRING,       0,                      0,      0,                      DIGIT_2,         StrYB,         LED_GRID_NONE   }, 
+      { DATA_TYPE_VARIABLE,     &InstantPara.VolYB,     4,      DIS_VAL_VOLTAGE,        DIGIT_3,         0,             LED_GRID_NONE   },
+      { 0xff,                   0,                      0,     0,                       DIGIT_3,         0,             0               }
   },
   // SCREEN 2: Line to Line Voltage 3P BR
   {
-      { DATA_TYPE_STRING,       0,                      0,      0,                      DIGIT_2,         StrBR,         LED_OFF   },
-      { DATA_TYPE_VARIABLE,     &InstantPara.VolBR,     4,      DIS_VAL_VOLTAGE,        DIGIT_3,         0,             LED_OFF   },
-      { 0xff,                   0,                      0,     0,                       DIGIT_3,         0,             0         }
+      { DATA_TYPE_STRING,       0,                      0,      0,                      DIGIT_2,         StrBR,         LED_GRID_NONE   },
+      { DATA_TYPE_VARIABLE,     &InstantPara.VolBR,     4,      DIS_VAL_VOLTAGE,        DIGIT_3,         0,             LED_GRID_NONE   },
+      { 0xff,                   0,                      0,     0,                       DIGIT_3,         0,             0               }
   },
  
   // SCREEN 3:  Line to Neutral Voltage 3P R
   {
-      { DATA_TYPE_STRING,       0,                      0,      0,                      DIGIT_2,         StrV,          LED_R   },   
-      { DATA_TYPE_VARIABLE,     &InstantPara.VolR,      4,      DIS_VAL_VOLTAGE,        DIGIT_3,         0,             LED_R   },
-      { 0xff,                   0,                      0,      0,                      DIGIT_3,         0,             0       }
+      { DATA_TYPE_STRING,       0,                      0,      0,                      DIGIT_2,         StrV,          LED_GRID_R      },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.VolR,      4,      DIS_VAL_VOLTAGE,        DIGIT_3,         0,             LED_GRID_R      },
+      { 0xff,                   0,                      0,      0,                      DIGIT_3,         0,             0               }
   },
   // SCREEN 4:  Line to Neutral Voltage 3P Y
   {
-      { DATA_TYPE_STRING,       0,                      0,      0,                      DIGIT_2,         StrV,          LED_Y   },   
-      { DATA_TYPE_VARIABLE,     &InstantPara.VolY,      4,      DIS_VAL_VOLTAGE,        DIGIT_3,         0,             LED_Y   },
-      { 0xff,                   0,                      0,      0,                      DIGIT_3,         0,             LED_Y   }
+      { DATA_TYPE_STRING,       0,                      0,      0,                      DIGIT_2,         StrV,          LED_GRID_Y      },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.VolY,      4,      DIS_VAL_VOLTAGE,        DIGIT_3,         0,             LED_GRID_Y      },
+      { 0xff,                   0,                      0,      0,                      DIGIT_3,         0,             0,              }
   },
   // SCREEN 5:  Line to Neutral Voltage 3P B
   {
-      { DATA_TYPE_STRING,       0,                      0,      0,                      DIGIT_2,         StrV,          LED_B   },   
-      { DATA_TYPE_VARIABLE,     &InstantPara.VolB,      4,      DIS_VAL_VOLTAGE,        DIGIT_3,         0,             LED_B   },
-      { 0xff,                   0,                      0,      0,                      DIGIT_3,         0,             0       }
+      { DATA_TYPE_STRING,       0,                      0,      0,                      DIGIT_2,         StrV,          LED_GRID_B      },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.VolB,      4,      DIS_VAL_VOLTAGE,        DIGIT_3,         0,             LED_GRID_B      },
+      { 0xff,                   0,                      0,      0,                      DIGIT_3,         0,             0               }
   },
   
   // SCREEN 6: Current 3P R
   {
-      { DATA_TYPE_STRING,       0,                      0,      0,                      DIGIT_2,         StrA,          LED_R   },   
-      { DATA_TYPE_VARIABLE,     &InstantPara.CurrentR,  4,      DIS_VAL_CURRENT,        DIGIT_3,         0,             LED_R   },
-      { 0xff,                   0,                      0,      0,                      DIGIT_3,         0,             LED_R   }
+      { DATA_TYPE_STRING,       0,                      0,      0,                      DIGIT_2,         StrA,          LED_GRID_R      },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.CurrentR,  4,      DIS_VAL_CURRENT,        DIGIT_3,         0,             LED_GRID_R      },
+      { 0xff,                   0,                      0,      0,                      DIGIT_3,         0,             0,              }
   },
   // SCREEN 7: Current 3P Y
   {
-      { DATA_TYPE_STRING,       0,                      0,      0,                      DIGIT_2,         StrA,          LED_Y   },   
-      { DATA_TYPE_VARIABLE,     &InstantPara.CurrentY,  4,      DIS_VAL_CURRENT,        DIGIT_3,         0,             LED_Y   },
-      { 0xff,                   0,                      0,      0,                      DIGIT_3,         0,             LED_Y   }
+      { DATA_TYPE_STRING,       0,                      0,      0,                      DIGIT_2,         StrA,          LED_GRID_Y      },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.CurrentY,  4,      DIS_VAL_CURRENT,        DIGIT_3,         0,             LED_GRID_Y      },
+      { 0xff,                   0,                      0,      0,                      DIGIT_3,         0,             0,              }
   },
   // SCREEN 8: Current 3P B
   {
-      { DATA_TYPE_STRING,       0,                      0,      0,                      DIGIT_2,         StrA,          LED_B   },   
-      { DATA_TYPE_VARIABLE,     &InstantPara.CurrentB,  4,      DIS_VAL_CURRENT,        DIGIT_3,         0,             LED_B   },
-      { 0xff,                   0,                      0,      0,                      DIGIT_3,         0,             LED_B   }
+      { DATA_TYPE_STRING,       0,                      0,      0,                      DIGIT_2,         StrA,          LED_GRID_B      },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.CurrentB,  4,      DIS_VAL_CURRENT,        DIGIT_3,         0,             LED_GRID_B      },
+      { 0xff,                   0,                      0,      0,                      DIGIT_3,         0,             LED_GRID_B      }
   },
  // SCREEN 9: Neutral Current 3P
  {
-      { DATA_TYPE_STRING,       0,                      0,      0,                      DIGIT_2,         StrNA,         LED_OFF }, 
-      { DATA_TYPE_VARIABLE,     &InstantPara.CurrentN,  4,      DIS_VAL_CURRENT,        DIGIT_3,         0,             LED_OFF },
-      { 0xff,                   0,                      0,     0,                       DIGIT_3,         0,             LED_OFF }
+      { DATA_TYPE_STRING,       0,                      0,      0,                      DIGIT_2,         StrNA,         LED_GRID_NONE   }, 
+      { DATA_TYPE_VARIABLE,     &InstantPara.CurrentN,  4,      DIS_VAL_CURRENT,        DIGIT_3,         0,             LED_GRID_NONE   },
+      { 0xff,                   0,                      0,     0,                       DIGIT_3,         0,             0 }
   },
   // SCREEN 10: Average Current 3P
   {
-      { DATA_TYPE_STRING,       0,                      0,      0,                      DIGIT_2,         StrAA,         LED_OFF }, 
-      { DATA_TYPE_VARIABLE,     &InstantPara.AvgCurr,   4,      DIS_VAL_CURRENT,        DIGIT_3,         0,             LED_OFF },
+      { DATA_TYPE_STRING,       0,                      0,      0,                      DIGIT_2,         StrAA,         LED_GRID_NONE }, 
+      { DATA_TYPE_VARIABLE,     &InstantPara.AvgCurr,   4,      DIS_VAL_CURRENT,        DIGIT_3,         0,             LED_GRID_NONE },
       { 0xff,                   0,                      0,     0,                       DIGIT_3,         0,             LED_OFF }
   },
  // SCREEN 11: frequency
   {
-      { DATA_TYPE_STRING,       0,                      0,      0,                      DIGIT_2,         StrHZ,         LED_OFF }, 
-      { DATA_TYPE_VARIABLE,     &InstantPara.Frequency, 4,      DIS_VAL_FREQ,           DIGIT_3,         0,             LED_OFF },
+      { DATA_TYPE_STRING,       0,                      0,      0,                      DIGIT_2,         StrHZ,         LED_GRID_NONE }, 
+      { DATA_TYPE_VARIABLE,     &InstantPara.Frequency, 4,      DIS_VAL_FREQ,           DIGIT_3,         0,             LED_GRID_NONE },
       { 0xff,                   0,                      0,      0 ,                     DIGIT_3,         0,             LED_OFF }
   },
   // SCREEN 12: Vol Unbalance
   {
-      { DATA_TYPE_STRING,       0,                      0,      0,                      DIGIT_2,         StrUV,         LED_OFF }, 
-      { DATA_TYPE_VARIABLE,     &InstantPara.VolUnb,    3,      DIS_VAL_UNB,            DIGIT_3,         0,             LED_OFF },
+      { DATA_TYPE_STRING,       0,                      0,      0,                      DIGIT_2,         StrUV,         LED_GRID_NONE }, 
+      { DATA_TYPE_VARIABLE,     &InstantPara.VolUnb,    3,      DIS_VAL_UNB,            DIGIT_3,         0,             LED_GRID_NONE },
       { 0xff,                   0,                      0,      0,                      DIGIT_3,         0,             0       }
   },
   // SCREEN 13: Current Unbalance
   {
-      { DATA_TYPE_STRING,       0,                      0,      0,                      DIGIT_2,         StrUA,         LED_OFF },   
-      { DATA_TYPE_VARIABLE,     &InstantPara.CurUnb,    3,      DIS_VAL_UNB,            DIGIT_3,         0,             LED_OFF },
+      { DATA_TYPE_STRING,       0,                      0,      0,                      DIGIT_2,         StrUA,         LED_GRID_NONE },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.CurUnb,    3,      DIS_VAL_UNB,            DIGIT_3,         0,             LED_GRID_NONE },
       { 0xff,                   0,                      0,      0,                      DIGIT_3,         0,             0       }
   },
   // SCREEN 14: POWER KW 3P R
   {
-      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrW,         LED_R   },   
-      { DATA_TYPE_VARIABLE,     &InstantPara.TotalPowerR,  4,      DIS_VAL_POWER,        DIGIT_3,         0,            LED_R   },
+      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrW,         LED_GRID_R   },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.TotalPowerR,  4,      DIS_VAL_POWER,        DIGIT_3,         0,            LED_GRID_R   },
       { 0xff,                   0,                         0,     0,                     DIGIT_3,         0,            0       }
   },
   // SCREEN 15: POWER KW 3P Y
    {
-      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrW,         LED_Y   },   
-      { DATA_TYPE_VARIABLE,     &InstantPara.TotalPowerY,  4,      DIS_VAL_POWER,        DIGIT_3,         0,            LED_Y   },
+      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrW,         LED_GRID_Y   },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.TotalPowerY,  4,      DIS_VAL_POWER,        DIGIT_3,         0,            LED_GRID_Y   },
       { 0xff,                   0,                         0,     0,                     DIGIT_3,         0,            0       }
   },
   // SCREEN 16: POWER KW 3P B
    {
-      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrW,         LED_B   },   
-      { DATA_TYPE_VARIABLE,     &InstantPara.TotalPowerB,  4,      DIS_VAL_POWER,        DIGIT_3,         0,            LED_B   },
+      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrW,         LED_GRID_B   },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.TotalPowerB,  4,      DIS_VAL_POWER,        DIGIT_3,         0,            LED_GRID_B   },
       { 0xff,                   0,                         0,     0,                     DIGIT_3,         0,            0       }
   },
   // SCREEN 17: Sum Power  
   {
-      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrTW,        LED_OFF },   
-      { DATA_TYPE_VARIABLE,     &InstantPara.SumTotalPower,4,      DIS_VAL_POWER,        DIGIT_3,         0,            LED_OFF },
-      { 0xff,                   0,                         0,     0,                     DIGIT_3,         0,            LED_OFF }
+      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrTW,        LED_GRID_TOTAL },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.SumTotalPower,4,      DIS_VAL_POWER,        DIGIT_3,         0,            LED_GRID_TOTAL },
+      { 0xff,                   0,                         0,     0,                     DIGIT_3,         0,            0 }
   },
   // SCREEN 18: kVA 3P R
   {
-      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrVA,        LED_R   },   
-      { DATA_TYPE_VARIABLE,     &InstantPara.AppPowerR,    4,      DIS_VAL_POW_VA,       DIGIT_3,         0,            LED_R   },
+      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrVA,        LED_GRID_R   },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.AppPowerR,    4,      DIS_VAL_POW_VA,       DIGIT_3,         0,            LED_GRID_R   },
       { 0xff,                   0,                         0,     0,                     DIGIT_3,         0,            0       }
   },
   // SCREEN 19: kVA 3P Y
   {
-      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrVA,        LED_Y   },   
-      { DATA_TYPE_VARIABLE,     &InstantPara.AppPowerY,    4,      DIS_VAL_POW_VA,       DIGIT_3,         0,            LED_Y   },
+      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrVA,        LED_GRID_Y   },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.AppPowerY,    4,      DIS_VAL_POW_VA,       DIGIT_3,         0,            LED_GRID_Y   },
       { 0xff,                   0,                         0,     0,                     DIGIT_3,         0,            0       }
   },
   // SCREEN 20: kVA 3P B
   {
-      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrVA,        LED_B   },   
-      { DATA_TYPE_VARIABLE,     &InstantPara.AppPowerB,    4,      DIS_VAL_POW_VA,       DIGIT_3,         0,            LED_B   },
+      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrVA,        LED_GRID_B   },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.AppPowerB,    4,      DIS_VAL_POW_VA,       DIGIT_3,         0,            LED_GRID_B   },
       { 0xff,                   0,                         0,     0,                     DIGIT_3,         0,            0       }
   },
    // SCREEN 21: Sum VA  
   {
-      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrVA,        LED_OFF },   
-      { DATA_TYPE_VARIABLE,     &InstantPara.TotalAppPower,4,      DIS_VAL_POW_VA,       DIGIT_3,         0,            LED_OFF },
-      { 0xff,                   0,                         0,     0,                     DIGIT_3,         0,            LED_OFF }
+      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrVA,        LED_GRID_TOTAL },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.TotalAppPower,4,      DIS_VAL_POW_VA,       DIGIT_3,         0,            LED_GRID_TOTAL },
+      { 0xff,                   0,                         0,     0,                     DIGIT_3,         0,            LED_GRID_TOTAL }
   },
   // SCREEN 22: kVAr 3P R
   {
-      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrVR,        LED_R   },   
-      { DATA_TYPE_VARIABLE,     &InstantPara.ReactPowerR,  4,      DIS_VAL_POW_VAR,      DIGIT_3,         0,            LED_R   },
+      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrVR,        LED_GRID_R   },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.ReactPowerR,  4,      DIS_VAL_POW_VAR,      DIGIT_3,         0,            LED_GRID_R   },
       { 0xff,                   0,                         0,     0,                     DIGIT_3,         0,            0       }
  
   },
   // SCREEN 23: kVAr 3P Y
   {
-      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrVR,        LED_Y   },   
-      { DATA_TYPE_VARIABLE,     &InstantPara.ReactPowerY,  4,      DIS_VAL_POW_VAR,      DIGIT_3,         0,            LED_Y   },
+      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrVR,        LED_GRID_Y   },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.ReactPowerY,  4,      DIS_VAL_POW_VAR,      DIGIT_3,         0,            LED_GRID_Y   },
       { 0xff,                   0,                         0,     0,                     DIGIT_3,         0,            0       }
   },
   // SCREEN 24: kVAr 3P B
   {
-      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrVR,        LED_B   },   
-      { DATA_TYPE_VARIABLE,     &InstantPara.ReactPowerB,  4,      DIS_VAL_POW_VAR,      DIGIT_3,         0,            LED_B   },
+      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrVR,        LED_GRID_B   },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.ReactPowerB,  4,      DIS_VAL_POW_VAR,      DIGIT_3,         0,            LED_GRID_B   },
       { 0xff,                   0,                         0,     0,                     DIGIT_3,         0,            0       }
   },
   // SCREEN 25: Sum VAR 
   {
-      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrVR,        LED_OFF },   
-      { DATA_TYPE_VARIABLE,     &InstantPara.TotalReactPower,4,    DIS_VAL_POW_VAR,      DIGIT_3,         0,            LED_OFF },
-      { 0xff,                   0,                         0,     0,                     DIGIT_3,         0,            LED_OFF }
+      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrVR,        LED_GRID_TOTAL },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.TotalReactPower,4,    DIS_VAL_POW_VAR,      DIGIT_3,         0,            LED_GRID_TOTAL },
+      { 0xff,                   0,                         0,     0,                     DIGIT_3,         0,            LED_GRID_TOTAL }
   },
   // SCREEN 26: Power factor 3P R
   {
-      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrPF,        LED_R   },   
-      { DATA_TYPE_VARIABLE,     &InstantPara.PowerFactorR, 4,      DIS_VAL_PF,           DIGIT_3,         0,            LED_R   },
+      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrPF,        LED_GRID_R   },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.PowerFactorR, 4,      DIS_VAL_PF,           DIGIT_3,         0,            LED_GRID_R   },
       { 0xff,                   0,                         0,     0,                     DIGIT_3,         0,            0       }
   },
   // SCREEN 27: Power factor 3P Y
   {
-      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrPF,        LED_Y   },   
-      { DATA_TYPE_VARIABLE,     &InstantPara.PowerFactorY, 4,      DIS_VAL_PF,           DIGIT_3,         0,            LED_Y   },
+      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrPF,        LED_GRID_Y   },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.PowerFactorY, 4,      DIS_VAL_PF,           DIGIT_3,         0,            LED_GRID_Y   },
       { 0xff,                   0,                         0,     0,                     DIGIT_3,         0,            0       }
   },
   // SCREEN 28: Power factor 3P B
   {
-      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrPF,        LED_B   },   
-      { DATA_TYPE_VARIABLE,     &InstantPara.PowerFactorB, 4,      DIS_VAL_PF,           DIGIT_3,         0,            LED_B   },
+      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrPF,        LED_GRID_B   },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.PowerFactorB, 4,      DIS_VAL_PF,           DIGIT_3,         0,            LED_GRID_B   },
       { 0xff,                   0,                         0,     0,                     DIGIT_3,         0,            0       }
   },
   // SCREEN 29: Sum PF 
   {
-      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrPF,        LED_OFF },   
-      { DATA_TYPE_VARIABLE,     &InstantPara.TotalPowerFactor,4,   DIS_VAL_PF,           DIGIT_3,         0,            LED_OFF },
-      { 0xff,                   0,                         0,      0,                    DIGIT_3,         0,            LED_OFF }
+      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrPF,        LED_GRID_TOTAL },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.TotalPowerFactor,4,   DIS_VAL_PF,           DIGIT_3,         0,            LED_GRID_TOTAL },
+      { 0xff,                   0,                         0,      0,                    DIGIT_3,         0,            LED_GRID_TOTAL }
   },
   // SCREEN 30: Kwh  Import Str
   { 
@@ -366,8 +366,8 @@ const struct object Screen[61][3]=
   },
   // SCREEN 31: Kwh  Import Val
   { 
-    {  DATA_TYPE_VARIABLE,     &InstantPara.VolR,          9,       DIS_W_IMP,           DIGIT_1,          0,           LED_OFF },
-    {  0xff,                   0,                          0,       0,                   DIGIT_2,          0,           LED_OFF }
+    {  DATA_TYPE_VARIABLE,     &InstantPara.VolR,          9,       DIS_W_IMP,           DIGIT_1,          0,           LED_GRID_TOTAL },
+    {  0xff,                   0,                          0,       0,                   DIGIT_2,          0,           LED_GRID_TOTAL }
   },
   // SCREEN 32: KVah  Import Str
   { 
@@ -376,8 +376,8 @@ const struct object Screen[61][3]=
   },
   // SCREEN 33: KVah  Import Val
   { 
-    {  DATA_TYPE_VARIABLE,     &InstantPara.VolR,          9,       DIS_VA_IMP,          DIGIT_1,          0,           LED_OFF },
-    {  0xff,                   0,                          0,       0,                   DIGIT_2,          0,           LED_OFF }
+    {  DATA_TYPE_VARIABLE,     &InstantPara.VolR,          9,       DIS_VA_IMP,          DIGIT_1,          0,           LED_GRID_TOTAL },
+    {  0xff,                   0,                          0,       0,                   DIGIT_2,          0,           LED_GRID_TOTAL }
   },
   // SCREEN 34: Reactive Pos  Import Str
   { 
@@ -386,8 +386,8 @@ const struct object Screen[61][3]=
   },
   // SCREEN 35: Reactive Pos  Import Val
   { 
-    {  DATA_TYPE_VARIABLE,     &InstantPara.VolR,          9,      DIS_VAR_POS_IMP,      DIGIT_1,          0,           LED_OFF },
-    {  0xff,                   0,                          0,      0,                    DIGIT_2,          0,           LED_OFF }
+    {  DATA_TYPE_VARIABLE,     &InstantPara.VolR,          9,      DIS_VAR_POS_IMP,      DIGIT_1,          0,           LED_GRID_TOTAL },
+    {  0xff,                   0,                          0,      0,                    DIGIT_2,          0,           LED_GRID_TOTAL }
   },
   // SCREEN 36: Reactive Neg  Import Str
   { 
@@ -396,8 +396,8 @@ const struct object Screen[61][3]=
   },
   // SCREEN 37: Reactive Neg  Import Val
   { 
-    {  DATA_TYPE_VARIABLE,     &InstantPara.VolR,          9,       DIS_VAR_NEG_IMP,     DIGIT_1,          0,           LED_OFF },
-    {  0xff,                   0,                          0,       0,                   DIGIT_2,          0,           LED_OFF }
+    {  DATA_TYPE_VARIABLE,     &InstantPara.VolR,          9,       DIS_VAR_NEG_IMP,     DIGIT_1,          0,           LED_GRID_TOTAL },
+    {  0xff,                   0,                          0,       0,                   DIGIT_2,          0,           LED_GRID_TOTAL }
   },
    // SCREEN 38: Run Hour Import Str
   { 
@@ -416,8 +416,8 @@ const struct object Screen[61][3]=
   },
   // SCREEN 41: Load Hour   Import Val
   { 
-    {  DATA_TYPE_VARIABLE,     &InstantPara.VolR,          9,       DIS_LH_IMP,          DIGIT_1,          0,           LED_OFF },
-    {  0xff,                   0,                          0,       0,                   DIGIT_2,          0,           LED_OFF }
+    {  DATA_TYPE_VARIABLE,     &InstantPara.VolR,          9,       DIS_LH_IMP,          DIGIT_1,          0,           LED_GRID_TOTAL },
+    {  0xff,                   0,                          0,       0,                   DIGIT_2,          0,           LED_GRID_TOTAL }
   },
   // SCREEN 42: Kwh  Import Old Str
   { 
@@ -426,8 +426,8 @@ const struct object Screen[61][3]=
   },
   // SCREEN 43: Kwh  Import Old Val
   { 
-    {  DATA_TYPE_VARIABLE,     &InstantPara.VolR,          9,       DIS_W_IMP_OLD,       DIGIT_1,          0,           LED_OFF },
-    {  0xff,                   0,                          0,       0,                   DIGIT_2,          0,           LED_OFF }
+    {  DATA_TYPE_VARIABLE,     &InstantPara.VolR,          9,       DIS_W_IMP_OLD,       DIGIT_1,          0,           LED_GRID_TOTAL },
+    {  0xff,                   0,                          0,       0,                   DIGIT_2,          0,           LED_GRID_TOTAL }
   },
   // SCREEN 44: KVah  Import Old Str
   { 
@@ -436,8 +436,8 @@ const struct object Screen[61][3]=
   },
   // SCREEN 45: KVah  Import Old Val
   { 
-    {  DATA_TYPE_VARIABLE,     &InstantPara.VolR,          9,       DIS_VA_IMP_OLD,      DIGIT_1,          0,           LED_OFF },
-    {  0xff,                   0,                          0,       0,                   DIGIT_2,          0,           LED_OFF }
+    {  DATA_TYPE_VARIABLE,     &InstantPara.VolR,          9,       DIS_VA_IMP_OLD,      DIGIT_1,          0,           LED_GRID_TOTAL },
+    {  0xff,                   0,                          0,       0,                   DIGIT_2,          0,           LED_GRID_TOTAL }
   },
   // SCREEN 46: Reactive Pos  Import Old Str
   { 
@@ -446,8 +446,8 @@ const struct object Screen[61][3]=
   },
   // SCREEN 47: Reactive Pos  Import Old Val
   { 
-    {  DATA_TYPE_VARIABLE,     &InstantPara.VolR,          9,      DIS_VAR_POS_IMP_OLD,  DIGIT_1,          0,           LED_OFF },
-    {  0xff,                   0,                          0,      0,                    DIGIT_2,          0,           LED_OFF }
+    {  DATA_TYPE_VARIABLE,     &InstantPara.VolR,          9,      DIS_VAR_POS_IMP_OLD,  DIGIT_1,          0,           LED_GRID_TOTAL },
+    {  0xff,                   0,                          0,      0,                    DIGIT_2,          0,           LED_GRID_TOTAL }
   },
   // SCREEN 48: Reactive Neg  Import Old Str
   { 
@@ -456,8 +456,8 @@ const struct object Screen[61][3]=
   },
   // SCREEN 49: Reactive Neg  Import Old Val
   { 
-    {  DATA_TYPE_VARIABLE,     &InstantPara.VolR,          9,       DIS_VAR_NEG_IMP_OLD, DIGIT_1,          0,           LED_OFF },
-    {  0xff,                   0,                          0,       0,                   DIGIT_2,          0,           LED_OFF }
+    {  DATA_TYPE_VARIABLE,     &InstantPara.VolR,          9,       DIS_VAR_NEG_IMP_OLD, DIGIT_1,          0,           LED_GRID_TOTAL },
+    {  0xff,                   0,                          0,       0,                   DIGIT_2,          0,           LED_GRID_TOTAL }
   },
    // SCREEN 50: Run Hour Import Old Str
   { 
@@ -476,8 +476,8 @@ const struct object Screen[61][3]=
   },
   // SCREEN 53: Load Hour   Import Old Val
   { 
-    {  DATA_TYPE_VARIABLE,     &InstantPara.VolR,          9,       DIS_LH_IMP_OLD,      DIGIT_1,          0,           LED_OFF },
-    {  0xff,                   0,                          0,       0,                   DIGIT_2,          0,           LED_OFF }
+    {  DATA_TYPE_VARIABLE,     &InstantPara.VolR,          9,       DIS_LH_IMP_OLD,      DIGIT_1,          0,           LED_GRID_TOTAL },
+    {  0xff,                   0,                          0,       0,                   DIGIT_2,          0,           LED_GRID_TOTAL }
   },
   // SCREEN 54:Angle 3Phase R
   
@@ -524,7 +524,23 @@ const struct object Screen[61][3]=
         {  0xff,                   0,                          0,       0,               DIGIT_2,          0,           LED_OFF }
     },
   
-      
-    
+    // SCREEN 61:  Line to Neutral Voltage 3P R Solar
+    {
+      { DATA_TYPE_STRING,       0,                      0,      0,                      DIGIT_2,         StrV,          LED_SOLAR_R     },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.VolRSolar, 4,      DIS_VAL_VOLTAGE,        DIGIT_3,         0,             LED_SOLAR_R     },
+      { 0xff,                   0,                      0,      0,                      DIGIT_3,         0,             0               }
+    },
+    // SCREEN 62:  Line to Neutral Voltage 3P Y Solar
+    {
+      { DATA_TYPE_STRING,       0,                      0,      0,                      DIGIT_2,         StrV,          LED_SOLAR_Y     },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.VolYSolar, 4,      DIS_VAL_VOLTAGE,        DIGIT_3,         0,             LED_SOLAR_Y     },
+      { 0xff,                   0,                      0,      0,                      DIGIT_3,         0,             0,              }
+    },
+    // SCREEN 63:  Line to Neutral Voltage 3P B Solar
+    {
+      { DATA_TYPE_STRING,       0,                      0,      0,                      DIGIT_2,         StrV,          LED_SOLAR_B     },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.VolBSolar, 4,      DIS_VAL_VOLTAGE,        DIGIT_3,         0,             LED_SOLAR_B     },
+      { 0xff,                   0,                      0,      0,                      DIGIT_3,         0,             0               }
+    },
 };
 

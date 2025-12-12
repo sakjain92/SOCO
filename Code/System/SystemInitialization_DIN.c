@@ -292,7 +292,7 @@ static void SetPwrRegisters(void)
 
 static void SetDmaRegisters(void)
 {
-  DMA1_Channel1->CNDTR=0X6; // NO OF DATA TRANSFER
+  DMA1_Channel1->CNDTR=0XC; // NO OF DATA TRANSFER
   DMA1_Channel1->CPAR=(uint32_t)&ADC1->DR;
   DMA1_Channel1->CMAR=(uint32_t)&AdcDataInArray;
   // DMA Enabled, Circular Mode, Memmory Increment, 16 bits pheripheral size, 16 bits memory size
@@ -323,25 +323,20 @@ static void SetAdc(void)
   // 4th channel: 11th channel (MVYP)
   // 5th sequence: 5th channel (IYB_M)
   // 6th sequence: 12th squence (MVBP)
-  ADC1->SQR3=0x18559D46;
-  ADC1->SQR2=0x0;
-  // 6 total sequences
-  ADC1->SQR1=0x500000;
-
-#if 0
-  // Solar
   //
-  // 1th Sequence: 9th channel (IRP_P)
-  // 2th sequence: 13th channel (PVRP)
-  // 3th sequence: 4th channel (IYP_P)
-  // 4th channel: 14th channel (PVYP)
-  // 5th sequence: 8th channel (IYB_P)
-  // 6th sequence: 15th squence (PVBP)
-  ADC1->SQR3=0x1E8711A9;
-  ADC1->SQR2=0x0;
-  // 6 total sequences
-  ADC1->SQR1=0x500000;
-#endif
+  // Solar
+  // 7th Sequence: 9th channel (IRP_P)
+  // 8th sequence: 13th channel (PVRP)
+  // 9th sequence: 4th channel (IYP_P)
+  // 10th channel: 14th channel (PVYP)
+  // 11th sequence: 8th channel (IYB_P)
+  // 12th sequence: 15th squence (PVBP)
+  //  
+  ADC1->SQR3=0x18559D46;
+  ADC1->SQR2=0x1E8711A9;
+  // 12 total sequences
+  ADC1->SQR1=0xB00000;
+
   // ADC On, Enable Calibration, DMA enabled, JSWSRTART Trigger, SWSTART Trigger, Enable exrternal trigger
   ADC1->CR2=0X1E7105;
 

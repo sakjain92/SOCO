@@ -11,7 +11,7 @@ const struct PH_COEFF_STRUCT CalibrationCoeff @ "FLASH_COEFF_SECTION"=
   1.0f,
   1.0f,
   
-  1.0f,  // Vol 110V
+  1.0f,  // Vol Solar 240V
   1.0f,
   1.0f,
   

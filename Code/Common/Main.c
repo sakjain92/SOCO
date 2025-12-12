@@ -44,6 +44,9 @@ void main(void)
   WorkingCopyGain.VR_GAIN=CalibrationCoeff.VR_240_GAIN;
   WorkingCopyGain.VY_GAIN=CalibrationCoeff.VY_240_GAIN;
   WorkingCopyGain.VB_GAIN=CalibrationCoeff.VB_240_GAIN;
+  WorkingCopyGain.VR_SOLAR_GAIN=CalibrationCoeff.VR_SOLAR_240_GAIN;
+  WorkingCopyGain.VY_SOLAR_GAIN=CalibrationCoeff.VY_SOLAR_240_GAIN;
+  WorkingCopyGain.VB_SOLAR_GAIN=CalibrationCoeff.VB_SOLAR_240_GAIN;
   SetWorkingGainBuffer();
   DISP_SR_ON;
   __enable_interrupt();
@@ -686,7 +689,10 @@ void StartCalibration(void)
      WorkingCopyGain.PY_BETA=0;
      WorkingCopyGain.PB_ALFA=1;
      WorkingCopyGain.PB_BETA=0;
-       
+
+     WorkingCopyGain.VR_SOLAR_GAIN=1.0f;
+     WorkingCopyGain.VY_SOLAR_GAIN=1.0f;
+     WorkingCopyGain.VB_SOLAR_GAIN=1.0f;
    }
    if(FlagDirectCalibration == CALIBRATE_H_VI)
    {

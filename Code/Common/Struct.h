@@ -51,7 +51,16 @@ struct INT_DATA_SUM
   float        OffsetCurRPhase;
   float        OffsetCurYPhase;
   float        OffsetCurBPhase;
-  
+
+  float        VolRSolarPhase;
+  float        VolYSolarPhase;
+  float        VolBSolarPhase;
+  float        VolRYSolarPhPh;
+  float        VolYBSolarPhPh;
+  float        VolBRSolarPhPh;
+  float        OffsetVolRSolarPhase;
+  float        OffsetVolYSolarPhase;
+  float        OffsetVolBSolarPhase;
 };
 
 
@@ -79,7 +88,16 @@ struct INT_DATA_SAVE
   float     OffsetCurYPhase;
   float     OffsetCurBPhase;
   uint16_t  TimerCountValue;
-    
+
+  float     VolRSolarPhase;
+  float     VolYSolarPhase;
+  float     VolBSolarPhase;
+  float     VolRYSolarPhPh;
+  float     VolYBSolarPhPh;
+  float     VolBRSolarPhPh;
+  float     OffsetVolRSolarPhase;
+  float     OffsetVolYSolarPhase;
+  float     OffsetVolBSolarPhase;
 };
 
 struct INT_TIMER_COUNT
@@ -174,9 +192,13 @@ struct INST_PARA
   float     IbMin;
   float     IbMax;
   float     IbSum;
-    
-    
-  
+
+  float     VolRSolar;
+  float     VolYSolar;
+  float     VolBSolar;
+  float     VolRYSolar;
+  float     VolYBSolar;
+  float     VolBRSolar;
 };
 
 struct OFFSET
@@ -188,6 +210,10 @@ struct OFFSET
   float     CurRPhase;
   float     CurYPhase;
   float     CurBPhase;
+
+  float     VolRSolarPhase;
+  float     VolYSolarPhase;
+  float     VolBSolarPhase;
 };
 
 struct FFT_STRUCT
@@ -207,7 +233,6 @@ struct FFT_STRUCT
   float    FFT_BCurCosSum[50];
   float    FFT_NeuCurSinSum[50];
   float    FFT_NeuCurCosSum[50];
-  
   
   float    FFT_RVolSinSave[50];
   float    FFT_RVolCosSave[50];
@@ -248,9 +273,9 @@ float     VR_240_GAIN;
 float     VY_240_GAIN;
 float     VB_240_GAIN;     
 
-float     VR_110_GAIN;             
-float     VY_110_GAIN;
-float     VB_110_GAIN;  
+float     VR_SOLAR_240_GAIN;             
+float     VY_SOLAR_240_GAIN;
+float     VB_SOLAR_240_GAIN;  
 
 float     IR_HIGH_GAIN;     // future for high accuracy meters
 float     IR_MID_GAIN;
@@ -301,8 +326,9 @@ struct GAIN_WC
   float PY_BETA;
   float PB_BETA;
   
-  
- 
+  float VR_SOLAR_GAIN;
+  float VY_SOLAR_GAIN;
+  float VB_SOLAR_GAIN;
 };
 
   
