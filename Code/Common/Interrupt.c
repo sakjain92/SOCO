@@ -28,6 +28,9 @@ struct SAMPLE   RVolSample;
 struct SAMPLE   YVolSample;
 struct SAMPLE   BVolSample;
 
+struct SAMPLE   RSolarCurSample;
+struct SAMPLE   YSolarCurSample;
+struct SAMPLE   BSolarCurSample;
 struct SAMPLE   RSolarVolSample;
 struct SAMPLE   YSolarVolSample;
 struct SAMPLE   BSolarVolSample;
@@ -39,13 +42,22 @@ uint16_t OneSecCounter;
 
 #define FREQ_LIMIT_VOL    (90)
 
+// UNDONE: The harmonics code assumes that the interrupt timer is setup such
+// that it is called f * 3200 Hz where f is the freqency of input.
+// But now, we have two different sources. So ideally, we should either
+// be using two timers, one for each source (And decide when to start 
+// ADC measurement) or reject Harmonics based measurement altogether
+// (Can't ignore as reactive power is based on harmonics)
+// This is also another reason for error in current measurement most likely
+//
 void ProcessMainInterrupt(void)
 {
 
   float IntVolRPhase,IntVolYPhase,IntVolBPhase;
   float IntVolRSolarPhase,IntVolYSolarPhase,IntVolBSolarPhase;
   float IntCurRPhase,IntCurYPhase,IntCurBPhase;
-  float IntNeuCurrent;
+  float IntCurRSolarPhase,IntCurYSolarPhase,IntCurBSolarPhase;
+  float IntNeuCurrent, IntNeuSolarCurrent;
   float TempGainMult;
   int16_t TempInt;  
   uint8_t i;
@@ -80,34 +92,32 @@ void ProcessMainInterrupt(void)
     if(PowerFailCounter==0)InterruptFlag |= INT_POWER_OK;
   }  
 #endif  
-  TempInt=AdcDataInArray[ADC_VR1];
+  TempInt=AdcDataInArray[ADC_VR];
   TempInt=TempInt-0x1000;
   IntVolRPhase  =(float)TempInt-VIOffset.VolRPhase;
   IntVolRPhase *=WorkingCopyGain.VR_GAIN;
   
-  
-  TempInt=AdcDataInArray[ADC_VY1];
+  TempInt=AdcDataInArray[ADC_VY];
   TempInt=TempInt-0x1000;
   IntVolYPhase  =(float)TempInt-VIOffset.VolYPhase;
   IntVolYPhase *=WorkingCopyGain.VY_GAIN;
   
-  
-  TempInt=AdcDataInArray[ADC_VB1];
+  TempInt=AdcDataInArray[ADC_VB];
   TempInt=TempInt-0x1000;
   IntVolBPhase  =(float)TempInt-VIOffset.VolBPhase;
   IntVolBPhase *=WorkingCopyGain.VB_GAIN;
    
-  TempInt=AdcDataInArray[ADC_IR1];
+  TempInt=AdcDataInArray[ADC_IR];
   TempInt=TempInt-0x1000;
   IntCurRPhase  =(float)TempInt-VIOffset.CurRPhase;
   IntCurRPhase *=WorkingCopyGain.IR_GAIN;
 
-  TempInt=AdcDataInArray[ADC_IY1];
+  TempInt=AdcDataInArray[ADC_IY];
   TempInt=TempInt-0x1000;
   IntCurYPhase  =(float)TempInt-VIOffset.CurYPhase;
   IntCurYPhase *=WorkingCopyGain.IY_GAIN;
 
-  TempInt=AdcDataInArray[ADC_IB1];
+  TempInt=AdcDataInArray[ADC_IB];
   TempInt=TempInt-0x1000;
   IntCurBPhase  =(float)TempInt-VIOffset.CurBPhase;
   IntCurBPhase *=WorkingCopyGain.IB_GAIN;
@@ -126,6 +136,21 @@ void ProcessMainInterrupt(void)
   TempInt=TempInt-0x1000;
   IntVolBSolarPhase  =(float)TempInt-VIOffset.VolBSolarPhase;
   IntVolBSolarPhase *=WorkingCopyGain.VB_SOLAR_GAIN;
+
+  TempInt=AdcDataInArray[ADC_IR_SOLAR];
+  TempInt=TempInt-0x1000;
+  IntCurRSolarPhase  =(float)TempInt-VIOffset.CurRSolarPhase;
+  IntCurRSolarPhase *=WorkingCopyGain.IR_SOLAR_GAIN;
+
+  TempInt=AdcDataInArray[ADC_IY_SOLAR];
+  TempInt=TempInt-0x1000;
+  IntCurYSolarPhase  =(float)TempInt-VIOffset.CurYSolarPhase;
+  IntCurYSolarPhase *=WorkingCopyGain.IY_SOLAR_GAIN;
+
+  TempInt=AdcDataInArray[ADC_IB_SOLAR];
+  TempInt=TempInt-0x1000;
+  IntCurBSolarPhase  =(float)TempInt-VIOffset.CurBSolarPhase;
+  IntCurBSolarPhase *=WorkingCopyGain.IB_SOLAR_GAIN;
 
   // UNDONE: Do the current & power calculation for solar
 
@@ -194,6 +219,36 @@ void ProcessMainInterrupt(void)
   BVolSample.PrevIn_1=IntVolBPhase;
   IntVolBPhase=TempGainMult;
   
+  TempGainMult=(RSolarCurSample.PrevIn_2+IntCurRSolarPhase)*FILT_600_COEFF_X1+\
+                RSolarCurSample.PrevIn_1*FILT_600_COEFF_X2+\
+                RSolarCurSample.PrevOut_1*FILT_600_COEFF_Y1-\
+                RSolarCurSample.PrevOut_2*FILT_600_COEFF_Y2;
+  RSolarCurSample.PrevOut_2=RSolarCurSample.PrevOut_1;
+  RSolarCurSample.PrevOut_2=TempGainMult;
+  RSolarCurSample.PrevIn_2=RSolarCurSample.PrevIn_1;
+  RSolarCurSample.PrevIn_1=IntCurRSolarPhase;
+  IntCurRSolarPhase=TempGainMult;
+  
+  TempGainMult=(YSolarCurSample.PrevIn_2+IntCurYSolarPhase)*FILT_600_COEFF_X1+\
+                YSolarCurSample.PrevIn_1*FILT_600_COEFF_X2+\
+                YSolarCurSample.PrevOut_1*FILT_600_COEFF_Y1-\
+                YSolarCurSample.PrevOut_2*FILT_600_COEFF_Y2;
+  YSolarCurSample.PrevOut_2=YSolarCurSample.PrevOut_1;
+  YSolarCurSample.PrevOut_2=TempGainMult;
+  YSolarCurSample.PrevIn_2=YSolarCurSample.PrevIn_1;
+  YSolarCurSample.PrevIn_1=IntCurYSolarPhase;
+  IntCurYSolarPhase=TempGainMult;
+  
+  TempGainMult=(BSolarCurSample.PrevIn_2+IntCurBSolarPhase)*FILT_600_COEFF_X1+\
+                BSolarCurSample.PrevIn_1*FILT_600_COEFF_X2+\
+                BSolarCurSample.PrevOut_1*FILT_600_COEFF_Y1-\
+                BSolarCurSample.PrevOut_2*FILT_600_COEFF_Y2;
+  BSolarCurSample.PrevOut_2=BSolarCurSample.PrevOut_1;
+  BSolarCurSample.PrevOut_2=TempGainMult;
+  BSolarCurSample.PrevIn_2=BSolarCurSample.PrevIn_1;
+  BSolarCurSample.PrevIn_1=IntCurBSolarPhase;
+  IntCurBSolarPhase=TempGainMult;
+
   TempGainMult=(RSolarVolSample.PrevIn_2+IntVolRSolarPhase)*FILT_600_COEFF_X1+\
                 RSolarVolSample.PrevIn_1*FILT_600_COEFF_X2+\
                 RSolarVolSample.PrevOut_1*FILT_600_COEFF_Y1-\
@@ -233,7 +288,6 @@ void ProcessMainInterrupt(void)
   }
   else if(SampleCounter==NO_OF_SAMPLES)
   {
-    IntWattPerPulseTick=WattPerPulseTick;
     SampleCounter=0;
     InterruptFlag |=INT_CYCLE_OVER;
     InterruptFlag |=(INT_Y_NEW_FREQ_MEASURE+INT_B_NEW_FREQ_MEASURE);
@@ -264,18 +318,31 @@ void ProcessMainInterrupt(void)
     IntDataSave.VolRSolarPhase=IntDataSum.VolRSolarPhase;
     IntDataSave.VolYSolarPhase=IntDataSum.VolYSolarPhase;
     IntDataSave.VolBSolarPhase=IntDataSum.VolBSolarPhase;
+    IntDataSave.CurRSolarPhase=IntDataSum.CurRSolarPhase;
+    IntDataSave.CurYSolarPhase=IntDataSum.CurYSolarPhase;
+    IntDataSave.CurBSolarPhase=IntDataSum.CurBSolarPhase;
+
+    IntDataSave.RSolarPhasePower=IntDataSum.RSolarPhasePower;
+    IntDataSave.YSolarPhasePower=IntDataSum.YSolarPhasePower;
+    IntDataSave.BSolarPhasePower=IntDataSum.BSolarPhasePower;
+    IntDataSave.YRSolarPower3P3W=IntDataSum.YRSolarPower3P3W;
+    IntDataSave.YBSolarPower3P3W=IntDataSum.YBSolarPower3P3W;
+    
+    IntDataSave.CurNeutralSolar=IntDataSum.CurNeutralSolar;
     IntDataSave.VolRYSolarPhPh=IntDataSum.VolRYSolarPhPh;
     IntDataSave.VolYBSolarPhPh=IntDataSum.VolYBSolarPhPh;
     IntDataSave.VolBRSolarPhPh=IntDataSum.VolBRSolarPhPh;
     IntDataSave.OffsetVolRSolarPhase=IntDataSum.OffsetVolRSolarPhase;
     IntDataSave.OffsetVolYSolarPhase=IntDataSum.OffsetVolYSolarPhase;
     IntDataSave.OffsetVolBSolarPhase=IntDataSum.OffsetVolBSolarPhase;
+    IntDataSave.OffsetCurRSolarPhase=IntDataSum.OffsetCurRSolarPhase;
+    IntDataSave.OffsetCurYSolarPhase=IntDataSum.OffsetCurYSolarPhase;
+    IntDataSave.OffsetCurBSolarPhase=IntDataSum.OffsetCurBSolarPhase;
 
     memset(&IntDataSum, 0, sizeof(IntDataSum));
  
     for(i=0;i<50;i++)
-    {
-      
+    {    
       FftSampleData.FFT_RVolSinSave[i]=FftSampleData.FFT_RVolSinSum[i];
       FftSampleData.FFT_RVolCosSave[i]=FftSampleData.FFT_RVolCosSum[i];
       FftSampleData.FFT_YVolSinSave[i]=FftSampleData.FFT_YVolSinSum[i];
@@ -307,21 +374,44 @@ void ProcessMainInterrupt(void)
       FftSampleData.FFT_BCurCosSum[i]=0;
       FftSampleData.FFT_NeuCurSinSum[i]=0;
       FftSampleData.FFT_NeuCurCosSum[i]=0;
+
+      FftSampleData.FFT_RSolarVolSinSave[i]=FftSampleData.FFT_RSolarVolSinSum[i];
+      FftSampleData.FFT_RSolarVolCosSave[i]=FftSampleData.FFT_RSolarVolCosSum[i];
+      FftSampleData.FFT_YSolarVolSinSave[i]=FftSampleData.FFT_YSolarVolSinSum[i];
+      FftSampleData.FFT_YSolarVolCosSave[i]=FftSampleData.FFT_YSolarVolCosSum[i];
+      FftSampleData.FFT_BSolarVolSinSave[i]=FftSampleData.FFT_BSolarVolSinSum[i];
+      FftSampleData.FFT_BSolarVolCosSave[i]=FftSampleData.FFT_BSolarVolCosSum[i];
+      
+      FftSampleData.FFT_RSolarCurSinSave[i]=FftSampleData.FFT_RSolarCurSinSum[i];
+      FftSampleData.FFT_RSolarCurCosSave[i]=FftSampleData.FFT_RSolarCurCosSum[i];
+      FftSampleData.FFT_YSolarCurSinSave[i]=FftSampleData.FFT_YSolarCurSinSum[i];
+      FftSampleData.FFT_YSolarCurCosSave[i]=FftSampleData.FFT_YSolarCurCosSum[i];
+      FftSampleData.FFT_BSolarCurSinSave[i]=FftSampleData.FFT_BSolarCurSinSum[i];
+      FftSampleData.FFT_BSolarCurCosSave[i]=FftSampleData.FFT_BSolarCurCosSum[i];
+      
+      FftSampleData.FFT_NeuSolarCurSinSave[i]=FftSampleData.FFT_NeuSolarCurSinSum[i];
+      FftSampleData.FFT_NeuSolarCurCosSave[i]=FftSampleData.FFT_NeuSolarCurCosSum[i];
+      
+      FftSampleData.FFT_RSolarVolSinSum[i]=0;
+      FftSampleData.FFT_RSolarVolCosSum[i]=0;
+      FftSampleData.FFT_YSolarVolSinSum[i]=0;
+      FftSampleData.FFT_YSolarVolCosSum[i]=0;
+      FftSampleData.FFT_BSolarVolSinSum[i]=0;
+      FftSampleData.FFT_BSolarVolCosSum[i]=0;
+      FftSampleData.FFT_RSolarCurSinSum[i]=0;
+      FftSampleData.FFT_RSolarCurCosSum[i]=0;
+      FftSampleData.FFT_YSolarCurSinSum[i]=0;
+      FftSampleData.FFT_YSolarCurCosSum[i]=0;
+      FftSampleData.FFT_BSolarCurSinSum[i]=0;
+      FftSampleData.FFT_BSolarCurCosSum[i]=0;
+      FftSampleData.FFT_NeuSolarCurSinSum[i]=0;
+      FftSampleData.FFT_NeuSolarCurCosSum[i]=0;
+
     }
     FftSampleData.FFT_Counter=0;
     FftSampleData.FFT_CounterIndex=0;
   }
-#ifdef MODEL_EPULSE  
-  if(KWhLedOnCounter)KWhLedOnCounter--;
-  if(KWhLedOnCounter==1)KWH_LED_OFF;;
-  SumWattPerPulseTick +=IntWattPerPulseTick;
-  if(SumWattPerPulseTick>=3600000000)
-  {
-    SumWattPerPulseTick -=3600000000;
-    KWH_LED_ON;
-    KWhLedOnCounter=25;
-  }
-#endif    
+
 #ifdef MODEL_RS485 
   // This is an old code which states that if RS485 is stuck transmitting
   // for more than 5 seconds, let's restart the USART module
@@ -354,7 +444,6 @@ void ProcessMainInterrupt(void)
   IntDataSum.OffsetCurYPhase +=IntCurYPhase;
   IntDataSum.OffsetCurBPhase +=IntCurBPhase;
   
-   
   IntDataSum.CurRPhase += IntCurRPhase*IntCurRPhase;
   IntDataSum.CurYPhase += IntCurYPhase*IntCurYPhase;
   IntDataSum.CurBPhase += IntCurBPhase*IntCurBPhase;
@@ -399,7 +488,7 @@ void ProcessMainInterrupt(void)
   IntBPrevSample=IntVolBPhase;
   IntVolBPhase +=TempGainMult;
   IntVolBPhase=(WorkingCopyGain.PB_ALFA*IntVolBPhase);
-  
+ 
   IntDataSum.RPhasePower +=IntVolRPhase*IntCurRPhase;
   IntDataSum.YPhasePower +=IntVolYPhase*IntCurYPhase;
   IntDataSum.BPhasePower +=IntVolBPhase*IntCurBPhase;
@@ -407,10 +496,19 @@ void ProcessMainInterrupt(void)
   IntDataSum.YRPower3P3W +=IntVolYPhase*IntCurRPhase; //in case of 3P3W
   IntDataSum.YBPower3P3W +=IntVolYPhase*IntCurBPhase; //in case of 3P3W
 
+  // Solar 
   IntDataSum.OffsetVolRSolarPhase +=IntVolRSolarPhase;
   IntDataSum.OffsetVolYSolarPhase +=IntVolYSolarPhase;
   IntDataSum.OffsetVolBSolarPhase +=IntVolBSolarPhase;
   
+  IntDataSum.OffsetCurRSolarPhase +=IntCurRSolarPhase;
+  IntDataSum.OffsetCurYSolarPhase +=IntCurYSolarPhase;
+  IntDataSum.OffsetCurBSolarPhase +=IntCurBSolarPhase;
+  
+  IntDataSum.CurRSolarPhase += IntCurRSolarPhase*IntCurRSolarPhase;
+  IntDataSum.CurYSolarPhase += IntCurYSolarPhase*IntCurYSolarPhase;
+  IntDataSum.CurBSolarPhase += IntCurBSolarPhase*IntCurBSolarPhase;
+
   IntDataSum.VolRSolarPhase += IntVolRSolarPhase*IntVolRSolarPhase;
   IntDataSum.VolYSolarPhase += IntVolYSolarPhase*IntVolYSolarPhase;
   IntDataSum.VolBSolarPhase += IntVolBSolarPhase*IntVolBSolarPhase;
@@ -421,6 +519,31 @@ void ProcessMainInterrupt(void)
   IntDataSum.VolBRSolarPhPh += TempGainMult*TempGainMult;
   TempGainMult=(IntVolBSolarPhase-IntVolYSolarPhase);
   IntDataSum.VolYBSolarPhPh += TempGainMult*TempGainMult;
+
+  IntNeuSolarCurrent=0;
+  if(InterruptFlag & INT_R_SOLAR_PHASE_REV)IntNeuSolarCurrent -=IntCurRSolarPhase;
+  else IntNeuSolarCurrent +=IntCurRSolarPhase;
+  if(InterruptFlag & INT_Y_SOLAR_PHASE_REV)IntNeuSolarCurrent -=IntCurYSolarPhase;
+  else IntNeuSolarCurrent +=IntCurYSolarPhase;
+  if(InterruptFlag & INT_B_SOLAR_PHASE_REV)IntNeuSolarCurrent -=IntCurBSolarPhase;
+  else IntNeuSolarCurrent +=IntCurBSolarPhase;
+  
+  IntDataSum.CurNeutralSolar +=IntNeuSolarCurrent*IntNeuSolarCurrent;
+
+  TempGainMult=  (WorkingCopyGain.PR_SOLAR_BETA*IntRSolarPrevSample);
+  IntRSolarPrevSample=IntVolRSolarPhase;
+  IntVolRSolarPhase +=TempGainMult;
+  IntVolRSolarPhase=(WorkingCopyGain.PR_SOLAR_ALFA*IntVolRSolarPhase);
+  
+  TempGainMult=  (WorkingCopyGain.PY_SOLAR_BETA*IntYSolarPrevSample);
+  IntYSolarPrevSample=IntVolYSolarPhase;
+  IntVolYSolarPhase +=TempGainMult;
+  IntVolYSolarPhase=(WorkingCopyGain.PY_SOLAR_ALFA*IntVolYSolarPhase);
+  
+  TempGainMult=  (WorkingCopyGain.PB_SOLAR_BETA*IntBSolarPrevSample);
+  IntBSolarPrevSample=IntVolBSolarPhase;
+  IntVolBSolarPhase +=TempGainMult;
+  IntVolBSolarPhase=(WorkingCopyGain.PB_SOLAR_ALFA*IntVolBSolarPhase);
 
   // Summation for FFT Purpose
   
@@ -441,6 +564,24 @@ void ProcessMainInterrupt(void)
   
   FftSampleData.FFT_NeuCurSinSum[FftSampleData.FFT_CounterIndex]+=IntNeuCurrent*SinTable[FftSampleData.FFT_Counter];
   FftSampleData.FFT_NeuCurCosSum[FftSampleData.FFT_CounterIndex]+=IntNeuCurrent*CosTable[FftSampleData.FFT_Counter];
+
+  FftSampleData.FFT_RSolarVolSinSum[FftSampleData.FFT_CounterIndex]+=IntVolRSolarPhase*SinTable[FftSampleData.FFT_Counter];
+  FftSampleData.FFT_RSolarVolCosSum[FftSampleData.FFT_CounterIndex]+=IntVolRSolarPhase*CosTable[FftSampleData.FFT_Counter];
+  FftSampleData.FFT_YSolarVolSinSum[FftSampleData.FFT_CounterIndex]+=IntVolYSolarPhase*SinTable[FftSampleData.FFT_Counter];
+  FftSampleData.FFT_YSolarVolCosSum[FftSampleData.FFT_CounterIndex]+=IntVolYSolarPhase*CosTable[FftSampleData.FFT_Counter];
+  FftSampleData.FFT_BSolarVolSinSum[FftSampleData.FFT_CounterIndex]+=IntVolBSolarPhase*SinTable[FftSampleData.FFT_Counter];
+  FftSampleData.FFT_BSolarVolCosSum[FftSampleData.FFT_CounterIndex]+=IntVolBSolarPhase*CosTable[FftSampleData.FFT_Counter];
+  
+  FftSampleData.FFT_RSolarCurSinSum[FftSampleData.FFT_CounterIndex]+=IntCurRSolarPhase*SinTable[FftSampleData.FFT_Counter];
+  FftSampleData.FFT_RSolarCurCosSum[FftSampleData.FFT_CounterIndex]+=IntCurRSolarPhase*CosTable[FftSampleData.FFT_Counter];
+  FftSampleData.FFT_YSolarCurSinSum[FftSampleData.FFT_CounterIndex]+=IntCurYSolarPhase*SinTable[FftSampleData.FFT_Counter];
+  FftSampleData.FFT_YSolarCurCosSum[FftSampleData.FFT_CounterIndex]+=IntCurYSolarPhase*CosTable[FftSampleData.FFT_Counter];
+  FftSampleData.FFT_BSolarCurSinSum[FftSampleData.FFT_CounterIndex]+=IntCurBSolarPhase*SinTable[FftSampleData.FFT_Counter];
+  FftSampleData.FFT_BSolarCurCosSum[FftSampleData.FFT_CounterIndex]+=IntCurBSolarPhase*CosTable[FftSampleData.FFT_Counter];
+  
+  FftSampleData.FFT_NeuSolarCurSinSum[FftSampleData.FFT_CounterIndex]+=IntNeuSolarCurrent*SinTable[FftSampleData.FFT_Counter];
+  FftSampleData.FFT_NeuSolarCurCosSum[FftSampleData.FFT_CounterIndex]+=IntNeuSolarCurrent*CosTable[FftSampleData.FFT_Counter];
+
   
   FftSampleData.FFT_Counter++;
   if(FftSampleData.FFT_Counter==64)
@@ -705,8 +846,19 @@ void ClearInterruptVariables(void)
       FftSampleData.FFT_YCurCosSum[i]=0;
       FftSampleData.FFT_BCurSinSum[i]=0;
       FftSampleData.FFT_BCurCosSum[i]=0;
-    
-    
+
+      FftSampleData.FFT_RSolarVolSinSum[i]=0;
+      FftSampleData.FFT_RSolarVolCosSum[i]=0;
+      FftSampleData.FFT_YSolarVolSinSum[i]=0;
+      FftSampleData.FFT_YSolarVolCosSum[i]=0;
+      FftSampleData.FFT_BSolarVolSinSum[i]=0;
+      FftSampleData.FFT_BSolarVolCosSum[i]=0;
+      FftSampleData.FFT_RSolarCurSinSum[i]=0;
+      FftSampleData.FFT_RSolarCurCosSum[i]=0;
+      FftSampleData.FFT_YSolarCurSinSum[i]=0;
+      FftSampleData.FFT_YSolarCurCosSum[i]=0;
+      FftSampleData.FFT_BSolarCurSinSum[i]=0;
+      FftSampleData.FFT_BSolarCurCosSum[i]=0;
   }
   FftSampleData.FFT_Counter=0;
   FftSampleData.FFT_CounterIndex=0;

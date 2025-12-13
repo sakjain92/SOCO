@@ -74,6 +74,37 @@
 #define SCREEN_VOL_LN_Y_SOLAR           62
 #define SCREEN_VOL_LN_B_SOLAR           63
 
+// Solar Current
+#define SCREEN_CUR_R_SOLAR              64
+#define SCREEN_CUR_Y_SOLAR              65
+#define SCREEN_CUR_B_SOLAR              66
+
+// Solar Power
+#define SCREEN_W_R_SOLAR                67
+#define SCREEN_W_Y_SOLAR                68
+#define SCREEN_W_B_SOLAR                69
+#define SCREEN_SUM_W_3P_SOLAR           70
+#define SCREEN_VA_R_SOLAR               71
+#define SCREEN_VA_Y_SOLAR               72
+#define SCREEN_VA_B_SOLAR               73
+#define SCREEN_SUM_VA_3P_SOLAR          74
+#define SCREEN_VAR_R_SOLAR              75
+#define SCREEN_VAR_Y_SOLAR              76
+#define SCREEN_VAR_B_SOLAR              77
+#define SCREEN_SUM_VAR_3P_SOLAR         78
+
+// Solar PF
+#define SCREEN_PF_R_SOLAR               79
+#define SCREEN_PF_Y_SOLAR               80
+#define SCREEN_PF_B_SOLAR               81
+#define SCREEN_SUM_PF_3P_SOLAR          82
+
+// Solar Energy
+#define SCREEN_IMP_ENE_W_VAL_SOLAR       83
+#define SCREEN_IMP_ENE_VA_VAL_SOLAR      84
+#define SCREEN_IMP_ENE_VAR_POS_VAL_SOLAR 85
+#define SCREEN_IMP_ENE_VAR_NEG_VAL_SOLAR 86
+
   const uint8_t SCREEN_SEQ_3P_MAIN[]=  
   {
    SCREEN_VOL_LN_R,             
@@ -84,31 +115,54 @@
    SCREEN_VOL_LN_Y_SOLAR,
    SCREEN_CUR_R,                
    SCREEN_CUR_Y,                
-   SCREEN_CUR_B,                
+   SCREEN_CUR_B,    
+   SCREEN_CUR_R_SOLAR,                
+   SCREEN_CUR_Y_SOLAR,                
+   SCREEN_CUR_B_SOLAR,
    SCREEN_W_R,                  
    SCREEN_W_Y,                  
    SCREEN_W_B,                  
    SCREEN_SUM_W_3P,             
+   SCREEN_W_R_SOLAR,                  
+   SCREEN_W_Y_SOLAR,                  
+   SCREEN_W_B_SOLAR,                  
+   SCREEN_SUM_W_3P_SOLAR,             
    SCREEN_VA_R,                 
    SCREEN_VA_Y,                 
    SCREEN_VA_B,                 
-   SCREEN_SUM_VA_3P,            
+   SCREEN_SUM_VA_3P,    
+   SCREEN_VA_R_SOLAR,                 
+   SCREEN_VA_Y_SOLAR,                 
+   SCREEN_VA_B_SOLAR,                 
+   SCREEN_SUM_VA_3P_SOLAR,     
    SCREEN_VAR_R,                
    SCREEN_VAR_Y,                
    SCREEN_VAR_B,                
    SCREEN_SUM_VAR_3P,           
+   SCREEN_VAR_R_SOLAR,                
+   SCREEN_VAR_Y_SOLAR,                
+   SCREEN_VAR_B_SOLAR,                
+   SCREEN_SUM_VAR_3P_SOLAR,           
    SCREEN_PF_R,                 
    SCREEN_PF_Y,                 
    SCREEN_PF_B,                 
    SCREEN_SUM_PF_3P,            
+   SCREEN_PF_R_SOLAR,                 
+   SCREEN_PF_Y_SOLAR,                 
+   SCREEN_PF_B_SOLAR,                 
+   SCREEN_SUM_PF_3P_SOLAR,            
    SCREEN_IMP_ENE_W_STR,        
    SCREEN_IMP_ENE_W_VAL,        
+   SCREEN_IMP_ENE_W_VAL_SOLAR,        
    SCREEN_IMP_ENE_VA_STR,       
    SCREEN_IMP_ENE_VA_VAL,       
+   SCREEN_IMP_ENE_VA_VAL_SOLAR,       
    SCREEN_IMP_ENE_VAR_POS_STR,  
    SCREEN_IMP_ENE_VAR_POS_VAL,  
+   SCREEN_IMP_ENE_VAR_POS_VAL_SOLAR,  
    SCREEN_IMP_ENE_VAR_NEG_STR,  
    SCREEN_IMP_ENE_VAR_NEG_VAL,  
+   SCREEN_IMP_ENE_VAR_NEG_VAL_SOLAR,
    0XFF,
   };
   const uint8_t SCREEN_SEQ_OLD_DATA[]=

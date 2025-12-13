@@ -41,6 +41,8 @@ void NewMeterInit(void)
     for(i=0;i<sizeof(StorageBuffer);i++)*((uint8_t *)&StorageBuffer+i)=0;
     StorageBuffer.ImportVarhNeg=0.00001;
     StorageBuffer.ExportVarhNeg=0.00001;
+    StorageBuffer.SolarImportVarhNeg=0.00001;
+    StorageBuffer.SolarExportVarhNeg=0.00001;
     i=sizeof(StorageBuffer);
     StorageBuffer.StorageCounter=1;
     StorageBuffer.StorageLocation=DATA_SAVE_START_LOC;

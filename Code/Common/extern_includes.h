@@ -96,6 +96,7 @@ extern uint32_t InterruptFlag,RYFreqMeasDuration,SaveFreqMeasDuration;
 extern uint32_t WattPerPulseTick,IntWattPerPulseTick;
 extern uint64_t SumWattPerPulseTick;
 extern float IntRPrevSample,IntYPrevSample,IntBPrevSample;
+extern float IntRSolarPrevSample,IntYSolarPrevSample,IntBSolarPrevSample;
 extern uint8_t Tc20ms,OperatingSatatus;
 extern uint16_t SwPressed,SwPrev,SwTimer,SwFlag,SwValue,SwTimeOverflow,SwTimeOverflow2,SwTimeOverflow3;
 extern int16_t PrevSampleVol,FilOut_1,FilOut_2;

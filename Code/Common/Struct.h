@@ -9,6 +9,7 @@ struct STORE
     uint32_t  StorageCounter;
     uint16_t  StorageLocation;
     uint16_t  RunningMode;
+
     uint32_t  RunHourImport;
     uint32_t  RunHourExport;
     uint32_t  LoadHourImport;   // For dual source import is mains(S1) and export is generator(S2)
@@ -23,6 +24,22 @@ struct STORE
     double    ExportVarhNeg; 
     uint16_t  ImportInterruptions;
     uint16_t  ExportInterruptions;  // Interruption cant be import/export only
+
+    uint32_t  SolarRunHourImport;
+    uint32_t  SolarRunHourExport;
+    uint32_t  SolarLoadHourImport;   // For dual source import is mains(S1) and export is generator(S2)
+    uint32_t  SolarLoadHourExport;
+    double    SolarImportWh;    // least count is 1e-7whr and hence max 999,999,999,999.999,999,9 whr sec term
+    double    SolarImportVAh;
+    double    SolarImportVarhPos;
+    double    SolarImportVarhNeg;
+    double    SolarExportWh;
+    double    SolarExportVAh;
+    double    SolarExportVarhPos;
+    double    SolarExportVarhNeg; 
+    uint16_t  SolarImportInterruptions;
+    uint16_t  SolarExportInterruptions;  // Interruption cant be import/export only
+
     uint16_t  EnergyDispUnit;
     uint16_t  StoreCRC;
 };
@@ -55,12 +72,24 @@ struct INT_DATA_SUM
   float        VolRSolarPhase;
   float        VolYSolarPhase;
   float        VolBSolarPhase;
+  float        CurRSolarPhase;
+  float        CurYSolarPhase;
+  float        CurBSolarPhase;
+  float        RSolarPhasePower;
+  float        YSolarPhasePower;
+  float        BSolarPhasePower;
+  float        YRSolarPower3P3W;
+  float        YBSolarPower3P3W;
+  float        CurNeutralSolar;
   float        VolRYSolarPhPh;
   float        VolYBSolarPhPh;
   float        VolBRSolarPhPh;
   float        OffsetVolRSolarPhase;
   float        OffsetVolYSolarPhase;
   float        OffsetVolBSolarPhase;
+  float        OffsetCurRSolarPhase;
+  float        OffsetCurYSolarPhase;
+  float        OffsetCurBSolarPhase;
 };
 
 
@@ -92,12 +121,24 @@ struct INT_DATA_SAVE
   float     VolRSolarPhase;
   float     VolYSolarPhase;
   float     VolBSolarPhase;
+  float     CurRSolarPhase;
+  float     CurYSolarPhase;
+  float     CurBSolarPhase;
+  float     RSolarPhasePower;
+  float     YSolarPhasePower;
+  float     BSolarPhasePower;
+  float     YRSolarPower3P3W;
+  float     YBSolarPower3P3W;
+  float     CurNeutralSolar;
   float     VolRYSolarPhPh;
   float     VolYBSolarPhPh;
   float     VolBRSolarPhPh;
   float     OffsetVolRSolarPhase;
   float     OffsetVolYSolarPhase;
   float     OffsetVolBSolarPhase;
+  float     OffsetCurRSolarPhase;
+  float     OffsetCurYSolarPhase;
+  float     OffsetCurBSolarPhase;
 };
 
 struct INT_TIMER_COUNT
@@ -199,6 +240,30 @@ struct INST_PARA
   float     VolRYSolar;
   float     VolYBSolar;
   float     VolBRSolar;
+  float     CurrentRSolar;
+  float     CurrentYSolar;
+  float     CurrentBSolar;
+  float     CurrentNSolar;
+  float     TotalPowerRSolar;
+  float     TotalPowerYSolar;
+  float     TotalPowerBSolar;
+  float     SumTotalPowerSolar;
+  float     AppPowerRSolar;
+  float     AppPowerYSolar;
+  float     AppPowerBSolar;
+  float     TotalAppPowerSolar;
+  float     ReactPowerRSolar;
+  float     ReactPowerYSolar;
+  float     ReactPowerBSolar;
+  float     TotalReactPowerSolar;
+  float     PowerFactorRSolar;
+  float     PowerFactorYSolar;
+  float     PowerFactorBSolar;
+  float     TotalPowerFactorSolar;
+  float     FunRSolarCurr;
+  float     FunYSolarCurr;
+  float     FunBSolarCurr;
+  float     FunNSolarCurr;
 };
 
 struct OFFSET
@@ -214,6 +279,9 @@ struct OFFSET
   float     VolRSolarPhase;
   float     VolYSolarPhase;
   float     VolBSolarPhase;
+  float     CurRSolarPhase;
+  float     CurYSolarPhase;
+  float     CurBSolarPhase;
 };
 
 struct FFT_STRUCT
@@ -249,6 +317,39 @@ struct FFT_STRUCT
   float    FFT_BCurCosSave[50];
   float    FFT_NeuCurSinSave[50];
   float    FFT_NeuCurCosSave[50];
+
+  float    FFT_RSolarVolSinSum[50];
+  float    FFT_RSolarVolCosSum[50];
+  float    FFT_YSolarVolSinSum[50];
+  float    FFT_YSolarVolCosSum[50];
+  float    FFT_BSolarVolSinSum[50];
+  float    FFT_BSolarVolCosSum[50];
+  
+  float    FFT_RSolarCurSinSum[50];
+  float    FFT_RSolarCurCosSum[50];
+  float    FFT_YSolarCurSinSum[50];
+  float    FFT_YSolarCurCosSum[50];
+  float    FFT_BSolarCurSinSum[50];
+  float    FFT_BSolarCurCosSum[50];
+  float    FFT_NeuSolarCurSinSum[50];
+  float    FFT_NeuSolarCurCosSum[50];
+  
+  float    FFT_RSolarVolSinSave[50];
+  float    FFT_RSolarVolCosSave[50];
+  float    FFT_YSolarVolSinSave[50];
+  float    FFT_YSolarVolCosSave[50];
+  float    FFT_BSolarVolSinSave[50];
+  float    FFT_BSolarVolCosSave[50];
+  
+  float    FFT_RSolarCurSinSave[50];
+  float    FFT_RSolarCurCosSave[50];
+  float    FFT_YSolarCurSinSave[50];
+  float    FFT_YSolarCurCosSave[50];
+  float    FFT_BSolarCurSinSave[50];
+  float    FFT_BSolarCurCosSave[50];
+  float    FFT_NeuSolarCurSinSave[50];
+  float    FFT_NeuSolarCurCosSave[50];
+
   uint16_t FFT_Counter;
   uint16_t FFT_CounterIndex;
 };
@@ -273,14 +374,9 @@ float     VR_240_GAIN;
 float     VY_240_GAIN;
 float     VB_240_GAIN;     
 
-float     VR_SOLAR_240_GAIN;             
-float     VY_SOLAR_240_GAIN;
-float     VB_SOLAR_240_GAIN;  
-
 float     IR_HIGH_GAIN;     // future for high accuracy meters
 float     IR_MID_GAIN;
 float     IR_LOW_GAIN;
-
 
 float     IY_HIGH_GAIN;  
 float     IY_MID_GAIN;
@@ -301,7 +397,36 @@ float     IY_LOW_PH_ERROR;
 float     IB_HIGH_PH_ERROR;
 float     IB_MID_PH_ERROR;
 float     IB_LOW_PH_ERROR;
-          
+
+float     VR_SOLAR_240_GAIN;             
+float     VY_SOLAR_240_GAIN;
+float     VB_SOLAR_240_GAIN;  
+
+float     IR_SOLAR_HIGH_GAIN;     // future for high accuracy meters
+float     IR_SOLAR_MID_GAIN;
+float     IR_SOLAR_LOW_GAIN;
+
+float     IY_SOLAR_HIGH_GAIN;  
+float     IY_SOLAR_MID_GAIN;
+float     IY_SOLAR_LOW_GAIN; 
+
+float     IB_SOLAR_HIGH_GAIN; 
+float     IB_SOLAR_MID_GAIN;
+float     IB_SOLAR_LOW_GAIN;  
+
+float     IR_SOLAR_HIGH_PH_ERROR;
+float     IR_SOLAR_MID_PH_ERROR;
+float     IR_SOLAR_LOW_PH_ERROR;
+
+float     IY_SOLAR_HIGH_PH_ERROR;
+float     IY_SOLAR_MID_PH_ERROR;
+float     IY_SOLAR_LOW_PH_ERROR;
+
+float     IB_SOLAR_HIGH_PH_ERROR;
+float     IB_SOLAR_MID_PH_ERROR;
+float     IB_SOLAR_LOW_PH_ERROR;
+
+
 uint16_t     INIT_DATA1;          
 uint16_t     INIT_DATA2  ; 
 
@@ -329,6 +454,20 @@ struct GAIN_WC
   float VR_SOLAR_GAIN;
   float VY_SOLAR_GAIN;
   float VB_SOLAR_GAIN;
+
+  float IR_SOLAR_GAIN;
+  float IY_SOLAR_GAIN;
+  float IB_SOLAR_GAIN;
+  
+  float PR_SOLAR_ALFA;
+  float PY_SOLAR_ALFA;
+  float PB_SOLAR_ALFA;
+  
+  float PR_SOLAR_BETA;
+  float PY_SOLAR_BETA;
+  float PB_SOLAR_BETA;
+  
+
 };
 
   

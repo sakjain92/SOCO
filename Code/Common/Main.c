@@ -38,15 +38,13 @@ void main(void)
   MeterInit(); 
   if(StorageBuffer.RunningMode==RUNNING_MODE_IMPORT)StorageBuffer.ImportInterruptions++;
   else StorageBuffer.ExportInterruptions++;
+
+  if(StorageBuffer.RunningMode==RUNNING_MODE_IMPORT)StorageBuffer.SolarImportInterruptions++;
+  else StorageBuffer.SolarExportInterruptions++;
+
   FillCurrentGainArray();
   IntTimerCount.TimerNewValue=3750;
   IntTimerCount.TimerPresentValue=3750;
-  WorkingCopyGain.VR_GAIN=CalibrationCoeff.VR_240_GAIN;
-  WorkingCopyGain.VY_GAIN=CalibrationCoeff.VY_240_GAIN;
-  WorkingCopyGain.VB_GAIN=CalibrationCoeff.VB_240_GAIN;
-  WorkingCopyGain.VR_SOLAR_GAIN=CalibrationCoeff.VR_SOLAR_240_GAIN;
-  WorkingCopyGain.VY_SOLAR_GAIN=CalibrationCoeff.VY_SOLAR_240_GAIN;
-  WorkingCopyGain.VB_SOLAR_GAIN=CalibrationCoeff.VB_SOLAR_240_GAIN;
   SetWorkingGainBuffer();
   DISP_SR_ON;
   __enable_interrupt();
@@ -233,8 +231,6 @@ void ProcessRelays()
     //
 #define MAX_CONTACTOR_CHANGE_LATENCY    5
 
-    static float solarRPhaseVolt = 240;
-
     // By default, contactor is turned on when the controller is off
     // (Contactor coil tied to NC of the controller's relay).
     // So assume healthy state initially (except Load On Solar contactor)
@@ -311,7 +307,7 @@ void ProcessRelays()
             .TimeLeft = 0,
             // UNDONE: Change this to actual solar R Phase
             //
-            .vol = &solarRPhaseVolt,
+            .vol = &InstantPara.VolRSolar,
             .turnContactorOn = SwitchOnContactorLoadOnSolar,
             .turnContactorOff = SwitchOffContactorLoadOnSolar,
             .contactorFeedback = &g_DigInputs.LoadOnSolarContactorOn,
@@ -693,6 +689,15 @@ void StartCalibration(void)
      WorkingCopyGain.VR_SOLAR_GAIN=1.0f;
      WorkingCopyGain.VY_SOLAR_GAIN=1.0f;
      WorkingCopyGain.VB_SOLAR_GAIN=1.0f;
+     WorkingCopyGain.IR_SOLAR_GAIN=1.0f;
+     WorkingCopyGain.IY_SOLAR_GAIN=1.0f;
+     WorkingCopyGain.IB_SOLAR_GAIN=1.0f;
+     WorkingCopyGain.PR_SOLAR_ALFA=1;
+     WorkingCopyGain.PR_SOLAR_BETA=0;
+     WorkingCopyGain.PY_SOLAR_ALFA=1;
+     WorkingCopyGain.PY_SOLAR_BETA=0;
+     WorkingCopyGain.PB_SOLAR_ALFA=1;
+     WorkingCopyGain.PB_SOLAR_BETA=0;
    }
    if(FlagDirectCalibration == CALIBRATE_H_VI)
    {
@@ -716,6 +721,19 @@ void StartCalibration(void)
         WorkingCopyGain.PY_BETA=0;
         WorkingCopyGain.PB_ALFA=1;
         WorkingCopyGain.PB_BETA=0;
+
+        WorkingCopyGain.IR_SOLAR_GAIN=CalibrationCoeff.IR_SOLAR_HIGH_GAIN;
+        WorkingCopyGain.IY_SOLAR_GAIN=CalibrationCoeff.IY_SOLAR_HIGH_GAIN;
+        WorkingCopyGain.IB_SOLAR_GAIN=CalibrationCoeff.IB_SOLAR_HIGH_GAIN;
+        WorkingCopyGain.VR_SOLAR_GAIN=CalibrationCoeff.VR_SOLAR_240_GAIN;
+        WorkingCopyGain.VY_SOLAR_GAIN=CalibrationCoeff.VY_SOLAR_240_GAIN;
+        WorkingCopyGain.VB_SOLAR_GAIN=CalibrationCoeff.VB_SOLAR_240_GAIN;
+        WorkingCopyGain.PR_SOLAR_ALFA=1;
+        WorkingCopyGain.PR_SOLAR_BETA=0;
+        WorkingCopyGain.PY_SOLAR_ALFA=1;
+        WorkingCopyGain.PY_SOLAR_BETA=0;
+        WorkingCopyGain.PB_SOLAR_ALFA=1;
+        WorkingCopyGain.PB_SOLAR_BETA=0;
      }
    }
    
@@ -750,13 +768,26 @@ void StartCalibration(void)
      WorkingCopyGain.VR_GAIN=CalibrationCoeff.VR_240_GAIN;
      WorkingCopyGain.VY_GAIN=CalibrationCoeff.VY_240_GAIN;
      WorkingCopyGain.VB_GAIN=CalibrationCoeff.VB_240_GAIN;
-     
      WorkingCopyGain.PR_ALFA=1;
      WorkingCopyGain.PR_BETA=0;
      WorkingCopyGain.PY_ALFA=1;
      WorkingCopyGain.PY_BETA=0;
      WorkingCopyGain.PB_ALFA=1;
      WorkingCopyGain.PB_BETA=0;
+
+     WorkingCopyGain.IR_SOLAR_GAIN=1.0f;
+     WorkingCopyGain.IY_SOLAR_GAIN=1.0f;
+     WorkingCopyGain.IB_SOLAR_GAIN=1.0f;
+     WorkingCopyGain.VR_SOLAR_GAIN=CalibrationCoeff.VR_SOLAR_240_GAIN;
+     WorkingCopyGain.VY_SOLAR_GAIN=CalibrationCoeff.VY_SOLAR_240_GAIN;
+     WorkingCopyGain.VB_SOLAR_GAIN=CalibrationCoeff.VB_SOLAR_240_GAIN;
+     WorkingCopyGain.PR_SOLAR_ALFA=1;
+     WorkingCopyGain.PR_SOLAR_BETA=0;
+     WorkingCopyGain.PY_SOLAR_ALFA=1;
+     WorkingCopyGain.PY_SOLAR_BETA=0;
+     WorkingCopyGain.PB_SOLAR_ALFA=1;
+     WorkingCopyGain.PB_SOLAR_BETA=0;
+
        
    }
    if(FlagDirectCalibration == CALIBRATE_M_VI)
@@ -782,6 +813,18 @@ void StartCalibration(void)
         WorkingCopyGain.PB_ALFA=1;
         WorkingCopyGain.PB_BETA=0;
 
+        WorkingCopyGain.IR_SOLAR_GAIN=CalibrationCoeff.IR_SOLAR_MID_GAIN;
+        WorkingCopyGain.IY_SOLAR_GAIN=CalibrationCoeff.IY_SOLAR_MID_GAIN;
+        WorkingCopyGain.IB_SOLAR_GAIN=CalibrationCoeff.IB_SOLAR_MID_GAIN;
+        WorkingCopyGain.VR_SOLAR_GAIN=CalibrationCoeff.VR_SOLAR_240_GAIN;
+        WorkingCopyGain.VY_SOLAR_GAIN=CalibrationCoeff.VY_SOLAR_240_GAIN;
+        WorkingCopyGain.VB_SOLAR_GAIN=CalibrationCoeff.VB_SOLAR_240_GAIN;
+        WorkingCopyGain.PR_SOLAR_ALFA=1;
+        WorkingCopyGain.PR_SOLAR_BETA=0;
+        WorkingCopyGain.PY_SOLAR_ALFA=1;
+        WorkingCopyGain.PY_SOLAR_BETA=0;
+        WorkingCopyGain.PB_SOLAR_ALFA=1;
+        WorkingCopyGain.PB_SOLAR_BETA=0;
      }
    }
    if(FlagDirectCalibration == CALIBRATE_DIS_M_PF)
@@ -816,14 +859,26 @@ void StartCalibration(void)
      WorkingCopyGain.VR_GAIN=CalibrationCoeff.VR_240_GAIN;
      WorkingCopyGain.VY_GAIN=CalibrationCoeff.VY_240_GAIN;
      WorkingCopyGain.VB_GAIN=CalibrationCoeff.VB_240_GAIN;
-     
-     
      WorkingCopyGain.PR_ALFA=1;
      WorkingCopyGain.PR_BETA=0;
      WorkingCopyGain.PY_ALFA=1;
      WorkingCopyGain.PY_BETA=0;
      WorkingCopyGain.PB_ALFA=1;
      WorkingCopyGain.PB_BETA=0;
+
+     WorkingCopyGain.IR_SOLAR_GAIN=1.0f;
+     WorkingCopyGain.IY_SOLAR_GAIN=1.0f;
+     WorkingCopyGain.IB_SOLAR_GAIN=1.0f;
+     WorkingCopyGain.VR_SOLAR_GAIN=CalibrationCoeff.VR_SOLAR_240_GAIN;
+     WorkingCopyGain.VY_SOLAR_GAIN=CalibrationCoeff.VY_SOLAR_240_GAIN;
+     WorkingCopyGain.VB_SOLAR_GAIN=CalibrationCoeff.VB_SOLAR_240_GAIN;
+     WorkingCopyGain.PR_SOLAR_ALFA=1;
+     WorkingCopyGain.PR_SOLAR_BETA=0;
+     WorkingCopyGain.PY_SOLAR_ALFA=1;
+     WorkingCopyGain.PY_SOLAR_BETA=0;
+     WorkingCopyGain.PB_SOLAR_ALFA=1;
+     WorkingCopyGain.PB_SOLAR_BETA=0;
+
        
    }
    if(FlagDirectCalibration == CALIBRATE_L_VI)
@@ -849,6 +904,18 @@ void StartCalibration(void)
         WorkingCopyGain.PB_ALFA=1;
         WorkingCopyGain.PB_BETA=0;
 
+        WorkingCopyGain.IR_SOLAR_GAIN=CalibrationCoeff.IR_SOLAR_LOW_GAIN;
+        WorkingCopyGain.IY_SOLAR_GAIN=CalibrationCoeff.IY_SOLAR_LOW_GAIN;
+        WorkingCopyGain.IB_SOLAR_GAIN=CalibrationCoeff.IB_SOLAR_LOW_GAIN;
+        WorkingCopyGain.VR_SOLAR_GAIN=CalibrationCoeff.VR_SOLAR_240_GAIN;
+        WorkingCopyGain.VY_SOLAR_GAIN=CalibrationCoeff.VY_SOLAR_240_GAIN;
+        WorkingCopyGain.VB_SOLAR_GAIN=CalibrationCoeff.VB_SOLAR_240_GAIN;
+        WorkingCopyGain.PR_SOLAR_ALFA=1;
+        WorkingCopyGain.PR_SOLAR_BETA=0;
+        WorkingCopyGain.PY_SOLAR_ALFA=1;
+        WorkingCopyGain.PY_SOLAR_BETA=0;
+        WorkingCopyGain.PB_SOLAR_ALFA=1;
+        WorkingCopyGain.PB_SOLAR_BETA=0;
      }
    }
    if(FlagDirectCalibration == CALIBRATE_DIS_L_PF)
@@ -918,6 +985,9 @@ void StartCalibration(void)
    if (FlagDirectCalibration >= CALIBRATE_OUT_1 &&
        FlagDirectCalibration <= CALIBRATE_OUT_5)
    {
+       // UNDONE: This logic here might not be working
+       // Not able to test outputs properly
+       //
        void (*outputs[])(void) = 
        {
            SwitchOnContactorRPhaseGridHealthy,
@@ -966,6 +1036,19 @@ void FillCurrentGainArray(void)
   for(i=0;i<50;i++)CalPF(BufferBetaR[i],&BufferAlfaR[i],&BufferBetaR[i]);
   for(i=0;i<50;i++)CalPF(BufferBetaY[i],&BufferAlfaY[i],&BufferBetaY[i]);
   for(i=0;i<50;i++)CalPF(BufferBetaB[i],&BufferAlfaB[i],&BufferBetaB[i]);
+
+  for(i=0;i<StepHigh;i++)BufferBetaRSolar[i]=CalibrationCoeff.IR_SOLAR_HIGH_PH_ERROR+(CalibrationCoeff.IR_SOLAR_MID_PH_ERROR-CalibrationCoeff.IR_SOLAR_HIGH_PH_ERROR)*i/StepHigh;
+  for(i=0;i<StepHigh;i++)BufferBetaYSolar[i]=CalibrationCoeff.IY_SOLAR_HIGH_PH_ERROR+(CalibrationCoeff.IY_SOLAR_MID_PH_ERROR-CalibrationCoeff.IY_SOLAR_HIGH_PH_ERROR)*i/StepHigh;
+  for(i=0;i<StepHigh;i++)BufferBetaBSolar[i]=CalibrationCoeff.IB_SOLAR_HIGH_PH_ERROR+(CalibrationCoeff.IB_SOLAR_MID_PH_ERROR-CalibrationCoeff.IB_SOLAR_HIGH_PH_ERROR)*i/StepHigh;
+  
+  for(i=0;i<StepLow+1;i++)BufferBetaRSolar[i+StepHigh]=CalibrationCoeff.IR_SOLAR_MID_PH_ERROR+(CalibrationCoeff.IR_SOLAR_LOW_PH_ERROR-CalibrationCoeff.IR_SOLAR_MID_PH_ERROR)*i/StepLow;
+  for(i=0;i<StepLow+1;i++)BufferBetaYSolar[i+StepHigh]=CalibrationCoeff.IY_SOLAR_MID_PH_ERROR+(CalibrationCoeff.IY_SOLAR_LOW_PH_ERROR-CalibrationCoeff.IY_SOLAR_MID_PH_ERROR)*i/StepLow;
+  for(i=0;i<StepLow+1;i++)BufferBetaBSolar[i+StepHigh]=CalibrationCoeff.IB_SOLAR_MID_PH_ERROR+(CalibrationCoeff.IB_SOLAR_LOW_PH_ERROR-CalibrationCoeff.IB_SOLAR_MID_PH_ERROR)*i/StepLow;
+  
+  for(i=0;i<50;i++)CalPF(BufferBetaRSolar[i],&BufferAlfaRSolar[i],&BufferBetaRSolar[i]);
+  for(i=0;i<50;i++)CalPF(BufferBetaYSolar[i],&BufferAlfaYSolar[i],&BufferBetaYSolar[i]);
+  for(i=0;i<50;i++)CalPF(BufferBetaBSolar[i],&BufferAlfaBSolar[i],&BufferBetaBSolar[i]);
+
 }
   
 /*
@@ -977,6 +1060,14 @@ void SetWorkingGainBuffer(void)
 {
   uint8_t TempChar;
   float Slope,Offset;
+
+  WorkingCopyGain.VR_GAIN=CalibrationCoeff.VR_240_GAIN;
+  WorkingCopyGain.VY_GAIN=CalibrationCoeff.VY_240_GAIN;
+  WorkingCopyGain.VB_GAIN=CalibrationCoeff.VB_240_GAIN;
+  WorkingCopyGain.VR_SOLAR_GAIN=CalibrationCoeff.VR_SOLAR_240_GAIN;
+  WorkingCopyGain.VY_SOLAR_GAIN=CalibrationCoeff.VY_SOLAR_240_GAIN;
+  WorkingCopyGain.VB_SOLAR_GAIN=CalibrationCoeff.VB_SOLAR_240_GAIN;
+
   if(InstantPara.CurrentR>=CUR_MID_CAL_POINT)
   {
     if(InstantPara.CurrentR>=CUR_HIGH_CAL_POINT)WorkingCopyGain.IR_GAIN=CalibrationCoeff.IR_HIGH_GAIN;
@@ -1029,8 +1120,61 @@ void SetWorkingGainBuffer(void)
     WorkingCopyGain.IB_GAIN=Offset+Slope*InstantPara.CurrentB;
   }
   else WorkingCopyGain.IB_GAIN=CalibrationCoeff.IB_LOW_GAIN;  
-    
    
+  // Solar
+  if(InstantPara.CurrentRSolar>=CUR_MID_CAL_POINT)
+  {
+    if(InstantPara.CurrentRSolar>=CUR_HIGH_CAL_POINT)WorkingCopyGain.IR_SOLAR_GAIN=CalibrationCoeff.IR_SOLAR_HIGH_GAIN;
+    else
+    {
+      Slope=(CalibrationCoeff.IR_SOLAR_HIGH_GAIN-CalibrationCoeff.IR_SOLAR_MID_GAIN)/(CUR_HIGH_CAL_POINT-CUR_MID_CAL_POINT);
+      Offset=CalibrationCoeff.IR_SOLAR_HIGH_GAIN-CUR_HIGH_CAL_POINT*Slope;
+      WorkingCopyGain.IR_SOLAR_GAIN=Offset+Slope*InstantPara.CurrentRSolar;
+    }
+  }
+  else if(InstantPara.CurrentRSolar>=CUR_LOW_CAL_POINT)
+  {
+    Slope=(CalibrationCoeff.IR_SOLAR_MID_GAIN-CalibrationCoeff.IR_SOLAR_LOW_GAIN)/(CUR_MID_CAL_POINT-CUR_LOW_CAL_POINT);
+    Offset=CalibrationCoeff.IR_SOLAR_MID_GAIN-Slope;
+    WorkingCopyGain.IR_SOLAR_GAIN=Offset+Slope*InstantPara.CurrentRSolar;
+  }
+  else WorkingCopyGain.IR_SOLAR_GAIN=CalibrationCoeff.IR_SOLAR_LOW_GAIN;
+ 
+  if(InstantPara.CurrentYSolar>=CUR_MID_CAL_POINT)
+  {
+    if(InstantPara.CurrentYSolar>CUR_HIGH_CAL_POINT)WorkingCopyGain.IY_SOLAR_GAIN=CalibrationCoeff.IY_SOLAR_HIGH_GAIN;
+    else
+    {
+      Slope=(CalibrationCoeff.IY_SOLAR_HIGH_GAIN-CalibrationCoeff.IY_SOLAR_MID_GAIN)/(CUR_HIGH_CAL_POINT-CUR_MID_CAL_POINT);
+      Offset=CalibrationCoeff.IY_SOLAR_HIGH_GAIN-CUR_HIGH_CAL_POINT*Slope;
+      WorkingCopyGain.IY_SOLAR_GAIN=Offset+Slope*InstantPara.CurrentYSolar;
+    }
+  }
+  else if(InstantPara.CurrentYSolar>=CUR_LOW_CAL_POINT)
+  {
+    Slope=(CalibrationCoeff.IY_SOLAR_MID_GAIN-CalibrationCoeff.IY_SOLAR_LOW_GAIN)/(CUR_MID_CAL_POINT-CUR_LOW_CAL_POINT);
+    Offset=CalibrationCoeff.IY_SOLAR_MID_GAIN-Slope;
+    WorkingCopyGain.IY_SOLAR_GAIN=Offset+Slope*InstantPara.CurrentYSolar;
+  }
+  else WorkingCopyGain.IY_SOLAR_GAIN=CalibrationCoeff.IY_SOLAR_LOW_GAIN;
+  if(InstantPara.CurrentBSolar>=CUR_MID_CAL_POINT)
+  {
+    if(InstantPara.CurrentBSolar>=CUR_HIGH_CAL_POINT)WorkingCopyGain.IB_SOLAR_GAIN=CalibrationCoeff.IB_SOLAR_HIGH_GAIN;
+    else
+    {
+      Slope=(CalibrationCoeff.IB_SOLAR_HIGH_GAIN-CalibrationCoeff.IB_SOLAR_MID_GAIN)/(CUR_HIGH_CAL_POINT-CUR_MID_CAL_POINT);
+      Offset=CalibrationCoeff.IB_SOLAR_HIGH_GAIN-CUR_HIGH_CAL_POINT*Slope;
+      WorkingCopyGain.IB_SOLAR_GAIN=Offset+Slope*InstantPara.CurrentBSolar;
+    }
+  }
+  else if(InstantPara.CurrentBSolar>=CUR_LOW_CAL_POINT)
+  {
+    Slope=(CalibrationCoeff.IB_SOLAR_MID_GAIN-CalibrationCoeff.IB_SOLAR_LOW_GAIN)/(CUR_MID_CAL_POINT-CUR_LOW_CAL_POINT);
+    Offset=CalibrationCoeff.IB_SOLAR_MID_GAIN-Slope;
+    WorkingCopyGain.IB_SOLAR_GAIN=Offset+Slope*InstantPara.CurrentBSolar;
+  }
+  else WorkingCopyGain.IB_SOLAR_GAIN=CalibrationCoeff.IB_SOLAR_LOW_GAIN;  
+
     
   TempChar=(uint8_t)(InstantPara.CurrentR*10);
   if(TempChar>=50)TempChar=50;
@@ -1052,7 +1196,29 @@ void SetWorkingGainBuffer(void)
   TempChar=50-TempChar;
   WorkingCopyGain.PB_ALFA=BufferAlfaB[TempChar];
   WorkingCopyGain.PB_BETA=BufferBetaB[TempChar];
- 
+
+  // Solar
+  //
+  TempChar=(uint8_t)(InstantPara.CurrentRSolar*10);
+  if(TempChar>=50)TempChar=50;
+  else if(TempChar==0)TempChar=1;
+  TempChar=50-TempChar;
+  WorkingCopyGain.PR_SOLAR_ALFA=BufferAlfaRSolar[TempChar];
+  WorkingCopyGain.PR_SOLAR_BETA=BufferBetaRSolar[TempChar];
+  
+  TempChar=(uint8_t)(InstantPara.CurrentYSolar*10);
+  if(TempChar>=50)TempChar=50;
+  else if(TempChar==0)TempChar=1;
+  TempChar=50-TempChar;
+  WorkingCopyGain.PY_SOLAR_ALFA=BufferAlfaYSolar[TempChar];
+  WorkingCopyGain.PY_SOLAR_BETA=BufferBetaYSolar[TempChar];
+
+  TempChar=(uint8_t)(InstantPara.CurrentBSolar*10);
+  if(TempChar>=50)TempChar=50;
+  else if(TempChar==0)TempChar=1;
+  TempChar=50-TempChar;
+  WorkingCopyGain.PB_SOLAR_ALFA=BufferAlfaBSolar[TempChar];
+  WorkingCopyGain.PB_SOLAR_BETA=BufferBetaBSolar[TempChar];
 }
   /*
 Inf: Save Data in Eeprom
@@ -1067,11 +1233,17 @@ Ret: None
     if(InterruptFlag & INT_POWER_OK)DataSaveCounter++; 
     else DataSaveCounter=0;
     StorageBuffer.RunHourImport++;
+    StorageBuffer.SolarRunHourImport++;
     {
       if((InstantPara.CurrentR>0)||(InstantPara.CurrentY>0)||
         (InstantPara.CurrentB>0))
       {
          StorageBuffer.LoadHourImport++;
+      }
+      if((InstantPara.CurrentRSolar>0)||(InstantPara.CurrentYSolar>0)||
+        (InstantPara.CurrentBSolar>0))
+      {
+         StorageBuffer.SolarLoadHourImport++;
       }
     }
   

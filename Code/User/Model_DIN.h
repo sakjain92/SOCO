@@ -153,6 +153,7 @@
 // 1) For Apparent power, we are using RMS (IEC 60038) instead of (IEC 61000-4-7) where we just measure first harmonics as we need to match energy with utility meter (and SMPS will have noise)
 // 2) We tested surge via primary and connected 100:5A CT externally (like in ECON) to ECON current section and didn't see any failure in ECON. Does this indicate current section is directly
 // immune to surge (except for conductive surge)
+// 3) Note that this code is specialized for Jio. It doesn't have all the data calculation on Solar side because it didn't needed to be measured for Jio.
 //
 //
 // PANEL:

@@ -78,6 +78,9 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 #define  PASSWORD_CHECK_ON              0x200
 #define  INT_DATA_SAVING_EEPROM         0x400
 #define  INT_POWER_OK                   0x800
+#define  INT_R_SOLAR_PHASE_REV          0X1000
+#define  INT_Y_SOLAR_PHASE_REV          0X2000
+#define  INT_B_SOLAR_PHASE_REV          0X4000
 
 
 
@@ -416,12 +419,12 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 
 #define Stopbit_one     0
 #define Stopbit_two     1
-#define    ADC_IR1              0
-#define    ADC_VR1              1
-#define    ADC_IY1              2
-#define    ADC_VY1              3
-#define    ADC_IB1              4
-#define    ADC_VB1              5
+#define    ADC_IR               0
+#define    ADC_VR               1
+#define    ADC_IY               2
+#define    ADC_VY               3
+#define    ADC_IB               4
+#define    ADC_VB               5
 #define    ADC_IR_SOLAR         6
 #define    ADC_VR_SOLAR         7
 #define    ADC_IY_SOLAR         8

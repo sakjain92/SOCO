@@ -114,6 +114,19 @@ void DisplayUpdate(void)
                case DIS_INT_IMP:
                  DisplayInterruption(StorageBuffer.ImportInterruptions,ScreenIndex,DisplayIndex);
                  break;  
+              // Solar
+              case DIS_SOLAR_W_IMP:
+                 DisplayEnergy(StorageBuffer.SolarImportWh,ScreenIndex,DisplayIndex,Screen[DisplayIndex][ScreenIndex].LedType);
+                 break;  
+               case DIS_SOLAR_VA_IMP:    
+                 DisplayEnergy(StorageBuffer.SolarImportVAh,ScreenIndex,DisplayIndex,Screen[DisplayIndex][ScreenIndex].LedType);
+                 break;  
+               case DIS_SOLAR_VAR_POS_IMP:
+                 DisplayEnergy(StorageBuffer.SolarImportVarhPos,ScreenIndex,DisplayIndex,Screen[DisplayIndex][ScreenIndex].LedType);
+                 break;  
+               case DIS_SOLAR_VAR_NEG_IMP:
+                 DisplayEnergy(-StorageBuffer.SolarImportVarhNeg,ScreenIndex,DisplayIndex,Screen[DisplayIndex][ScreenIndex].LedType);
+                 break;    
  // Old Data
                  
                  case DIS_RUN_HR_IMP_OLD:

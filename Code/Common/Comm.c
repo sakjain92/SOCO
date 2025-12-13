@@ -72,12 +72,20 @@ float TempFloat;
    // UNDONE: Should the guard rails be on average or instant parameters
    //
    if(
-     (InstantPara.CurrentR >I_L_LOWER_LIMIT) && (InstantPara.CurrentR<I_L_UPPER_LIMIT)&&
+      (InstantPara.CurrentR >I_L_LOWER_LIMIT) && (InstantPara.CurrentR<I_L_UPPER_LIMIT)&&
       (InstantPara.CurrentY >I_L_LOWER_LIMIT)&& (InstantPara.CurrentY<I_L_UPPER_LIMIT)&&
       (InstantPara.CurrentB >I_L_LOWER_LIMIT) && (InstantPara.CurrentB<I_L_UPPER_LIMIT)&&
       (InstantPara.TotalPowerR<PF_POWER_L_UPPER_LIMIT)&&(InstantPara.TotalPowerR>PF_POWER_L_LOWER_LIMIT)&&
       (InstantPara.TotalPowerY<PF_POWER_L_UPPER_LIMIT)&&(InstantPara.TotalPowerY>PF_POWER_L_LOWER_LIMIT)&&
-      (InstantPara.TotalPowerB<PF_POWER_L_UPPER_LIMIT)&&(InstantPara.TotalPowerB>PF_POWER_L_LOWER_LIMIT)) 
+      (InstantPara.TotalPowerB<PF_POWER_L_UPPER_LIMIT)&&(InstantPara.TotalPowerB>PF_POWER_L_LOWER_LIMIT)&&
+
+      (InstantPara.CurrentRSolar >I_L_LOWER_LIMIT) && (InstantPara.CurrentRSolar<I_L_UPPER_LIMIT)&&
+      (InstantPara.CurrentYSolar >I_L_LOWER_LIMIT)&& (InstantPara.CurrentYSolar<I_L_UPPER_LIMIT)&&
+      (InstantPara.CurrentBSolar >I_L_LOWER_LIMIT) && (InstantPara.CurrentBSolar<I_L_UPPER_LIMIT)&&
+      (InstantPara.TotalPowerRSolar<PF_POWER_L_UPPER_LIMIT)&&(InstantPara.TotalPowerRSolar>PF_POWER_L_LOWER_LIMIT)&&
+      (InstantPara.TotalPowerYSolar<PF_POWER_L_UPPER_LIMIT)&&(InstantPara.TotalPowerYSolar>PF_POWER_L_LOWER_LIMIT)&&
+      (InstantPara.TotalPowerBSolar<PF_POWER_L_UPPER_LIMIT)&&(InstantPara.TotalPowerBSolar>PF_POWER_L_LOWER_LIMIT)
+    )
    {
 
       ProtectionReset();              
@@ -95,6 +103,15 @@ float TempFloat;
       TempFloat=(CalPowB-CAL_PF_POWER_SETTING_LOW)/CAL_PF_POWER_SETTING_LOW;
       CalBuffer.IB_LOW_PH_ERROR=TempFloat-0.001;
 
+      TempFloat=(CalPowRSolar-CAL_PF_POWER_SETTING_LOW)/CAL_PF_POWER_SETTING_LOW;
+      CalBuffer.IR_SOLAR_LOW_PH_ERROR=TempFloat-0.001;
+
+      TempFloat=(CalPowYSolar-CAL_PF_POWER_SETTING_LOW)/CAL_PF_POWER_SETTING_LOW;
+      CalBuffer.IY_SOLAR_LOW_PH_ERROR=TempFloat-0.001;
+
+      TempFloat=(CalPowBSolar-CAL_PF_POWER_SETTING_LOW)/CAL_PF_POWER_SETTING_LOW;
+      CalBuffer.IB_SOLAR_LOW_PH_ERROR=TempFloat-0.001;
+
       
    }
    else DisplayImproperSettings();
@@ -103,12 +120,20 @@ float TempFloat;
  if(FlagDirectCalibration==CALIBRATE_L_VI)
  {
    if(
-     (InstantPara.CurrentR >I_L_LOWER_LIMIT) && (InstantPara.CurrentR<I_L_UPPER_LIMIT)&&
+      (InstantPara.CurrentR >I_L_LOWER_LIMIT) && (InstantPara.CurrentR<I_L_UPPER_LIMIT)&&
       (InstantPara.CurrentY >I_L_LOWER_LIMIT)&& (InstantPara.CurrentY<I_L_UPPER_LIMIT)&&
       (InstantPara.CurrentB >I_L_LOWER_LIMIT) && (InstantPara.CurrentB<I_L_UPPER_LIMIT)&&
       (InstantPara.TotalPowerR<PF_POWER_L_UPPER_LIMIT)&&(InstantPara.TotalPowerR>PF_POWER_L_LOWER_LIMIT)&&
       (InstantPara.TotalPowerY<PF_POWER_L_UPPER_LIMIT)&&(InstantPara.TotalPowerY>PF_POWER_L_LOWER_LIMIT)&&
-      (InstantPara.TotalPowerB<PF_POWER_L_UPPER_LIMIT)&&(InstantPara.TotalPowerB>PF_POWER_L_LOWER_LIMIT))  
+      (InstantPara.TotalPowerB<PF_POWER_L_UPPER_LIMIT)&&(InstantPara.TotalPowerB>PF_POWER_L_LOWER_LIMIT)&&
+
+      (InstantPara.CurrentRSolar >I_L_LOWER_LIMIT) && (InstantPara.CurrentRSolar<I_L_UPPER_LIMIT)&&
+      (InstantPara.CurrentYSolar >I_L_LOWER_LIMIT)&& (InstantPara.CurrentYSolar<I_L_UPPER_LIMIT)&&
+      (InstantPara.CurrentBSolar >I_L_LOWER_LIMIT) && (InstantPara.CurrentBSolar<I_L_UPPER_LIMIT)&&
+      (InstantPara.TotalPowerRSolar<PF_POWER_L_UPPER_LIMIT)&&(InstantPara.TotalPowerRSolar>PF_POWER_L_LOWER_LIMIT)&&
+      (InstantPara.TotalPowerYSolar<PF_POWER_L_UPPER_LIMIT)&&(InstantPara.TotalPowerYSolar>PF_POWER_L_LOWER_LIMIT)&&
+      (InstantPara.TotalPowerBSolar<PF_POWER_L_UPPER_LIMIT)&&(InstantPara.TotalPowerBSolar>PF_POWER_L_LOWER_LIMIT)
+    )
    {
 
       ProtectionReset();              
@@ -118,10 +143,12 @@ float TempFloat;
       SaveFlashData();  
             
       CalBuffer.IR_LOW_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_LOW*CalBuffer.IR_LOW_GAIN)/CalCurR);
-     
       CalBuffer.IY_LOW_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_LOW*(float)CalBuffer.IY_LOW_GAIN)/CalCurY);
-      
       CalBuffer.IB_LOW_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_LOW*(float)CalBuffer.IB_LOW_GAIN)/CalCurB);
+
+      CalBuffer.IR_SOLAR_LOW_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_LOW*CalBuffer.IR_SOLAR_LOW_GAIN)/CalCurRSolar);
+      CalBuffer.IY_SOLAR_LOW_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_LOW*(float)CalBuffer.IY_SOLAR_LOW_GAIN)/CalCurYSolar);
+      CalBuffer.IB_SOLAR_LOW_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_LOW*(float)CalBuffer.IB_SOLAR_LOW_GAIN)/CalCurBSolar);
       
    }
    else DisplayImproperSettings();
@@ -130,12 +157,20 @@ float TempFloat;
  else if(FlagDirectCalibration==CALIBRATE_M_PF)
  {
    if(
-     (InstantPara.CurrentR >I_M_LOWER_LIMIT) && (InstantPara.CurrentR<I_M_UPPER_LIMIT)&&
+      (InstantPara.CurrentR >I_M_LOWER_LIMIT) && (InstantPara.CurrentR<I_M_UPPER_LIMIT)&&
       (InstantPara.CurrentY >I_M_LOWER_LIMIT)&& (InstantPara.CurrentY<I_M_UPPER_LIMIT)&&
       (InstantPara.CurrentB >I_M_LOWER_LIMIT) && (InstantPara.CurrentB<I_M_UPPER_LIMIT)&&
       (InstantPara.TotalPowerR<PF_POWER_M_UPPER_LIMIT)&&(InstantPara.TotalPowerR>PF_POWER_M_LOWER_LIMIT)&&
       (InstantPara.TotalPowerY<PF_POWER_M_UPPER_LIMIT)&&(InstantPara.TotalPowerY>PF_POWER_M_LOWER_LIMIT)&&
-      (InstantPara.TotalPowerB<PF_POWER_M_UPPER_LIMIT)&&(InstantPara.TotalPowerB>PF_POWER_M_LOWER_LIMIT))  
+      (InstantPara.TotalPowerB<PF_POWER_M_UPPER_LIMIT)&&(InstantPara.TotalPowerB>PF_POWER_M_LOWER_LIMIT)&&
+
+      (InstantPara.CurrentRSolar >I_M_LOWER_LIMIT) && (InstantPara.CurrentRSolar<I_M_UPPER_LIMIT)&&
+      (InstantPara.CurrentYSolar >I_M_LOWER_LIMIT)&& (InstantPara.CurrentYSolar<I_M_UPPER_LIMIT)&&
+      (InstantPara.CurrentBSolar >I_M_LOWER_LIMIT) && (InstantPara.CurrentBSolar<I_M_UPPER_LIMIT)&&
+      (InstantPara.TotalPowerRSolar<PF_POWER_M_UPPER_LIMIT)&&(InstantPara.TotalPowerRSolar>PF_POWER_M_LOWER_LIMIT)&&
+      (InstantPara.TotalPowerYSolar<PF_POWER_M_UPPER_LIMIT)&&(InstantPara.TotalPowerYSolar>PF_POWER_M_LOWER_LIMIT)&&
+      (InstantPara.TotalPowerBSolar<PF_POWER_M_UPPER_LIMIT)&&(InstantPara.TotalPowerBSolar>PF_POWER_M_LOWER_LIMIT)
+    )  
    {
 
       ProtectionReset();              
@@ -153,7 +188,14 @@ float TempFloat;
       TempFloat=(CalPowB-CAL_PF_POWER_SETTING_MID)/CAL_PF_POWER_SETTING_MID;
       CalBuffer.IB_MID_PH_ERROR=TempFloat-0.001;
 
-      
+      TempFloat=(CalPowRSolar-CAL_PF_POWER_SETTING_MID)/CAL_PF_POWER_SETTING_MID;
+      CalBuffer.IR_SOLAR_MID_PH_ERROR=TempFloat-0.001;
+
+      TempFloat=(CalPowYSolar-CAL_PF_POWER_SETTING_MID)/CAL_PF_POWER_SETTING_MID;
+      CalBuffer.IY_SOLAR_MID_PH_ERROR=TempFloat-0.001;
+
+      TempFloat=(CalPowBSolar-CAL_PF_POWER_SETTING_MID)/CAL_PF_POWER_SETTING_MID;
+      CalBuffer.IB_SOLAR_MID_PH_ERROR=TempFloat-0.001;
    }
    else DisplayImproperSettings();
  } 
@@ -161,12 +203,20 @@ float TempFloat;
  else if(FlagDirectCalibration==CALIBRATE_M_VI)
  {
    if(
-     (InstantPara.CurrentR >I_M_LOWER_LIMIT) && (InstantPara.CurrentR<I_M_UPPER_LIMIT)&&
+      (InstantPara.CurrentR >I_M_LOWER_LIMIT) && (InstantPara.CurrentR<I_M_UPPER_LIMIT)&&
       (InstantPara.CurrentY >I_M_LOWER_LIMIT)&& (InstantPara.CurrentY<I_M_UPPER_LIMIT)&&
       (InstantPara.CurrentB >I_M_LOWER_LIMIT) && (InstantPara.CurrentB<I_M_UPPER_LIMIT)&&
       (InstantPara.TotalPowerR<PF_POWER_M_UPPER_LIMIT)&&(InstantPara.TotalPowerR>PF_POWER_M_LOWER_LIMIT)&&
       (InstantPara.TotalPowerY<PF_POWER_M_UPPER_LIMIT)&&(InstantPara.TotalPowerY>PF_POWER_M_LOWER_LIMIT)&&
-      (InstantPara.TotalPowerB<PF_POWER_M_UPPER_LIMIT)&&(InstantPara.TotalPowerB>PF_POWER_M_LOWER_LIMIT))  
+      (InstantPara.TotalPowerB<PF_POWER_M_UPPER_LIMIT)&&(InstantPara.TotalPowerB>PF_POWER_M_LOWER_LIMIT)&&
+
+      (InstantPara.CurrentRSolar >I_M_LOWER_LIMIT) && (InstantPara.CurrentRSolar<I_M_UPPER_LIMIT)&&
+      (InstantPara.CurrentYSolar >I_M_LOWER_LIMIT)&& (InstantPara.CurrentYSolar<I_M_UPPER_LIMIT)&&
+      (InstantPara.CurrentBSolar >I_M_LOWER_LIMIT) && (InstantPara.CurrentBSolar<I_M_UPPER_LIMIT)&&
+      (InstantPara.TotalPowerRSolar<PF_POWER_M_UPPER_LIMIT)&&(InstantPara.TotalPowerRSolar>PF_POWER_M_LOWER_LIMIT)&&
+      (InstantPara.TotalPowerYSolar<PF_POWER_M_UPPER_LIMIT)&&(InstantPara.TotalPowerYSolar>PF_POWER_M_LOWER_LIMIT)&&
+      (InstantPara.TotalPowerBSolar<PF_POWER_M_UPPER_LIMIT)&&(InstantPara.TotalPowerBSolar>PF_POWER_M_LOWER_LIMIT)
+    )  
    {
 
       ProtectionReset();              
@@ -176,11 +226,12 @@ float TempFloat;
       SaveFlashData();  
             
       CalBuffer.IR_MID_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_MID*CalBuffer.IR_MID_GAIN)/CalCurR);
-     
       CalBuffer.IY_MID_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_MID*(float)CalBuffer.IY_MID_GAIN)/CalCurY);
-      
       CalBuffer.IB_MID_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_MID*(float)CalBuffer.IB_MID_GAIN)/CalCurB);
-      
+
+      CalBuffer.IR_SOLAR_MID_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_MID*CalBuffer.IR_SOLAR_MID_GAIN)/CalCurRSolar);
+      CalBuffer.IY_SOLAR_MID_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_MID*(float)CalBuffer.IY_SOLAR_MID_GAIN)/CalCurYSolar);
+      CalBuffer.IB_SOLAR_MID_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_MID*(float)CalBuffer.IB_SOLAR_MID_GAIN)/CalCurBSolar);
    }
    else DisplayImproperSettings();
  } 
@@ -197,9 +248,16 @@ float TempFloat;
       (InstantPara.TotalPowerR<PF_POWER_H_UPPER_LIMIT)&&(InstantPara.TotalPowerR>PF_POWER_H_LOWER_LIMIT)&&
       (InstantPara.TotalPowerY<PF_POWER_H_UPPER_LIMIT)&&(InstantPara.TotalPowerY>PF_POWER_H_LOWER_LIMIT)&&
       (InstantPara.TotalPowerB<PF_POWER_H_UPPER_LIMIT)&&(InstantPara.TotalPowerB>PF_POWER_H_LOWER_LIMIT)&&
+
       (InstantPara.VolRSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolRSolar<VOLTAGE_HIGHER_LIMIT) &&  
       (InstantPara.VolYSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolYSolar<VOLTAGE_HIGHER_LIMIT)&& 
-      (InstantPara.VolBSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolBSolar<VOLTAGE_HIGHER_LIMIT)
+      (InstantPara.VolBSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolBSolar<VOLTAGE_HIGHER_LIMIT) &&
+      (InstantPara.CurrentRSolar >I_H_LOWER_LIMIT) && (InstantPara.CurrentRSolar<I_H_UPPER_LIMIT)&&
+      (InstantPara.CurrentYSolar >I_H_LOWER_LIMIT)&& (InstantPara.CurrentYSolar<I_H_UPPER_LIMIT)&&
+      (InstantPara.CurrentBSolar >I_H_LOWER_LIMIT) && (InstantPara.CurrentBSolar<I_H_UPPER_LIMIT)&&
+      (InstantPara.TotalPowerRSolar<PF_POWER_H_UPPER_LIMIT)&&(InstantPara.TotalPowerRSolar>PF_POWER_H_LOWER_LIMIT)&&
+      (InstantPara.TotalPowerYSolar<PF_POWER_H_UPPER_LIMIT)&&(InstantPara.TotalPowerYSolar>PF_POWER_H_LOWER_LIMIT)&&
+      (InstantPara.TotalPowerBSolar<PF_POWER_H_UPPER_LIMIT)&&(InstantPara.TotalPowerBSolar>PF_POWER_H_LOWER_LIMIT)
     )  
    {
 
@@ -218,6 +276,14 @@ float TempFloat;
       TempFloat=(CalPowB-CAL_PF_POWER_SETTING_HIGH)/CAL_PF_POWER_SETTING_HIGH;
       CalBuffer.IB_HIGH_PH_ERROR=TempFloat-0.001;
 
+      TempFloat=(CalPowRSolar-CAL_PF_POWER_SETTING_HIGH)/CAL_PF_POWER_SETTING_HIGH;
+      CalBuffer.IR_SOLAR_HIGH_PH_ERROR=TempFloat-0.001;
+
+      TempFloat=(CalPowYSolar-CAL_PF_POWER_SETTING_HIGH)/CAL_PF_POWER_SETTING_HIGH;
+      CalBuffer.IY_SOLAR_HIGH_PH_ERROR=TempFloat-0.001;
+
+      TempFloat=(CalPowBSolar-CAL_PF_POWER_SETTING_HIGH)/CAL_PF_POWER_SETTING_HIGH;
+      CalBuffer.IB_SOLAR_HIGH_PH_ERROR=TempFloat-0.001;
    }
    else DisplayImproperSettings();
  }
@@ -234,9 +300,16 @@ float TempFloat;
       (InstantPara.TotalPowerR<PF_POWER_H_UPPER_LIMIT)&&(InstantPara.TotalPowerR>PF_POWER_H_LOWER_LIMIT)&&
       (InstantPara.TotalPowerY<PF_POWER_H_UPPER_LIMIT)&&(InstantPara.TotalPowerY>PF_POWER_H_LOWER_LIMIT)&&
       (InstantPara.TotalPowerB<PF_POWER_H_UPPER_LIMIT)&&(InstantPara.TotalPowerB>PF_POWER_H_LOWER_LIMIT) &&
+
       (InstantPara.VolRSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolRSolar<VOLTAGE_HIGHER_LIMIT) &&  
       (InstantPara.VolYSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolYSolar<VOLTAGE_HIGHER_LIMIT)&& 
-      (InstantPara.VolBSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolBSolar<VOLTAGE_HIGHER_LIMIT)
+      (InstantPara.VolBSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolBSolar<VOLTAGE_HIGHER_LIMIT) && 
+      (InstantPara.CurrentRSolar >I_H_LOWER_LIMIT) && (InstantPara.CurrentRSolar<I_H_UPPER_LIMIT)&&
+      (InstantPara.CurrentYSolar >I_H_LOWER_LIMIT)&& (InstantPara.CurrentYSolar<I_H_UPPER_LIMIT)&&
+      (InstantPara.CurrentBSolar >I_H_LOWER_LIMIT) && (InstantPara.CurrentBSolar<I_H_UPPER_LIMIT)&&
+      (InstantPara.TotalPowerRSolar<PF_POWER_H_UPPER_LIMIT)&&(InstantPara.TotalPowerRSolar>PF_POWER_H_LOWER_LIMIT)&&
+      (InstantPara.TotalPowerYSolar<PF_POWER_H_UPPER_LIMIT)&&(InstantPara.TotalPowerYSolar>PF_POWER_H_LOWER_LIMIT)&&
+      (InstantPara.TotalPowerBSolar<PF_POWER_H_UPPER_LIMIT)&&(InstantPara.TotalPowerBSolar>PF_POWER_H_LOWER_LIMIT)
     )  
 
    {
@@ -247,22 +320,18 @@ float TempFloat;
       RESET_WATCH_DOG;
       SaveFlashData();  
       CalBuffer.VR_240_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_VOLTAGE_SETTING_HIGH*CalBuffer.VR_240_GAIN)/CalVolR);
-      
       CalBuffer.VY_240_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_VOLTAGE_SETTING_HIGH*CalBuffer.VY_240_GAIN)/CalVolY);
-      
       CalBuffer.VB_240_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_VOLTAGE_SETTING_HIGH*CalBuffer.VB_240_GAIN)/CalVolB);
-      
       CalBuffer.IR_HIGH_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_HIGH*CalBuffer.IR_HIGH_GAIN)/CalCurR);
-     
       CalBuffer.IY_HIGH_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_HIGH*(float)CalBuffer.IY_HIGH_GAIN)/CalCurY);
-      
       CalBuffer.IB_HIGH_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_HIGH*(float)CalBuffer.IB_HIGH_GAIN)/CalCurB);
 
       CalBuffer.VR_SOLAR_240_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_VOLTAGE_SETTING_HIGH*CalBuffer.VR_SOLAR_240_GAIN)/CalVolRSolar);
-      
       CalBuffer.VY_SOLAR_240_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_VOLTAGE_SETTING_HIGH*CalBuffer.VY_SOLAR_240_GAIN)/CalVolYSolar);
-      
       CalBuffer.VB_SOLAR_240_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_VOLTAGE_SETTING_HIGH*CalBuffer.VB_SOLAR_240_GAIN)/CalVolBSolar);
+      CalBuffer.IR_SOLAR_HIGH_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_HIGH*CalBuffer.IR_SOLAR_HIGH_GAIN)/CalCurRSolar);
+      CalBuffer.IY_SOLAR_HIGH_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_HIGH*(float)CalBuffer.IY_SOLAR_HIGH_GAIN)/CalCurYSolar);
+      CalBuffer.IB_SOLAR_HIGH_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_HIGH*(float)CalBuffer.IB_SOLAR_HIGH_GAIN)/CalCurBSolar);
    }
       
    else DisplayImproperSettings();
@@ -296,6 +365,12 @@ void AccumulateDataForCalibration(void)
    CalVolRSolar+=InstantPara.VolRSolar;
    CalVolYSolar+=InstantPara.VolYSolar;
    CalVolBSolar+=InstantPara.VolBSolar;
+   CalCurRSolar+=InstantPara.CurrentRSolar;
+   CalCurYSolar+=InstantPara.CurrentYSolar;
+   CalCurBSolar+=InstantPara.CurrentBSolar;
+   CalPowRSolar+=InstantPara.TotalPowerRSolar;
+   CalPowYSolar+=InstantPara.TotalPowerYSolar;
+   CalPowBSolar+=InstantPara.TotalPowerBSolar;
  }
 
 /*
@@ -318,6 +393,12 @@ void ClearCalAccumulatedData(void)
    CalVolRSolar=0;
    CalVolYSolar=0;
    CalVolBSolar=0;
+   CalCurRSolar=0;
+   CalCurYSolar=0;
+   CalCurBSolar=0;
+   CalPowRSolar=0;
+   CalPowYSolar=0;
+   CalPowBSolar=0;
 }
 
 /*

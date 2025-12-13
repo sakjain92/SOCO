@@ -38,6 +38,9 @@ void Metrology(void)
   VIOffset.VolRSolarPhase += IntDataSave.OffsetVolRSolarPhase/NO_OF_SAMPLES;
   VIOffset.VolYSolarPhase += IntDataSave.OffsetVolYSolarPhase/NO_OF_SAMPLES;
   VIOffset.VolBSolarPhase += IntDataSave.OffsetVolBSolarPhase/NO_OF_SAMPLES;
+  VIOffset.CurRSolarPhase += IntDataSave.OffsetCurRSolarPhase/NO_OF_SAMPLES;
+  VIOffset.CurYSolarPhase += IntDataSave.OffsetCurYSolarPhase/NO_OF_SAMPLES;
+  VIOffset.CurBSolarPhase += IntDataSave.OffsetCurBSolarPhase/NO_OF_SAMPLES;
 
   if(IntDataSave.RPhasePower<0)InterruptFlag |=INT_R_PHASE_REV;
   else InterruptFlag &=~INT_R_PHASE_REV;
@@ -45,6 +48,14 @@ void Metrology(void)
   else InterruptFlag &=~INT_Y_PHASE_REV;
   if(IntDataSave.BPhasePower<0)InterruptFlag |=INT_B_PHASE_REV;
   else InterruptFlag &=~INT_B_PHASE_REV;
+
+  if(IntDataSave.RSolarPhasePower<0)InterruptFlag |=INT_R_SOLAR_PHASE_REV;
+  else InterruptFlag &=~INT_R_SOLAR_PHASE_REV;
+  if(IntDataSave.YSolarPhasePower<0)InterruptFlag |=INT_Y_SOLAR_PHASE_REV;
+  else InterruptFlag &=~INT_Y_SOLAR_PHASE_REV;
+  if(IntDataSave.BSolarPhasePower<0)InterruptFlag |=INT_B_SOLAR_PHASE_REV;
+  else InterruptFlag &=~INT_B_SOLAR_PHASE_REV;
+
   CalculateVoCur();
   CalculateHarmonicComponents();
   
@@ -110,17 +121,49 @@ void Metrology(void)
   }
   
   if(InstantPara.VolBR<MIN_VOL_LIMIT_PH_PH)InstantPara.VolBR=0;
+
+  // Solar
+  //
+  if(InstantPara.CurrentRSolar<MIN_TOTAL_CUR_LIMIT)InstantPara.CurrentRSolar=InstantPara.FunRSolarCurr;
+  if(InstantPara.CurrentRSolar<TempFloat)
+  {
+    InstantPara.CurrentRSolar=0;
+    InstantPara.FunRSolarCurr=0;
+    IntDataSave.RSolarPhasePower=0;
+  }
+  
+  if(InstantPara.CurrentYSolar<MIN_TOTAL_CUR_LIMIT)InstantPara.CurrentYSolar=InstantPara.FunYSolarCurr;
+  if(InstantPara.CurrentYSolar<TempFloat)
+  {
+    InstantPara.CurrentYSolar=0;
+    InstantPara.FunYSolarCurr=0;
+    IntDataSave.YSolarPhasePower=0;
+  }
+  
  
- if(InstantPara.VolRSolar<MIN_VOL_LIMIT)
+  if(InstantPara.CurrentBSolar<MIN_TOTAL_CUR_LIMIT)InstantPara.CurrentBSolar=InstantPara.FunBSolarCurr;
+  if(InstantPara.CurrentBSolar<TempFloat)
+  {
+    InstantPara.CurrentBSolar=0;
+    InstantPara.FunBSolarCurr=0;
+    IntDataSave.BSolarPhasePower=0;
+  }
+  
+  if(InstantPara.CurrentNSolar<MIN_TOTAL_CUR_LIMIT)InstantPara.CurrentNSolar=InstantPara.FunNSolarCurr;
+  if(InstantPara.CurrentNSolar<MIN_NEU_CUR_LIMIT)InstantPara.CurrentNSolar=0;
+  // Vol
+  if(InstantPara.VolRSolar<MIN_VOL_LIMIT)
   {
     InstantPara.VolRSolar=0;
+    IntDataSave.RSolarPhasePower=0;
   }
   
   if(InstantPara.VolRYSolar<MIN_VOL_LIMIT_PH_PH)InstantPara.VolRYSolar=0;
   
   if(InstantPara.VolYSolar<MIN_VOL_LIMIT)
   {
-    InstantPara.VolY=0;
+    InstantPara.VolYSolar=0;
+    IntDataSave.YSolarPhasePower=0;
   }
   
   if(InstantPara.VolYBSolar<MIN_VOL_LIMIT_PH_PH)InstantPara.VolYBSolar=0;
@@ -128,10 +171,11 @@ void Metrology(void)
   if(InstantPara.VolBSolar<MIN_VOL_LIMIT)
   {
     InstantPara.VolBSolar=0;
+    IntDataSave.BSolarPhasePower=0;
   }
   
   if(InstantPara.VolBRSolar<MIN_VOL_LIMIT_PH_PH)InstantPara.VolBRSolar=0;
-
+ 
   // Min/Max
   /*
   InstantPara.CurrentR=1.234;
@@ -260,14 +304,13 @@ void Metrology(void)
   if(InstantPara.SumTotalPower>=0) TempFloat=InstantPara.SumTotalPower*1e7; //for accuracy its multiplied by 1e7
   else TempFloat=-InstantPara.SumTotalPower*1e7;
   TempFloat=(TempFloat*(float)IntDataSave.TimerCountValue/3750.0);
-  WattPerPulseTick=(uint32_t)(TempFloat/3200.0);
   InstantPara.TotalAppPower=InstantPara.AppPowerR+InstantPara.AppPowerY+InstantPara.AppPowerB;
 
    
   TempFloat=TempFloat/(3600*1e7); // all energies are saved in whr
   FloatMin=InstantPara.TotalReactPower*(float)IntDataSave.TimerCountValue/13500000.0f; //(3750*3600)  Reactive
   FloatMax=InstantPara.TotalAppPower*(float)IntDataSave.TimerCountValue/13500000.0f; //Apparent
-  
+
 #ifdef    MODEL_DATA_SAVE  
 #ifdef MODEL_IMPORT_ONLY
   if(PowerUpCounter>3)
@@ -280,7 +323,86 @@ void Metrology(void)
     StorageBuffer.ImportVAh +=(CtPtRatio*(double)FloatMax); 
   }
 #endif // MODEL_IMPORT_ONLY
+#endif // MODEL_DATA_SAVE
+
+  // Solar
+  InstantPara.TotalPowerRSolar=POWER_COEFF_3P4W*IntDataSave.RSolarPhasePower;
+  if(InstantPara.CurrentRSolar==0)InstantPara.TotalPowerRSolar=0; // Starting 
+  InstantPara.TotalPowerYSolar=POWER_COEFF_3P4W*IntDataSave.YSolarPhasePower;
+  if(InstantPara.CurrentYSolar==0)InstantPara.TotalPowerYSolar=0; // Starting 
+  InstantPara.TotalPowerBSolar=POWER_COEFF_3P4W*IntDataSave.BSolarPhasePower;
+  if(InstantPara.CurrentBSolar==0)InstantPara.TotalPowerBSolar=0; // Starting 
+  InstantPara.SumTotalPowerSolar=(InstantPara.TotalPowerRSolar+InstantPara.TotalPowerYSolar+InstantPara.TotalPowerBSolar);
+
+  // VA
+  InstantPara.AppPowerRSolar=(InstantPara.VolRSolar*InstantPara.CurrentRSolar);
+  InstantPara.AppPowerYSolar=(InstantPara.VolYSolar*InstantPara.CurrentYSolar);
+  InstantPara.AppPowerBSolar=(InstantPara.VolBSolar*InstantPara.CurrentBSolar);
   
+  if(InstantPara.AppPowerRSolar< InstantPara.TotalPowerRSolar)InstantPara.AppPowerRSolar=InstantPara.TotalPowerRSolar;
+  if(InstantPara.AppPowerYSolar< InstantPara.TotalPowerYSolar)InstantPara.AppPowerYSolar=InstantPara.TotalPowerYSolar;
+  if(InstantPara.AppPowerBSolar< InstantPara.TotalPowerBSolar)InstantPara.AppPowerBSolar=InstantPara.TotalPowerBSolar;
+  
+  // Power Factor
+  if(InstantPara.AppPowerRSolar>0)
+  { 
+      InstantPara.PowerFactorRSolar=InstantPara.TotalPowerRSolar/InstantPara.AppPowerRSolar;
+      if(InstantPara.PowerFactorRSolar<0)InstantPara.PowerFactorRSolar=-1*InstantPara.PowerFactorRSolar;
+      if(InstantPara.PowerFactorRSolar>1.0)InstantPara.PowerFactorRSolar=1.0;
+      
+  }
+  else InstantPara.PowerFactorRSolar=1.0;
+  
+  if(InstantPara.AppPowerYSolar>0)
+  {
+     
+    InstantPara.PowerFactorYSolar=InstantPara.TotalPowerYSolar/InstantPara.AppPowerYSolar;
+    if(InstantPara.PowerFactorYSolar<0)InstantPara.PowerFactorYSolar=-1*InstantPara.PowerFactorYSolar;
+    if(InstantPara.PowerFactorYSolar>1.0)InstantPara.PowerFactorYSolar=1.0;
+  }
+  else InstantPara.PowerFactorYSolar=1.0;
+  
+  if(InstantPara.AppPowerBSolar>0)
+  {
+      InstantPara.PowerFactorBSolar=InstantPara.TotalPowerBSolar/InstantPara.AppPowerBSolar;
+      if(InstantPara.PowerFactorBSolar<0)InstantPara.PowerFactorBSolar=-1*InstantPara.PowerFactorBSolar;
+      if(InstantPara.PowerFactorBSolar>1.0)InstantPara.PowerFactorBSolar=1.0;
+  }
+  else InstantPara.PowerFactorBSolar=1.0;
+  InstantPara.TotalAppPowerSolar=InstantPara.AppPowerRSolar+InstantPara.AppPowerYSolar+InstantPara.AppPowerBSolar;
+  if(InstantPara.TotalAppPowerSolar>0)
+  {
+    InstantPara.TotalPowerFactorSolar=InstantPara.SumTotalPowerSolar/InstantPara.TotalAppPowerSolar;
+    if(InstantPara.TotalPowerFactorSolar<0)InstantPara.TotalPowerFactorSolar=-1*InstantPara.TotalPowerFactorSolar;
+    if(InstantPara.TotalPowerFactorSolar>1.0)InstantPara.TotalPowerFactorSolar=1.0;
+  }
+  else InstantPara.TotalPowerFactorSolar=1.0;
+  
+  if(InstantPara.SumTotalPowerSolar>=0) TempFloat=InstantPara.SumTotalPowerSolar*1e7; //for accuracy its multiplied by 1e7
+  else TempFloat=-InstantPara.SumTotalPowerSolar*1e7;
+  TempFloat=(TempFloat*(float)IntDataSave.TimerCountValue/3750.0);
+  InstantPara.TotalAppPowerSolar=InstantPara.AppPowerRSolar+InstantPara.AppPowerYSolar+InstantPara.AppPowerBSolar;
+
+  TempFloat=TempFloat/(3600*1e7); // all energies are saved in whr
+  FloatMin=InstantPara.TotalReactPowerSolar*(float)IntDataSave.TimerCountValue/13500000.0f; //(3750*3600)  Reactive
+  FloatMax=InstantPara.TotalAppPowerSolar*(float)IntDataSave.TimerCountValue/13500000.0f; //Apparent
+  
+
+#ifdef    MODEL_DATA_SAVE  
+#ifdef MODEL_IMPORT_ONLY
+  if(PowerUpCounter>3)
+  {
+    StorageBuffer.SolarImportWh +=(CtPtRatio*(double)TempFloat);
+    if(InstantPara.TotalReactPowerSolar>0)
+      StorageBuffer.SolarImportVarhPos +=(CtPtRatio*(double)FloatMin);
+    else 
+      StorageBuffer.SolarImportVarhNeg -=(CtPtRatio*(double)FloatMin); 
+    StorageBuffer.SolarImportVAh +=(CtPtRatio*(double)FloatMax); 
+  }
+#endif // MODEL_IMPORT_ONLY
+#endif // MODEL_DATA_SAVE
+
+#ifdef    MODEL_DATA_SAVE  
   tempc=0;
   
     
@@ -311,6 +433,7 @@ void Metrology(void)
     StorageBuffer.ImportVarhPos-=EnergyOverflowLimit;
     tempc=1;
   }
+  // UNDONE: This should be less that as ImportVarhNeg is supposed to be negative
   if(StorageBuffer.ImportVarhNeg>EnergyOverflowLimit)
   {
     StorageBuffer.ImportVarhNeg-=EnergyOverflowLimit;
@@ -332,6 +455,55 @@ void Metrology(void)
   if((StorageBuffer.RunHourImport>=36e8)||(StorageBuffer.RunHourExport>=36e8)||\
     (StorageBuffer.LoadHourImport>=36e8)||(StorageBuffer.LoadHourExport>=36e8))tempc=1;
 
+  // Solar
+  if(StorageBuffer.SolarImportWh>EnergyOverflowLimit)
+  {
+    StorageBuffer.SolarImportWh-=EnergyOverflowLimit;
+    tempc=1;
+  }
+    
+  if(StorageBuffer.SolarExportWh>EnergyOverflowLimit)
+  {
+    StorageBuffer.SolarExportWh-=EnergyOverflowLimit;
+    tempc=1;
+  }
+  if(StorageBuffer.SolarExportVarhPos>EnergyOverflowLimit)
+  {
+    StorageBuffer.SolarExportVarhPos-=EnergyOverflowLimit;
+    tempc=1;
+  }
+  if(StorageBuffer.SolarExportVarhNeg>EnergyOverflowLimit)
+  {
+    StorageBuffer.SolarExportVarhNeg-=EnergyOverflowLimit;
+    tempc=1;
+  }
+  
+  if(StorageBuffer.SolarImportVarhPos>EnergyOverflowLimit)
+  {
+    StorageBuffer.SolarImportVarhPos-=EnergyOverflowLimit;
+    tempc=1;
+  }
+  // UNDONE: This should be less then?
+  if(StorageBuffer.SolarImportVarhNeg>EnergyOverflowLimit)
+  {
+    StorageBuffer.SolarImportVarhNeg-=EnergyOverflowLimit;
+    tempc=1;
+  }
+  
+  if(StorageBuffer.SolarImportVAh>EnergyOverflowLimit)
+  {
+    StorageBuffer.SolarImportVAh-=EnergyOverflowLimit;
+    tempc=1;
+  }
+  
+  if(StorageBuffer.SolarExportVAh>EnergyOverflowLimit)
+  {
+    StorageBuffer.SolarExportVAh-=EnergyOverflowLimit;
+    tempc=1;
+  }
+
+  if((StorageBuffer.SolarRunHourImport>=36e8)||(StorageBuffer.SolarRunHourExport>=36e8)||\
+    (StorageBuffer.SolarLoadHourImport>=36e8)||(StorageBuffer.SolarLoadHourExport>=36e8))tempc=1;
   
   if(tempc)
   {
@@ -447,6 +619,11 @@ void Metrology(void)
   if(InstantPara.PowerFactorR>0.9985)InstantPara.ReactPowerR=0;
   if(InstantPara.PowerFactorY>0.9985)InstantPara.ReactPowerY=0;
   if(InstantPara.PowerFactorB>0.9985)InstantPara.ReactPowerB=0;
+
+  if(InstantPara.PowerFactorRSolar>0.9985)InstantPara.ReactPowerRSolar=0;
+  if(InstantPara.PowerFactorYSolar>0.9985)InstantPara.ReactPowerYSolar=0;
+  if(InstantPara.PowerFactorBSolar>0.9985)InstantPara.ReactPowerBSolar=0;
+
   /*
   if((InstantPara.TotalReactPower<1)&&(InstantPara.TotalPowerFactor!=1))
   {
@@ -493,6 +670,9 @@ void CalculateHarmonicComponents(void)
   float TempRCur=0,TempYCur=0,TempBCur=0,TempNCur=0;
   float TempRW=0,TempYW=0,TempBW=0;
   float TempRVr=0,TempYVr=0,TempBVr=0,TempNVr=0,TempNW=0;
+  float TempRSolarCur=0,TempYSolarCur=0,TempBSolarCur=0,TempNSolarCur=0;
+  float TempRSolarVr=0,TempYSolarVr=0,TempBSolarVr=0;
+
 
   for(i=0;i<50;i++)
   {
@@ -532,6 +712,15 @@ void CalculateHarmonicComponents(void)
                  (FftSampleData.FFT_BVolCosSave[i]*FftSampleData.FFT_BCurSinSave[i]));
       TempNVr+=((FftSampleData.FFT_YVolSinSave[i]*FftSampleData.FFT_NeuCurCosSave[i])- // for 3p3w neutral current mult by Y vol
                  (FftSampleData.FFT_YVolCosSave[i]*FftSampleData.FFT_NeuCurSinSave[i]));
+
+      TempRSolarCur +=((FftSampleData.FFT_RSolarCurSinSave[i]*FftSampleData.FFT_RSolarCurSinSave[i])+
+                 (FftSampleData.FFT_RSolarCurCosSave[i]*FftSampleData.FFT_RSolarCurCosSave[i]));
+      TempYSolarCur +=((FftSampleData.FFT_YSolarCurSinSave[i]*FftSampleData.FFT_YSolarCurSinSave[i])+
+                 (FftSampleData.FFT_YSolarCurCosSave[i]*FftSampleData.FFT_YSolarCurCosSave[i]));
+      TempBSolarCur +=((FftSampleData.FFT_BSolarCurSinSave[i]*FftSampleData.FFT_BSolarCurSinSave[i])+
+                 (FftSampleData.FFT_BSolarCurCosSave[i]*FftSampleData.FFT_BSolarCurCosSave[i]));
+      TempNSolarCur +=((FftSampleData.FFT_NeuSolarCurSinSave[i]*FftSampleData.FFT_NeuSolarCurSinSave[i])+
+                 (FftSampleData.FFT_NeuSolarCurCosSave[i]*FftSampleData.FFT_NeuSolarCurCosSave[i]));
   }
   InstantPara.FunRVol=FUND_VOL_COEFF*sqrt(TempRVol/50);
   InstantPara.FunYVol=FUND_VOL_COEFF*sqrt(TempYVol/50);
@@ -544,22 +733,39 @@ void CalculateHarmonicComponents(void)
   InstantPara.FunPowerY=FUND_POWER_COEFF*TempYW/50;
   InstantPara.FunPowerB=FUND_POWER_COEFF*TempBW/50;
   InstantPara.ReactPowerR=-FUND_POWER_COEFF*TempRVr/50;
+  InstantPara.ReactPowerY=-FUND_POWER_COEFF*TempYVr/50;
   InstantPara.ReactPowerB=-FUND_POWER_COEFF*TempBVr/50;
- 
+
   InstantPara.SumFunPower=InstantPara.FunPowerR+InstantPara.FunPowerY+InstantPara.FunPowerB;
                                                 
   if((InstantPara.CurrentR==0)||((InstantPara.ReactPowerR<0.01)&&(InstantPara.ReactPowerR>-0.01)))InstantPara.ReactPowerR=0; 
-  
-  InstantPara.ReactPowerY=-FUND_POWER_COEFF*TempYVr/50;
   if((InstantPara.CurrentY==0)||((InstantPara.ReactPowerY<0.01)&&(InstantPara.ReactPowerY>-0.01)))InstantPara.ReactPowerY=0; 
   if((InstantPara.CurrentB==0)||((InstantPara.ReactPowerB<0.01)&&(InstantPara.ReactPowerB>-0.01)))InstantPara.ReactPowerB=0; 
     
-  
   if(InterruptFlag & INT_R_PHASE_REV)InstantPara.ReactPowerR=-InstantPara.ReactPowerR;
   if(InterruptFlag & INT_Y_PHASE_REV)InstantPara.ReactPowerY=-InstantPara.ReactPowerY;
   if(InterruptFlag & INT_B_PHASE_REV)InstantPara.ReactPowerB=-InstantPara.ReactPowerB;
   InstantPara.TotalReactPower=InstantPara.ReactPowerR+InstantPara.ReactPowerY+InstantPara.ReactPowerB;  
-  
+
+  InstantPara.FunRSolarCurr=FUND_CURRENT_COEFF*sqrt(TempRSolarCur/50);
+  InstantPara.FunYSolarCurr=FUND_CURRENT_COEFF*sqrt(TempYSolarCur/50);
+  InstantPara.FunBSolarCurr=FUND_CURRENT_COEFF*sqrt(TempBSolarCur/50);
+  InstantPara.FunNSolarCurr=FUND_CURRENT_COEFF*sqrt(TempNSolarCur/50);
+  InstantPara.ReactPowerRSolar=-FUND_POWER_COEFF*TempRSolarVr/50;
+  InstantPara.ReactPowerYSolar=-FUND_POWER_COEFF*TempYSolarVr/50;
+  InstantPara.ReactPowerBSolar=-FUND_POWER_COEFF*TempBSolarVr/50;
+
+  // UNDONE: Check this limit for Reactive power. Should we increase it?
+  if((InstantPara.CurrentRSolar==0)||((InstantPara.ReactPowerRSolar<0.01)&&(InstantPara.ReactPowerRSolar>-0.01)))InstantPara.ReactPowerRSolar=0; 
+  if((InstantPara.CurrentYSolar==0)||((InstantPara.ReactPowerYSolar<0.01)&&(InstantPara.ReactPowerYSolar>-0.01)))InstantPara.ReactPowerYSolar=0; 
+  if((InstantPara.CurrentBSolar==0)||((InstantPara.ReactPowerBSolar<0.01)&&(InstantPara.ReactPowerBSolar>-0.01)))InstantPara.ReactPowerBSolar=0; 
+    
+  if(InterruptFlag & INT_R_SOLAR_PHASE_REV)InstantPara.ReactPowerRSolar=-InstantPara.ReactPowerRSolar;
+  if(InterruptFlag & INT_Y_SOLAR_PHASE_REV)InstantPara.ReactPowerYSolar=-InstantPara.ReactPowerYSolar;
+  if(InterruptFlag & INT_B_SOLAR_PHASE_REV)InstantPara.ReactPowerBSolar=-InstantPara.ReactPowerBSolar;
+  InstantPara.TotalReactPowerSolar=InstantPara.ReactPowerRSolar+InstantPara.ReactPowerYSolar+InstantPara.ReactPowerBSolar;  
+
+
 
   if(InstantPara.VolR>InstantPara.FunRVol)
   {
@@ -621,10 +827,14 @@ void CalculateVoCur(void)
   InstantPara.VolBR=PH_VOLTAGE_COEFF*sqrt(IntDataSave.VolBRPhPh); 
   InstantPara.CurrentN=NEU_CURRENT_COEFF*sqrt(IntDataSave.CurNeutral);
 
+  InstantPara.CurrentRSolar=CURRENT_COEFF*sqrt(IntDataSave.CurRSolarPhase); 
+  InstantPara.CurrentYSolar=CURRENT_COEFF*sqrt(IntDataSave.CurYSolarPhase); 
+  InstantPara.CurrentBSolar=CURRENT_COEFF*sqrt(IntDataSave.CurBSolarPhase); 
   InstantPara.VolRSolar=VOLTAGE_COEFF*sqrt(IntDataSave.VolRSolarPhase); 
   InstantPara.VolRYSolar=PH_VOLTAGE_COEFF*sqrt(IntDataSave.VolRYSolarPhPh); 
   InstantPara.VolYSolar=VOLTAGE_COEFF*sqrt(IntDataSave.VolYSolarPhase); 
   InstantPara.VolYBSolar=PH_VOLTAGE_COEFF*sqrt(IntDataSave.VolYBSolarPhPh); 
   InstantPara.VolBSolar=VOLTAGE_COEFF*sqrt(IntDataSave.VolBSolarPhase); 
-  InstantPara.VolBRSolar=PH_VOLTAGE_COEFF*sqrt(IntDataSave.VolBRSolarPhPh); 
+  InstantPara.VolBRSolar=PH_VOLTAGE_COEFF*sqrt(IntDataSave.VolBRSolarPhPh);
+  InstantPara.CurrentNSolar=NEU_CURRENT_COEFF*sqrt(IntDataSave.CurNeutralSolar);
 }

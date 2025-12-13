@@ -59,6 +59,11 @@ Upto 10 its just the decimal place
 #define DIS_VAL_FREQ                32
 #define DIS_VAL_UNB                 33
 
+#define DIS_SOLAR_W_IMP             34
+#define DIS_SOLAR_VA_IMP            35
+#define DIS_SOLAR_VAR_POS_IMP       36
+#define DIS_SOLAR_VAR_NEG_IMP       37
+
 
 const uint8_t StrRY[]="RY";
 const uint8_t StrYB[]="YB";
@@ -542,5 +547,142 @@ const struct object Screen[][3]=
       { DATA_TYPE_VARIABLE,     &InstantPara.VolBSolar, 4,      DIS_VAL_VOLTAGE,        DIGIT_3,         0,             LED_SOLAR_B     },
       { 0xff,                   0,                      0,      0,                      DIGIT_3,         0,             0               }
     },
+    // SCREEN 64: Current 3P R Solar
+    {
+      { DATA_TYPE_STRING,       0,                      0,      0,                      DIGIT_2,         StrA,          LED_SOLAR_R      },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.CurrentRSolar,  4, DIS_VAL_CURRENT,        DIGIT_3,         0,             LED_SOLAR_R      },
+      { 0xff,                   0,                      0,      0,                      DIGIT_3,         0,             0,              }
+    },
+    // SCREEN 65: Current 3P Y Solar
+    {
+      { DATA_TYPE_STRING,       0,                      0,      0,                      DIGIT_2,         StrA,          LED_SOLAR_Y      },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.CurrentYSolar,  4, DIS_VAL_CURRENT,        DIGIT_3,         0,             LED_SOLAR_Y      },
+      { 0xff,                   0,                      0,      0,                      DIGIT_3,         0,             0,              }
+    },
+    // SCREEN 66: Current 3P B Solar
+    {
+      { DATA_TYPE_STRING,       0,                      0,      0,                      DIGIT_2,         StrA,          LED_SOLAR_B      },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.CurrentBSolar,  4, DIS_VAL_CURRENT,        DIGIT_3,         0,             LED_SOLAR_B      },
+      { 0xff,                   0,                      0,      0,                      DIGIT_3,         0,             LED_SOLAR_B      }
+    },
+      // SCREEN 67: POWER KW 3P R Solar
+  {
+      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrW,         LED_SOLAR_R   },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.TotalPowerRSolar,  4, DIS_VAL_POWER,        DIGIT_3,         0,            LED_SOLAR_R   },
+      { 0xff,                   0,                         0,     0,                     DIGIT_3,         0,            0       }
+  },
+  // SCREEN 68: POWER KW 3P Y Solar
+   {
+      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrW,         LED_SOLAR_Y   },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.TotalPowerYSolar,  4, DIS_VAL_POWER,        DIGIT_3,         0,            LED_SOLAR_Y   },
+      { 0xff,                   0,                         0,     0,                     DIGIT_3,         0,            0       }
+  },
+  // SCREEN 69: POWER KW 3P B Solar
+   {
+      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrW,         LED_SOLAR_B   },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.TotalPowerBSolar,  4, DIS_VAL_POWER,        DIGIT_3,         0,            LED_SOLAR_B   },
+      { 0xff,                   0,                         0,     0,                     DIGIT_3,         0,            0       }
+  },
+  // SCREEN 70: Sum Power  Solar
+  {
+      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrTW,        LED_SOLAR_TOTAL },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.SumTotalPowerSolar,4, DIS_VAL_POWER,        DIGIT_3,         0,            LED_SOLAR_TOTAL },
+      { 0xff,                   0,                         0,     0,                     DIGIT_3,         0,            0 }
+  },
+  // SCREEN 71: kVA 3P R Solar
+  {
+      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrVA,        LED_SOLAR_R   },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.AppPowerRSolar,    4, DIS_VAL_POW_VA,       DIGIT_3,         0,            LED_SOLAR_R   },
+      { 0xff,                   0,                         0,     0,                     DIGIT_3,         0,            0       }
+  },
+  // SCREEN 72: kVA 3P Y Solar
+  {
+      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrVA,        LED_SOLAR_Y   },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.AppPowerYSolar,    4, DIS_VAL_POW_VA,       DIGIT_3,         0,            LED_SOLAR_Y   },
+      { 0xff,                   0,                         0,     0,                     DIGIT_3,         0,            0       }
+  },
+  // SCREEN 73: kVA 3P B Solar
+  {
+      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrVA,        LED_SOLAR_B   },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.AppPowerBSolar,    4, DIS_VAL_POW_VA,       DIGIT_3,         0,            LED_SOLAR_B   },
+      { 0xff,                   0,                         0,     0,                     DIGIT_3,         0,            0       }
+  },
+   // SCREEN 74: Sum VA  SOlar
+  {
+      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrVA,        LED_SOLAR_TOTAL },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.TotalAppPowerSolar,4, DIS_VAL_POW_VA,       DIGIT_3,         0,            LED_SOLAR_TOTAL },
+      { 0xff,                   0,                         0,     0,                     DIGIT_3,         0,            LED_SOLAR_TOTAL }
+  },
+  // SCREEN 75: kVAr 3P R Solar
+  {
+      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrVR,        LED_SOLAR_R   },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.ReactPowerRSolar,  4, DIS_VAL_POW_VAR,      DIGIT_3,         0,            LED_SOLAR_R   },
+      { 0xff,                   0,                         0,     0,                     DIGIT_3,         0,            0       }
+ 
+  },
+  // SCREEN 76: kVAr 3P Y SOlar
+  {
+      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrVR,        LED_SOLAR_Y   },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.ReactPowerYSolar,  4, DIS_VAL_POW_VAR,      DIGIT_3,         0,            LED_SOLAR_Y   },
+      { 0xff,                   0,                         0,     0,                     DIGIT_3,         0,            0       }
+  },
+  // SCREEN 77: kVAr 3P B Solar
+  {
+      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrVR,        LED_SOLAR_B   },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.ReactPowerBSolar,  4, DIS_VAL_POW_VAR,      DIGIT_3,         0,            LED_SOLAR_B   },
+      { 0xff,                   0,                         0,     0,                     DIGIT_3,         0,            0       }
+  },
+  // SCREEN 78: Sum VAR Solar 
+  {
+      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrVR,        LED_SOLAR_TOTAL },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.TotalReactPowerSolar,4,    DIS_VAL_POW_VAR, DIGIT_3,         0,            LED_SOLAR_TOTAL },
+      { 0xff,                   0,                         0,     0,                     DIGIT_3,         0,            LED_SOLAR_TOTAL }
+  },
+  // SCREEN 79: Power factor 3P R Solar
+  {
+      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrPF,        LED_SOLAR_R   },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.PowerFactorRSolar, 4, DIS_VAL_PF,           DIGIT_3,         0,            LED_SOLAR_R   },
+      { 0xff,                   0,                         0,     0,                     DIGIT_3,         0,            0       }
+  },
+  // SCREEN 80: Power factor 3P Y Solar
+  {
+      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrPF,        LED_SOLAR_Y   },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.PowerFactorYSolar, 4, DIS_VAL_PF,           DIGIT_3,         0,            LED_SOLAR_Y   },
+      { 0xff,                   0,                         0,     0,                     DIGIT_3,         0,            0       }
+  },
+  // SCREEN 81: Power factor 3P B Solar
+  {
+      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrPF,        LED_SOLAR_B   },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.PowerFactorBSolar, 4, DIS_VAL_PF,           DIGIT_3,         0,            LED_SOLAR_B   },
+      { 0xff,                   0,                         0,     0,                     DIGIT_3,         0,            0       }
+  },
+  // SCREEN 82: Sum PF 
+  {
+      { DATA_TYPE_STRING,       0,                         0,      0,                    DIGIT_2,         StrPF,        LED_SOLAR_TOTAL },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.TotalPowerFactorSolar,4,DIS_VAL_PF,         DIGIT_3,         0,            LED_SOLAR_TOTAL },
+      { 0xff,                   0,                         0,      0,                    DIGIT_3,         0,            LED_SOLAR_TOTAL }
+  },
+
+  // SCREEN 83: Kwh  Import Val Solar
+  { 
+    {  DATA_TYPE_VARIABLE,     &InstantPara.VolRSolar,     9,       DIS_SOLAR_W_IMP,     DIGIT_1,          0,           LED_SOLAR_TOTAL },
+    {  0xff,                   0,                          0,       0,                   DIGIT_2,          0,           LED_SOLAR_TOTAL }
+  },
+  // SCREEN 84: KVah  Import Val Solar
+  { 
+    {  DATA_TYPE_VARIABLE,     &InstantPara.VolRSolar,     9,       DIS_SOLAR_VA_IMP,    DIGIT_1,          0,           LED_SOLAR_TOTAL },
+    {  0xff,                   0,                          0,       0,                   DIGIT_2,          0,           LED_SOLAR_TOTAL }
+  },
+  // SCREEN 85: Reactive Pos  Import Val Solar
+  { 
+    {  DATA_TYPE_VARIABLE,     &InstantPara.VolRSolar,     9,      DIS_SOLAR_VAR_POS_IMP, DIGIT_1,          0,           LED_SOLAR_TOTAL },
+    {  0xff,                   0,                          0,      0,                    DIGIT_2,          0,           LED_SOLAR_TOTAL }
+  },
+  // SCREEN 86: Reactive Neg  Import Val Solar
+  { 
+    {  DATA_TYPE_VARIABLE,     &InstantPara.VolRSolar,     9,       DIS_SOLAR_VAR_NEG_IMP,     DIGIT_1,          0,           LED_SOLAR_TOTAL },
+    {  0xff,                   0,                          0,       0,                   DIGIT_2,          0,           LED_SOLAR_TOTAL }
+  },
+ 
 };
 
