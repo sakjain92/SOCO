@@ -8,6 +8,10 @@ struct STORE
 {
     uint32_t  StorageCounter;
     uint16_t  StorageLocation;
+
+    // Running Mode, Run Hour, Load Hours, Interrupts are currently not 
+    // valid in this codebase
+    //
     uint16_t  RunningMode;
 
     uint32_t  RunHourImport;

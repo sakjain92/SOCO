@@ -113,7 +113,19 @@ void DisplayUpdate(void)
                  break;    
                case DIS_INT_IMP:
                  DisplayInterruption(StorageBuffer.ImportInterruptions,ScreenIndex,DisplayIndex);
+                 break;
+               case DIS_W_EXP:
+                 DisplayEnergy(StorageBuffer.ExportWh,ScreenIndex,DisplayIndex,Screen[DisplayIndex][ScreenIndex].LedType);
                  break;  
+               case DIS_VA_EXP:    
+                 DisplayEnergy(StorageBuffer.ExportVAh,ScreenIndex,DisplayIndex,Screen[DisplayIndex][ScreenIndex].LedType);
+                 break;  
+               case DIS_VAR_POS_EXP:
+                 DisplayEnergy(StorageBuffer.ExportVarhPos,ScreenIndex,DisplayIndex,Screen[DisplayIndex][ScreenIndex].LedType);
+                 break;  
+               case DIS_VAR_NEG_EXP:
+                 DisplayEnergy(-StorageBuffer.ExportVarhNeg,ScreenIndex,DisplayIndex,Screen[DisplayIndex][ScreenIndex].LedType);
+
               // Solar
               case DIS_SOLAR_W_IMP:
                  DisplayEnergy(StorageBuffer.SolarImportWh,ScreenIndex,DisplayIndex,Screen[DisplayIndex][ScreenIndex].LedType);
@@ -126,7 +138,18 @@ void DisplayUpdate(void)
                  break;  
                case DIS_SOLAR_VAR_NEG_IMP:
                  DisplayEnergy(-StorageBuffer.SolarImportVarhNeg,ScreenIndex,DisplayIndex,Screen[DisplayIndex][ScreenIndex].LedType);
-                 break;    
+                 break;  
+               case DIS_SOLAR_W_EXP:
+                 DisplayEnergy(StorageBuffer.SolarExportWh,ScreenIndex,DisplayIndex,Screen[DisplayIndex][ScreenIndex].LedType);
+                 break;  
+               case DIS_SOLAR_VA_EXP:    
+                 DisplayEnergy(StorageBuffer.SolarExportVAh,ScreenIndex,DisplayIndex,Screen[DisplayIndex][ScreenIndex].LedType);
+                 break;  
+               case DIS_SOLAR_VAR_POS_EXP:
+                 DisplayEnergy(StorageBuffer.SolarExportVarhPos,ScreenIndex,DisplayIndex,Screen[DisplayIndex][ScreenIndex].LedType);
+                 break;  
+               case DIS_SOLAR_VAR_NEG_EXP:
+                 DisplayEnergy(-StorageBuffer.SolarExportVarhNeg,ScreenIndex,DisplayIndex,Screen[DisplayIndex][ScreenIndex].LedType);
  // Old Data
                  
                  case DIS_RUN_HR_IMP_OLD:

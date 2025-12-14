@@ -64,6 +64,15 @@ Upto 10 its just the decimal place
 #define DIS_SOLAR_VAR_POS_IMP       36
 #define DIS_SOLAR_VAR_NEG_IMP       37
 
+#define DIS_W_EXP                   38
+#define DIS_VA_EXP                  39
+#define DIS_VAR_POS_EXP             40
+#define DIS_VAR_NEG_EXP             41
+
+#define DIS_SOLAR_W_EXP             42
+#define DIS_SOLAR_VA_EXP            43
+#define DIS_SOLAR_VAR_POS_EXP       44
+#define DIS_SOLAR_VAR_NEG_EXP       45
 
 const uint8_t StrRY[]="RY";
 const uint8_t StrYB[]="YB";
@@ -134,6 +143,12 @@ const uint8_t StrImpVarh[]="F VARh";
 const uint8_t StrImpLdHr[]="F LdHr";
 const uint8_t StrImpRnHr[]="F  RnHr";
 #endif
+
+const uint8_t StrExpWh[]=  "R   Wh";  
+const uint8_t StrExpVah[]= "R  VAh";
+const uint8_t StrExpVarh[]="R VARh";
+const uint8_t StrExpRnHr[]="R RnHr";
+const uint8_t StrExpLdHr[]="R LdHr";
 
 #ifdef MODEL_IMPORT_ONLY
 const uint8_t StrOldImpWh[]= "O   Wh";
@@ -683,6 +698,69 @@ const struct object Screen[][3]=
     {  DATA_TYPE_VARIABLE,     &InstantPara.VolRSolar,     9,       DIS_SOLAR_VAR_NEG_IMP,     DIGIT_1,          0,           LED_SOLAR_TOTAL },
     {  0xff,                   0,                          0,       0,                   DIGIT_2,          0,           LED_SOLAR_TOTAL }
   },
- 
+
+
+  // SCREEN 87: Kwh  Export Str
+  { 
+    {  DATA_TYPE_STRING,       0,                          0,       0,                   DIGIT_6,         StrExpWh,     LED_OFF },
+    {  0xff,                   0,                          0,       0,                   DIGIT_2,         0,            LED_OFF }
+  },
+  // SCREEN 88: Kwh  Export Val
+  { 
+    {  DATA_TYPE_VARIABLE,     &InstantPara.VolR,          9,       DIS_W_EXP,           DIGIT_1,          0,           LED_GRID_TOTAL },
+    {  0xff,                   0,                          0,       0,                   DIGIT_2,          0,           LED_GRID_TOTAL }
+  },
+  // SCREEN 89: KVah  Export Str
+  { 
+    {  DATA_TYPE_STRING,       0,                          0,        0,                  DIGIT_6,          StrExpVah,   LED_OFF },
+    {  0xff,                   0,                          0,       0,                   DIGIT_2,          0,           LED_OFF }
+  },
+  // SCREEN 90: KVah  Export Val
+  { 
+    {  DATA_TYPE_VARIABLE,     &InstantPara.VolR,          9,       DIS_VA_EXP,          DIGIT_1,          0,           LED_GRID_TOTAL },
+    {  0xff,                   0,                          0,       0,                   DIGIT_2,          0,           LED_GRID_TOTAL }
+  },
+  // SCREEN 91: Reactive Pos  Export Str
+  { 
+    {  DATA_TYPE_STRING,       0,                          0,      0,                    DIGIT_6,          StrExpVarh,  LED_OFF },
+    {  0xff,                   0,                          0,      0,                    DIGIT_2,          0,           LED_OFF }
+  },
+  // SCREEN 92: Reactive Pos  Export Val
+  { 
+    {  DATA_TYPE_VARIABLE,     &InstantPara.VolR,          9,      DIS_VAR_POS_EXP,      DIGIT_1,          0,           LED_GRID_TOTAL },
+    {  0xff,                   0,                          0,      0,                    DIGIT_2,          0,           LED_GRID_TOTAL }
+  },
+  // SCREEN 93: Reactive Neg  Export Str
+  { 
+    {  DATA_TYPE_STRING,       0,                          0,       0,                   DIGIT_6,          StrExpVarh,  LED_OFF },
+    {  0xff,                   0,                          0,       0,                   DIGIT_2,          0,           LED_OFF }
+  },
+  // SCREEN 94: Reactive Neg  Export Val
+  { 
+    {  DATA_TYPE_VARIABLE,     &InstantPara.VolR,          9,       DIS_VAR_NEG_EXP,     DIGIT_1,          0,           LED_GRID_TOTAL },
+    {  0xff,                   0,                          0,       0,                   DIGIT_2,          0,           LED_GRID_TOTAL }
+  },
+
+  // SCREEN 95: Kwh  Export Val Solar
+  { 
+    {  DATA_TYPE_VARIABLE,     &InstantPara.VolRSolar,     9,       DIS_SOLAR_W_EXP,     DIGIT_1,          0,           LED_SOLAR_TOTAL },
+    {  0xff,                   0,                          0,       0,                   DIGIT_2,          0,           LED_SOLAR_TOTAL }
+  },
+  // SCREEN 96: KVah  Export Val Solar
+  { 
+    {  DATA_TYPE_VARIABLE,     &InstantPara.VolRSolar,     9,       DIS_SOLAR_VA_EXP,    DIGIT_1,          0,           LED_SOLAR_TOTAL },
+    {  0xff,                   0,                          0,       0,                   DIGIT_2,          0,           LED_SOLAR_TOTAL }
+  },
+  // SCREEN 97: Reactive Pos  Export Val Solar
+  { 
+    {  DATA_TYPE_VARIABLE,     &InstantPara.VolRSolar,     9,      DIS_SOLAR_VAR_POS_EXP,DIGIT_1,          0,           LED_SOLAR_TOTAL },
+    {  0xff,                   0,                          0,      0,                    DIGIT_2,          0,           LED_SOLAR_TOTAL }
+  },
+  // SCREEN 98: Reactive Neg  Export Val Solar
+  { 
+    {  DATA_TYPE_VARIABLE,     &InstantPara.VolRSolar,     9,       DIS_SOLAR_VAR_NEG_EXP,DIGIT_1,          0,          LED_SOLAR_TOTAL },
+    {  0xff,                   0,                          0,       0,                   DIGIT_2,          0,           LED_SOLAR_TOTAL }
+  },
+
 };
 

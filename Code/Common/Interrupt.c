@@ -457,12 +457,9 @@ void ProcessMainInterrupt(void)
   
   // Neutral Current
   IntNeuCurrent=0;
-  if(InterruptFlag & INT_R_PHASE_REV)IntNeuCurrent -=IntCurRPhase;
-  else IntNeuCurrent +=IntCurRPhase;
-  if(InterruptFlag & INT_Y_PHASE_REV)IntNeuCurrent -=IntCurYPhase;
-  else IntNeuCurrent +=IntCurYPhase;
-  if(InterruptFlag & INT_B_PHASE_REV)IntNeuCurrent -=IntCurBPhase;
-  else IntNeuCurrent +=IntCurBPhase;
+  IntNeuCurrent +=IntCurRPhase;
+  IntNeuCurrent +=IntCurYPhase;
+  IntNeuCurrent +=IntCurBPhase;
   
   IntDataSum.CurNeutral +=IntNeuCurrent*IntNeuCurrent;
   
@@ -514,12 +511,9 @@ void ProcessMainInterrupt(void)
   IntDataSum.VolYBSolarPhPh += TempGainMult*TempGainMult;
 
   IntNeuSolarCurrent=0;
-  if(InterruptFlag & INT_R_SOLAR_PHASE_REV)IntNeuSolarCurrent -=IntCurRSolarPhase;
-  else IntNeuSolarCurrent +=IntCurRSolarPhase;
-  if(InterruptFlag & INT_Y_SOLAR_PHASE_REV)IntNeuSolarCurrent -=IntCurYSolarPhase;
-  else IntNeuSolarCurrent +=IntCurYSolarPhase;
-  if(InterruptFlag & INT_B_SOLAR_PHASE_REV)IntNeuSolarCurrent -=IntCurBSolarPhase;
-  else IntNeuSolarCurrent +=IntCurBSolarPhase;
+  IntNeuSolarCurrent +=IntCurRSolarPhase;
+  IntNeuSolarCurrent +=IntCurYSolarPhase;
+  IntNeuSolarCurrent +=IntCurBSolarPhase;
   
   IntDataSum.CurNeutralSolar +=IntNeuSolarCurrent*IntNeuSolarCurrent;
 

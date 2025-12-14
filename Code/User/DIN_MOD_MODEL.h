@@ -60,12 +60,13 @@ The desired paramters should be selected as per the model
   #define MODBUS_POWER_FACTOR
   //#define MODBUS_ANGLE
   #define MODBUS_WH_IMPORT
-  #define MODBUS_VA_IMPORT
-  #define MODBUS_VAR_IMPORT
   //#define MODBUS_RH_IMPORT
   //#define MODBUS_LH_IMPORT
   #define MODBUS_VAH_IMPORT
   #define MODBUS_VARH_IMPORT
+  #define MODBUS_WH_EXPORT  
+  #define MODBUS_VAH_EXPORT
+  #define MODBUS_VARH_EXPORT 
   //#define MODBUS_INTERRUPT_IMPORT
   //#define MODBUS_OLD_WH_IMPORT
   //#define MODBUS_OLD_VAH_IMPORT
