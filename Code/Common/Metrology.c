@@ -721,6 +721,14 @@ void CalculateHarmonicComponents(void)
                  (FftSampleData.FFT_BSolarCurCosSave[i]*FftSampleData.FFT_BSolarCurCosSave[i]));
       TempNSolarCur +=((FftSampleData.FFT_NeuSolarCurSinSave[i]*FftSampleData.FFT_NeuSolarCurSinSave[i])+
                  (FftSampleData.FFT_NeuSolarCurCosSave[i]*FftSampleData.FFT_NeuSolarCurCosSave[i]));
+
+      TempRSolarVr+=((FftSampleData.FFT_RSolarVolSinSave[i]*FftSampleData.FFT_RSolarCurCosSave[i])-
+                 (FftSampleData.FFT_RSolarVolCosSave[i]*FftSampleData.FFT_RSolarCurSinSave[i]));
+      TempYSolarVr+=((FftSampleData.FFT_YSolarVolSinSave[i]*FftSampleData.FFT_YSolarCurCosSave[i])-
+                 (FftSampleData.FFT_YSolarVolCosSave[i]*FftSampleData.FFT_YSolarCurSinSave[i]));
+      TempBSolarVr+=((FftSampleData.FFT_BSolarVolSinSave[i]*FftSampleData.FFT_BSolarCurCosSave[i])-
+                 (FftSampleData.FFT_BSolarVolCosSave[i]*FftSampleData.FFT_BSolarCurSinSave[i]));
+
   }
   InstantPara.FunRVol=FUND_VOL_COEFF*sqrt(TempRVol/50);
   InstantPara.FunYVol=FUND_VOL_COEFF*sqrt(TempYVol/50);

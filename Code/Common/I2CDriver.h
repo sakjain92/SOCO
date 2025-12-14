@@ -20,5 +20,3 @@
                                          ((MODE) == I2C_Generate_Start_Write) || \
                                          ((MODE) == I2C_No_StartStop))
                                
-
-#define  EEPROM_PAGESIZE          128

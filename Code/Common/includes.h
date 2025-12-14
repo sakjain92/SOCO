@@ -20,8 +20,8 @@ void CheckAutoScroll(void);
 void DisplayDisabled(void);
 void ReSetDisplayParameter(void);
 void CalPF(float Error, float * CalGainBufferPointer,float * CalBetaBufferPointer);
-void EepromWrite(uint16_t DataLocation,uint8_t NoOfBytes,uint8_t DeviceAddress,uint8_t *DataArray );
-void I2CRead(uint16_t DataLocation,uint8_t NoOfBytes,uint8_t DeviceAddress,uint8_t *DataArray );
+void EepromWrite(uint16_t DataLocation,uint16_t NoOfBytes,uint8_t DeviceAddress,uint8_t *DataArray );
+void EepromRead(uint16_t DataLocation,uint16_t NoOfBytes,uint8_t DeviceAddress,uint8_t *DataArray );
 void CheckEpromFree(uint8_t DeviceAddress);
 void DisplayString(uint8_t DV_Row,uint8_t DV_Digit, uint8_t *DV_String,uint8_t LED_Type);
 void DisplayCalHighVI(void);
@@ -108,7 +108,7 @@ int16_t PrevSampleVol,FilOut_1,FilOut_2;
 volatile uint16_t CounterSendComplete;
 uint8_t ParaBlockIndex;
 uint8_t Dec2DCBArray[16],DisplayScrollCounter;
-uint8_t LcdEpromBuffer[128];
+uint8_t LcdEpromBuffer[512];
 uint8_t SwitchPressed;
 uint8_t CommIndexRS232,discard,CommFlagRS232,TransmitLengthRS232,DiscardRS232;
 uint8_t KeyPressedCounter,EditIndex;
@@ -130,7 +130,7 @@ uint8_t EditParaPassStatus;
 float Reserved;
 uint32_t Check485DirCount,Check485DirCounter;
 uint16_t BufferToDisplay[24];
-uint8_t DisplayParameterBuffer[50],dispStartCnt,DisParalast;
+uint8_t DisplayParameterBuffer[100],dispStartCnt,DisParalast;
 
 struct DigInputs g_DigInputs;
 

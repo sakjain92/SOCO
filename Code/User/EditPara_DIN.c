@@ -199,10 +199,10 @@ void EditDisplayParameter(void)
   UpdateDisplay=1;
   
 }
- 
+
 void ViewOldData (uint8_t KeyPressed)
 {
-  if(EditFirstRow==0)for(uint8_t i=0;i<50;i++)
+  if(EditFirstRow==0)for(uint8_t i=0;i<100;i++)
   {
     DisplayParameterBuffer[i]= SCREEN_SEQ_OLD_DATA[i];
     DisplaySetup.DisplayScanPage=0;
@@ -363,7 +363,7 @@ void UpdateEditSettings(void)
       
    InterruptFlag |=INT_DATA_SAVING_EEPROM;
    __no_operation();
-   I2CRead(PROGRAM_DATA_LOC1_START,20,EXT_EEPROM,LcdEpromBuffer );    
+   EepromRead(PROGRAM_DATA_LOC1_START,20,EXT_EEPROM,LcdEpromBuffer );    
    InterruptFlag &=~INT_DATA_SAVING_EEPROM;
    for(i=0;i<9;i++)
    { 

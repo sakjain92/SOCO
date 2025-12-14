@@ -15,8 +15,8 @@ extern void CheckAutoScroll(void);
 extern void DisplayDisabled(void);
 extern void ReSetDisplayParameter(void);
 extern void CalPF(float Error, float * CalGainBufferPointer,float * CalBetaBufferPointer);
-extern void EepromWrite(uint16_t DataLocation,uint8_t NoOfBytes,uint8_t DeviceAddress,uint8_t *DataArray );
-extern void I2CRead(uint16_t DataLocation,uint8_t NoOfBytes,uint8_t DeviceAddress,uint8_t *DataArray );
+extern void EepromWrite(uint16_t DataLocation,uint16_t NoOfBytes,uint8_t DeviceAddress,uint8_t *DataArray );
+extern void EepromRead(uint16_t DataLocation,uint16_t NoOfBytes,uint8_t DeviceAddress,uint8_t *DataArray );
 extern void CheckEpromFree(uint8_t DeviceAddress);
 extern  void DisplayString(uint8_t DV_Row,uint8_t DV_Digit, uint8_t *DV_String,uint8_t LED_Type);
 extern  void DisplayCalHighVI(void);
@@ -90,7 +90,7 @@ extern uint32_t CaptureValueSum;
 extern uint16_t PreviousCaptureCount,CaptureValueSav,CaptureSumCounter;
 extern uint16_t OneSecFlag;
 extern struct DIS_SCROLL DisplaySetup ;
-extern uint8_t LcdEpromBuffer[128];
+extern uint8_t LcdEpromBuffer[512];
 extern uint16_t AdcDataInArray[24],SampleCounter;
 extern uint32_t InterruptFlag,RYFreqMeasDuration,SaveFreqMeasDuration;
 extern uint32_t WattPerPulseTick,IntWattPerPulseTick;
@@ -106,7 +106,7 @@ extern uint16_t LoadExportOrGenerator;
 extern double EnergyOverflowLimit;
 extern uint16_t BufferToDisplay[24];
 extern uint8_t  KeyPressedCounter,EditIndex,UpdateDisplay;
-extern uint8_t ParaBlockIndex,DisplayParameterBuffer[50],dispStartCnt,DisParalast;
+extern uint8_t ParaBlockIndex,DisplayParameterBuffer[100],dispStartCnt,DisParalast;
 extern uint8_t Dec2DCBArray[16];
 
 extern struct DigInputs g_DigInputs;
@@ -132,4 +132,5 @@ extern void SwitchOnContactorLoadOnGrid();
 //
 #define ROUNDUP_POW2(x, factor)  ((((x)+(factor)-1) & ~((factor) - 1)))
 
+#define COMPILE_ASSERT(cond)    extern char dummy_assertion_array[(cond) ? 1 : -1]
 #endif

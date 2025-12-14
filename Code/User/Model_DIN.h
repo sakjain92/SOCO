@@ -135,6 +135,9 @@
 // 101) Check MOV in RS485 section is 175V and not 305V
 // 102) Can change MOV in DC 48V power supply to be 175V MOV (In ECON, also the BTS from 48V can be changed to 175V MOV instead of 320V MOV)
 // 103) For better MCU pin protection in current section, if 10K input impedence is not possible, can use a 1K ferrite bead for noise suppression
+// 104) Should add some provision over RS485 to reset energy and/or display (special password for our testing team?)
+// 105) Two power wires coming from bottom PCB to top PCB should have a diode to avoid mistake in production where the wires are reversed
+// 106) In self-test, improve it (Delay between input testing & output testing is too much and long press in self-test shouldn't change Scroll on/off)
 // 98) We need to change R59 & R60 to be 6.2k
 // The equation of op-amp is as follows:
 // Vout = ((Rp + Rf)*(Rn*Vb + Rb*Vn)/(Rn + Rb) - Vp*Rf)/Rp (Note the output is inverted voltage so 180 phase shift)

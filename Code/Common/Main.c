@@ -76,7 +76,7 @@ void main(void)
           EditIndex=0;
           ParaBlockIndex=0;
           DisplaySetup.DisplayScanPage=0;
-          I2CRead(PROGRAM_DATA_LOC1_START,(MAX_PARAM_LIMIT*2+2),EXT_EEPROM,(uint8_t *)CopySetPara );
+          EepromRead(PROGRAM_DATA_LOC1_START,(MAX_PARAM_LIMIT*2+2),EXT_EEPROM,(uint8_t *)CopySetPara );
           InterruptFlag &=~(PASSWORD_CHECK_ON+PASSWORD_VERIFIED+PASSWORD_FOR_VIEW);
           
           DisplayScrollCounter=10;
@@ -1252,12 +1252,11 @@ Ret: None
       DataSaveCounter=0;
       InterruptFlag |=INT_DATA_SAVING_EEPROM;
       StorageBuffer.StorageCounter++;
-      StorageBuffer.StorageLocation+=128;
+      StorageBuffer.StorageLocation+=MAX_DATA_SAVE_SIZE;
       if(StorageBuffer.StorageLocation >=DATA_SAVE_END_LOC)StorageBuffer.StorageLocation=DATA_SAVE_START_LOC;
       Tempointer=offsetof(struct STORE,StoreCRC);
       StorageBuffer.StoreCRC=CRCCalculation((uint16_t *)&StorageBuffer,Tempointer/2);
-      EepromWrite(StorageBuffer.StorageLocation,64,EXT_EEPROM,(uint8_t *)&StorageBuffer );
-      EepromWrite(StorageBuffer.StorageLocation+64,sizeof(StorageBuffer)-64,EXT_EEPROM,(uint8_t *)&StorageBuffer+64 );
+      EepromWrite(StorageBuffer.StorageLocation,sizeof(StorageBuffer),EXT_EEPROM,(uint8_t *)&StorageBuffer );
       InterruptFlag &=~INT_DATA_SAVING_EEPROM;
     }
   }

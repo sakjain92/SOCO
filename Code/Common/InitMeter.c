@@ -20,7 +20,7 @@ void NewMeterInit(void)
   {
     ProtectionReset(); 
     for(i=0;i<64;i++)LcdEpromBuffer[i]=0; 
-    for(i=0;i<200;i++) 
+    for(i=0;i<MAX_NUM_PAGES;i++) 
     {
       EepromWrite(i*64,64,EXT_EEPROM,LcdEpromBuffer );
       RESET_WATCH_DOG;
@@ -48,8 +48,7 @@ void NewMeterInit(void)
     StorageBuffer.StorageLocation=DATA_SAVE_START_LOC;
     Tempointer=offsetof(struct STORE,StoreCRC);
     StorageBuffer.StoreCRC=CRCCalculation((uint16_t *)&StorageBuffer,Tempointer/2);
-    EepromWrite(StorageBuffer.StorageLocation,64,EXT_EEPROM,(uint8_t *)&StorageBuffer );
-    EepromWrite(StorageBuffer.StorageLocation+64,sizeof(StorageBuffer)-64,EXT_EEPROM,(uint8_t *)&StorageBuffer+64 );
+    EepromWrite(StorageBuffer.StorageLocation,sizeof(StorageBuffer),EXT_EEPROM,(uint8_t *)&StorageBuffer );
     
     PowerDownDataSave();
     //SaveTripData();
@@ -106,39 +105,39 @@ void StoredDataVerification(void)
   temp=0;
   RESET_WATCH_DOG;
   k=MAX_PARAM_LIMIT*2+2; // if k is more than 254 it needs to be read in 2 steps
-  I2CRead(PROGRAM_DATA_LOC1_START,k,EXT_EEPROM,(uint8_t *)CopySetPara );
+  EepromRead(PROGRAM_DATA_LOC1_START,k,EXT_EEPROM,(uint8_t *)CopySetPara );
   temp1=CRCCalculation((uint16_t *)CopySetPara,MAX_PARAM_LIMIT+1);  
   if(temp1 !=0)temp=1;
-  I2CRead(PROGRAM_DATA_LOC2_START,k,EXT_EEPROM,(uint8_t *)CopySetPara );
+  EepromRead(PROGRAM_DATA_LOC2_START,k,EXT_EEPROM,(uint8_t *)CopySetPara );
   temp1=CRCCalculation((uint16_t *)CopySetPara,MAX_PARAM_LIMIT+1);  
   if(temp1 !=0)temp=temp|0x02;
   if(temp!=0)
   {
       if(temp==1)
       {
-         I2CRead(PROGRAM_DATA_LOC2_START,k,EXT_EEPROM,(uint8_t *)CopySetPara );
+         EepromRead(PROGRAM_DATA_LOC2_START,k,EXT_EEPROM,(uint8_t *)CopySetPara );
          ParaLocUpdate(PROGRAM_DATA_LOC1_START);
          RESET_WATCH_DOG;
       }
         
       else if(temp==2) 
       {
-        I2CRead(PROGRAM_DATA_LOC1_START,k,EXT_EEPROM,(uint8_t *)CopySetPara );
+        EepromRead(PROGRAM_DATA_LOC1_START,k,EXT_EEPROM,(uint8_t *)CopySetPara );
         ParaLocUpdate(PROGRAM_DATA_LOC2_START);
          RESET_WATCH_DOG;
       }  
       else  InitilisationError(); 
   }
-  else I2CRead(PROGRAM_DATA_LOC2_START,k,EXT_EEPROM,(uint8_t *)CopySetPara );
+  else EepromRead(PROGRAM_DATA_LOC2_START,k,EXT_EEPROM,(uint8_t *)CopySetPara );
 #ifdef MODEL_DATA_SAVE  
   RESET_WATCH_DOG;
   uint16_t TempCrc,i;
   uint32_t TempStorageCounter=0,TempStorageLoc=0;
   k=0;
   // check validity of flash and eeprom all 40 locations.
-  for(i=0;i<40;i++)
+  for(i=0;i<NUM_DATA_PAGES;i++)
   {
-    I2CRead(DATA_SAVE_START_LOC+i*128,sizeof(StorageBuffer),EXT_EEPROM,LcdEpromBuffer);
+    EepromRead(DATA_SAVE_START_LOC+i*MAX_DATA_SAVE_SIZE,sizeof(StorageBuffer),EXT_EEPROM,LcdEpromBuffer);
     Tempointer=offsetof(struct STORE,StoreCRC);
     TempCrc=CRCCalculation((uint16_t *)&LcdEpromBuffer,(Tempointer/2)+1);
     RESET_WATCH_DOG;;
@@ -153,25 +152,25 @@ void StoredDataVerification(void)
     }
   }
   // Power Down Recovery
-  I2CRead(POWER_DN_SAVE_PAGE,sizeof(StorageBuffer),EXT_EEPROM,LcdEpromBuffer);
+  EepromRead(POWER_DN_SAVE_PAGE,sizeof(StorageBuffer),EXT_EEPROM,LcdEpromBuffer);
   
   temp=offsetof(struct STORE,StoreCRC)/2 +1;
   if((TempCrc=CRCCalculation((uint16_t *)LcdEpromBuffer,temp))==0)
   {
     if(*(uint32_t *)&LcdEpromBuffer[0]>TempStorageCounter)
     {
-      I2CRead(POWER_DN_SAVE_PAGE,sizeof(StorageBuffer),EXT_EEPROM,(uint8_t*)&StorageBuffer);
+      EepromRead(POWER_DN_SAVE_PAGE,sizeof(StorageBuffer),EXT_EEPROM,(uint8_t*)&StorageBuffer);
     }
     else
     {
       if(k==0)InitilisationError(); 
-      else I2CRead(TempStorageLoc,sizeof(StorageBuffer),EXT_EEPROM,(uint8_t*)&StorageBuffer);
+      else EepromRead(TempStorageLoc,sizeof(StorageBuffer),EXT_EEPROM,(uint8_t*)&StorageBuffer);
     }
   }
   else
   {
     if(k==0)InitilisationError(); 
-    else I2CRead(TempStorageLoc,sizeof(StorageBuffer),EXT_EEPROM,(uint8_t*)&StorageBuffer);
+    else EepromRead(TempStorageLoc,sizeof(StorageBuffer),EXT_EEPROM,(uint8_t*)&StorageBuffer);
   }
 #endif // MODEL_DATA_SAVE
   RESET_WATCH_DOG;;

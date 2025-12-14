@@ -17,9 +17,7 @@
 #include "stm32f37x_flash.h"
 #include "extern_includes.h"
 
-
-
-
+COMPILE_ASSERT(sizeof(StorageBuffer) <= MAX_DATA_SAVE_SIZE);
 
 uint16_t CRCCalculation(uint16_t * str,uint8_t length)
 {
@@ -43,7 +41,6 @@ uint16_t CRCCalculation(uint16_t * str,uint8_t length)
 #ifdef MODEL_DATA_SAVE
 void  SaveOldData(void)
 {
-  uint8_t i;
   uint32_t Temp;
   uint16_t Tempointer;
   RESET_WATCH_DOG;
@@ -53,9 +50,8 @@ void  SaveOldData(void)
   PowerDownDataSave();
   Temp=StorageBuffer.StorageCounter;
   InterruptFlag &= ~INT_POWER_OK;
-  EepromWrite(OLD_DATA_LOC,64,EXT_EEPROM,(uint8_t *)&StorageBuffer );  // save old data
-  EepromWrite(OLD_DATA_LOC+64,sizeof(StorageBuffer)-64,EXT_EEPROM,(uint8_t *)&StorageBuffer+64 );
-  for(i=0;i<sizeof(StorageBuffer);i++)*((uint8_t *)&StorageBuffer+i)=0;
+  EepromWrite(OLD_DATA_LOC,sizeof(StorageBuffer),EXT_EEPROM,(uint8_t *)&StorageBuffer );  // save old data
+  for(uint16_t i=0;i<sizeof(StorageBuffer);i++)*((uint8_t *)&StorageBuffer+i)=0;
   StorageBuffer.ImportVarhNeg=0.00001;
   StorageBuffer.ExportVarhNeg=0.00001;
   StorageBuffer.SolarImportVarhNeg=0.00001;
@@ -64,8 +60,7 @@ void  SaveOldData(void)
   StorageBuffer.StorageLocation=DATA_SAVE_START_LOC;
   Tempointer=offsetof(struct STORE,StoreCRC);
   StorageBuffer.StoreCRC=CRCCalculation((uint16_t *)&StorageBuffer,Tempointer/2);
-  EepromWrite(StorageBuffer.StorageLocation,64,EXT_EEPROM,(uint8_t *)&StorageBuffer );
-  EepromWrite(StorageBuffer.StorageLocation+64,sizeof(StorageBuffer)-64,EXT_EEPROM,(uint8_t *)&StorageBuffer+64 );
+  EepromWrite(StorageBuffer.StorageLocation,sizeof(StorageBuffer),EXT_EEPROM,(uint8_t *)&StorageBuffer );
 }
 //extern void Delay1Msec12Mhz( uint32_t Delay);
 void PowerDownDataSave(void)
@@ -79,8 +74,7 @@ void PowerDownDataSave(void)
   Tempointer=offsetof(struct STORE,StoreCRC);
   StorageBuffer.StoreCRC=CRCCalculation((uint16_t *)&StorageBuffer,Tempointer/2);
   InterruptFlag &= ~INT_POWER_OK;
-  EepromWrite(POWER_DN_SAVE_PAGE,64,EXT_EEPROM,(uint8_t *)&StorageBuffer );
-  EepromWrite(POWER_DN_SAVE_PAGE+64,sizeof(StorageBuffer)-64,EXT_EEPROM,(uint8_t *)&StorageBuffer+64 );
+  EepromWrite(POWER_DN_SAVE_PAGE,sizeof(StorageBuffer),EXT_EEPROM,(uint8_t *)&StorageBuffer );
   Delay1Msec12Mhz(6);
   InterruptFlag &=~INT_DATA_SAVING_EEPROM;
 }
@@ -89,8 +83,7 @@ void PowerDownDataSave(void)
 void SaveTripData(void)
 {
   RESET_WATCH_DOG;
-  EepromWrite(TRIP_DATA_LOC,64,EXT_EEPROM,(uint8_t *)&StorageBuffer );
-  EepromWrite(TRIP_DATA_LOC+64,sizeof(StorageBuffer)-64,EXT_EEPROM,(uint8_t *)&StorageBuffer+64 );
+  EepromWrite(TRIP_DATA_LOC,sizeof(StorageBuffer),EXT_EEPROM,(uint8_t *)&StorageBuffer );
   TripData= StorageBuffer;
 }*/
   

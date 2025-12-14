@@ -39,6 +39,8 @@ struct STORE
     double    SolarExportVarhNeg; 
     uint16_t  SolarImportInterruptions;
     uint16_t  SolarExportInterruptions;  // Interruption cant be import/export only
+    
+    uint8_t   Spare[128];
 
     uint16_t  EnergyDispUnit;
     uint16_t  StoreCRC;

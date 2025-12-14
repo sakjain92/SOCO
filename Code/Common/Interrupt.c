@@ -161,120 +161,120 @@ void ProcessMainInterrupt(void)
   //
   TempGainMult=(RCurSample.PrevIn_2+IntCurRPhase)*FILT_600_COEFF_X1+\
                 RCurSample.PrevIn_1*FILT_600_COEFF_X2+\
-                RCurSample.PrevOut_1*FILT_600_COEFF_Y1-\
+                RCurSample.PrevOut_1*FILT_600_COEFF_Y1+\
                 RCurSample.PrevOut_2*FILT_600_COEFF_Y2;
   RCurSample.PrevOut_2=RCurSample.PrevOut_1;
-  RCurSample.PrevOut_2=TempGainMult;
+  RCurSample.PrevOut_1=TempGainMult;
   RCurSample.PrevIn_2=RCurSample.PrevIn_1;
   RCurSample.PrevIn_1=IntCurRPhase;
   IntCurRPhase=TempGainMult;
   
   TempGainMult=(YCurSample.PrevIn_2+IntCurYPhase)*FILT_600_COEFF_X1+\
                 YCurSample.PrevIn_1*FILT_600_COEFF_X2+\
-                YCurSample.PrevOut_1*FILT_600_COEFF_Y1-\
+                YCurSample.PrevOut_1*FILT_600_COEFF_Y1+\
                 YCurSample.PrevOut_2*FILT_600_COEFF_Y2;
   YCurSample.PrevOut_2=YCurSample.PrevOut_1;
-  YCurSample.PrevOut_2=TempGainMult;
+  YCurSample.PrevOut_1=TempGainMult;
   YCurSample.PrevIn_2=YCurSample.PrevIn_1;
   YCurSample.PrevIn_1=IntCurYPhase;
   IntCurYPhase=TempGainMult;
   
   TempGainMult=(BCurSample.PrevIn_2+IntCurBPhase)*FILT_600_COEFF_X1+\
                 BCurSample.PrevIn_1*FILT_600_COEFF_X2+\
-                BCurSample.PrevOut_1*FILT_600_COEFF_Y1-\
+                BCurSample.PrevOut_1*FILT_600_COEFF_Y1+\
                 BCurSample.PrevOut_2*FILT_600_COEFF_Y2;
   BCurSample.PrevOut_2=BCurSample.PrevOut_1;
-  BCurSample.PrevOut_2=TempGainMult;
+  BCurSample.PrevOut_1=TempGainMult;
   BCurSample.PrevIn_2=BCurSample.PrevIn_1;
   BCurSample.PrevIn_1=IntCurBPhase;
   IntCurBPhase=TempGainMult;
   
   TempGainMult=(RVolSample.PrevIn_2+IntVolRPhase)*FILT_600_COEFF_X1+\
                 RVolSample.PrevIn_1*FILT_600_COEFF_X2+\
-                RVolSample.PrevOut_1*FILT_600_COEFF_Y1-\
+                RVolSample.PrevOut_1*FILT_600_COEFF_Y1+\
                 RVolSample.PrevOut_2*FILT_600_COEFF_Y2;
   RVolSample.PrevOut_2=RVolSample.PrevOut_1;
-  RVolSample.PrevOut_2=TempGainMult;
+  RVolSample.PrevOut_1=TempGainMult;
   RVolSample.PrevIn_2=RVolSample.PrevIn_1;
   RVolSample.PrevIn_1=IntVolRPhase;
   IntVolRPhase=TempGainMult;
   
   TempGainMult=(YVolSample.PrevIn_2+IntVolYPhase)*FILT_600_COEFF_X1+\
                 YVolSample.PrevIn_1*FILT_600_COEFF_X2+\
-                YVolSample.PrevOut_1*FILT_600_COEFF_Y1-\
+                YVolSample.PrevOut_1*FILT_600_COEFF_Y1+\
                 YVolSample.PrevOut_2*FILT_600_COEFF_Y2;
   YVolSample.PrevOut_2=YVolSample.PrevOut_1;
-  YVolSample.PrevOut_2=TempGainMult;
+  YVolSample.PrevOut_1=TempGainMult;
   YVolSample.PrevIn_2=YVolSample.PrevIn_1;
   YVolSample.PrevIn_1=IntVolYPhase;
   IntVolYPhase=TempGainMult;
   
   TempGainMult=(BVolSample.PrevIn_2+IntVolBPhase)*FILT_600_COEFF_X1+\
                 BVolSample.PrevIn_1*FILT_600_COEFF_X2+\
-                BVolSample.PrevOut_1*FILT_600_COEFF_Y1-\
+                BVolSample.PrevOut_1*FILT_600_COEFF_Y1+\
                 BVolSample.PrevOut_2*FILT_600_COEFF_Y2;
   BVolSample.PrevOut_2=BVolSample.PrevOut_1;
-  BVolSample.PrevOut_2=TempGainMult;
+  BVolSample.PrevOut_1=TempGainMult;
   BVolSample.PrevIn_2=BVolSample.PrevIn_1;
   BVolSample.PrevIn_1=IntVolBPhase;
   IntVolBPhase=TempGainMult;
   
   TempGainMult=(RSolarCurSample.PrevIn_2+IntCurRSolarPhase)*FILT_600_COEFF_X1+\
                 RSolarCurSample.PrevIn_1*FILT_600_COEFF_X2+\
-                RSolarCurSample.PrevOut_1*FILT_600_COEFF_Y1-\
+                RSolarCurSample.PrevOut_1*FILT_600_COEFF_Y1+\
                 RSolarCurSample.PrevOut_2*FILT_600_COEFF_Y2;
   RSolarCurSample.PrevOut_2=RSolarCurSample.PrevOut_1;
-  RSolarCurSample.PrevOut_2=TempGainMult;
+  RSolarCurSample.PrevOut_1=TempGainMult;
   RSolarCurSample.PrevIn_2=RSolarCurSample.PrevIn_1;
   RSolarCurSample.PrevIn_1=IntCurRSolarPhase;
   IntCurRSolarPhase=TempGainMult;
   
   TempGainMult=(YSolarCurSample.PrevIn_2+IntCurYSolarPhase)*FILT_600_COEFF_X1+\
                 YSolarCurSample.PrevIn_1*FILT_600_COEFF_X2+\
-                YSolarCurSample.PrevOut_1*FILT_600_COEFF_Y1-\
+                YSolarCurSample.PrevOut_1*FILT_600_COEFF_Y1+\
                 YSolarCurSample.PrevOut_2*FILT_600_COEFF_Y2;
   YSolarCurSample.PrevOut_2=YSolarCurSample.PrevOut_1;
-  YSolarCurSample.PrevOut_2=TempGainMult;
+  YSolarCurSample.PrevOut_1=TempGainMult;
   YSolarCurSample.PrevIn_2=YSolarCurSample.PrevIn_1;
   YSolarCurSample.PrevIn_1=IntCurYSolarPhase;
   IntCurYSolarPhase=TempGainMult;
   
   TempGainMult=(BSolarCurSample.PrevIn_2+IntCurBSolarPhase)*FILT_600_COEFF_X1+\
                 BSolarCurSample.PrevIn_1*FILT_600_COEFF_X2+\
-                BSolarCurSample.PrevOut_1*FILT_600_COEFF_Y1-\
+                BSolarCurSample.PrevOut_1*FILT_600_COEFF_Y1+\
                 BSolarCurSample.PrevOut_2*FILT_600_COEFF_Y2;
   BSolarCurSample.PrevOut_2=BSolarCurSample.PrevOut_1;
-  BSolarCurSample.PrevOut_2=TempGainMult;
+  BSolarCurSample.PrevOut_1=TempGainMult;
   BSolarCurSample.PrevIn_2=BSolarCurSample.PrevIn_1;
   BSolarCurSample.PrevIn_1=IntCurBSolarPhase;
   IntCurBSolarPhase=TempGainMult;
 
   TempGainMult=(RSolarVolSample.PrevIn_2+IntVolRSolarPhase)*FILT_600_COEFF_X1+\
                 RSolarVolSample.PrevIn_1*FILT_600_COEFF_X2+\
-                RSolarVolSample.PrevOut_1*FILT_600_COEFF_Y1-\
+                RSolarVolSample.PrevOut_1*FILT_600_COEFF_Y1+\
                 RSolarVolSample.PrevOut_2*FILT_600_COEFF_Y2;
   RSolarVolSample.PrevOut_2=RSolarVolSample.PrevOut_1;
-  RSolarVolSample.PrevOut_2=TempGainMult;
+  RSolarVolSample.PrevOut_1=TempGainMult;
   RSolarVolSample.PrevIn_2=RSolarVolSample.PrevIn_1;
   RSolarVolSample.PrevIn_1=IntVolRSolarPhase;
   IntVolRSolarPhase=TempGainMult;
 
   TempGainMult=(YSolarVolSample.PrevIn_2+IntVolYSolarPhase)*FILT_600_COEFF_X1+\
                 YSolarVolSample.PrevIn_1*FILT_600_COEFF_X2+\
-                YSolarVolSample.PrevOut_1*FILT_600_COEFF_Y1-\
+                YSolarVolSample.PrevOut_1*FILT_600_COEFF_Y1+\
                 YSolarVolSample.PrevOut_2*FILT_600_COEFF_Y2;
   YSolarVolSample.PrevOut_2=YSolarVolSample.PrevOut_1;
-  YSolarVolSample.PrevOut_2=TempGainMult;
+  YSolarVolSample.PrevOut_1=TempGainMult;
   YSolarVolSample.PrevIn_2=YSolarVolSample.PrevIn_1;
   YSolarVolSample.PrevIn_1=IntVolYSolarPhase;
   IntVolYSolarPhase=TempGainMult;
 
   TempGainMult=(BSolarVolSample.PrevIn_2+IntVolBSolarPhase)*FILT_600_COEFF_X1+\
                 BSolarVolSample.PrevIn_1*FILT_600_COEFF_X2+\
-                BSolarVolSample.PrevOut_1*FILT_600_COEFF_Y1-\
+                BSolarVolSample.PrevOut_1*FILT_600_COEFF_Y1+\
                 BSolarVolSample.PrevOut_2*FILT_600_COEFF_Y2;
   BSolarVolSample.PrevOut_2=BSolarVolSample.PrevOut_1;
-  BSolarVolSample.PrevOut_2=TempGainMult;
+  BSolarVolSample.PrevOut_1=TempGainMult;
   BSolarVolSample.PrevIn_2=BSolarVolSample.PrevIn_1;
   BSolarVolSample.PrevIn_1=IntVolBSolarPhase;
   IntVolBSolarPhase=TempGainMult;
@@ -301,8 +301,6 @@ void ProcessMainInterrupt(void)
     IntDataSave.RPhasePower=IntDataSum.RPhasePower;
     IntDataSave.YPhasePower=IntDataSum.YPhasePower;
     IntDataSave.BPhasePower=IntDataSum.BPhasePower;
-    IntDataSave.YRPower3P3W=IntDataSum.YRPower3P3W;
-    IntDataSave.YBPower3P3W=IntDataSum.YBPower3P3W;
     
     IntDataSave.CurNeutral=IntDataSum.CurNeutral;
     IntDataSave.VolRYPhPh=IntDataSum.VolRYPhPh;
@@ -325,8 +323,6 @@ void ProcessMainInterrupt(void)
     IntDataSave.RSolarPhasePower=IntDataSum.RSolarPhasePower;
     IntDataSave.YSolarPhasePower=IntDataSum.YSolarPhasePower;
     IntDataSave.BSolarPhasePower=IntDataSum.BSolarPhasePower;
-    IntDataSave.YRSolarPower3P3W=IntDataSum.YRSolarPower3P3W;
-    IntDataSave.YBSolarPower3P3W=IntDataSum.YBSolarPower3P3W;
     
     IntDataSave.CurNeutralSolar=IntDataSum.CurNeutralSolar;
     IntDataSave.VolRYSolarPhPh=IntDataSum.VolRYSolarPhPh;
@@ -493,9 +489,6 @@ void ProcessMainInterrupt(void)
   IntDataSum.YPhasePower +=IntVolYPhase*IntCurYPhase;
   IntDataSum.BPhasePower +=IntVolBPhase*IntCurBPhase;
   
-  IntDataSum.YRPower3P3W +=IntVolYPhase*IntCurRPhase; //in case of 3P3W
-  IntDataSum.YBPower3P3W +=IntVolYPhase*IntCurBPhase; //in case of 3P3W
-
   // Solar 
   IntDataSum.OffsetVolRSolarPhase +=IntVolRSolarPhase;
   IntDataSum.OffsetVolYSolarPhase +=IntVolYSolarPhase;
@@ -545,6 +538,10 @@ void ProcessMainInterrupt(void)
   IntVolBSolarPhase +=TempGainMult;
   IntVolBSolarPhase=(WorkingCopyGain.PB_SOLAR_ALFA*IntVolBSolarPhase);
 
+  IntDataSum.RSolarPhasePower +=IntVolRSolarPhase*IntCurRSolarPhase;
+  IntDataSum.YSolarPhasePower +=IntVolYSolarPhase*IntCurYSolarPhase;
+  IntDataSum.BSolarPhasePower +=IntVolBSolarPhase*IntCurBSolarPhase;
+  
   // Summation for FFT Purpose
   
   

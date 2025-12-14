@@ -19,18 +19,20 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 
 #define     EEPROM_PAGE_LENGTH          64
 #define     EXT_EEPROM                  0xA0
-#define     EEPROM_PAGES_FOR_DATA_SAVE  100
+#define     MAX_NUM_PAGES               512
 
+#define  MAX_DATA_SAVE_SIZE             512
+#define  NUM_DATA_PAGES                 40
 #define  DATA_SAVE_START_LOC            0
-#define  DATA_SAVE_END_LOC              5119     // 40 pages of 128 bytes
-#define  PROGRAM_DATA_LOC1_START        (EEPROM_PAGE_LENGTH*EEPROM_PAGES_FOR_DATA_SAVE)
+#define  DATA_SAVE_END_LOC              (MAX_DATA_SAVE_SIZE * NUM_DATA_PAGES - 1)
+#define  PROGRAM_DATA_LOC1_START        (DATA_SAVE_END_LOC + 1)
 #define  PROGRAM_DATA_LOC2_START        (PROGRAM_DATA_LOC1_START+256)
 #define  OLD_DATA_LOC                   (PROGRAM_DATA_LOC2_START+256)
 
-#define  POWER_DN_SAVE_PAGE            (OLD_DATA_LOC+256)
+#define  POWER_DN_SAVE_PAGE            (OLD_DATA_LOC+MAX_DATA_SAVE_SIZE)
 
-#define  PASSWORD_SAV_LOC              (POWER_DN_SAVE_PAGE+256)
-#define  SCROLL_LOCK_LOC               (PASSWORD_SAV_LOC+16)
+#define  PASSWORD_SAV_LOC              (POWER_DN_SAVE_PAGE+MAX_DATA_SAVE_SIZE)
+#define  SCROLL_LOCK_LOC               (PASSWORD_SAV_LOC+EEPROM_PAGE_LENGTH)
 
 #define  DATA_SAVE_DEBAR_TIME          5
 #define  DATA_SAVE_DURATION           (30+DATA_SAVE_DEBAR_TIME) // External EEPROM Data Saved every 30 Sec
@@ -149,7 +151,7 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 //
 #define   MIN_VOL_LIMIT            70.0f
 #define   MIN_VOL_LIMIT_PH_PH      (MIN_VOL_LIMIT * 1.732f)
-#define   MIN_TOTAL_CUR_LIMIT      0.5f
+#define   MIN_TOTAL_CUR_LIMIT      1.5f
 #define   MIN_NEU_CUR_LIMIT        0.1f
 #define   MIN_CURRENT_LIMIT        0.1f
 
@@ -220,10 +222,11 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 
 // The ratio between CUR_HIGH_CAL_POINT/CUR_MID_CAL_POINT should be 5:1
 // The ratio between CUR_MID_CAL_POINT/CUR_LOW_CAL_POINT should be 10:1
+// UNDONE: Calibrating at 0.4 as below that in current hardware we are getting too much noise
 //
-#define        CUR_HIGH_CAL_POINT                    10.0
-#define        CUR_MID_CAL_POINT                     2.0
-#define        CUR_LOW_CAL_POINT                     0.2
+#define        CUR_HIGH_CAL_POINT                    20.0
+#define        CUR_MID_CAL_POINT                     4.0
+#define        CUR_LOW_CAL_POINT                     0.4
 #define        NO_OF_CAL_ACCUMULATION_VI             4
 #define        NO_OF_CAL_ACCUMULATION_POW            10
 #define        CAL_ACC_DELAY                         8
@@ -234,7 +237,7 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 #define        CAL_CURRENT_SETTING_LOW               CUR_LOW_CAL_POINT
 #define        CURRENT_TOLRERANCE                    0.2f   // UNDONE: This was 0.1 earlier but in our board at lower end of calibration needed to increase error range
                                                             // We should use SDADC to get better accuracy
-#define        VOLTAGE_TOLERANCE                     0.1f   // UNDONE: This was 0.1 earlier but in our board there is wider variation hence changing this
+#define        VOLTAGE_TOLERANCE                     0.1f
 #define        POWER_TOLERANCE                       0.4f 
 
 
