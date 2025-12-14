@@ -13,6 +13,7 @@ extern struct Object Timer;
 //extern struct Field Mod_TransmitFrame;
 extern uint16_t LoadExportOrGenerator;
 extern float PTPrimary, CTPrimary,PTSecondary,CTSecondary;
+extern float ModbusDummyFloatRegister;
 
 #define CT_RATIO       2
 #define PT_RATIO       3
@@ -29,7 +30,9 @@ extern float PTPrimary, CTPrimary,PTSecondary,CTSecondary;
 #define InstPara_YphaseRMS      11
 #define InstPara_BphaseRMS      11
 #define InstPara_Demand         18
-
+#define InstPara_NewSolarAll    58
+#define InstPara_Solar_ENERGYIMPORT   7
+#define InstPara_Solar_ENERGYEXPORT   7
 
 #define InstPara_NewAll_Block1     27
 #define InstPara_NewAll_Block2     31
@@ -771,6 +774,188 @@ const struct ModBusParameter BlockAll[]=
  { (uint8_t *)&CopySetPara[PARA_STOP_BIT]               ,          DATA_TYPE_16,     1       ,       1      },
  { (uint8_t *)&CopySetPara[PARA_ENDIAN]                 ,          DATA_TYPE_16,     1       ,       1      },
 #endif
+
+ // SOLAR
+ //
+  { (uint8_t *)&ModbusDummyFloatRegister,           DATA_TYPE_Float	,	0	,	1	},
+#ifdef MODBUS_VOL							
+  { (uint8_t *)&InstantPara.VolRSolar	,	        DATA_TYPE_Float	,	1	,	PT_RATIO	},
+  { (uint8_t *)&InstantPara.VolYSolar	,	        DATA_TYPE_Float	,	1	,	PT_RATIO	},
+  { (uint8_t *)&InstantPara.VolBSolar	,	        DATA_TYPE_Float	,	1	,	PT_RATIO	},
+  { (uint8_t *)&InstantPara.VolRYSolar	,	        DATA_TYPE_Float	,	1	,	PT_RATIO	},
+  { (uint8_t *)&InstantPara.VolYBSolar	,	        DATA_TYPE_Float	,	1	,	PT_RATIO	},
+  { (uint8_t *)&InstantPara.VolBRSolar	,	        DATA_TYPE_Float	,	1	,	PT_RATIO	},
+#else
+  { (uint8_t *)&InstantPara.VolRSolar	,	        DATA_TYPE_Float	,	0	,	PT_RATIO	},
+  { (uint8_t *)&InstantPara.VolYSolar	,	        DATA_TYPE_Float	,	0	,	PT_RATIO	},
+  { (uint8_t *)&InstantPara.VolBSolar	,	        DATA_TYPE_Float	,	0	,	PT_RATIO	}, 
+  { (uint8_t *)&InstantPara.VolRYSolar	,	        DATA_TYPE_Float	,	0	,	PT_RATIO	},
+  { (uint8_t *)&InstantPara.VolYBSolar	,	        DATA_TYPE_Float	,	0	,	PT_RATIO	},
+  { (uint8_t *)&InstantPara.VolBRSolar	,	        DATA_TYPE_Float	,	0	,	PT_RATIO	},
+#endif
+							
+  
+#ifdef MODBUS_CUR							
+  { (uint8_t *)&InstantPara.CurrentRSolar	,	    DATA_TYPE_Float	,	1	,	CT_RATIO	},
+  { (uint8_t *)&InstantPara.CurrentYSolar	,	    DATA_TYPE_Float	,	1	,	CT_RATIO	},
+  { (uint8_t *)&InstantPara.CurrentBSolar	,	    DATA_TYPE_Float	,	1	,	CT_RATIO	},
+#else
+  { (uint8_t *)&InstantPara.CurrentRSolar	,	    DATA_TYPE_Float	,	0	,	CT_RATIO	},
+  { (uint8_t *)&InstantPara.CurrentYSolar	,	    DATA_TYPE_Float	,	0	,	CT_RATIO	},
+  { (uint8_t *)&InstantPara.CurrentBSolar	,	    DATA_TYPE_Float	,	0	,	CT_RATIO	},
+#endif
+#ifdef  MODBUS_CUR_NEU
+  { (uint8_t *)&InstantPara.CurrentNSolar	,	    DATA_TYPE_Float	,	1	,	CT_RATIO	},
+#else
+  { (uint8_t *)&InstantPara.CurrentNSolar	,	    DATA_TYPE_Float	,	0	,	CT_RATIO	},
+#endif
+#ifdef MODBUS_ACTIVE_POWER						
+  { (uint8_t *)&InstantPara.TotalPowerRSolar	,	DATA_TYPE_Float	,	1	,	CT_PT_RATIO	},
+  { (uint8_t *)&InstantPara.TotalPowerYSolar	,	DATA_TYPE_Float	,	1	,	CT_PT_RATIO	},
+  { (uint8_t *)&InstantPara.TotalPowerBSolar	,	DATA_TYPE_Float	,	1	,	CT_PT_RATIO	},
+  { (uint8_t *)&InstantPara.SumTotalPowerSolar,	    DATA_TYPE_Float	,	1	,	CT_PT_RATIO	},
+#else
+  { (uint8_t *)&InstantPara.TotalPowerR	,	        DATA_TYPE_Float	,	0	,	CT_PT_RATIO	},
+  { (uint8_t *)&InstantPara.TotalPowerY	,	        DATA_TYPE_Float	,	0	,	CT_PT_RATIO	},
+  { (uint8_t *)&InstantPara.TotalPowerB	,	        DATA_TYPE_Float	,	0	,	CT_PT_RATIO	},
+  { (uint8_t *)&InstantPara.SumTotalPower,	        DATA_TYPE_Float	,	0	,	CT_PT_RATIO	},
+#endif
+  { (uint8_t *)&ModbusDummyFloatRegister	,	    DATA_TYPE_Float	,	1	,	CT_PT_RATIO	},
+  { (uint8_t *)&ModbusDummyFloatRegister	,	    DATA_TYPE_Float	,	1	,	CT_PT_RATIO	},
+  { (uint8_t *)&ModbusDummyFloatRegister	,	    DATA_TYPE_Float	,	1	,	CT_PT_RATIO	},
+  { (uint8_t *)&ModbusDummyFloatRegister	,	    DATA_TYPE_Float	,	1	,	CT_PT_RATIO	},
+#ifdef	MODBUS_APP_POWER						
+  { (uint8_t *)&InstantPara.AppPowerRSolar	,	    DATA_TYPE_Float	,	1	,	CT_PT_RATIO	},
+  { (uint8_t *)&InstantPara.AppPowerYSolar	,	    DATA_TYPE_Float	,	1	,	CT_PT_RATIO	},
+  { (uint8_t *)&InstantPara.AppPowerBSolar	,	    DATA_TYPE_Float	,	1	,	CT_PT_RATIO	},
+  { (uint8_t *)&InstantPara.TotalAppPowerSolar,	    DATA_TYPE_Float	,	1	,	CT_PT_RATIO	},
+#else
+  { (uint8_t *)&InstantPara.AppPowerRSolar	,	    DATA_TYPE_Float	,	0	,	CT_PT_RATIO	},
+  { (uint8_t *)&InstantPara.AppPowerYSolar	,	    DATA_TYPE_Float	,	0	,	CT_PT_RATIO	},
+  { (uint8_t *)&InstantPara.AppPowerBSolar	,	    DATA_TYPE_Float	,	0	,	CT_PT_RATIO	},
+  { (uint8_t *)&InstantPara.TotalAppPowerSolar,	    DATA_TYPE_Float	,	0	,	CT_PT_RATIO	},
+#endif
+#ifdef	MODBUS_REACT_POWER							
+  { (uint8_t *)&InstantPara.ReactPowerRSolar	,	DATA_TYPE_Float	,	1	,	CT_PT_RATIO	},
+  { (uint8_t *)&InstantPara.ReactPowerYSolar	,	DATA_TYPE_Float	,	1	,	CT_PT_RATIO	},
+  { (uint8_t *)&InstantPara.ReactPowerBSolar	,	DATA_TYPE_Float	,	1	,	CT_PT_RATIO	},
+  { (uint8_t *)&InstantPara.TotalReactPowerSolar,	DATA_TYPE_Float	,	1	,	CT_PT_RATIO	},
+#else
+  { (uint8_t *)&InstantPara.ReactPowerRSolar	,	DATA_TYPE_Float	,	0	,	CT_PT_RATIO	},
+  { (uint8_t *)&InstantPara.ReactPowerYSolar	,	DATA_TYPE_Float	,	0	,	CT_PT_RATIO	},
+  { (uint8_t *)&InstantPara.ReactPowerBSolar	,	DATA_TYPE_Float	,	0	,	CT_PT_RATIO	},
+  { (uint8_t *)&InstantPara.TotalReactPowerSolar,	DATA_TYPE_Float	,	0	,	CT_PT_RATIO	},
+#endif
+  
+#ifdef MODBUS_POWER_FACTOR							
+  { (uint8_t *)&InstantPara.PowerFactorRSolar	,   DATA_TYPE_Float	,	1	,	1	},
+  { (uint8_t *)&InstantPara.PowerFactorYSolar	,   DATA_TYPE_Float	,	1	,	1	},
+  { (uint8_t *)&InstantPara.PowerFactorBSolar	,	DATA_TYPE_Float	,	1	,	1	},
+  { (uint8_t *)&InstantPara.TotalPowerFactorSolar	,	DATA_TYPE_Float	,	1	,	1	},
+#else
+  { (uint8_t *)&InstantPara.PowerFactorRSolar	,   DATA_TYPE_Float	,	0	,	1	},
+  { (uint8_t *)&InstantPara.PowerFactorYSolar	,   DATA_TYPE_Float	,	0	,	1	},
+  { (uint8_t *)&InstantPara.PowerFactorBSolar	,	DATA_TYPE_Float	,	0	,	1	},
+  { (uint8_t *)&InstantPara.TotalPowerFactorSolar	,	DATA_TYPE_Float	,	0	,	1	},
+#endif
+
+  { (uint8_t *)&ModbusDummyFloatRegister,           DATA_TYPE_Float	,	0	,	1	},
+  { (uint8_t *)&ModbusDummyFloatRegister,           DATA_TYPE_Float	,	0	,	1	},
+  { (uint8_t *)&ModbusDummyFloatRegister,           DATA_TYPE_Float	,	0	,	1	},
+  { (uint8_t *)&ModbusDummyFloatRegister,           DATA_TYPE_Float	,	0	,	1	},
+  { (uint8_t *)&ModbusDummyFloatRegister,           DATA_TYPE_Float	,	0	,	1	},
+  { (uint8_t *)&ModbusDummyFloatRegister,           DATA_TYPE_Float	,	0	,	1	},
+  { (uint8_t *)&ModbusDummyFloatRegister,           DATA_TYPE_Float	,	0	,	1	},
+  { (uint8_t *)&ModbusDummyFloatRegister,           DATA_TYPE_Float	,	0	,	1	},
+  { (uint8_t *)&ModbusDummyFloatRegister,           DATA_TYPE_Float	,	0	,	1	},
+  { (uint8_t *)&ModbusDummyFloatRegister,           DATA_TYPE_Float	,	0	,	1	},
+  { (uint8_t *)&ModbusDummyFloatRegister,           DATA_TYPE_Float	,	0	,	1	},
+  { (uint8_t *)&ModbusDummyFloatRegister,           DATA_TYPE_Float	,	0	,	1	},
+  { (uint8_t *)&ModbusDummyFloatRegister,           DATA_TYPE_Float	,	0	,	1	},
+  { (uint8_t *)&ModbusDummyFloatRegister,           DATA_TYPE_Float	,	0	,	1	},
+  { (uint8_t *)&ModbusDummyFloatRegister,           DATA_TYPE_Float	,	0	,	1	},
+  { (uint8_t *)&ModbusDummyFloatRegister,           DATA_TYPE_Float	,	0	,	1	},
+  { (uint8_t *)&ModbusDummyFloatRegister,           DATA_TYPE_Float	,	0	,	1	},
+  { (uint8_t *)&ModbusDummyFloatRegister,           DATA_TYPE_Float	,	0	,	1	},
+  { (uint8_t *)&ModbusDummyFloatRegister,           DATA_TYPE_Float	,	0	,	1	},
+  { (uint8_t *)&ModbusDummyFloatRegister,           DATA_TYPE_Float	,	0	,	1	},
+  { (uint8_t *)&ModbusDummyFloatRegister,           DATA_TYPE_Float	,	0	,	1	},
+  { (uint8_t *)&ModbusDummyFloatRegister,           DATA_TYPE_Float	,	0	,	1	},
+  { (uint8_t *)&ModbusDummyFloatRegister,           DATA_TYPE_Float	,	0	,	1	},
+  { (uint8_t *)&ModbusDummyFloatRegister,           DATA_TYPE_Float	,	0	,	1	},
+  { (uint8_t *)&ModbusDummyFloatRegister,           DATA_TYPE_Float	,	0	,	1	},
+  { (uint8_t *)&ModbusDummyFloatRegister,           DATA_TYPE_Float	,	0	,	1	},
+  { (uint8_t *)&ModbusDummyFloatRegister,           DATA_TYPE_Float	,	0	,	1	},
+
+  ////////////////////////  SOLAR ENERGY IMPORT  /////////////////////////////	6						
+#ifdef MODBUS_RH_IMPORT								
+  { (uint8_t *)&StorageBuffer.SolarRunHourImport	,	  DATA_TYPE_32	,	1	,	1	},
+#else
+  { (uint8_t *)&StorageBuffer.SolarRunHourImport	,	  DATA_TYPE_32	,	0	,	1	},
+#endif
+#ifdef MODBUS_LH_IMPORT
+  { (uint8_t *)&StorageBuffer.SolarLoadHourImport	,	  DATA_TYPE_32	,	1	,	1	},
+#else
+  { (uint8_t *)&StorageBuffer.SolarLoadHourImport	,	  DATA_TYPE_32	,	0	,	1	},
+#endif
+
+#ifdef MODBUS_WH_IMPORT
+  { (uint8_t *)&StorageBuffer.SolarImportWh	        ,	  DATA_TYPE_Double	,	1	,	1	},
+#else
+  { (uint8_t *)&StorageBuffer.SolarImportWh	        ,	  DATA_TYPE_Double	,	0	,	1	},
+#endif
+#ifdef MODBUS_VAH_IMPORT
+  { (uint8_t *)&StorageBuffer.SolarImportVAh	    ,	  DATA_TYPE_Double	,	1	,	1	},
+#else
+  { (uint8_t *)&StorageBuffer.SolarImportVAh	    ,	  DATA_TYPE_Double	,	0	,	1	},
+#endif
+#ifdef MODBUS_VARH_IMPORT
+  { (uint8_t *)&StorageBuffer.SolarImportVarhPos	,	  DATA_TYPE_Double	,	1	,	1	},
+  { (uint8_t *)&StorageBuffer.SolarImportVarhNeg	,	  DATA_TYPE_Double	,	1	,	1	},
+#else
+  { (uint8_t *)&StorageBuffer.SolarImportVarhPos	,	  DATA_TYPE_Double	,	0	,	1	},
+  { (uint8_t *)&StorageBuffer.SolarImportVarhNeg	,	  DATA_TYPE_Double	,	0	,	1	},
+#endif
+#ifdef MODBUS_INTERRUPT_IMPORT
+  { (uint8_t *)&StorageBuffer.SolarImportInterruptions,	  DATA_TYPE_16	,	1	,	1	},
+#else
+  { (uint8_t *)&StorageBuffer.SolarImportInterruptions,	  DATA_TYPE_16	,	0	,	1	},
+#endif
+  							
+  ////////////////////////   SOLAR ENERGY EXPORT  /////////////////////////////							
+#ifdef MODBUS_RH_EXPORT					
+  { (uint8_t *)&StorageBuffer.SolarRunHourExport	,	   DATA_TYPE_32	,	1	,	1	},
+#else
+  { (uint8_t *)&StorageBuffer.SolarRunHourExport	,	   DATA_TYPE_32	,	0	,	1	},
+#endif
+#ifdef MODBUS_LH_EXPORT	  
+  { (uint8_t *)&StorageBuffer.SolarLoadHourExport	,	   DATA_TYPE_32	,	1	,	1	},
+#else
+  { (uint8_t *)&StorageBuffer.SolarLoadHourExport	,	   DATA_TYPE_32	,	0	,	1	},
+#endif
+#ifdef MODBUS_WH_EXPORT  
+  { (uint8_t *)&StorageBuffer.SolarExportWh	,	           DATA_TYPE_Double	,	1	,	1	},
+#else
+  { (uint8_t *)&StorageBuffer.SolarExportWh	,	           DATA_TYPE_Double	,	0	,	1	},
+#endif
+#ifdef MODBUS_VAH_EXPORT
+  { (uint8_t *)&StorageBuffer.SolarExportVAh	,	       DATA_TYPE_Double	,	1	,	1	},
+#else
+  { (uint8_t *)&StorageBuffer.SolarExportVAh	,	       DATA_TYPE_Double	,	0	,	1	},
+#endif
+#ifdef MODBUS_VARH_EXPORT  
+  { (uint8_t *)&StorageBuffer.SolarExportVarhPos	,	   DATA_TYPE_Double	,	1	,	1	},
+  { (uint8_t *)&StorageBuffer.SolarExportVarhNeg	,	   DATA_TYPE_Double	,	1	,	1	},
+#else
+  { (uint8_t *)&StorageBuffer.SolarExportVarhPos	,	   DATA_TYPE_Double	,	0	,	1	},
+  { (uint8_t *)&StorageBuffer.SolarExportVarhNeg	,	   DATA_TYPE_Double	,	0	,	1	},
+#endif
+#ifdef MODBUS_INTERRUPT_EXPORT  
+  { (uint8_t *)&StorageBuffer.SolarExportInterruptions,	   DATA_TYPE_16	,	1	,	1	},
+#else
+  { (uint8_t *)&StorageBuffer.SolarExportInterruptions,	   DATA_TYPE_16	,	0	,	1	},
+#endif
+
 };
 
 // DEVNOTE: Digital inputs are read using read input status

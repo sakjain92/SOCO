@@ -3,7 +3,7 @@
 // 3 digit version number
 // Shown on display as X.YY
 //
-#define VERSION_NO  201
+#define VERSION_NO  203
 
 #define MODEL_COMM_PROCOM
 #define MODEL_DATA_SAVE  
@@ -139,7 +139,8 @@
 // 106) In self-test, improve it (Delay between input testing & output testing is too much and long press in self-test shouldn't change Scroll on/off)
 // 107) Check the calculation in this codebase v/s in Ace code base. There are differences. Also ask Chatgpt to proof read code (atleast the calculation logic) as code in AcePlus seems to have bugs
 // 108) Maybe we should make CtPt ratio as 2500/5 as lot of the codebase assumes a current flowing into the meter as 5A and then the CT ratio multipled. Check constants like (0.1) being used in metrology.
-// 109) Energies can overflow from display. We should add provision for a) Reseting energy over modbus b) Showing old data over modbus or start showing energies in MWh also (I think they shouldn't overflow storage & data sent ovr modbus)
+// 109) Energies can overflow from display. We should add provision for a) Reseting energy over modbus b) Showing old data over modbus or start showing energies in MWh also (I think they shouldn't overflow storage & data sent over modbus). Also, on modbus, data is being transmitted as float so accuracy is limited at 2^24 and maximum value is limited to 2^32. We should fix this (Send data as double over modbus)
+// 110) Test modbus as Jio will use modbus
 // 98) We need to change R59 & R60 to be 6.2k
 // The equation of op-amp is as follows:
 // Vout = ((Rp + Rf)*(Rn*Vb + Rb*Vn)/(Rn + Rb) - Vp*Rf)/Rp (Note the output is inverted voltage so 180 phase shift)

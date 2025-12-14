@@ -131,6 +131,7 @@ float Reserved;
 uint32_t Check485DirCount,Check485DirCounter;
 uint16_t BufferToDisplay[24];
 uint8_t DisplayParameterBuffer[100],dispStartCnt,DisParalast;
+float ModbusDummyFloatRegister;
 
 struct DigInputs g_DigInputs;
 

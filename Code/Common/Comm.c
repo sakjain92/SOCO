@@ -11,6 +11,65 @@
 
 #include "Comm.h"
 
+// Table containing start address on modbus table & number of entries in the
+// modbus table
+// Note: The address should be monotonically increasing with any missing
+// entries
+//
+struct ModbusTableSection_t
+{
+    uint16_t address;
+    uint16_t numEntries;
+};
+
+struct ModbusTableSection_t ModbusTableSections[] =
+{
+    {
+        1000, InstPara_NewAll
+    },
+    {
+        2000, InstPara_THD
+    },
+    {
+        2100, InstPara_ENERGYIMPORT
+    },
+    {
+        2200, InstPara_ENERGYEXPORT
+    },
+    {
+        2300, InstPara_ENERGYOLD
+    },
+    {
+        2400, InstPara_ENERGYTrip
+    },
+    {
+        2500, InstPara_TotalRMS
+    },
+    {
+        2600, InstPara_RphaseRMS
+    },
+    {
+        2700, InstPara_YphaseRMS
+    },
+    {
+        2800, InstPara_BphaseRMS
+    },
+    {
+        3000, InstPara_Demand
+    },
+    {
+        5000, MAX_PARAM_LIMIT
+    },
+    {
+        11000, InstPara_NewSolarAll
+    },
+    {
+        12100, InstPara_Solar_ENERGYIMPORT
+    },
+    {
+        12200, InstPara_Solar_ENERGYEXPORT
+    },
+};
 
 /*
 Inf: Production release 
@@ -470,7 +529,7 @@ void ModBusCommunication(void)
        switch(Fun_Received)
        {                 
         case 0x03:
-          
+        { 
             Start_Add_High = RecieveArray[2];
             Start_Add_Low = RecieveArray[3];
             Start_Add = (Start_Add_Low) + (Start_Add_High<<8);
@@ -486,93 +545,26 @@ void ModBusCommunication(void)
                 Fun_Received &=~ 0x80;
                 break;
             }
-              NoOfBytes=NoOfBytes/2;
-              Timer.DoubleData = 0;
+            NoOfBytes=NoOfBytes/2;
+            Timer.DoubleData = 0;
             
-            
-            if((Start_Add >= 1000)&&(Start_Add < 1000+(InstPara_NewAll*2))&&(!(Start_Add%2)))
+            bool found = false;
+            ArrayIndex = Start_Add / 2;
+            for (uint8_t i = 0; i < ARRAY_SIZE(ModbusTableSections); i++)
             {
-               Start_Add -= 1000;
-               AvailableByte = InstPara_NewAll-Start_Add/2;
-               ArrayIndex = Start_Add/2;
-            }
-            else if((Start_Add >=2000 )&&(Start_Add < 2000+(InstPara_THD*2))&&(!(Start_Add%2)))
-            {
-               Start_Add -= 2000;
-               AvailableByte = InstPara_THD-Start_Add/2;
-               ArrayIndex = InstPara_NewAll + Start_Add/2;
-            }
-            else if((Start_Add >=2100 )&&(Start_Add < 2100+(InstPara_ENERGYIMPORT*2))&&(!(Start_Add%2)))
-            {
-               Start_Add -= 2100;
-               AvailableByte = InstPara_ENERGYIMPORT-Start_Add/2;
-               ArrayIndex = InstPara_NewAll+ InstPara_THD + Start_Add/2;
-            }
-            else if((Start_Add >=2200 )&&(Start_Add < 2200+(InstPara_ENERGYEXPORT*2))&&(!(Start_Add%2)))
-            {
-               Start_Add -= 2200;
-               AvailableByte = InstPara_ENERGYEXPORT-Start_Add/2;
-               ArrayIndex = InstPara_NewAll + InstPara_THD + InstPara_ENERGYIMPORT + Start_Add/2;
-            }
-            else if((Start_Add >=2300 )&&(Start_Add < 2300+(InstPara_ENERGYOLD*2))&&(!(Start_Add%2)))
-            {
-               Start_Add -= 2300;
-               AvailableByte = InstPara_ENERGYOLD-Start_Add/2;
-               ArrayIndex = InstPara_NewAll + InstPara_THD + InstPara_ENERGYIMPORT + InstPara_ENERGYEXPORT + Start_Add/2;
-            }
-            else if((Start_Add >=2400 )&&(Start_Add <2400+(InstPara_ENERGYTrip*2))&&(!(Start_Add%2)))
-            {
-               Start_Add -= 2400;
-               AvailableByte = InstPara_ENERGYTrip-Start_Add/2;
-               ArrayIndex = InstPara_NewAll + InstPara_THD + InstPara_ENERGYIMPORT + InstPara_ENERGYEXPORT + InstPara_ENERGYOLD + Start_Add/2;
-            }
-            else if((Start_Add >=2500 )&&(Start_Add < 2500+(InstPara_TotalRMS*2))&&(!(Start_Add%2)))
-            {
-               Start_Add -= 2500;
-               AvailableByte = InstPara_TotalRMS-Start_Add/2;
-               ArrayIndex = InstPara_NewAll + InstPara_THD + InstPara_ENERGYIMPORT + InstPara_ENERGYEXPORT 
-                          + InstPara_ENERGYOLD + InstPara_ENERGYTrip + Start_Add/2;
-            }
-            else if((Start_Add >=2600 )&&(Start_Add < 2600+(InstPara_RphaseRMS*2))&&(!(Start_Add%2)))
-            {
-               Start_Add -= 2600;
-               AvailableByte = InstPara_RphaseRMS-Start_Add/2;
-               ArrayIndex = InstPara_NewAll + InstPara_THD + InstPara_ENERGYIMPORT + InstPara_ENERGYEXPORT 
-                          + InstPara_ENERGYOLD + InstPara_ENERGYTrip +InstPara_TotalRMS+ Start_Add/2;
-            }
-            else if((Start_Add >=2700 )&&(Start_Add < 2700+(InstPara_YphaseRMS*2))&&(!(Start_Add%2)))
-            {
-               Start_Add -= 2700;
-               AvailableByte = InstPara_YphaseRMS-Start_Add/2;
-               ArrayIndex = InstPara_NewAll + InstPara_THD + InstPara_ENERGYIMPORT + InstPara_ENERGYEXPORT 
-                          + InstPara_ENERGYOLD + InstPara_ENERGYTrip +InstPara_TotalRMS+InstPara_RphaseRMS+ Start_Add/2;
-            }
-            else if((Start_Add >=2800 )&&(Start_Add < 2800+(InstPara_BphaseRMS*2))&&(!(Start_Add%2)))
-            {
-               Start_Add -= 2800;
-               AvailableByte = InstPara_BphaseRMS-Start_Add/2;
-               ArrayIndex = InstPara_NewAll + InstPara_THD + InstPara_ENERGYIMPORT + InstPara_ENERGYEXPORT 
-                          + InstPara_ENERGYOLD + InstPara_ENERGYTrip +InstPara_TotalRMS+InstPara_RphaseRMS+InstPara_YphaseRMS+ Start_Add/2;
-            }
-            else if((Start_Add >=3000 )&&(Start_Add < 3000+(InstPara_Demand*2))&&(!(Start_Add%2)))
-            {
-               Start_Add -= 3000;
-               AvailableByte = InstPara_Demand-Start_Add/2;
-               ArrayIndex = InstPara_NewAll + InstPara_THD + InstPara_ENERGYIMPORT + InstPara_ENERGYEXPORT + InstPara_BphaseRMS
-                          + InstPara_ENERGYOLD + InstPara_ENERGYTrip +InstPara_TotalRMS+InstPara_RphaseRMS+InstPara_YphaseRMS+ Start_Add/2;
-            }
-            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-            else if((Start_Add >=5000 )&&(Start_Add < 5000+(MAX_PARAM_LIMIT*2))&&(!(Start_Add%2)))
-            {
-               Start_Add -= 5000;
-               AvailableByte = MAX_PARAM_LIMIT-Start_Add/2;
-               ArrayIndex = InstPara_NewAll + InstPara_THD + InstPara_ENERGYIMPORT + InstPara_ENERGYEXPORT + InstPara_BphaseRMS
-                          + InstPara_ENERGYOLD + InstPara_ENERGYTrip +InstPara_TotalRMS+InstPara_RphaseRMS+InstPara_YphaseRMS+ InstPara_Demand+Start_Add/2;
+                if ((Start_Add >= ModbusTableSections[i].address) &&
+                    (Start_Add < ModbusTableSections[i].address + ModbusTableSections[i].numEntries * 2) &&
+                    (!(Start_Add%2)))
+                {
+                    Start_Add -= ModbusTableSections[i].address; 
+                    AvailableByte = ModbusTableSections[i].numEntries - Start_Add/2;
+                    found = true;
+                    break;
+                }
+                ArrayIndex += ModbusTableSections[i].numEntries;
             }
             
-            ////// Exception Response for Illegal Data Address //////
-            else    
+            if (!found)    
             {
               Fun_Received |= 0x80;
               Mod_TransmitFrame.Data_Array[0] = 0x02;
@@ -740,6 +732,7 @@ void ModBusCommunication(void)
             DataArrLoc = 0;
             ByteCount = 0;
             break;
+          }
           case 0x10:
               Start_Add_High = RecieveArray[2];
               Start_Add_Low = RecieveArray[3];
