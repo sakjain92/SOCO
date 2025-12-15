@@ -38,13 +38,13 @@
 // 19) M7 on bottom PCB connected to R130 is D28 but not present in BOM and not marked in schematic with name D28
 // 20) Remove R55, R130, R129, R128 from Bottom PCB. D28 also.
 // 21) Try to make sure no through hole component on top PCB. Move power supply to bottom PCB if space (so no high voltages going to top PCB. Remove relay if that gives space. More relay terminals accordingly).
-// 22) Make another mould enclouser with more spacing for future components.
+// 22) Make another mould enclouser with more spacing for future components. Preferablly just increase depth of IPR5 enclousre
 // 23) Should add a LED for DG Running/SPD Healthy? Don't need info about SPD healthy but do require for DG Running/Load on Solar or Grid. Maybe remove COMM Led
 // 24) With 37V Aux and all relays on, 5.3V is observed. So no need to change power supply with OMRON relays inplace (G6RN relays). We probably don't need High capacity relays but they have better dielectric strength. Have to check rated contact voltage for the relay (They are 250V currently for NO with max switching voltage of 250VAC. This is important. We need higher contact rating)
 // 25) Need to add convert connector and FRC cable to 20pins from 16 pins J2 in top
 // 26) Can we move op-amps to bottom pcb and also the power supply section so no high voltage goes to top PCB ever
 // 27) Do we want to measure the 0.5 class accuracy across temperature range and different pieces. Might have to do calibration at two points for this (100V and 300V). Get lab tested for meter accuracy and protction.
-// 28) Change R118, R136, R117, R124, R122, R126 to 2.2k. Check BOM of Ace/COP/REX/IPR to see difference in BOM vs Schematic as we have taken schematics as references
+// 28) Change R118, R116, R117, R124, R122, R123 to 2.2k. Check BOM of Ace/COP/REX/IPR to see difference in BOM vs Schematic as we have taken schematics as references
 // 29) Should change relay driving logic as in saturation, Ic=10*Ib. So to drive 100ma, need 10mA Ib, which is not possble from uC GPIO pin. Need two transistor pair (Current Vce is about 0.2)
 // 30) Should check direction of mounting R/G/B LED (It was solder in wrong direction. Is this possible in production also)
 // 31) Check resistors for LEDs (R/G/B or other LEDs) to make sure about their life
@@ -105,7 +105,7 @@
 // 74) Check accuracy (amplitude & phase) of external CTs across wide range (100A - 0.01A). For class 0.5 meter, check which is minimum startup current as per standards
 // 75) Replace R48, R52, R56, R47, R51, R55 with 6.2k (We don't have 8.2k). Replace R40, R48, R23, R32, R94, R101, R108, R115, R131, R132, R133, R134 with 10ohm (Later when we use SDADC, we can reduce to 5ohm to keep burden on external CT low and also to generate low voltages across shunt for better protection). Need extra protection on current circuit (reverse engineer the Siemens/L&T meter).
 // ALso check if long wires of external CT causes any noise pickup
-// 76) Check replacing all series resistors (Voltage/Current) to 10K for better protection of uC and check if it still works with good accuracy
+// 76) Check replacing all series resistors (Voltage/Current) to 10K for better protection of uC and check if it still works with good accuracy (Not working with current section. Probably need to buffer it with Op-amp to add 10k). We have to check if a better op-amp is required for lesser Common mode noise & offset error/bias error etc
 // 77) Have to check fluctuation level on voltage/current and error after moving to SDADC (Currently the error is not acceptable)
 // 78) Change the LEDs sticker on SOCO as the red filter on LEDs makes the green and blue LED not pass through the filter
 // 79) When error on calibration, it doesn't show on display and also difficult to debug
@@ -141,6 +141,8 @@
 // 108) Maybe we should make CtPt ratio as 2500/5 as lot of the codebase assumes a current flowing into the meter as 5A and then the CT ratio multipled. Check constants like (0.1) being used in metrology.
 // 109) Energies can overflow from display. We should add provision for a) Reseting energy over modbus b) Showing old data over modbus or start showing energies in MWh also (I think they shouldn't overflow storage & data sent over modbus). Also, on modbus, data is being transmitted as float so accuracy is limited at 2^24 and maximum value is limited to 2^32. We should fix this (Send data as double over modbus)
 // 110) Test modbus as Jio will use modbus
+// 111) Consider adding PT outside controller in panel for reducing risk in voltage measurement
+// 112) Ask for shielded cable for external CTs? Also check the proper length (not to long) for external CT. Also we already use another external CT in Whole Current Meter. Can we use the same here?
 // 98) We need to change R59 & R60 to be 6.2k
 // The equation of op-amp is as follows:
 // Vout = ((Rp + Rf)*(Rn*Vb + Rb*Vn)/(Rn + Rb) - Vp*Rf)/Rp (Note the output is inverted voltage so 180 phase shift)
@@ -163,7 +165,7 @@
 //
 //
 // PANEL:
-// 1) Color code external CTs and without sticker
+// 1) Color code external CTs and without sticker (There should be sticker of R/Y/B Grid/Solar on the CT also)
 // 2) Calibration of polarity of CTs and recheck via self test (RS485) of polarity of CTs in Panel division
 // 3) Check rubber gasket type to be used for IP65 protection (THere is a cut in the gasket). Get salt spray for 1000 hours for the panel
 // 4) Maintiain spacing around wiring and contactor for heat dissipiation. Get a temperature test done of panel to see maximum temp on contactor (to be below 10)

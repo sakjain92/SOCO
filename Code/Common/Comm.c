@@ -549,7 +549,7 @@ void ModBusCommunication(void)
             Timer.DoubleData = 0;
             
             bool found = false;
-            ArrayIndex = Start_Add / 2;
+            ArrayIndex = 0;
             for (uint8_t i = 0; i < ARRAY_SIZE(ModbusTableSections); i++)
             {
                 if ((Start_Add >= ModbusTableSections[i].address) &&
@@ -558,6 +558,8 @@ void ModBusCommunication(void)
                 {
                     Start_Add -= ModbusTableSections[i].address; 
                     AvailableByte = ModbusTableSections[i].numEntries - Start_Add/2;
+                    ArrayIndex += Start_Add/2;
+
                     found = true;
                     break;
                 }
