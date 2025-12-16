@@ -473,6 +473,8 @@ void ProcessRelays()
     //
     for (uint8_t i = 0; i < ARRAY_SIZE(pvsArray); i++)
     {
+        // UNDONE: Not sure if "break before make" is being followed here
+        //
         if (!pvsArray[i].shouldContactorBeOn)
         {
             pvsArray[i].turnContactorOff();
@@ -1021,9 +1023,12 @@ Ret: None
 */ 
 void FillCurrentGainArray(void)
 {
+  // UNDONE: Check if we need to make the phase error correction more fine grained
+  // as compared to multiples of CUR_LOW_CAL_POINT
+  //
   uint8_t  i;
-  StepHigh=(CUR_HIGH_CAL_POINT-CUR_MID_CAL_POINT)*10;
-  StepLow=(CUR_MID_CAL_POINT-CUR_LOW_CAL_POINT)*10;
+  StepHigh=(float)(CUR_HIGH_CAL_POINT-CUR_MID_CAL_POINT)/(float)(CUR_LOW_CAL_POINT);
+  StepLow=(float)(CUR_MID_CAL_POINT-CUR_LOW_CAL_POINT)/(float)(CUR_LOW_CAL_POINT);
   
   for(i=0;i<StepHigh;i++)BufferBetaR[i]=CalibrationCoeff.IR_HIGH_PH_ERROR+(CalibrationCoeff.IR_MID_PH_ERROR-CalibrationCoeff.IR_HIGH_PH_ERROR)*i/StepHigh;
   for(i=0;i<StepHigh;i++)BufferBetaY[i]=CalibrationCoeff.IY_HIGH_PH_ERROR+(CalibrationCoeff.IY_MID_PH_ERROR-CalibrationCoeff.IY_HIGH_PH_ERROR)*i/StepHigh;
@@ -1176,21 +1181,21 @@ void SetWorkingGainBuffer(void)
   else WorkingCopyGain.IB_SOLAR_GAIN=CalibrationCoeff.IB_SOLAR_LOW_GAIN;  
 
     
-  TempChar=(uint8_t)(InstantPara.CurrentR*10);
+  TempChar=(uint8_t)(InstantPara.CurrentR/(float)(CUR_LOW_CAL_POINT));
   if(TempChar>=50)TempChar=50;
   else if(TempChar==0)TempChar=1;
   TempChar=50-TempChar;
   WorkingCopyGain.PR_ALFA=BufferAlfaR[TempChar];
   WorkingCopyGain.PR_BETA=BufferBetaR[TempChar];
   
-  TempChar=(uint8_t)(InstantPara.CurrentY*10);
+  TempChar=(uint8_t)(InstantPara.CurrentY/(float)(CUR_LOW_CAL_POINT));
   if(TempChar>=50)TempChar=50;
   else if(TempChar==0)TempChar=1;
   TempChar=50-TempChar;
   WorkingCopyGain.PY_ALFA=BufferAlfaY[TempChar];
   WorkingCopyGain.PY_BETA=BufferBetaY[TempChar];
 
-  TempChar=(uint8_t)(InstantPara.CurrentB*10);
+  TempChar=(uint8_t)(InstantPara.CurrentB/(float)(CUR_LOW_CAL_POINT));
   if(TempChar>=50)TempChar=50;
   else if(TempChar==0)TempChar=1;
   TempChar=50-TempChar;
@@ -1199,21 +1204,21 @@ void SetWorkingGainBuffer(void)
 
   // Solar
   //
-  TempChar=(uint8_t)(InstantPara.CurrentRSolar*10);
+  TempChar=(uint8_t)(InstantPara.CurrentRSolar/(float)(CUR_LOW_CAL_POINT));
   if(TempChar>=50)TempChar=50;
   else if(TempChar==0)TempChar=1;
   TempChar=50-TempChar;
   WorkingCopyGain.PR_SOLAR_ALFA=BufferAlfaRSolar[TempChar];
   WorkingCopyGain.PR_SOLAR_BETA=BufferBetaRSolar[TempChar];
   
-  TempChar=(uint8_t)(InstantPara.CurrentYSolar*10);
+  TempChar=(uint8_t)(InstantPara.CurrentYSolar/(float)(CUR_LOW_CAL_POINT));
   if(TempChar>=50)TempChar=50;
   else if(TempChar==0)TempChar=1;
   TempChar=50-TempChar;
   WorkingCopyGain.PY_SOLAR_ALFA=BufferAlfaYSolar[TempChar];
   WorkingCopyGain.PY_SOLAR_BETA=BufferBetaYSolar[TempChar];
 
-  TempChar=(uint8_t)(InstantPara.CurrentBSolar*10);
+  TempChar=(uint8_t)(InstantPara.CurrentBSolar/(float)(CUR_LOW_CAL_POINT));
   if(TempChar>=50)TempChar=50;
   else if(TempChar==0)TempChar=1;
   TempChar=50-TempChar;

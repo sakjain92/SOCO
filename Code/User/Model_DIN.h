@@ -143,6 +143,23 @@
 // 110) Test modbus as Jio will use modbus
 // 111) Consider adding PT outside controller in panel for reducing risk in voltage measurement
 // 112) Ask for shielded cable for external CTs? Also check the proper length (not to long) for external CT. Also we already use another external CT in Whole Current Meter. Can we use the same here?
+// 111) In self-test we should also test all digits/leds of the display
+// 112) Check if the power supply circuit is properly designed for low voltage
+// 113) Check delay between DG turning off from on and load switching to solar
+// 114) The terminals of the controller are on the back side of the controller. Makes it hard to understand the wiring. Maybe the L-Channel should have a hinge or change the body to din-rail type
+// (We have extra space now so can try for a single flat din-rail mounted PCB)
+// 115) Need RS485 based K5 tripping (Where if EMS box wants, it can trip K5 even if Mains is healthy (K4 can be turned on in this case if solar available)).
+// This needs to be time based. So if the command doesn't repeat again and again every 5 minutes, we turn on K5 again.
+// Jio wants this so as to allow battery to discharge so that Mains is not used to charge the battery but the battery gets charged when the solar becomes available
+// The whole purpose of AC based Solar invertors is to export solar to grid as solar is high on afternoon but telecom load is highest at night
+// 116) Need USB for firmware upgrade as Jio will keep asking for changes. Also firmware upgrade over RS485 is also important to them.
+// 117) Need to send alarms to RS485 when the contactors inputs don't match our controlling of the logic. Do we need to flash it on screen also? Also, can check contactor input against metering data to see if the contactor positions matches our expectations.
+// 118) Current measurement accuracy needs to be improved to make neutral current measurement accurate
+// 119) When SPD is healthy, is the output contact NC?
+// 120) Read the whole code base again. There are many hardcoded stuff here that can potentially cause issues
+// 121) The controller's wiring diagram is a bit off. The pins mentioned on the sticker don't exactly align with the terminals
+// 122) It's possible currently for current to flow from 
+//
 // 98) We need to change R59 & R60 to be 6.2k
 // The equation of op-amp is as follows:
 // Vout = ((Rp + Rf)*(Rn*Vb + Rb*Vn)/(Rn + Rb) - Vp*Rf)/Rp (Note the output is inverted voltage so 180 phase shift)
@@ -179,4 +196,17 @@
 // 11) Is Panel door also need to be Earth? No components on it.
 // 12) Have to check if 25mm armoured cable can bend to go to terminal in panel (Get 25mm alumnium for testing)
 // 13) We also use ring type thimble. Should be okay but Jio specified only pin & boot type. Maybe that's for control wiring.
+// 14) Canopy might need to be extended on all sides to protect from rain as per Jio's requirements
+// 15) Wooden packing is essential for avoiding transportation as high vibration
+// 16) EP Sheet required inside the panel to maintain tight contact between the panel door and contactors (Check other components also)
+// 17) Mounting screws for mounting plate needs to be screwed through the back sheet and not welded for more strength. 6 screws is a good idea due to high weight of the mounting plate.
+// Vibration testing is required
+// 18) Check if enough space for bending of armoured cable
+// 19) For panel heat test, need to bring our own 100A * 240V source and load.
+// 20) Check a weird phenomenon we saw: Solar & Grid Power Supply MCB to controller was off as well as 48VDC MCB. Solar voltage 3 phase was present and no voltage on grid. The controller was still flickering. Why? Is there any capacitance causing current flow path?
+//
+//
+// Future scope:
+// 1) Give relay card channel to Jio with OMRON for v1.5 of the Panel
+// 2) ACDB controller can be given to Jio for residential project also. They require it, but economical
 //

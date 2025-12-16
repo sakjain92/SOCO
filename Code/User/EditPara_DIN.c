@@ -363,9 +363,9 @@ void UpdateEditSettings(void)
       
    InterruptFlag |=INT_DATA_SAVING_EEPROM;
    __no_operation();
-   EepromRead(PROGRAM_DATA_LOC1_START,20,EXT_EEPROM,LcdEpromBuffer );    
+   EepromRead(PROGRAM_DATA_LOC1_START,2*MAX_PARAM_LIMIT+2,EXT_EEPROM,LcdEpromBuffer );    
    InterruptFlag &=~INT_DATA_SAVING_EEPROM;
-   for(i=0;i<9;i++)
+   for(i=0;i<MAX_PARAM_LIMIT;i++)
    { 
      if(CopySetPara[i] != *((uint16_t *)(LcdEpromBuffer+i*2)))k=1;
    }

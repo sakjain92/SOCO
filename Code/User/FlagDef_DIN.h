@@ -223,6 +223,8 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 // The ratio between CUR_HIGH_CAL_POINT/CUR_MID_CAL_POINT should be 5:1
 // The ratio between CUR_MID_CAL_POINT/CUR_LOW_CAL_POINT should be 10:1
 // UNDONE: Calibrating at 0.4 as below that in current hardware we are getting too much noise
+// Note: The CUR_LOW_CAL_POINT determines the Least count for Phase Error Correction
+// so keep it as small as possible
 //
 #define        CUR_HIGH_CAL_POINT                    20.0
 #define        CUR_MID_CAL_POINT                     4.0
