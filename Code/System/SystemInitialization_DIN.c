@@ -520,7 +520,7 @@ void InitUart(uint8_t baud,uint8_t parity1,uint8_t Stopbit1)
   SWITCH_OFF_LED_COMM;
   USART2->CR1 |= 0x400002C;            // Transmitter enable, Receiver enable, RXNEIE,Receiver timeout interrupt enable
   USART2->CR2 |=  0x800000;             //Receiver timeout enable 
-  USART2->CR3 =  0x80;                 // DMA
+  USART2->CR3 =  0x1080;                 // DMA
   USART2->ICR =  0;
   USART2->CR1 |= 1;
   DMA1_Channel7->CPAR = (uint32_t)&USART2->TDR;
