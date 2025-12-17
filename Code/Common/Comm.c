@@ -61,6 +61,9 @@ struct ModbusTableSection_t ModbusTableSections[] =
         5000, MAX_PARAM_LIMIT
     },
     {
+        6000, InstPara_LoadOnGridDisableSec,
+    },
+    {
         11000, InstPara_NewSolarAll
     },
     {
@@ -508,6 +511,15 @@ void ModBusCommunication(void)
    
    if((Timer.End_Frame)&&(!Timer.ParityError))
    {
+     if ((ReceiveLength < 4) || (ReceiveLength > MAX_BYTE_TO_RECIEVE))
+     {
+       // Drop invalid frames to avoid buffer overruns and spurious faults
+       Timer.End_Frame = 0;
+       Timer.ParityError = 0;
+       ReceiveLength = 0;
+       return;
+     }
+
      Timer.End_Frame=0;
      Add_Received = RecieveArray[0];
      Fun_Received = RecieveArray[1];
@@ -756,6 +768,17 @@ void ModBusCommunication(void)
                 //Start_Add +=2; // To remove system configuration
                 ModbusUpdateParameter(Start_Add/2,NoOfBytes);
               }
+              else if (Start_Add == 6000 && NoOfBytes == 2)
+              {
+                  g_DisableLoadOnGridSeconds =
+                      RecieveArray[10] +
+                      RecieveArray[9]<<8 +
+                      RecieveArray[8]<<16+
+                      RecieveArray[7]<<24;
+
+                  memcpy(Mod_TransmitFrame.Data_Array, &RecieveArray[2], 4);
+                  SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received,4);
+              }
               else  ///// Illegal Data Address //////
               {
 
@@ -775,47 +798,79 @@ void ModBusCommunication(void)
                 NoOfBytes_Low = RecieveArray[5];
                 NoOfBytes = (NoOfBytes_Low) + (NoOfBytes_High<<8);
                 
-                uint32_t endReg = (uint32_t)(Start_Add) + (uint32_t)(NoOfBytes) - 1;
-                uint8_t maxRegs = sizeof(g_DigInputs);
-                if (endReg >= maxRegs || NoOfBytes == 0)
+                struct MapEntry
+                {
+                    uint16_t address;
+                    uint16_t numEntries;
+                    uint8_t* buffer;
+                };
+
+                struct MapEntry mapEntries[] = 
+                {
+                    {
+                        0,
+                        sizeof(g_DigInputs),
+                        (uint8_t*)(&g_DigInputs)
+                    },
+                    {
+                        100,
+                        sizeof(g_Alarms),
+                        (uint8_t*)(&g_Alarms)
+                    }
+                };
+
+                bool found = false;
+
+                for (uint8_t i = 0; i < ARRAY_SIZE(mapEntries); i++)
+                {
+                    if (!(Start_Add >= mapEntries[i].address &&
+                            Start_Add + NoOfBytes <= mapEntries[i].address + mapEntries[i].numEntries))
+                    {
+                        break;
+                    }
+
+                    found = true;
+
+                    // We need to shift certain bits if Start_Add != 0
+                    //
+                    uint8_t sourceBuffer[64] = {0};
+                    uint8_t destBuffer[64] = {0};
+
+                    uint8_t* source = mapEntries[i].buffer;
+                    for (int i = 0; i < mapEntries[i].numEntries; i++)
+                    {
+                        if (source[i])
+                        {
+                            int sourceByteIdx = i / 8;
+                            int sourceBitIdx = i - 8 * sourceByteIdx;
+                            sourceBuffer[sourceByteIdx] |= (1 << sourceBitIdx);
+                        }
+                    }
+                    for (int bitIdx = 0; bitIdx < NoOfBytes; bitIdx++)
+                    {
+                        int sourceBitIdx = bitIdx + Start_Add - mapEntries[i].address;
+                        int sourceByteIdx = sourceBitIdx / 8;
+                        int sourceBitOffset = sourceBitIdx - sourceByteIdx * 8;
+
+                        int destBitIdx = bitIdx;
+                        int destByteIdx = destBitIdx / 8;
+                        int destBitOffset = destBitIdx - destByteIdx * 8;
+
+                        destBuffer[destByteIdx] |=
+                            (((sourceBuffer[sourceByteIdx] >> sourceBitOffset) & 0x1) << destBitOffset);
+                    }
+
+                    uint8_t numBytesToSend = ROUNDUP_POW2(NoOfBytes, 8) / 8;
+                    ModbusSendData(destBuffer, numBytesToSend, Fun_Received);
+                }
+
+                if (!found)
                 {
                     Fun_Received |= 0x80;
                     Mod_TransmitFrame.Data_Array[0] = 0x02;
                     SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received,1);
                     break;
                 }
-
-                // We need to shift certain bits if Start_Add != 0
-                //
-                uint8_t sourceBuffer[64] = {0};
-                uint8_t destBuffer[64] = {0};
-
-                uint8_t* source = (uint8_t*)(&g_DigInputs);
-                for (int i = 0; i < sizeof(g_DigInputs); i++)
-                {
-                    if (source[i])
-                    {
-                        int sourceByteIdx = i / 8;
-                        int sourceBitIdx = i - 8 * sourceByteIdx;
-                        sourceBuffer[sourceByteIdx] |= (1 << sourceBitIdx);
-                    }
-                }
-                for (int bitIdx = 0; bitIdx < NoOfBytes; bitIdx++)
-                {
-                    int sourceBitIdx = bitIdx + Start_Add;
-                    int sourceByteIdx = sourceBitIdx / 8;
-                    int sourceBitOffset = sourceBitIdx - sourceByteIdx * 8;
-
-                    int destBitIdx = bitIdx;
-                    int destByteIdx = destBitIdx / 8;
-                    int destBitOffset = destBitIdx - destByteIdx * 8;
-
-                    destBuffer[destByteIdx] |=
-                        (((sourceBuffer[sourceByteIdx] >> sourceBitOffset) & 0x1) << destBitOffset);
-                }
-
-                uint8_t numBytesToSend = ROUNDUP_POW2(NoOfBytes, 8) / 8;
-                ModbusSendData(destBuffer, numBytesToSend, Fun_Received);
                 break;
             }
 

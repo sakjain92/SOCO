@@ -222,7 +222,8 @@ void ProcessRelays()
                                 // till we don't register the actual contactor change.
                                 // This is to allow contactors to first turn off before
                                 // turning other contactors (after some delay)
-        enum StuckState contactorStuckState;
+        bool* stuckOpen;
+        bool* stuckClosed;
     };
 
     static bool initialized = false;
@@ -254,7 +255,8 @@ void ProcessRelays()
             .shouldContactorBeOn = true,
             .ContactorChangeTimeLeft = MAX_CONTACTOR_CHANGE_LATENCY,
             .isPrevContactorOn = true,
-            .contactorStuckState = CONTACTOR_NOT_STUCK,
+            .stuckOpen = &g_Alarms.MainsRPhaseContactorStuckOpen,
+            .stuckClosed = &g_Alarms.MainsRPhaseContactorStuckClosed,
         },
         // Mains Y Phase
         {
@@ -273,7 +275,8 @@ void ProcessRelays()
             .shouldContactorBeOn = true,
             .ContactorChangeTimeLeft = MAX_CONTACTOR_CHANGE_LATENCY,
             .isPrevContactorOn = true,
-            .contactorStuckState = CONTACTOR_NOT_STUCK,
+            .stuckOpen = &g_Alarms.MainsYPhaseContactorStuckOpen,
+            .stuckClosed = &g_Alarms.MainsYPhaseContactorStuckClosed,
         },
         // Mains B Phase
         {
@@ -292,7 +295,8 @@ void ProcessRelays()
             .shouldContactorBeOn = true,
             .ContactorChangeTimeLeft = MAX_CONTACTOR_CHANGE_LATENCY,
             .isPrevContactorOn = true,
-            .contactorStuckState = CONTACTOR_NOT_STUCK,
+            .stuckOpen = &g_Alarms.MainsBPhaseContactorStuckOpen,
+            .stuckClosed = &g_Alarms.MainsBPhaseContactorStuckClosed,
         },
         // Load On Solar
         //
@@ -314,7 +318,8 @@ void ProcessRelays()
             .shouldContactorBeOn = false,
             .ContactorChangeTimeLeft = MAX_CONTACTOR_CHANGE_LATENCY,
             .isPrevContactorOn = false,
-            .contactorStuckState = CONTACTOR_NOT_STUCK,
+            .stuckOpen = &g_Alarms.LoadOnSolarContactorStuckOpen,
+            .stuckClosed = &g_Alarms.LoadOnSolarContactorStuckClosed,
         },
         // Load On Grid
         //
@@ -334,7 +339,8 @@ void ProcessRelays()
             .shouldContactorBeOn = true,
             .ContactorChangeTimeLeft = MAX_CONTACTOR_CHANGE_LATENCY,
             .isPrevContactorOn = true,
-            .contactorStuckState = CONTACTOR_NOT_STUCK,
+            .stuckOpen = &g_Alarms.LoadOnGridContactorStuckOpen,
+            .stuckClosed = &g_Alarms.LoadOnGridContactorStuckClosed,
         }
     };
 
@@ -443,13 +449,16 @@ void ProcessRelays()
     // but remembering that it is stuck.
     //
     pvsArray[0].shouldContactorBeOn = pvsArray[0].isHealthy &&
-                                        !pvsArray[3].isPrevContactorOn;
+                                        !pvsArray[3].isPrevContactorOn &&
+                                        (g_DisableLoadOnGridSeconds == 0);
     pvsArray[1].shouldContactorBeOn = pvsArray[0].isHealthy &&
                                         pvsArray[1].isHealthy &&
-                                        !pvsArray[3].isPrevContactorOn;
+                                        !pvsArray[3].isPrevContactorOn &&
+                                        (g_DisableLoadOnGridSeconds == 0);
     pvsArray[2].shouldContactorBeOn = pvsArray[0].isHealthy &&
                                         pvsArray[2].isHealthy &&
-                                        !pvsArray[3].isPrevContactorOn;
+                                        !pvsArray[3].isPrevContactorOn &&
+                                        (g_DisableLoadOnGridSeconds == 0);
     // If 48V is not present, DG PFC is not reliable.
     // But if DG is running, 48V should be available.
     // So if 48V is not present we assume DG is not running.
@@ -458,14 +467,20 @@ void ProcessRelays()
     // in open condition
     //
     pvsArray[3].shouldContactorBeOn = pvsArray[3].isHealthy &&
-                                      !pvsArray[4].isHealthy &&
+                                      (!pvsArray[4].isHealthy || g_DisableLoadOnGridSeconds) &&
                                         (g_DigInputs.DGOff || !g_DigInputs.DC48Available) &&
                                         !pvsArray[0].isPrevContactorOn &&
                                         !pvsArray[1].isPrevContactorOn &&
                                         !pvsArray[2].isPrevContactorOn &&
                                         !pvsArray[4].isPrevContactorOn;
     pvsArray[4].shouldContactorBeOn = pvsArray[4].isHealthy &&
+                                        (g_DisableLoadOnGridSeconds == 0) &&
                                         !pvsArray[3].isPrevContactorOn;
+
+    if (g_DisableLoadOnGridSeconds)
+    {
+        g_DisableLoadOnGridSeconds--;
+    }
 
     // DEVNOTE: Follow break before make for all contactors
     // DEVNOTE: There should be gap between turning off a contactor & then
@@ -499,7 +514,7 @@ void ProcessRelays()
         //
         if (contactorStateChanged)
         {
-            if ((pvsArray[i].contactorStuckState == CONTACTOR_NOT_STUCK) ||
+            if ((!*pvsArray[i].stuckOpen && !*pvsArray[i].stuckClosed) ||
                 !feedbackNotMatches)
             {
                 if (pvsArray[i].ContactorChangeTimeLeft)
@@ -518,13 +533,22 @@ void ProcessRelays()
                 if (feedbackNotMatches)
                 {
                     pvsArray[i].isPrevContactorOn = *pvsArray[i].contactorFeedback;
-                    pvsArray[i].contactorStuckState = *pvsArray[i].contactorFeedback ?
-                            CONTACTOR_STUCK_IN_CLOSED : CONTACTOR_STUCK_IN_OPEN;
+                    if (*pvsArray[i].contactorFeedback)
+                    {
+                        *pvsArray[i].stuckOpen = false;
+                        *pvsArray[i].stuckClosed = true;
+                    }
+                    else
+                    {
+                        *pvsArray[i].stuckOpen = true;
+                        *pvsArray[i].stuckClosed = false;
+                    }
                 }
                 else
                 {
                     pvsArray[i].isPrevContactorOn = pvsArray[i].shouldContactorBeOn;
-                    pvsArray[i].contactorStuckState = CONTACTOR_NOT_STUCK;
+                    *pvsArray[i].stuckOpen = true;
+                    *pvsArray[i].stuckClosed = false;
                 }
             }
         }
@@ -532,7 +556,8 @@ void ProcessRelays()
         {
             pvsArray[i].ContactorChangeTimeLeft = MAX_CONTACTOR_CHANGE_LATENCY;
             pvsArray[i].isPrevContactorOn = pvsArray[i].shouldContactorBeOn;
-            pvsArray[i].contactorStuckState = CONTACTOR_NOT_STUCK;
+            *pvsArray[i].stuckOpen = true;
+            *pvsArray[i].stuckClosed = false;
         }
         else
         {

@@ -133,6 +133,15 @@ uint16_t BufferToDisplay[24];
 uint8_t DisplayParameterBuffer[100],dispStartCnt,DisParalast;
 float ModbusDummyFloatRegister;
 
+// Defines the digital inputs status
+//
 struct DigInputs g_DigInputs;
 
+// Defined the alarms/faults detected
+//
+struct Alarms g_Alarms;
+
+// Defines the timing for which Load is disconnected from both Solar & Grid
+//
+uint32_t g_DisableLoadOnGridSeconds;
 #endif

@@ -121,6 +121,9 @@ extern void SwitchOnContactorLoadOnSolar();
 extern void SwitchOffContactorLoadOnGrid();
 extern void SwitchOnContactorLoadOnGrid();
 
+extern uint32_t g_DisableLoadOnGridSeconds;
+
+extern struct Alarms g_Alarms;
 
 #define RUNNING_MODE_IMPORT  0
 

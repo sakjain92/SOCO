@@ -139,7 +139,7 @@
 // 106) In self-test, improve it (Delay between input testing & output testing is too much and long press in self-test shouldn't change Scroll on/off)
 // 107) Check the calculation in this codebase v/s in Ace code base. There are differences. Also ask Chatgpt to proof read code (atleast the calculation logic) as code in AcePlus seems to have bugs
 // 108) Maybe we should make CtPt ratio as 2500/5 as lot of the codebase assumes a current flowing into the meter as 5A and then the CT ratio multipled. Check constants like (0.1) being used in metrology.
-// 109) Energies can overflow from display. We should add provision for a) Reseting energy over modbus b) Showing old data over modbus or start showing energies in MWh also (I think they shouldn't overflow storage & data sent over modbus). Also, on modbus, data is being transmitted as float so accuracy is limited at 2^24 and maximum value is limited to 2^32. We should fix this (Send data as double over modbus)
+// 109) Energies can overflow from display. We should add provision for a) Reseting energy over modbus b) Showing old data over modbus or start showing energies in MWh also (I think they shouldn't overflow storage & data sent over modbus). Also, on modbus, data is being transmitted as float so accuracy is limited at 2^24 and maximum value is limited to 2^32. We should fix this (Send data as double over modbus or send as divided by 1000)
 // 110) Test modbus as Jio will use modbus
 // 111) Consider adding PT outside controller in panel for reducing risk in voltage measurement
 // 112) Ask for shielded cable for external CTs? Also check the proper length (not to long) for external CT. Also we already use another external CT in Whole Current Meter. Can we use the same here?
@@ -159,6 +159,14 @@
 // 120) Read the whole code base again. There are many hardcoded stuff here that can potentially cause issues
 // 121) The controller's wiring diagram is a bit off. The pins mentioned on the sticker don't exactly align with the terminals
 // 122) It's possible currently for current to flow from 
+// 123) We should do proper bound error checks on all requests coming over Modbus
+// 124) IMP: The power supply section is a bit wrong. The controller can be powered on via current leakage from Neutral of grid to Neutral of solar or from Neutral of grid to 48-ive of battery etc.
+// Also, Check https://www.power.com/node/463601 where they are saying that they don't recommend the power supply to run on lower than 70V
+// 125) Check bug in modbuses if any. We had a bug that was caught after 10 mins of polling on modbus
+// 126) Remove support for little endian maybe since we don't support write holding registers in little endian (or add support for it)
+// 127) Check response type of Modbus Write Queries
+// 128) Do we need to show details of faults of the contactor on display
+// 129) Jio wants feedback of MCBs also via digital inputs. Should we do it or keep it in EMS scope along with Canopy door open logic? How to take feedback of MCBs also?
 //
 // 98) We need to change R59 & R60 to be 6.2k
 // The equation of op-amp is as follows:
@@ -204,6 +212,7 @@
 // 18) Check if enough space for bending of armoured cable
 // 19) For panel heat test, need to bring our own 100A * 240V source and load.
 // 20) Check a weird phenomenon we saw: Solar & Grid Power Supply MCB to controller was off as well as 48VDC MCB. Solar voltage 3 phase was present and no voltage on grid. The controller was still flickering. Why? Is there any capacitance causing current flow path?
+// 21) Change drawing of the Panel to indicate SPD fb to come from NC
 //
 //
 // Future scope:

@@ -584,4 +584,22 @@ struct DigInputs
     bool DC48Available;          
 };
 
+// Defines various abnormal conditions detected
+//
+// DEVNOTE: This is sent over modbus. Keep them in order.
+// Also, using one bool per alarm
+struct Alarms
+{
+    bool MainsRPhaseContactorStuckOpen;
+    bool MainsRPhaseContactorStuckClosed;
+    bool MainsYPhaseContactorStuckOpen;
+    bool MainsYPhaseContactorStuckClosed;
+    bool MainsBPhaseContactorStuckOpen;
+    bool MainsBPhaseContactorStuckClosed;
+    bool LoadOnSolarContactorStuckOpen;
+    bool LoadOnSolarContactorStuckClosed;
+    bool LoadOnGridContactorStuckOpen;
+    bool LoadOnGridContactorStuckClosed;
+};
+
 #endif

@@ -19,6 +19,9 @@ extern float ModbusDummyFloatRegister;
 #define PT_RATIO       3
 #define CT_PT_RATIO    4
 
+// None of these should be more than 60 as we allow user to read all
+// registers in a block at a time
+//
 #define InstPara_NewAll         58
 #define InstPara_THD            6
 #define InstPara_ENERGYIMPORT   7
@@ -30,6 +33,7 @@ extern float ModbusDummyFloatRegister;
 #define InstPara_YphaseRMS      11
 #define InstPara_BphaseRMS      11
 #define InstPara_Demand         18
+#define InstPara_LoadOnGridDisableSec 1
 #define InstPara_NewSolarAll    58
 #define InstPara_Solar_ENERGYIMPORT   7
 #define InstPara_Solar_ENERGYEXPORT   7
@@ -774,6 +778,8 @@ const struct ModBusParameter BlockAll[]=
  { (uint8_t *)&CopySetPara[PARA_STOP_BIT]               ,          DATA_TYPE_16,     1       ,       1      },
  { (uint8_t *)&CopySetPara[PARA_ENDIAN]                 ,          DATA_TYPE_16,     1       ,       1      },
 #endif
+ 
+ {(uint8_t *)&g_DisableLoadOnGridSeconds                ,          DATA_TYPE_32,     1       ,       1      },
 
  // SOLAR
  //
