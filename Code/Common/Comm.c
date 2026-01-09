@@ -826,7 +826,7 @@ void ModBusCommunication(void)
                     if (!(Start_Add >= mapEntries[i].address &&
                             Start_Add + NoOfBytes <= mapEntries[i].address + mapEntries[i].numEntries))
                     {
-                        break;
+                        continue;
                     }
 
                     found = true;
@@ -837,12 +837,12 @@ void ModBusCommunication(void)
                     uint8_t destBuffer[64] = {0};
 
                     uint8_t* source = mapEntries[i].buffer;
-                    for (int i = 0; i < mapEntries[i].numEntries; i++)
+                    for (int j = 0; j < mapEntries[i].numEntries; j++)
                     {
-                        if (source[i])
+                        if (source[j])
                         {
-                            int sourceByteIdx = i / 8;
-                            int sourceBitIdx = i - 8 * sourceByteIdx;
+                            int sourceByteIdx = j / 8;
+                            int sourceBitIdx = j - 8 * sourceByteIdx;
                             sourceBuffer[sourceByteIdx] |= (1 << sourceBitIdx);
                         }
                     }
