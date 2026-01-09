@@ -188,37 +188,39 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 
 
 
+#define         CALIBRATE_IN_START      1
+#define         CALIBRATE_IN_1          2
+#define         CALIBRATE_IN_2          3
+#define         CALIBRATE_IN_3          4
+#define         CALIBRATE_IN_4          5
+#define         CALIBRATE_IN_5          6
+#define         CALIBRATE_IN_6          7
+#define         CALIBRATE_IN_7          8
+#define         CALIBRATE_IN_8          9
 
-#define         CALIBRATE_DIS_H_VI      1
-#define         CALIBRATE_H_VI          2
-#define         CALIBRATE_DIS_H_PF      3
-#define         CALIBRATE_H_PF          4
+#define         CALIBRATE_OUT_1         10
+#define         CALIBRATE_OUT_2         11
+#define         CALIBRATE_OUT_3         12
+#define         CALIBRATE_OUT_4         13
+#define         CALIBRATE_OUT_5         14
 
-#define         CALIBRATE_DIS_M_VI      5
-#define         CALIBRATE_M_VI          6
-#define         CALIBRATE_DIS_M_PF      7
-#define         CALIBRATE_M_PF          8
+#define         CALIBRATE_VOL_CUR_START 15
+#define         CALIBRATE_DIS_H_VI      16
+#define         CALIBRATE_H_VI          17
+#define         CALIBRATE_DIS_H_PF      18
+#define         CALIBRATE_H_PF          19
 
-#define         CALIBRATE_DIS_L_VI      9
-#define         CALIBRATE_L_VI          10
-#define         CALIBRATE_DIS_L_PF      11
-#define         CALIBRATE_L_PF          12
+#define         CALIBRATE_DIS_M_VI      20
+#define         CALIBRATE_M_VI          21
+#define         CALIBRATE_DIS_M_PF      22
+#define         CALIBRATE_M_PF          23
 
-#define         CALIBRATE_IN_START      13
-#define         CALIBRATE_IN_1          14
-#define         CALIBRATE_IN_2          15
-#define         CALIBRATE_IN_3          16
-#define         CALIBRATE_IN_4          17
-#define         CALIBRATE_IN_5          18
-#define         CALIBRATE_IN_6          19
-#define         CALIBRATE_IN_7          20
-#define         CALIBRATE_IN_8          21
+#define         CALIBRATE_DIS_L_VI      24
+#define         CALIBRATE_L_VI          25
+#define         CALIBRATE_DIS_L_PF      26
+#define         CALIBRATE_L_PF          27
 
-#define         CALIBRATE_OUT_1         22
-#define         CALIBRATE_OUT_2         23
-#define         CALIBRATE_OUT_3         24
-#define         CALIBRATE_OUT_4         25
-#define         CALIBRATE_OUT_5         26
+#define         CALIBRATE_END           28
 
 // The ratio between CUR_HIGH_CAL_POINT/CUR_MID_CAL_POINT should be 5:1
 // The ratio between CUR_MID_CAL_POINT/CUR_LOW_CAL_POINT should be 10:1

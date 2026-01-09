@@ -3,7 +3,7 @@
 // 3 digit version number
 // Shown on display as X.YY
 //
-#define VERSION_NO  203
+#define VERSION_NO  207
 
 #define MODEL_COMM_PROCOM
 #define MODEL_DATA_SAVE  
@@ -167,6 +167,11 @@
 // 127) Check response type of Modbus Write Queries
 // 128) Do we need to show details of faults of the contactor on display
 // 129) Jio wants feedback of MCBs also via digital inputs. Should we do it or keep it in EMS scope along with Canopy door open logic? How to take feedback of MCBs also?
+// 130) We should send firmware version over Modbus
+// 131) Make a manual/datasheet (Similar to Ace/REX)
+// 132) IMPORTANT: In 230V power supply, our IC currently is max 700V drain mosfet. This needs to handle clamping voltage of MOV + inductor voltage. Should we try for 1500V?
+// Servo has a high voltage power supply available. Also, common mode surge noise has to be considered in power supply (230V and 48V. Note 48V is positively earthed)
+// 133) Check that 200mm * 250mm pcb will be able to be manufactured in the SMD room properly and in our shop floor
 //
 // 98) We need to change R59 & R60 to be 6.2k
 // The equation of op-amp is as follows:
@@ -213,7 +218,22 @@
 // 19) For panel heat test, need to bring our own 100A * 240V source and load.
 // 20) Check a weird phenomenon we saw: Solar & Grid Power Supply MCB to controller was off as well as 48VDC MCB. Solar voltage 3 phase was present and no voltage on grid. The controller was still flickering. Why? Is there any capacitance causing current flow path?
 // 21) Change drawing of the Panel to indicate SPD fb to come from NC
+// 22) Have to check agreement on pricing from contactor manufacturers/panel enclousre manufacturer as to frequency of change in pricing based on raw material escalation and appropriately specify the
+// same T&C to jio.
+// 23) Have to check filter used in panel as non-standard filter can make the panel non-IP55. Use an off the shelf plastic filters/louver as per BCH recommendation (Can buy separately as BCH will charge an overhead)
+// 24) Panel if kept in outdoor facing solar directly will cause heat-up. Need to put it in shade. Also assuming pole mounted and not wall mounted so heat transfer can happen from backside also. Gland plate will not be considered for heat transfer as it will have glands cutouts. Need to check current flowing through wires as the current flowing in wires can be major contributor for heat. Also need to check the upper temperature range for all components.
+// 25) Panel canopy can be extended on sides also in BCH as Jio wanted it
+// 26) BCH is saying that their wall mounted brackets are only 3mm and can handle 60-70kg. They don't have a type test report for it. But they can go for 4mm brackets (it will be expensive)
+// 27) The mounting plate is attached to back plate via screws that are welded on the panel enclosure. Make sure they can handle 30-40kg of components especially when vibrating during transportation
 //
+//
+// Panel ventilation:
+// 1) IEC 60890 seems to state that ventilation cutouts with filters impede air circulation so much that it's equivalent to no cutouts
+// 2) If Fan is to be put, it should be put on bottom sucking air in
+// 3) Air outlet cutout should be 1.1x of air inlet cutout
+// 4) Canopy is important otherwise temperature on top of the panel will be very high, just where SOCO will be placed
+// 5) Ambient temperature inside panel shouldn't cross 65 for wires
+// 6) Effect of temperature also should be considered in SOCO design
 //
 // Future scope:
 // 1) Give relay card channel to Jio with OMRON for v1.5 of the Panel

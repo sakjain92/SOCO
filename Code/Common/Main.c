@@ -547,7 +547,7 @@ void ProcessRelays()
                 else
                 {
                     pvsArray[i].isPrevContactorOn = pvsArray[i].shouldContactorBeOn;
-                    *pvsArray[i].stuckOpen = true;
+                    *pvsArray[i].stuckOpen = false;
                     *pvsArray[i].stuckClosed = false;
                 }
             }
@@ -556,7 +556,7 @@ void ProcessRelays()
         {
             pvsArray[i].ContactorChangeTimeLeft = MAX_CONTACTOR_CHANGE_LATENCY;
             pvsArray[i].isPrevContactorOn = pvsArray[i].shouldContactorBeOn;
-            *pvsArray[i].stuckOpen = true;
+            *pvsArray[i].stuckOpen = false;
             *pvsArray[i].stuckClosed = false;
         }
         else
@@ -691,10 +691,76 @@ void StartCalibration(void)
 
    if((SwPressed==KEY_DIR_CAL)&&(FlagDirectCalibration==0))
    {
-      SetDefaultCalCoeff();
-      DisplaySetHighPF();
-      FlagDirectCalibration=CALIBRATE_DIS_H_VI;
-    }
+      FlagDirectCalibration=CALIBRATE_IN_START;
+   }
+   if (FlagDirectCalibration >= CALIBRATE_IN_START &&
+        FlagDirectCalibration <= CALIBRATE_IN_8)
+   {
+       SwitchOffContactorRPhaseGridHealthy();
+       SwitchOffContactorYPhaseGridHealthy();
+       SwitchOffContactorBPhaseGridHealthy();
+       SwitchOffContactorLoadOnSolar();
+       SwitchOffContactorLoadOnGrid();
+
+       const bool* inputs[] = 
+       {
+           &g_DigInputs.MainsRPhaseContactorOn,
+           &g_DigInputs.MainsYPhaseContactorOn,
+           &g_DigInputs.MainsBPhaseContactorOn,
+           &g_DigInputs.LoadOnSolarContactorOn,
+           &g_DigInputs.LoadOnGridContactorOn,
+           &g_DigInputs.SPDFailed,
+           &g_DigInputs.DGOff,
+           &g_DigInputs.DC48Available
+       };
+       if (FlagDirectCalibration == CALIBRATE_IN_START)
+       {
+            for (uint8_t i = 0; i < ARRAY_SIZE(inputs); i++)
+            {
+                if (*inputs[i])
+                {
+                    DisplayImproperSettings();
+                }
+            }
+            FlagDirectCalibration = CALIBRATE_IN_1;
+       }
+
+       uint8_t idx = FlagDirectCalibration - CALIBRATE_IN_1;
+       DisplayInputX(idx + 1);
+       if (*inputs[idx])
+       {
+           FlagDirectCalibration++;
+       }
+   }
+   if (FlagDirectCalibration >= CALIBRATE_OUT_1 &&
+       FlagDirectCalibration <= CALIBRATE_OUT_5)
+   {
+       // UNDONE: This logic here might not be working
+       // Not able to test outputs properly
+       //
+       void (*outputs[])(void) = 
+       {
+           SwitchOnContactorRPhaseGridHealthy,
+           SwitchOnContactorYPhaseGridHealthy,
+           SwitchOnContactorBPhaseGridHealthy,
+           SwitchOnContactorLoadOnSolar,
+           SwitchOnContactorLoadOnGrid
+       };
+       uint8_t idx = FlagDirectCalibration - CALIBRATE_OUT_1;
+       DisplayOutputX(idx + 1);
+       outputs[idx]();
+       if (SwPressed==KEY_NEXT)
+       {
+           FlagDirectCalibration++;
+           if (FlagDirectCalibration == CALIBRATE_VOL_CUR_START)
+           {
+             SetDefaultCalCoeff();
+             DisplaySetHighPF();
+             FlagDirectCalibration=CALIBRATE_DIS_H_VI;  
+           }
+       }
+   }
+
    if((SwPressed==KEY_NEXT)&& (FlagDirectCalibration == CALIBRATE_DIS_H_VI))
    {
      DisplayCalHighVI();
@@ -967,77 +1033,23 @@ void StartCalibration(void)
      else
      {
         DirectCalibration();
-        FlagDirectCalibration = CALIBRATE_IN_START;
+        FlagDirectCalibration = CALIBRATE_END;
      }
    }
-   if (FlagDirectCalibration >= CALIBRATE_IN_START &&
-        FlagDirectCalibration <= CALIBRATE_IN_8)
-   {
-       SwitchOffContactorRPhaseGridHealthy();
-       SwitchOffContactorYPhaseGridHealthy();
-       SwitchOffContactorBPhaseGridHealthy();
-       SwitchOffContactorLoadOnSolar();
-       SwitchOffContactorLoadOnGrid();
-
-       const bool* inputs[] = 
-       {
-           &g_DigInputs.MainsRPhaseContactorOn,
-           &g_DigInputs.MainsYPhaseContactorOn,
-           &g_DigInputs.MainsBPhaseContactorOn,
-           &g_DigInputs.LoadOnSolarContactorOn,
-           &g_DigInputs.LoadOnGridContactorOn,
-           &g_DigInputs.SPDFailed,
-           &g_DigInputs.DGOff,
-           &g_DigInputs.DC48Available
-       };
-       if (FlagDirectCalibration == CALIBRATE_IN_START)
-       {
-            for (uint8_t i = 0; i < ARRAY_SIZE(inputs); i++)
-            {
-                if (*inputs[i])
-                {
-                    DisplayImproperSettings();
-                }
-            }
-            FlagDirectCalibration = CALIBRATE_IN_1;
-       }
-
-       uint8_t idx = FlagDirectCalibration - CALIBRATE_IN_1;
-       DisplayInputX(idx + 1);
-       if (*inputs[idx])
-       {
-           FlagDirectCalibration++;
-       }
-   }
-   if (FlagDirectCalibration >= CALIBRATE_OUT_1 &&
-       FlagDirectCalibration <= CALIBRATE_OUT_5)
-   {
-       // UNDONE: This logic here might not be working
-       // Not able to test outputs properly
-       //
-       void (*outputs[])(void) = 
-       {
-           SwitchOnContactorRPhaseGridHealthy,
-           SwitchOnContactorYPhaseGridHealthy,
-           SwitchOnContactorBPhaseGridHealthy,
-           SwitchOnContactorLoadOnSolar,
-           SwitchOnContactorLoadOnGrid
-       };
-       uint8_t idx = FlagDirectCalibration - CALIBRATE_OUT_1;
-       DisplayOutputX(idx + 1);
-       outputs[idx]();
-       if (SwPressed==KEY_NEXT)
-       {
-           FlagDirectCalibration++;
-       }
-   }
-   if (FlagDirectCalibration > CALIBRATE_OUT_5)
+   if (FlagDirectCalibration > CALIBRATE_END)
    {
      DisplayDoneCal();
      NVIC_SystemReset();
    }
    // UNDONE: Do a formal check of keys and also the 5V input incase
    // we add support for measuring 5V.
+   // UNDONE: We need to test RS485 also here or better if we make the
+   // testing automated over RS485 itself
+   // UNDONE: We haven't tested USB here
+   // Also, we haven't tested few peripherals such as 5V from 48V converted
+   // and 5V from combined power supply.
+   // We do use those inputs in our product but we aren't testing those in
+   // software
    //
 }
  
