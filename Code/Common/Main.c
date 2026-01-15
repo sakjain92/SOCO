@@ -607,8 +607,11 @@ void Process1SecOver(void)
     DisplayUpdate();
   }
   if(DisplayDebarCounter>0)DisplayDebarCounter--;
-  
-  if(ParaBlockIndex==0)CheckAutoScroll();
+ 
+  // Long press KEY_NEXT causes issue when inside calibration
+  // Also, it causes issue when we are editting settings
+  //
+  if(FlagDirectCalibration==0 && ParaBlockIndex==0)CheckAutoScroll();
 
   if (FlagDirectCalibration==0)ProcessRelays();
 }
@@ -691,8 +694,32 @@ void StartCalibration(void)
 
    if((SwPressed==KEY_DIR_CAL)&&(FlagDirectCalibration==0))
    {
-      FlagDirectCalibration=CALIBRATE_IN_START;
+      FlagDirectCalibration=CALIBRATE_OUT_1;
    }
+
+   if (FlagDirectCalibration >= CALIBRATE_OUT_1 &&
+       FlagDirectCalibration <= CALIBRATE_OUT_5)
+   {
+       // UNDONE: This logic here might not be working
+       // Not able to test outputs properly
+       //
+       void (*outputs[])(void) = 
+       {
+           SwitchOnContactorRPhaseGridHealthy,
+           SwitchOnContactorYPhaseGridHealthy,
+           SwitchOnContactorBPhaseGridHealthy,
+           SwitchOnContactorLoadOnSolar,
+           SwitchOnContactorLoadOnGrid
+       };
+       uint8_t idx = FlagDirectCalibration - CALIBRATE_OUT_1;
+       DisplayOutputX(idx + 1);
+       outputs[idx]();
+       if (SwPressed==KEY_NEXT)
+       {
+           FlagDirectCalibration++;
+       }
+   }
+
    if (FlagDirectCalibration >= CALIBRATE_IN_START &&
         FlagDirectCalibration <= CALIBRATE_IN_8)
    {
@@ -728,28 +755,6 @@ void StartCalibration(void)
        uint8_t idx = FlagDirectCalibration - CALIBRATE_IN_1;
        DisplayInputX(idx + 1);
        if (*inputs[idx])
-       {
-           FlagDirectCalibration++;
-       }
-   }
-   if (FlagDirectCalibration >= CALIBRATE_OUT_1 &&
-       FlagDirectCalibration <= CALIBRATE_OUT_5)
-   {
-       // UNDONE: This logic here might not be working
-       // Not able to test outputs properly
-       //
-       void (*outputs[])(void) = 
-       {
-           SwitchOnContactorRPhaseGridHealthy,
-           SwitchOnContactorYPhaseGridHealthy,
-           SwitchOnContactorBPhaseGridHealthy,
-           SwitchOnContactorLoadOnSolar,
-           SwitchOnContactorLoadOnGrid
-       };
-       uint8_t idx = FlagDirectCalibration - CALIBRATE_OUT_1;
-       DisplayOutputX(idx + 1);
-       outputs[idx]();
-       if (SwPressed==KEY_NEXT)
        {
            FlagDirectCalibration++;
            if (FlagDirectCalibration == CALIBRATE_VOL_CUR_START)

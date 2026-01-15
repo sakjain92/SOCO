@@ -187,22 +187,21 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 
 
 
+#define         CALIBRATE_OUT_1         1
+#define         CALIBRATE_OUT_2         2
+#define         CALIBRATE_OUT_3         3
+#define         CALIBRATE_OUT_4         4
+#define         CALIBRATE_OUT_5         5
 
-#define         CALIBRATE_IN_START      1
-#define         CALIBRATE_IN_1          2
-#define         CALIBRATE_IN_2          3
-#define         CALIBRATE_IN_3          4
-#define         CALIBRATE_IN_4          5
-#define         CALIBRATE_IN_5          6
-#define         CALIBRATE_IN_6          7
-#define         CALIBRATE_IN_7          8
-#define         CALIBRATE_IN_8          9
-
-#define         CALIBRATE_OUT_1         10
-#define         CALIBRATE_OUT_2         11
-#define         CALIBRATE_OUT_3         12
-#define         CALIBRATE_OUT_4         13
-#define         CALIBRATE_OUT_5         14
+#define         CALIBRATE_IN_START      6
+#define         CALIBRATE_IN_1          7
+#define         CALIBRATE_IN_2          8
+#define         CALIBRATE_IN_3          9
+#define         CALIBRATE_IN_4          10
+#define         CALIBRATE_IN_5          11
+#define         CALIBRATE_IN_6          12
+#define         CALIBRATE_IN_7          13
+#define         CALIBRATE_IN_8          14
 
 #define         CALIBRATE_VOL_CUR_START 15
 #define         CALIBRATE_DIS_H_VI      16
