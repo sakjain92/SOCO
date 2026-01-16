@@ -1041,7 +1041,7 @@ void StartCalibration(void)
         FlagDirectCalibration = CALIBRATE_END;
      }
    }
-   if (FlagDirectCalibration > CALIBRATE_END)
+   if (FlagDirectCalibration >= CALIBRATE_END)
    {
      DisplayDoneCal();
      NVIC_SystemReset();

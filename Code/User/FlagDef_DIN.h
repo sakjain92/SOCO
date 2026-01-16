@@ -129,10 +129,9 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 #define     METER_INIT_VALUE         135
 
 
-// Burden 20E
-#define   VOLTAGE_COEFF            5.63843E-03f
+#define   VOLTAGE_COEFF            4.6611E-03f
 #define   PH_VOLTAGE_COEFF         (VOLTAGE_COEFF)
-#define   FUND_VOL_COEFF           7.0480E-03f
+#define   FUND_VOL_COEFF           5.8264E-03f
 
 #define   CURRENT_COEFF            1.4566E-03f
 #define   NEU_CURRENT_COEFF        (CURRENT_COEFF)
@@ -140,9 +139,9 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 #define   FUND_CURRENT_COEFF       1.8207E-03f
 
 
-#define   POWER_COEFF_3P4W         8.2129E-06f
+#define   POWER_COEFF_3P4W         6.789342E-06f
 
-#define  FUND_POWER_COEFF          1.2833E-05f
+#define  FUND_POWER_COEFF          1.0608E-05f
 
 // Minimum voltage to maintain 0.5% accuracy is about 33VAC. Taking some margin
 // UNDONE: Figure out the correct minimum value for Currents as per metering
