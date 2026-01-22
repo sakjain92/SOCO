@@ -147,10 +147,17 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 // UNDONE: Figure out the correct minimum value for Currents as per metering
 // standard for 0.5 class metering.
 // Currently using ADC (not SDADC) gives a ~0.08 current without any input attached
+// UNDONE: Try and keep MIN_TOTAL_CUR_LIMIT as small as possible
+// Investigate why when current is < MIN_TOTAL_CUR_LIMIT then high fluctuations
+// are noticed (we start using Fundamental frequency based measurement only
+// but that should be more stable but it turns out to be lesser stable. 
+// Seems like a bug in implementation logic likely)
+// Also, at lower current we are getting higher error in power factor
+// (Need to investigate this. Is this cause of noise?)
 //
 #define   MIN_VOL_LIMIT            70.0f
 #define   MIN_VOL_LIMIT_PH_PH      (MIN_VOL_LIMIT * 1.732f)
-#define   MIN_TOTAL_CUR_LIMIT      1.5f
+#define   MIN_TOTAL_CUR_LIMIT      0.8f
 #define   MIN_NEU_CUR_LIMIT        0.1f
 #define   MIN_CURRENT_LIMIT        0.1f
 

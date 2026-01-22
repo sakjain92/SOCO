@@ -270,6 +270,9 @@ struct INST_PARA
   float     FunYSolarCurr;
   float     FunBSolarCurr;
   float     FunNSolarCurr;
+  float     FunPowerSolarR;
+  float     FunPowerSolarY;
+  float     FunPowerSolarB;
 };
 
 struct OFFSET

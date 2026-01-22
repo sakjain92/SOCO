@@ -61,6 +61,15 @@ void Metrology(void)
   
   TempFloat=MIN_CURRENT_LIMIT;
   
+  // UNDONE: If current is below certain threshold,
+  // we should use fundamental current and fundamental powers and 
+  // from there calculate power factor.
+  // Since fundamental power relies on fundamental voltage, should we switch
+  // to fundamental voltage also
+  // UNDONE: Also, we need to measure frequency of solar & grid and use that for
+  // controlling sampling frequency which is needed for fundamental
+  // This is important else we are assuming 50Hz frequency constant
+  //
   if(InstantPara.CurrentR<MIN_TOTAL_CUR_LIMIT)InstantPara.CurrentR=InstantPara.FunRCurr;
   if(InstantPara.CurrentR<TempFloat)
   {
@@ -260,12 +269,17 @@ void Metrology(void)
   
 // Total Power  
   InstantPara.TotalPowerR=POWER_COEFF_3P4W*IntDataSave.RPhasePower;
-  if(InstantPara.CurrentR==0)InstantPara.TotalPowerR=0; // Starting 
+  if(InstantPara.CurrentR<MIN_TOTAL_CUR_LIMIT)InstantPara.TotalPowerR=InstantPara.FunPowerR;
+  if(InstantPara.CurrentR==0)InstantPara.TotalPowerR=0; // Starting
+
   InstantPara.TotalPowerY=POWER_COEFF_3P4W*IntDataSave.YPhasePower;
+  if(InstantPara.CurrentY<MIN_TOTAL_CUR_LIMIT)InstantPara.TotalPowerY=InstantPara.FunPowerY;
   if(InstantPara.CurrentY==0)InstantPara.TotalPowerY=0; // Starting 
  
   InstantPara.TotalPowerB=POWER_COEFF_3P4W*IntDataSave.BPhasePower;
-  if(InstantPara.CurrentB==0)InstantPara.TotalPowerB=0; // Starting 
+  if(InstantPara.CurrentB<MIN_TOTAL_CUR_LIMIT)InstantPara.TotalPowerB=InstantPara.FunPowerB;
+  if(InstantPara.CurrentB==0)InstantPara.TotalPowerB=0; // Starting
+
   InstantPara.SumTotalPower=(InstantPara.TotalPowerR+InstantPara.TotalPowerY+InstantPara.TotalPowerB);
 
   InstantPara.TotalReactPower=InstantPara.ReactPowerR+InstantPara.ReactPowerY+InstantPara.ReactPowerB; 
@@ -346,10 +360,13 @@ void Metrology(void)
 
   // Solar
   InstantPara.TotalPowerRSolar=POWER_COEFF_3P4W*IntDataSave.RSolarPhasePower;
+  if(InstantPara.CurrentRSolar<MIN_TOTAL_CUR_LIMIT)InstantPara.TotalPowerRSolar=InstantPara.FunPowerSolarR;
   if(InstantPara.CurrentRSolar==0)InstantPara.TotalPowerRSolar=0; // Starting 
   InstantPara.TotalPowerYSolar=POWER_COEFF_3P4W*IntDataSave.YSolarPhasePower;
+  if(InstantPara.CurrentYSolar<MIN_TOTAL_CUR_LIMIT)InstantPara.TotalPowerYSolar=InstantPara.FunPowerSolarY;
   if(InstantPara.CurrentYSolar==0)InstantPara.TotalPowerYSolar=0; // Starting 
   InstantPara.TotalPowerBSolar=POWER_COEFF_3P4W*IntDataSave.BSolarPhasePower;
+  if(InstantPara.CurrentBSolar<MIN_TOTAL_CUR_LIMIT)InstantPara.TotalPowerBSolar=InstantPara.FunPowerSolarB;
   if(InstantPara.CurrentBSolar==0)InstantPara.TotalPowerBSolar=0; // Starting 
   InstantPara.SumTotalPowerSolar=(InstantPara.TotalPowerRSolar+InstantPara.TotalPowerYSolar+InstantPara.TotalPowerBSolar);
 
@@ -697,7 +714,7 @@ void CalculateHarmonicComponents(void)
   float TempRVr=0,TempYVr=0,TempBVr=0,TempNVr=0,TempNW=0;
   float TempRSolarCur=0,TempYSolarCur=0,TempBSolarCur=0,TempNSolarCur=0;
   float TempRSolarVr=0,TempYSolarVr=0,TempBSolarVr=0;
-
+  float TempRSolarW=0,TempYSolarW=0,TempBSolarW=0;
 
   for(i=0;i<50;i++)
   {
@@ -747,6 +764,15 @@ void CalculateHarmonicComponents(void)
       TempNSolarCur +=((FftSampleData.FFT_NeuSolarCurSinSave[i]*FftSampleData.FFT_NeuSolarCurSinSave[i])+
                  (FftSampleData.FFT_NeuSolarCurCosSave[i]*FftSampleData.FFT_NeuSolarCurCosSave[i]));
 
+      TempRSolarW+=((FftSampleData.FFT_RSolarVolSinSave[i]*FftSampleData.FFT_RSolarCurSinSave[i])+
+                 (FftSampleData.FFT_RSolarVolCosSave[i]*FftSampleData.FFT_RSolarCurCosSave[i]));
+      
+      TempYSolarW+=((FftSampleData.FFT_YSolarVolSinSave[i]*FftSampleData.FFT_YSolarCurSinSave[i])+
+                 (FftSampleData.FFT_YSolarVolCosSave[i]*FftSampleData.FFT_YSolarCurCosSave[i]));
+      
+      TempBSolarW+=((FftSampleData.FFT_BSolarVolSinSave[i]*FftSampleData.FFT_BSolarCurSinSave[i])+
+                 (FftSampleData.FFT_BSolarVolCosSave[i]*FftSampleData.FFT_BSolarCurCosSave[i]));
+
       TempRSolarVr+=((FftSampleData.FFT_RSolarVolSinSave[i]*FftSampleData.FFT_RSolarCurCosSave[i])-
                  (FftSampleData.FFT_RSolarVolCosSave[i]*FftSampleData.FFT_RSolarCurSinSave[i]));
       TempYSolarVr+=((FftSampleData.FFT_YSolarVolSinSave[i]*FftSampleData.FFT_YSolarCurCosSave[i])-
@@ -781,6 +807,9 @@ void CalculateHarmonicComponents(void)
   InstantPara.FunYSolarCurr=FUND_CURRENT_COEFF*sqrt(TempYSolarCur/50);
   InstantPara.FunBSolarCurr=FUND_CURRENT_COEFF*sqrt(TempBSolarCur/50);
   InstantPara.FunNSolarCurr=FUND_CURRENT_COEFF*sqrt(TempNSolarCur/50);
+  InstantPara.FunPowerSolarR=FUND_POWER_COEFF*TempRSolarW/50;
+  InstantPara.FunPowerSolarY=FUND_POWER_COEFF*TempYSolarW/50;
+  InstantPara.FunPowerSolarB=FUND_POWER_COEFF*TempBSolarW/50;
   InstantPara.ReactPowerRSolar=-FUND_POWER_COEFF*TempRSolarVr/50;
   InstantPara.ReactPowerYSolar=-FUND_POWER_COEFF*TempYSolarVr/50;
   InstantPara.ReactPowerBSolar=-FUND_POWER_COEFF*TempBSolarVr/50;

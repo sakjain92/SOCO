@@ -1044,8 +1044,8 @@ void StartCalibration(void)
    if (FlagDirectCalibration >= CALIBRATE_END)
    {
      DisplayDoneCal();
-     NVIC_SystemReset();
    }
+
    // UNDONE: Do a formal check of keys and also the 5V input incase
    // we add support for measuring 5V.
    // UNDONE: We need to test RS485 also here or better if we make the

@@ -59,7 +59,7 @@
 // 48VDC and Solar input is enough since the NC contacts of relays ensure that Solar input
 // (From K4) are always available when either Mains or Solar is available. Just that without
 // having Mains input, we wouldn't be able protect contactors from under voltage on Mains when
-// 48VDC is not available.
+// 48VDC is not available (Have to add software logic for this).
 // 37) Add vishay wirewound resistors on power supply (10KV protected) and 320V MOV. Replace
 // C14 on bottom PCB with 47uF/450V to make it properly surge protected.
 // 38) Remove D3, D4 (not D5) from circuit to save space and ensure 48VDC is always connected
@@ -75,6 +75,7 @@
 // 45) The capacitor on opto-coupler to be changed as re reduced resistor values so increase capacitor values (Circuit was copied from elsewhere)
 // 46) Use one of the digital inputs to check for presence of 48V. Also, export that over modbus. The resistor values (30K + 4.7k) on optocoupler indicates ~1mA current at 40V input. We can't go below this (opto-coupler datasheets starts at 1mA). But we can add TVS in parallel to the capacitor along with cut beneath the opto-coupler
 // 47) (IMPORTANT)We should move to using SDADC if possible as it has 16 bits and also it has programmable gain so we can keep the actual input voltage low coming on the pin low. Use single-ended measurements (We can use maximum of 11 double ended SDADC which leaves us with 1 sample.. Maybe measurement of B phase of solar for this can be done via ADC?)
+// Also since we have programmable gain, in lower current measurements, we can use higher gain to get better accuracy
 // 48) Four quadrant net metering required
 // 49) Get panel and controller tested in labs
 // 50) Add cuts in the terminal pins where high voltage is coming. Probably should still use SDADC in single ended mode for current as it needs more accuracy at lower ranges
@@ -171,7 +172,7 @@
 // 131) Make a manual/datasheet (Similar to Ace/REX)
 // 132) IMPORTANT: In 230V power supply, our IC currently is max 700V drain mosfet. This needs to handle clamping voltage of MOV + inductor voltage. Should we try for 1500V?
 // Servo has a high voltage power supply available. Also, common mode surge noise has to be considered in power supply (230V and 48V. Note 48V is positively earthed)
-// 133) Check that 200mm * 250mm pcb will be able to be manufactured in the SMD room properly and in our shop floor
+// 133) Check that 200mm * 250mm pcb will be able to be manufactured in the SMD room properly and in our shop floor (Done)
 //
 // 98) We need to change R59 & R60 to be 6.2k
 // The equation of op-amp is as follows:
@@ -197,6 +198,14 @@
 // 206) Do we need to add 100ohm resistor in Neutral or 48V- in power supply also
 // 207) In current section & voltage section, do we need a differential capacitor (between both input lines?)
 // 208) Check maximum and minimum current measurable. Maximum current is impacted by BAV99 maximum.
+// 209) One of the space relays will be used for controlling FAN (when temperature rises above 45C or 50C we will start Fan. NC of relay to be used).
+// This is because we want to limit the life of the Fan.
+// 210) BCH will provide load bearing certification for their mounting brackets.
+// 211) We should get the panel checked by BCH. Also ask their advice on packagain/transportation of it.
+// 212) We need to check if the AC fans can handle the 300V at remote sites + surges (Do we want to give fan failure protection also like in TMTL?). Also, SOCO should have temperature
+// measurement circuit (Do we use STM32F373 temp measurement or external IC like in IPR5)
+// 213) We should add under voltagr and over voltagr protection of contactors also (If there is excessive voltages or under voltages, switch off the contactors)
+// 214) Should we remove op-amp in voltage section also?
 //
 // NOTES:
 // 1) For Apparent power, we are using RMS (IEC 60038) instead of (IEC 61000-4-7) where we just measure first harmonics as we need to match energy with utility meter (and SMPS will have noise)
@@ -206,7 +215,7 @@
 //
 //
 // PANEL:
-// 1) Color code external CTs and without sticker (There should be sticker of R/Y/B Grid/Solar on the CT also)
+// 1) Color code external CTs and without sticker (There should be sticker of R/Y/B Grid/Solar P1/P2 on the CT also)
 // 2) Calibration of polarity of CTs and recheck via self test (RS485) of polarity of CTs in Panel division
 // 3) Check rubber gasket type to be used for IP65 protection (THere is a cut in the gasket). Get salt spray for 1000 hours for the panel
 // 4) Maintiain spacing around wiring and contactor for heat dissipiation. Get a temperature test done of panel to see maximum temp on contactor (to be below 10)
@@ -218,33 +227,43 @@
 // 9) We can potentially remove 2 MCB from panel to save cost. Also, do they need to be 6A or can they be lower rating.
 // 10) We can connect SPD remote indication & door lock indication to EMS box instead of our controller (saves 1 input + 1 output relay). Also, use 24VDC from output of EMS for running all PFCs instead of 48V as the 24V will be isolated and safer
 // 11) Is Panel door also need to be Earth? No components on it.
-// 12) Have to check if 25mm armoured cable can bend to go to terminal in panel (Get 25mm alumnium for testing)
+// 12) Have to check if 25mm armoured cable can bend to go to terminal in panel (Get 25mm alumnium for testing). Can check with panel already installed at site.
 // 13) We also use ring type thimble. Should be okay but Jio specified only pin & boot type. Maybe that's for control wiring.
-// 14) Canopy might need to be extended on all sides to protect from rain as per Jio's requirements
+// 14) Canopy might need to be extended on all sides to protect from rain as per Jio's requirements (About 40mm air gap required between canopy and panel top)
 // 15) Wooden packing is essential for avoiding transportation as high vibration
-// 16) EP Sheet required inside the panel to maintain tight contact between the panel door and contactors (Check other components also)
+// 16) EP Sheet required inside the panel to maintain tight contact between the panel door and contactors (Check other components also) during transportation
 // 17) Mounting screws for mounting plate needs to be screwed through the back sheet and not welded for more strength. 6 screws is a good idea due to high weight of the mounting plate.
 // Vibration testing is required
 // 18) Check if enough space for bending of armoured cable
 // 19) For panel heat test, need to bring our own 100A * 240V source and load.
-// 20) Check a weird phenomenon we saw: Solar & Grid Power Supply MCB to controller was off as well as 48VDC MCB. Solar voltage 3 phase was present and no voltage on grid. The controller was still flickering. Why? Is there any capacitance causing current flow path?
+// 20) Check a weird phenomenon we saw: Solar & Grid Power Supply MCB to controller was off as well as 48VDC MCB. Solar voltage 3 phase was present and no voltage on grid. The controller was still flickering. Why? Is there any capacitance causing current flow path? (This was an issue in SOCO power supply design)
 // 21) Change drawing of the Panel to indicate SPD fb to come from NC
 // 22) Have to check agreement on pricing from contactor manufacturers/panel enclousre manufacturer as to frequency of change in pricing based on raw material escalation and appropriately specify the
 // same T&C to jio.
-// 23) Have to check filter used in panel as non-standard filter can make the panel non-IP55. Use an off the shelf plastic filters/louver as per BCH recommendation (Can buy separately as BCH will charge an overhead)
+// 23) Have to check filter used in panel as non-standard filter can make the panel non-IP55. Use an off the shelf plastic filters/louver as per BCH recommendation (Can buy separately as BCH will charge an overhead). Can buy fan also separately to reduce cost (But if it's under BCH, warranty dealing will be simpler)
 // 24) Panel if kept in outdoor facing solar directly will cause heat-up. Need to put it in shade. Also assuming pole mounted and not wall mounted so heat transfer can happen from backside also. Gland plate will not be considered for heat transfer as it will have glands cutouts. Need to check current flowing through wires as the current flowing in wires can be major contributor for heat. Also need to check the upper temperature range for all components.
 // 25) Panel canopy can be extended on sides also in BCH as Jio wanted it
 // 26) BCH is saying that their wall mounted brackets are only 3mm and can handle 60-70kg. They don't have a type test report for it. But they can go for 4mm brackets (it will be expensive)
 // 27) The mounting plate is attached to back plate via screws that are welded on the panel enclosure. Make sure they can handle 30-40kg of components especially when vibrating during transportation
 // 28) Panel door open switch required in panel
+// 29) Ask BCH to have a look at our panel and suggests improvements based on their experience to make a good quality product. Maybe they can help with Fire Engine also.
+// 30) Instead of a padlock provision, we will provide option of key lock to Jio if required (Maybe pad lock provision is required by Jio?)
+// 31) Canopy will cover all 4 sides with minimum of 50mm air gap between canopy and panel top
+// 32) Canopy color will be white (RAL-9003) to reduce temperature. BCH to confirm there will be no discoloration and no dust coloration over period of time (Dust will always settle anyways)
+// 33) Door limit switch will be there
+// 34) Possible optimizations: 1) Use 1.6mm Gland Plate instead of 2mm gland plate (no need to add a new gland plate) 2) Reduce depth from 220mm (have to do heat calculations again. But I think the filter size if big enough that reduction is not possible) 3) Reduce Width from 700mm to 665mm (Mounting plate will be used less. BCH is saying they are buying custom sheet so not much effect)
+// 35) Why SOCO is on right side in panel? Shouldn't it be on left side and EMS box on right side? This will reduce control wiring (But does having SOCO away from contactors make it more resilient?:)
+// 36) For packing of panel, we should use wooden packing with plastic cover to protect from dust/water. Also the wooden packing to be such that no movement of panel possible
 //
 // Panel ventilation:
 // 1) IEC 60890 seems to state that ventilation cutouts with filters impede air circulation so much that it's equivalent to no cutouts
 // 2) If Fan is to be put, it should be put on bottom sucking air in
-// 3) Air outlet cutout should be 1.1x of air inlet cutout
+// 3) Air outlet cutout should be 1.1x of air inlet cutout (Or treat the cutouts as 0.9x)
 // 4) Canopy is important otherwise temperature on top of the panel will be very high, just where SOCO will be placed
 // 5) Ambient temperature inside panel shouldn't cross 65 for wires
 // 6) Effect of temperature also should be considered in SOCO design
+// 7) We might have to use a Fan to decrease temperature
+// 8) Standard says best option is fan attached at bottom flowing air into the panel from bottom and exit from the top. During panel construction, we will have to properly ensure poper direction of fans
 //
 // Future scope:
 // 1) Give relay card channel to Jio with OMRON for v1.5 of the Panel
