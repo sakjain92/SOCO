@@ -827,13 +827,11 @@ void DisplayImproperSettings(void)
 
 }
 
-// UNDONE: This doesn't show up on the screen due to while (1)
-//
 void DisplayDoneCal(void)
 {
   for (uint8_t i=0;i<16;i++)BufferToDisplay[i]=0;
   DisplayString(ROW_TOP,DIGIT_6,(uint8_t *)DIS_CAL_DONE,0);
-  while(1)RESET_WATCH_DOG;    
+  UpdateDisplay=1;
 }
 
 #pragma optimize=none

@@ -129,10 +129,10 @@
 // 96) We can use SDADC in single-ended mode to read many voltages (probably can read all voltages/currents in single ended mode but have to check the timing)
 // 97) Add separate Vref for currents also
 // 98) Add TVS near input of CTs. Also, make sure CTs can never be open. Also, all filtering of inputs should be wrt to Chassis right and not MCU ground? Also, add ferrite beads with surge protection on current and voltage protection
-// 99) Can modify the product to just run on 48VDC (Reduce MOV voltage and protect the circuit much better)
+// 99) Can modify the product to just run on 48VDC (Reduce MOV voltage and protect the circuit much better): No, Jio want 240V power supply also
 // 100) We need to protect the power supply for Common mode surge (Route surge to earth/chassis)
-// 101) Check MOV in RS485 section is 175V and not 305V
-// 102) Can change MOV in DC 48V power supply to be 175V MOV (In ECON, also the BTS from 48V can be changed to 175V MOV instead of 320V MOV)
+// 101) Check MOV in RS485 section is 175V and not 305V (Also if RS485 is completely internal in the panel, we can reduce it's protection. Is RS485 just for connecting SOCO to EMS?)
+// 102) Can change MOV in DC 48V power supply to be 175V (or 60V is better) MOV (In ECON, also the BTS from 48V can be changed to 175V MOV instead of 320V MOV)
 // 103) For better MCU pin protection in current section, if 10K input impedence is not possible, can use a 1K ferrite bead for noise suppression
 // 104) Should add some provision over RS485 to reset energy and/or display (special password for our testing team?)
 // 105) Two power wires coming from bottom PCB to top PCB should have a diode to avoid mistake in production where the wires are reversed
@@ -166,7 +166,7 @@
 // 126) Remove support for little endian maybe since we don't support write holding registers in little endian (or add support for it)
 // 127) Check response type of Modbus Write Queries
 // 128) Do we need to show details of faults of the contactor on display
-// 129) Jio wants feedback of MCBs also via digital inputs. Should we do it or keep it in EMS scope along with Canopy door open logic? How to take feedback of MCBs also?
+// 129) Jio wants feedback of MCBs also via digital inputs. Should we do it or keep it in EMS scope along with Canopy door open logic? How to take feedback of MCBs also? Total DI: 5 from contactors, 2 from MCBs/Isolators, & DG Running. EMS to take digital inputs for canopy open and SPD to be taken by EMS (They can also take MCB/Isolator inputs)
 // 130) We should send firmware version over Modbus
 // 131) Make a manual/datasheet (Similar to Ace/REX)
 // 132) IMPORTANT: In 230V power supply, our IC currently is max 700V drain mosfet. This needs to handle clamping voltage of MOV + inductor voltage. Should we try for 1500V?
@@ -185,7 +185,18 @@
 // Vb = Bias voltage = 1.35V
 // For equation to make sense, it's important that Rn = Rp && Rf = Rb. But note that for this we also need to factor in tolerance of resistors and TCR if we want no fluctuation.
 // (I don't think there is any other way out to match the accuracy). We probably need 0.25% or 0.1% resistors for 0.5% class here for both MELF and 6.2k resistors.
+// We should get type test for metering standards also
 //
+// 200) How to protect DI and current measurement section from common mode surges?
+// 201) Add frequency measurement of solar & grid in hardware else do software zero voltage crossing detection
+// 202) Need to measure differential voltage/current using SDADC (keep the two wires as close to each other as possible in input and near microcontroller). Need to reduce power factor error
+// and current fluctuations at low currents. Keep current & voltage & power sections away from each other.
+// 203) Check if op-amp can survive surges in voltage section or should we just use SDADC in voltage section also without op-amp? For current section, LM324 doesn't make sense. Use SDADC directly.
+// 204) Use 60V MOV in DI & 48V power supply
+// 205) Use stackFET in power supplly for protection upto 1500V (Clamping voltage of 320V MOV can go upto 900V)
+// 206) Do we need to add 100ohm resistor in Neutral or 48V- in power supply also
+// 207) In current section & voltage section, do we need a differential capacitor (between both input lines?)
+// 208) Check maximum and minimum current measurable. Maximum current is impacted by BAV99 maximum.
 //
 // NOTES:
 // 1) For Apparent power, we are using RMS (IEC 60038) instead of (IEC 61000-4-7) where we just measure first harmonics as we need to match energy with utility meter (and SMPS will have noise)
@@ -225,7 +236,7 @@
 // 25) Panel canopy can be extended on sides also in BCH as Jio wanted it
 // 26) BCH is saying that their wall mounted brackets are only 3mm and can handle 60-70kg. They don't have a type test report for it. But they can go for 4mm brackets (it will be expensive)
 // 27) The mounting plate is attached to back plate via screws that are welded on the panel enclosure. Make sure they can handle 30-40kg of components especially when vibrating during transportation
-//
+// 28) Panel door open switch required in panel
 //
 // Panel ventilation:
 // 1) IEC 60890 seems to state that ventilation cutouts with filters impede air circulation so much that it's equivalent to no cutouts

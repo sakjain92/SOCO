@@ -127,8 +127,8 @@ Ret: None
 */
 void DirectCalibration(void)
 {
-float TempFloat;
-  
+ float TempFloat;
+
  if(FlagDirectCalibration==CALIBRATE_L_PF)
  {
    // UNDONE: Should the guard rails be on average or instant parameters
@@ -176,7 +176,10 @@ float TempFloat;
 
       
    }
-   else DisplayImproperSettings();
+   else 
+   {
+       DisplayImproperSettings();
+   } 
  } 
   
  if(FlagDirectCalibration==CALIBRATE_L_VI)
@@ -213,7 +216,10 @@ float TempFloat;
       CalBuffer.IB_SOLAR_LOW_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_LOW*(float)CalBuffer.IB_SOLAR_LOW_GAIN)/CalCurBSolar);
       
    }
-   else DisplayImproperSettings();
+   else
+   {
+       DisplayImproperSettings();
+   } 
  } 
   
  else if(FlagDirectCalibration==CALIBRATE_M_PF)
@@ -259,7 +265,10 @@ float TempFloat;
       TempFloat=(CalPowBSolar-CAL_PF_POWER_SETTING_MID)/CAL_PF_POWER_SETTING_MID;
       CalBuffer.IB_SOLAR_MID_PH_ERROR=TempFloat-0.001;
    }
-   else DisplayImproperSettings();
+   else
+   {
+       DisplayImproperSettings();
+   } 
  } 
   
  else if(FlagDirectCalibration==CALIBRATE_M_VI)
@@ -295,7 +304,10 @@ float TempFloat;
       CalBuffer.IY_SOLAR_MID_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_MID*(float)CalBuffer.IY_SOLAR_MID_GAIN)/CalCurYSolar);
       CalBuffer.IB_SOLAR_MID_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_MID*(float)CalBuffer.IB_SOLAR_MID_GAIN)/CalCurBSolar);
    }
-   else DisplayImproperSettings();
+   else
+   {
+       DisplayImproperSettings();
+   } 
  } 
    
  else if(FlagDirectCalibration==CALIBRATE_H_PF)
@@ -347,7 +359,10 @@ float TempFloat;
       TempFloat=(CalPowBSolar-CAL_PF_POWER_SETTING_HIGH)/CAL_PF_POWER_SETTING_HIGH;
       CalBuffer.IB_SOLAR_HIGH_PH_ERROR=TempFloat-0.001;
    }
-   else DisplayImproperSettings();
+   else
+   {
+       DisplayImproperSettings();
+   } 
  }
  
   else if(FlagDirectCalibration==CALIBRATE_H_VI)
@@ -395,8 +410,10 @@ float TempFloat;
       CalBuffer.IY_SOLAR_HIGH_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_HIGH*(float)CalBuffer.IY_SOLAR_HIGH_GAIN)/CalCurYSolar);
       CalBuffer.IB_SOLAR_HIGH_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_HIGH*(float)CalBuffer.IB_SOLAR_HIGH_GAIN)/CalCurBSolar);
    }
-      
-   else DisplayImproperSettings();
+   else
+   {
+       DisplayImproperSettings();
+   } 
   }
   
 
