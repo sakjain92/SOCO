@@ -244,6 +244,9 @@
 // 226) Make sure that non-powder coating area doesn't rust in body
 // 227) Make sure that even if screws get rusted, no track is impacted
 // 228) Check if supports needed in between PCB
+// 229) Should we add RC filter on digitial input section also near the MCU pin (incase the external input is oscillating)? Might not be needed as we already have RC filter before optocoupler
+// 230) Remove single ended current measuring circuit & corresponding all zero ohm resistors. Hopefully this will make layout easier. Make sure voltage pins on MCU and current pins on MCU are away
+// from each other if possible
 //
 // NOTES:
 // 1) For Apparent power, we are using RMS (IEC 60038) instead of (IEC 61000-4-7) where we just measure first harmonics as we need to match energy with utility meter (and SMPS will have noise)

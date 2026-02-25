@@ -138,13 +138,13 @@ static void InitPort(void)
 { 
   // PA0: MOSI: Output, Push Pull
   // PA1: SCK: Output, Push Pull
-  // PA2: OE: Output, Push Pull, Pull Up
-  // PA3: RCLK: Output, Push Pull
-  // PA4: IYP_P: Analog (Channel 4)
-  // PA5: IBP_M: Analog (Channel 5)
-  // PA6: IRP_M: Analog (Channel 6)
-  // PA7: IYP_M: Analog (Channel 7)
-  // PA8: SW2: Input, Pull up
+  // PA2: OE: Output, Push Pull
+  // PA3: FAN_1_Current: Analog (Channel 3)
+  // PA4: DC_PWR_IN: Analog (Channel 4)
+  // PA5: AC_PWR_IN: Analog (Channel 5)
+  // PA6: FAN_2_Current: Analog (Channel 6)
+  // PA7: A_TEMP: Analog (Channel 7)
+  // PA8: PFC4: Input, No pull up/pull down
   // PA9: SCL: Alternate, Open Drain, Pull Up, Alternate Function: 4 (I2C2_SCL)
   // P10: SDA: Alternate, Open Drain, Pull Up, Alternate Function: 4 (I2C2_SDA)
   // PA11: - (Unused USB1)
@@ -152,101 +152,117 @@ static void InitPort(void)
   // PA13: SWDIO: Alternate, Push Pull, High Speed, Pull Up, Alternate Function 0 (JTAG)
   // PA14: SWCLK: Alternate, Push Pull, High Speed, Pull Down, Alternate Function 0 (JTAG)
   // PA15: DIS1: Output, Push Pull
-  GPIOA->MODER=0x6828FF55;
+  //
+  GPIOA->MODER=0x6828FFD5;
   GPIOA->OTYPER=0x600;
   GPIOA->OSPEEDR=0X3C000000;
-  GPIOA->PUPDR=0X24150010;
+  GPIOA->PUPDR=0X24140000;
   GPIOA->AFR[0]=0;
   GPIOA->AFR[1]=0x440;
 
-  // PB0: IBP_P: Analog (Channel 8)
-  // PB1: IRP_P: Analog (Channel 9)
-  // PB2: -
+  // PB0: MVYP_P: SDADC1_6P
+  // PB1: MVYP_M: SDADC1_6M
+  // PB2: PVYP_P: SDADC1_4P
   // PB3: RS4885_TX: Alternate, Medium Speed, Alternate Function 7 (UART2_TX)
   // PB4: RS485_RX: Alternate, Medimum Speed, Alternate Function 7 (UART2_RX)
   // PB5: RS485_EN: Output, Push Pull
   // PB6: DIS3: Output, Push Pull
   // PB7: DIS4: Output, Push Pull
-  // PB8: LED8: Output, Push Pull, Pull up
-  // PB9: LED7: Output, Push Pull, Pull Up
-  // PB10-PB15:-
-  GPIOB->MODER=0x5568F;
-  GPIOB->OTYPER=0x140;
-  GPIOB->OSPEEDR=0;
-  GPIOB->PUPDR=0x50000;
+  // PB8: SW2: Input, No pull up/pull down
+  // PB9: SW1: Input, No pull up/pull down
+  // PB10: IRP_M-: SDADC2_0M
+  // PB11-PB13:-
+  // PB14: IYP_M+: SDADC3_8P
+  // PB15: IYP_M-: SDADC3_8M
+  //
+  GPIOB->MODER=0xF03056BF;
+  GPIOB->OTYPER=0x0;
+  GPIOB->OSPEEDR=0x140;
+  GPIOB->PUPDR=0x0;
   GPIOB->AFR[0]=0x77000;
   GPIOB->AFR[1]=0;
 
-  // PC0: MVRP: Analog (Channel 10)
-  // PC1: MVYP: Analog (Channel 11)
-  // PC2: MVBP: Analog (Channel 12)
-  // PC3: PVRP: Analog (Channel 13)
-  // PC4: PVYP: Analog (Channel 14)
-  // PC5: PVBP: Analog (Channel 15)
-  // PC6-PC8:-
+  // PC0-PC5: -
+  // PC6: PFC1: Input, No pull up/pull down
+  // PC7: PFC2: Input, No pull up/pull down
+  // PC8: PFC3: Input, No pull up/pull down
   // PC9: PROTECT: Input, Pull Down
   // PC10: - (Unused Calibrator TX)
   // PC11: - (Unused Calibrator RX)
   // PC12: DIS2: Output, Push Pull
-  // PC13-PC15:-
-  GPIOC->MODER=0X1000FFF;
+  // PC13: LED2: Output, Push Pull
+  // PC14-PC15:-
+  //
+  GPIOC->MODER=0X05000000;
   GPIOC->OTYPER=0;
   GPIOC->OSPEEDR=0;
   GPIOC->PUPDR=0x80000;
   GPIOC->AFR[0]=0;
   GPIOC->AFR[1]=0;
 
-  // PD0: LED1: Output, Push Pull, Pull up
-  // PD1; LED2: Output, Push Pull, Pull up
-  // PD2: LED3: Output, Push Pull, Pull up
-  // PD3: LED4: Output, Push Pull, Pull up
-  // PD4: LED5: Output, Push Pull, Pull up
-  // PD5: LED6: Output, Push Pull, Pull up
-  // PD6-PD7: -
-  // PD8: RL1: Output, Push Pull
-  // PD9: RL2: Output, Push Pull
-  // PD10: RL5: Output, Push Pull
-  // PD11: RL6: Output, Push Pull
-  // PD12-PD15:-
+  // PD0: PFC6: Input, No pull up/pull down
+  // PD1: PFC7: Input, No pull up/pull down
+  // PD2: PFC8: Input, No pull up/pull down
+  // PD3: RL6: Output, Push-pull
+  // PD4: RL3: Output, Push-pull
+  // PD5: RL5: Output, Push-pull
+  // PD6: RL1: Output, Push-pull
+  // PD7: RL2: Output, Push-pull
+  // PD8: IBP_M+: SDADC3_6P
+  // PD9: IBP_M-: SDADC3_6M
+  // PD10: IRP_P+: SDADC3_4P
+  // PD11: IRP_P-: SDADC3_4M
+  // PD12: IYP_P+: SDADC3_2P
+  // PD13: IYP_P-: SDADC3_2M
+  // PD14: IBP_P+: SDADC3_0P
+  // PD15: IBP_P-: SDADC3_0M
   //
-  GPIOD->MODER=0x550555;
+  GPIOD->MODER=0xFFFF5540;
   GPIOD->OTYPER=0;
   GPIOD->OSPEEDR=0;
-  GPIOD->PUPDR=0X555;
+  GPIOD->PUPDR=0x10;
   GPIOD->AFR[0]=0;
   GPIOD->AFR[1]=0;
 
-  // PE0: PFC1: Input, Pull Up
-  // PE1: PFC2: Input, Pull Up
-  // PE2: PFC3: Input, Pull Up
-  // PE3: PFC4: Input, Pull Up
-  // PE4: PFC5: Input, Pull Up
-  // PE5: PFC6: Input, Pull Up
-  // PE6: PFC7: Input, Pull Up
-  // PE7:-
-  // PE8: RL3: Output, Push Pull, Pull up
-  // PE9: RL4: Output, Push Pull, Pull up
-  // PE10-PE15: -
-  GPIOE->MODER=0x50000;
+  // PE0: RL4: Output, Push Pull
+  // PE1: LED8: Output, Push Pull
+  // PE2: LED7: Output, Push Pull
+  // PE3: LED6: Output, Push Pull
+  // PE4: LED5: Output, Push Pull
+  // PE5: LED4: Output, Push Pull
+  // PE6: LED3: Output, Push Pull
+  // PE7: PVRP_M: SDADC1_4M
+  // PE8: MVBP_P: SDADC2_8P
+  // PE9: MVBP_M: SDADC2_8M
+  // PE10: PVYP_P: SDADC1_2P
+  // PE11: PVYP_M: SDADC1_2M
+  // PE12: PVBP: SDADC1_0
+  // PE13: MVRP_P: SDADC2_2P
+  // PE14: MVRP_M: SDADC2_2M
+  // PE15: IPR_M+: SDADC2_0P
+  //
+  GPIOE->MODER=0xFFFFD555;
   GPIOE->OTYPER=0;
   GPIOE->OSPEEDR=0;
-  GPIOE->PUPDR=0x50000;
+  GPIOE->PUPDR=0x0;
   GPIOE->AFR[0]=0;
   GPIOE->AFR[1]=0;
  
-  // PF0-PF3: -
-  // PF4: SW1: Input, Pull up
+  // PF0-PF1: -
+  // PF2: RCLK: Output, push-pull
+  // PF3: -
+  // PF4: SW3: Input, No push-pull
   // PF5: -
-  // PF6: SW3: Input, Pull up
+  // PF6: PFC5: Input, No push-pull
   // PF7-PF8:-
   // PF9: DIS5: Output, Push Pull
-  // PF10: PFC8: Input, Pull up
+  // PF10: LED1: Output, Push-pull
   // PF11-PF15: -
   //
-  GPIOF->MODER=0x40000;
+  GPIOF->MODER=0x140010;
   GPIOF->OTYPER=0;
   GPIOF->OSPEEDR=0;
-  GPIOF->PUPDR=0x40000;
+  GPIOF->PUPDR=0x0;
   GPIOF->AFR[0]=0;
   GPIOF->AFR[1]=0;
 

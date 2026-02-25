@@ -98,7 +98,7 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 
 #define     SR_CLOCK_BIT        0X02
 
-#define     OUTREG_CLOCK_BIT    0X08
+#define     OUTREG_CLOCK_BIT    0X04
 
 
 #define     DISP_SR_ON          (GPIOA->BRR  = 0X04)
@@ -108,8 +108,8 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 #define     DIS_DATA_OUT_HIGH           (GPIOA->BSRR = DIS_DATA_BIT)
 #define     SHIFT_REGISTER_CLOCK_LOW    (GPIOA->BSRR = SR_CLOCK_BIT)
 #define     SHIFT_REGISTER_CLOCK_HIGH   (GPIOA->BRR  = SR_CLOCK_BIT)
-#define     OUTPUT_REGISTER_CLOCK_LOW   (GPIOA->BSRR = OUTREG_CLOCK_BIT)
-#define     OUTPUT_REGISTER_CLOCK_HIGH  (GPIOA->BRR  = OUTREG_CLOCK_BIT)
+#define     OUTPUT_REGISTER_CLOCK_LOW   (GPIOF->BSRR = OUTREG_CLOCK_BIT)
+#define     OUTPUT_REGISTER_CLOCK_HIGH  (GPIOF->BRR  = OUTREG_CLOCK_BIT)
 
 
 
@@ -326,48 +326,54 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 #define LED_SOLAR_B     9
 #define LED_SOLAR_TOTAL 10
 
-#define SWITCH_OFF_LED2_R               GPIOD->BSRR = PORT_BIT_0 
-#define SWITCH_ON_LED2_R                GPIOD->BRR  = PORT_BIT_0
+#define SWITCH_OFF_LED2_R               GPIOF->BSRR = PORT_BIT_10
+#define SWITCH_ON_LED2_R                GPIOF->BRR  = PORT_BIT_10
 
-#define SWITCH_OFF_LED2_G               GPIOD->BSRR = PORT_BIT_1 
-#define SWITCH_ON_LED2_G                GPIOD->BRR  = PORT_BIT_1
+#define SWITCH_OFF_LED2_G               GPIOC->BSRR = PORT_BIT_13
+#define SWITCH_ON_LED2_G                GPIOC->BRR  = PORT_BIT_13
 
-#define SWITCH_OFF_LED2_B               GPIOD->BSRR = PORT_BIT_2 
-#define SWITCH_ON_LED2_B                GPIOD->BRR  = PORT_BIT_2
+#define SWITCH_OFF_LED2_B               GPIOE->BSRR = PORT_BIT_6 
+#define SWITCH_ON_LED2_B                GPIOE->BRR  = PORT_BIT_6
 
-#define SWITCH_OFF_LED_COMM             GPIOD->BSRR = PORT_BIT_3
-#define SWITCH_ON_LED_COMM              GPIOD->BRR  = PORT_BIT_3
+#define SWITCH_OFF_LED_COMM             GPIOE->BSRR = PORT_BIT_5
+#define SWITCH_ON_LED_COMM              GPIOE->BRR  = PORT_BIT_5
 
-#define SWITCH_OFF_LED_GRID_DISPLAY     GPIOD->BSRR = PORT_BIT_4
-#define SWITCH_ON_LED_GRID_DISPLAY      GPIOD->BRR = PORT_BIT_4
+#define SWITCH_OFF_LED_GRID_DISPLAY     GPIOE->BSRR = PORT_BIT_4
+#define SWITCH_ON_LED_GRID_DISPLAY      GPIOE->BRR = PORT_BIT_4
 
-#define SWITCH_OFF_LED_SOLAR_DISPLAY    GPIOD->BSRR = PORT_BIT_5
-#define SWITCH_ON_LED_SOLAR_DISPLAY     GPIOD->BRR = PORT_BIT_5
+#define SWITCH_OFF_LED_SOLAR_DISPLAY    GPIOE->BSRR = PORT_BIT_3
+#define SWITCH_ON_LED_SOLAR_DISPLAY     GPIOE->BRR = PORT_BIT_3
 
-#define SWITCH_OFF_LED_GRID_HEALTHY     GPIOB->BSRR = PORT_BIT_9
-#define SWITCH_ON_LED_GRID_HEALTHY      GPIOB->BRR = PORT_BIT_9
+#define SWITCH_OFF_LED_GRID_HEALTHY     GPIOE->BSRR = PORT_BIT_2
+#define SWITCH_ON_LED_GRID_HEALTHY      GPIOE->BRR = PORT_BIT_2
  
-#define SWITCH_OFF_LED_SOLAR_HEALTHY    GPIOB->BSRR = PORT_BIT_8
-#define SWITCH_ON_LED_SOLAR_HEALTHY     GPIOB->BRR = PORT_BIT_8
+#define SWITCH_OFF_LED_SOLAR_HEALTHY    GPIOE->BSRR = PORT_BIT_1
+#define SWITCH_ON_LED_SOLAR_HEALTHY     GPIOE->BRR = PORT_BIT_1
 
+#define INPUT_KEY_INC                   (!(GPIOB->IDR & PORT_BIT_9))
+#define INPUT_KEY_NEXT                  (!(GPIOB->IDR & PORT_BIT_8))
+#define INPUT_KEY_DEC                   (!(GPIOF->IDR & PORT_BIT_4))
 
 // All contactors (except "Load on Solar") are connected to the NC of the relays
 // Relays are turned on by driving GPIO Pins high
 //
-#define TURN_RELAY1_ON                              GPIOD->BSRR = PORT_BIT_8
-#define TURN_RELAY1_OFF                             GPIOD->BRR = PORT_BIT_8
+#define TURN_RELAY1_ON                              GPIOD->BSRR = PORT_BIT_6
+#define TURN_RELAY1_OFF                             GPIOD->BRR = PORT_BIT_6
 
-#define TURN_RELAY2_ON                              GPIOD->BSRR = PORT_BIT_9
-#define TURN_RELAY2_OFF                             GPIOD->BRR = PORT_BIT_9
+#define TURN_RELAY2_ON                              GPIOD->BSRR = PORT_BIT_7
+#define TURN_RELAY2_OFF                             GPIOD->BRR = PORT_BIT_7
 
-#define TURN_RELAY3_ON                              GPIOE->BSRR = PORT_BIT_8
-#define TURN_RELAY3_OFF                             GPIOE->BRR = PORT_BIT_8
+#define TURN_RELAY3_ON                              GPIOD->BSRR = PORT_BIT_4
+#define TURN_RELAY3_OFF                             GPIOD->BRR = PORT_BIT_4
 
-#define TURN_RELAY4_ON                              GPIOE->BSRR = PORT_BIT_9
-#define TURN_RELAY4_OFF                             GPIOE->BRR = PORT_BIT_9
+#define TURN_RELAY4_ON                              GPIOE->BSRR = PORT_BIT_0
+#define TURN_RELAY4_OFF                             GPIOE->BRR = PORT_BIT_0
 
-#define TURN_RELAY5_ON                              GPIOD->BSRR = PORT_BIT_10
-#define TURN_RELAY5_OFF                             GPIOD->BRR = PORT_BIT_10
+#define TURN_RELAY5_ON                              GPIOD->BSRR = PORT_BIT_5
+#define TURN_RELAY5_OFF                             GPIOD->BRR = PORT_BIT_5
+
+#define TURN_RELAY6_ON                              GPIOD->BSRR = PORT_BIT_3
+#define TURN_RELAY6_OFF                             GPIOD->BRR = PORT_BIT_3
 
 
 #define SWITCH_OFF_CONTACTOR_R_PHASE_GRID_HEALTHY  TURN_RELAY1_ON
@@ -391,14 +397,14 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 // Input from 48V is NC when it's healthy
 // Input from DG is NO when it's running
 //
-#define INPUT_R_PHASE_GRID_HEALTHY_CONTACTOR_ON    TO_BOOL(!(GPIOE->IDR & PORT_BIT_0))
-#define INPUT_Y_PHASE_GRID_HEALTHY_CONTACTOR_ON    TO_BOOL(!(GPIOE->IDR & PORT_BIT_1))
-#define INPUT_B_PHASE_GRID_HEALTHY_CONTACTOR_ON    TO_BOOL(!(GPIOE->IDR & PORT_BIT_2))
-#define INPUT_LOAD_ON_SOLAR_CONTACTOR_ON           TO_BOOL(!(GPIOE->IDR & PORT_BIT_3))
-#define INPUT_LOAD_ON_GRID_CONTACTOR_ON            TO_BOOL(!(GPIOE->IDR & PORT_BIT_4))
-#define INPUT_SPD_HEALTHY                          TO_BOOL(GPIOE->IDR & PORT_BIT_5)
-#define INPUT_DG_RUNNING                           TO_BOOL(GPIOE->IDR & PORT_BIT_6)
-#define INPUT_48V_AVAILABLE                        TO_BOOL(!(GPIOF->IDR & PORT_BIT_10))
+#define INPUT_R_PHASE_GRID_HEALTHY_CONTACTOR_ON    TO_BOOL(!(GPIOC->IDR & PORT_BIT_6))
+#define INPUT_Y_PHASE_GRID_HEALTHY_CONTACTOR_ON    TO_BOOL(!(GPIOC->IDR & PORT_BIT_7))
+#define INPUT_B_PHASE_GRID_HEALTHY_CONTACTOR_ON    TO_BOOL(!(GPIOC->IDR & PORT_BIT_8))
+#define INPUT_LOAD_ON_SOLAR_CONTACTOR_ON           TO_BOOL(!(GPIOA->IDR & PORT_BIT_8))
+#define INPUT_LOAD_ON_GRID_CONTACTOR_ON            TO_BOOL(!(GPIOF->IDR & PORT_BIT_6))
+#define INPUT_SPD_HEALTHY                          TO_BOOL(GPIOD->IDR & PORT_BIT_0)
+#define INPUT_DG_RUNNING                           TO_BOOL(GPIOD->IDR & PORT_BIT_1)
+#define INPUT_48V_AVAILABLE                        TO_BOOL(!(GPIOD->IDR & PORT_BIT_2))
 
 #define PARA_ONLY_DATA  1
 #define PARA_WITH_DEC   2
