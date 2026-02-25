@@ -171,8 +171,32 @@
 // 130) We should send firmware version over Modbus
 // 131) Make a manual/datasheet (Similar to Ace/REX)
 // 132) IMPORTANT: In 230V power supply, our IC currently is max 700V drain mosfet. This needs to handle clamping voltage of MOV + inductor voltage. Should we try for 1500V?
-// Servo has a high voltage power supply available. Also, common mode surge noise has to be considered in power supply (230V and 48V. Note 48V is positively earthed)
-// 133) Check that 200mm * 250mm pcb will be able to be manufactured in the SMD room properly and in our shop floor (Done)
+// Servo has a high voltage power supply available. Also, common mode surge noise has to be considered in power supply (230V and 48V. Note 48V is positively earthed). One solution is
+// using StackFET configuration via using external mosfet, like that used in Servo PSU
+// 133) Check that 200mm * 250mm pcb will be able to be manufactured in the SMD room properly and in our shop floor
+// 134) We should measure 5V from 48V to check if 48V is available or not
+// (We should have Cuts below MOVs on PCB for isolation)
+// 135) For differential op-amp circuit, check: a) Phase shift due to inverting (check power direction) b) Accuracy of resistors to match to make it class 0.5
+// Don't use LM324 as it has high offset error. Probably should use direct SDADC connections for current
+// Also, if using op-amps, have to check the maximum and minimum voltages that can be measured (due to maximum common mode voltage and maximum differential voltage
+// ratinng of op-amp. Maximum common mode voltage of LM324 can only be 3.3-2V = 1.3V but full scale differential voltage is allowed.
+// Also note that LM324 can at minimum reach to 20mV to 20mV needs to be clipped off the range of input)
+// 136) For 0.5% class, we should use resistors with better temp drift and maybe 0.1% accuracy or 0.5% accuracy resistors?
+// 137) For voltage measurement inputs in op-amp, consider adding guard rails at bias voltage around input pins
+// 138) Conformal coating might be required for creepage/clearance. Do we need them if we got cuts?
+// 139) For voltage measurement, LM324 is good enough as we have to support only maybe 50V-300V maximum. But consider calibrating at 100V, 200V, 300V. Keep decouping caps on bias voltage output from an op=amp
+// 140) Need a proper circuit for protection at the current input
+// 141) Add some error in coefficients to force calibration
+// 142) If we stick with 3 layer PCB, we will have to improve the connection between PCBs properly
+// 143) If we want to use SDADC for voltages also for better accuracy, we will have to change the signals of SDADC (We can only use SDADC Positive signals in single ended and we want
+// to keep the Voltages measurement just after current measurement for better phase accuracy). Also for currents, we can use differential measurement to remove noise coming from Vref/2 (keep the two traces as close to each other as possible). Review voltage and current section measurement circuit and layout properly
+// Also keep capacitor near uC pins (1K + 10nF?)
+// Keep current and voltage measurement sections away from each other (Keep power supply section also away from both of these)
+// 144) Check that using op-amp is safe in voltage section (High voltages)
+// 145) We should add conformal coating where there isn't enough spacing. If spacing is enough with cuts, do we need conformal coating?
+// 146) In v1.3, the 12V output port isn't protected against surge. Need to protect it.
+// 147)Use 60V MOV 20mm in DI and 48V power supply. What MOV to use for common mode? (Note that transformer only give 1KV isolation. Do we need to increase this or rely in common mode noise suppression instead)
+>>>>>>> Stashed changes
 //
 // 98) We need to change R59 & R60 to be 6.2k
 // The equation of op-amp is as follows:
@@ -206,6 +230,20 @@
 // measurement circuit (Do we use STM32F373 temp measurement or external IC like in IPR5)
 // 213) We should add under voltagr and over voltagr protection of contactors also (If there is excessive voltages or under voltages, switch off the contactors)
 // 214) Should we remove op-amp in voltage section also?
+// 215) We should do insulation test or dielectric test to check that the body of SOCO is not connected to PCB anyhow
+// 216) Creepage/Clearance around high voltage inputs: Make sure no low voltage signal on PCB layout comes anywhere near any high voltage input
+// 217) In AC power supply, do we use 2 450V Capacitor in series with bleeder resistor for input protection
+// 218) Get AC power supply reviewed by someone in Electricity Meter (They make according to standard). Compare with Servo PSU also
+// 219) Should we use 510VAC MOVs or 320VAC MOVs on AC line as what if two phases get short externally or netureal get short to phase?
+// 220) Check if after adding 100ohm * 2 resistors, all 6 relays can still work
+// 221) Do we need EMI/EMC on power supply?
+// 222) Check that if only one phase voltage is added, it's shown accurately even though the calibration happens in 3 phase. Same, check when 0 phase angle between R/Y/B voltage & current, is there any issue (This will happen on solar side)
+// 223) Check the voltage section is safe from surges (use of op-amp is correct)
+// 224) Make sure the PCB is not touching the body from edges (if it's touching then bare part should only be touching of PCB, no tracks)
+// 225) Make sure the contact points of body with PCB is not affected by powder coating
+// 226) Make sure that non-powder coating area doesn't rust in body
+// 227) Make sure that even if screws get rusted, no track is impacted
+// 228) Check if supports needed in between PCB
 //
 // NOTES:
 // 1) For Apparent power, we are using RMS (IEC 60038) instead of (IEC 61000-4-7) where we just measure first harmonics as we need to match energy with utility meter (and SMPS will have noise)
@@ -254,6 +292,10 @@
 // 34) Possible optimizations: 1) Use 1.6mm Gland Plate instead of 2mm gland plate (no need to add a new gland plate) 2) Reduce depth from 220mm (have to do heat calculations again. But I think the filter size if big enough that reduction is not possible) 3) Reduce Width from 700mm to 665mm (Mounting plate will be used less. BCH is saying they are buying custom sheet so not much effect)
 // 35) Why SOCO is on right side in panel? Shouldn't it be on left side and EMS box on right side? This will reduce control wiring (But does having SOCO away from contactors make it more resilient?:)
 // 36) For packing of panel, we should use wooden packing with plastic cover to protect from dust/water. Also the wooden packing to be such that no movement of panel possible
+// 37) Check earthing stud for SOCO in panel (should be nearby inside)
+// 38) Canopy can be changed to reduced cost if possible (doesn't need to extend at back)
+// 39) Have to check Pad lock hole and also ask Kanoda to change the mechanical mounting structure
+// 40) BOM has been changed: 50A 3 pole MCB is being used, 1 sq mm wire is being used for control wiring. 35mmsq glands are being used.
 //
 // Panel ventilation:
 // 1) IEC 60890 seems to state that ventilation cutouts with filters impede air circulation so much that it's equivalent to no cutouts
