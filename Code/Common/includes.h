@@ -102,6 +102,7 @@ float IntRPrevSample,IntYPrevSample,IntBPrevSample;
 float IntRSolarPrevSample,IntYSolarPrevSample,IntBSolarPrevSample;
 uint16_t CopySetPara[MAX_PARAM_LIMIT+1],DataSaveCounter;
 uint16_t AdcDataInArray[24],SampleCounter;
+int16_t SdAdcDataInArray[12];
 uint16_t OneSecFlag,MeterPassword;
 uint16_t SwPressed,SwPrev,SwTimer,SwFlag,SwValue,SwTimeOverflow,SwTimeOverflow2,SwTimeOverflow3;
 int16_t PrevSampleVol,FilOut_1,FilOut_2;

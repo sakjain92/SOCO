@@ -92,6 +92,7 @@ extern uint16_t OneSecFlag;
 extern struct DIS_SCROLL DisplaySetup ;
 extern uint8_t LcdEpromBuffer[512];
 extern uint16_t AdcDataInArray[24],SampleCounter;
+extern int16_t SdAdcDataInArray[12];
 extern uint32_t InterruptFlag,RYFreqMeasDuration,SaveFreqMeasDuration;
 extern uint32_t WattPerPulseTick,IntWattPerPulseTick;
 extern uint64_t SumWattPerPulseTick;

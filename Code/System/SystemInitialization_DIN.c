@@ -286,14 +286,14 @@ static void SetPwrRegisters(void)
 {
   
   // Enable: DMA, PortA-PortF
-  RCC->AHBENR=0x7E0001;
+  RCC->AHBENR=0x7E0003;
   // Sys CFG Enable, ADC, SDADC1, SDADC2, SDADC3
   RCC->APB2ENR=0x7000201;
   // Enable: Tim2, Tim3, Tim4, Usart2, Usart3, I2c2, PWR
   RCC->APB1ENR=0x10460007;
   // Select Sys clock as USART1 clock, I2C, I2C2 clock, PCLK as USART2, PCLK as USART3 clock
   RCC->CFGR3 |=0x31;
-  // SDADC clock as Sys clock / 4
+  // SDADC clock as Sys clock / 8 (48MHz/8 = 6Mhz, the maximum SDADC clock)
   // ADC: PCLK/2 (12Mhz/2)
   RCC->CFGR |=0X98000000;
   // Reset: Sys, ADC, SPI1, USART1, TIM15, TIM16, TIM17, TIM19, SDADC1, SDADC2, SDADC3
@@ -315,8 +315,29 @@ static void SetDmaRegisters(void)
   DMA1_Channel1->CCR=0X5A1;
   
   //DMA1_Channel1->CPAR=ADC1_BASE+0x4C;
-  
 
+  DMA2_Channel3->CPAR = (uint32_t)&SDADC1->JDATAR;  
+  DMA2_Channel3->CMAR=(uint32_t)&SdAdcDataInArray[0]; // Gen vol, Current, main Vol R phase
+  DMA2_Channel3->CNDTR=0X4; // NO OF DATA TRANSFER
+  DMA2_Channel3->CCR=0;
+  DMA2_Channel3->CCR=0X5A0;
+  DMA2_Channel3->CCR|=0X1;
+  
+  
+  DMA2_Channel4->CPAR =(uint32_t)&SDADC2->JDATAR;
+  DMA2_Channel4->CMAR=(uint32_t)&SdAdcDataInArray[4];// Gen vol, Current, main Vol Y phase
+  DMA2_Channel4->CNDTR=0X3; // NO OF DATA TRANSFER
+  DMA2_Channel4->CCR=0;
+  DMA2_Channel4->CCR=0X5A0;
+  DMA2_Channel4->CCR|=1;
+  
+ 
+  DMA2_Channel5->CPAR =(uint32_t)&SDADC3->JDATAR;
+  DMA2_Channel5->CMAR=(uint32_t)&SdAdcDataInArray[7];// Gen vol, Current, main Vol B phase
+  DMA2_Channel5->CNDTR=0X5; // NO OF DATA TRANSFER
+  DMA2_Channel5->CCR=0;
+  DMA2_Channel5->CCR=0X5A0;
+  DMA2_Channel5->CCR|=1;
 }
 static void SetAdc(void)
 {
@@ -330,6 +351,15 @@ static void SetAdc(void)
   ADC1->SMPR1=0x36DB6DB6;
   // 71.5 cycles for 0-9 channel
   ADC1->SMPR2=0x36DB6DB6;
+
+  // Total Sampling Cycles: 71.5 + 12.5 = 84 cycles
+  // ADC Clock = 6Mhz
+  // So sampling rate = 6MHz/84 = 71ksps
+  // At 50Hz input signal, we want calculation to complete within 3.2Khz
+  // So maximum samples we can measure = 71K/3.2K = 22 samples
+  // Give some margin for higher input signal frequency (e.g. 60Hz)
+  // So maximum samples we can safely measure = 22*0.5 = 11-12 samples of ADC
+  //
 
   // Mains
   //
@@ -483,10 +513,58 @@ void SetSDADC(void)
 {
   // Internal reference (1.2V)
   SDADC1->CR1=0X100;
-  // Start SDADC1
-  SDADC1->CR2=0X01;
+
+  // Make sure SDADC1,2,3 all run synchronously
+  // Enable DMA
+  //
+  SDADC1->CR1|=0X14000;
+  SDADC2->CR1|=0X14000;
+  SDADC3->CR1|=0X14000;
+
+  // SDADC running at 6MHz clock (Maximum)
+  // One sample takes 360 cycles
+  // Maximum of 5 samples in SDADC3
+  // So maximum sampling frequency: 3.33Khz
+  //
+  // SDADC1 Channels, 0 (single ended), 2, 4, 6
+  // SDADC2 Channels: 0 (4x Gain), 2, 8
+  // SDADC3 Channels: 0 (4x Gain), 2 (4x Gain), 4 (4x Gain), 6 (4xGain), 8 (4xGain)
+  //
+  SDADC1->JCHGR=0X55;
+  SDADC2->JCHGR=0X105;
+  SDADC3->JCHGR=0X155;
+
+  SDADC1->CONF0R = 0x0;
+  SDADC1->CONF1R = 0x0C000000;  // Single Ended
+  SDADC1->CONFCHR1 = 0x1;
+
+  SDADC2->CONF0R = 0x0;
+  SDADC2->CONF1R = 0x200000;    // 4x Gain
+  SDADC2->CONFCHR1 = 0x1;
+
+  SDADC3->CONF0R = 0x0;
+  SDADC3->CONF1R = 0x200000;    // 4x Gain
+  SDADC3->CONFCHR1 = 0x01010101;
+  SDADC3->CONFCHR2 = 0x1;
+
+  // Start SDADC 1,2,3 and start calibration
+  //
+  SDADC1->CR2=0X04;
+  SDADC2->CR2=0X04;
+  SDADC3->CR2=0X04;
+  
+  SDADC1->CR2|=0X01;
+  SDADC2->CR2|=0X01;
+  SDADC3->CR2|=0X01;
+  
+  SDADC1->CR2|=0X10;
+  SDADC2->CR2|=0X10;
+  SDADC3->CR2|=0X10;
+
   // Wait for SDADC stabilization
   while(SDADC1->ISR & SDADC_ISR_STABIP);
+  while(SDADC2->ISR & SDADC_ISR_STABIP);
+  while(SDADC3->ISR & SDADC_ISR_STABIP);
 }
   
 volatile uint16_t TimeOutCommTx;

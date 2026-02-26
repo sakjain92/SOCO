@@ -50,6 +50,8 @@ uint16_t OneSecCounter;
 // (Can't ignore as reactive power is based on harmonics)
 // This is also another reason for error in current measurement most likely
 //
+// DEVNOTE: SDADC3 is working maximum upto 3.3ksps
+//
 void ProcessMainInterrupt(void)
 {
 
@@ -92,62 +94,62 @@ void ProcessMainInterrupt(void)
     if(PowerFailCounter==0)InterruptFlag |= INT_POWER_OK;
   }  
 #endif  
-  TempInt=AdcDataInArray[ADC_VR];
+  TempInt=SdAdcDataInArray[SDADC_VR];
   TempInt=TempInt-0x1000;
   IntVolRPhase  =(float)TempInt-VIOffset.VolRPhase;
   IntVolRPhase *=WorkingCopyGain.VR_GAIN;
   
-  TempInt=AdcDataInArray[ADC_VY];
+  TempInt=SdAdcDataInArray[SDADC_VY];
   TempInt=TempInt-0x1000;
   IntVolYPhase  =(float)TempInt-VIOffset.VolYPhase;
   IntVolYPhase *=WorkingCopyGain.VY_GAIN;
   
-  TempInt=AdcDataInArray[ADC_VB];
+  TempInt=SdAdcDataInArray[SDADC_VB];
   TempInt=TempInt-0x1000;
   IntVolBPhase  =(float)TempInt-VIOffset.VolBPhase;
   IntVolBPhase *=WorkingCopyGain.VB_GAIN;
    
-  TempInt=AdcDataInArray[ADC_IR];
+  TempInt=SdAdcDataInArray[SDADC_IR];
   TempInt=TempInt-0x1000;
   IntCurRPhase  =(float)TempInt-VIOffset.CurRPhase;
   IntCurRPhase *=WorkingCopyGain.IR_GAIN;
 
-  TempInt=AdcDataInArray[ADC_IY];
+  TempInt=SdAdcDataInArray[SDADC_IY];
   TempInt=TempInt-0x1000;
   IntCurYPhase  =(float)TempInt-VIOffset.CurYPhase;
   IntCurYPhase *=WorkingCopyGain.IY_GAIN;
 
-  TempInt=AdcDataInArray[ADC_IB];
+  TempInt=SdAdcDataInArray[SDADC_IB];
   TempInt=TempInt-0x1000;
   IntCurBPhase  =(float)TempInt-VIOffset.CurBPhase;
   IntCurBPhase *=WorkingCopyGain.IB_GAIN;
 
-  TempInt=AdcDataInArray[ADC_VR_SOLAR];
+  TempInt=SdAdcDataInArray[SDADC_VR_SOLAR];
   TempInt=TempInt-0x1000;
   IntVolRSolarPhase  =(float)TempInt-VIOffset.VolRSolarPhase;
   IntVolRSolarPhase *=WorkingCopyGain.VR_SOLAR_GAIN;
 
-  TempInt=AdcDataInArray[ADC_VY_SOLAR];
+  TempInt=SdAdcDataInArray[SDADC_VY_SOLAR];
   TempInt=TempInt-0x1000;
   IntVolYSolarPhase  =(float)TempInt-VIOffset.VolYSolarPhase;
   IntVolYSolarPhase *=WorkingCopyGain.VY_SOLAR_GAIN;
 
-  TempInt=AdcDataInArray[ADC_VB_SOLAR];
+  TempInt=SdAdcDataInArray[SDADC_VB_SOLAR];
   TempInt=TempInt-0x1000;
   IntVolBSolarPhase  =(float)TempInt-VIOffset.VolBSolarPhase;
   IntVolBSolarPhase *=WorkingCopyGain.VB_SOLAR_GAIN;
 
-  TempInt=AdcDataInArray[ADC_IR_SOLAR];
+  TempInt=SdAdcDataInArray[SDADC_IR_SOLAR];
   TempInt=TempInt-0x1000;
   IntCurRSolarPhase  =(float)TempInt-VIOffset.CurRSolarPhase;
   IntCurRSolarPhase *=WorkingCopyGain.IR_SOLAR_GAIN;
 
-  TempInt=AdcDataInArray[ADC_IY_SOLAR];
+  TempInt=SdAdcDataInArray[SDADC_IY_SOLAR];
   TempInt=TempInt-0x1000;
   IntCurYSolarPhase  =(float)TempInt-VIOffset.CurYSolarPhase;
   IntCurYSolarPhase *=WorkingCopyGain.IY_SOLAR_GAIN;
 
-  TempInt=AdcDataInArray[ADC_IB_SOLAR];
+  TempInt=SdAdcDataInArray[SDADC_IB_SOLAR];
   TempInt=TempInt-0x1000;
   IntCurBSolarPhase  =(float)TempInt-VIOffset.CurBSolarPhase;
   IntCurBSolarPhase *=WorkingCopyGain.IB_SOLAR_GAIN;
@@ -155,6 +157,7 @@ void ProcessMainInterrupt(void)
   // UNDONE: Do the current & power calculation for solar
 
   ADC1->CR2 |=ADC_CR2_SWSTART;   // Start New conversion 
+  SDADC1->CR2 |=SDADC_CR2_JSWSTART;
  
   // UNDONE: There is a bug in this second order butterworth filter with cutoff
   // at 600Hz

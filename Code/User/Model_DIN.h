@@ -196,7 +196,6 @@
 // 145) We should add conformal coating where there isn't enough spacing. If spacing is enough with cuts, do we need conformal coating?
 // 146) In v1.3, the 12V output port isn't protected against surge. Need to protect it.
 // 147)Use 60V MOV 20mm in DI and 48V power supply. What MOV to use for common mode? (Note that transformer only give 1KV isolation. Do we need to increase this or rely in common mode noise suppression instead)
->>>>>>> Stashed changes
 //
 // 98) We need to change R59 & R60 to be 6.2k
 // The equation of op-amp is as follows:
@@ -247,6 +246,11 @@
 // 229) Should we add RC filter on digitial input section also near the MCU pin (incase the external input is oscillating)? Might not be needed as we already have RC filter before optocoupler
 // 230) Remove single ended current measuring circuit & corresponding all zero ohm resistors. Hopefully this will make layout easier. Make sure voltage pins on MCU and current pins on MCU are away
 // from each other if possible
+// 231) Check current and voltage measurement at 60Hz/40Hz. We currently have SDADC3 running very close to maximum frequency at 50Hz input signal.
+// We should move some of the current sampling to ADC instead of SDADC and reduce SDADC to maximum of 3 channels per SDADC
+// 232) Check that voltage on inverting pin of op-amp in voltage section doesn't go negative during surge (-900V). We can reduce magnitude via using 4x gain in SDADC if required
+// 233) Check the meter passes IEC definition of Class 1 Meter (Ib = 10A, Imax = 100A)
+// 234) Is DC power supply or AC power supply ESD protected? Issue during production?
 //
 // NOTES:
 // 1) For Apparent power, we are using RMS (IEC 60038) instead of (IEC 61000-4-7) where we just measure first harmonics as we need to match energy with utility meter (and SMPS will have noise)
@@ -309,6 +313,7 @@
 // 6) Effect of temperature also should be considered in SOCO design
 // 7) We might have to use a Fan to decrease temperature
 // 8) Standard says best option is fan attached at bottom flowing air into the panel from bottom and exit from the top. During panel construction, we will have to properly ensure poper direction of fans
+// 9) We are using AC fans (as we don't know how to measure DC current in isolated manner). Can we use DC fan with an NO/NC aux contact? If we use AC fans, what is estimated failure rate due to surges?
 //
 // Future scope:
 // 1) Give relay card channel to Jio with OMRON for v1.5 of the Panel

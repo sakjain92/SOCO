@@ -128,20 +128,30 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 #define     MAX_DIS_PARAMETER        18
 #define     METER_INIT_VALUE         135
 
+// According to IEC standard for class 1 meter:
+//
+// Voltage accuracy should be within 1% from 90% to 110% of nominal voltage
+// (230V or 240V in this case)
+// Current should start register from 0.4% of Ib (Let's say Ib = 10A) = 0.04A
+// Current should have 1.5% accuracy between 5% of Ib to 10% of Ib (between 0.5A-1A)
+// Above 10% Ib to Imax (100A in this case), the accuracy needs to be 1% (Between 1A-100A)
+// Let's aim for 1% accuracy between 1-100A. Will aim for rest of the range later.
+// An equivalent schenider model: https://download.schneider-electric.com/files?p_Doc_Ref=BRU19338&p_enDocType=Instruction+sheet
+//
 
-#define   VOLTAGE_COEFF            4.6611E-03f
+#define   VOLTAGE_COEFF            2.75479E-04f
 #define   PH_VOLTAGE_COEFF         (VOLTAGE_COEFF)
-#define   FUND_VOL_COEFF           5.8264E-03f
+#define   FUND_VOL_COEFF           3.4435E-04f
 
-#define   CURRENT_COEFF            1.4566E-03f
+#define   CURRENT_COEFF            1.0115E-04f
 #define   NEU_CURRENT_COEFF        (CURRENT_COEFF)
 
-#define   FUND_CURRENT_COEFF       1.8207E-03f
+#define   FUND_CURRENT_COEFF       1.2644E-04f
 
 
-#define   POWER_COEFF_3P4W         6.789342E-06f
+#define   POWER_COEFF_3P4W         2.786537E-08f
 
-#define  FUND_POWER_COEFF          1.0608E-05f
+#define  FUND_POWER_COEFF          4.3540E-08f
 
 // Minimum voltage to maintain 0.5% accuracy is about 33VAC. Taking some margin
 // UNDONE: Figure out the correct minimum value for Currents as per metering
@@ -449,5 +459,18 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 #define    ADC_VY_SOLAR         9
 #define    ADC_IB_SOLAR        10
 #define    ADC_VB_SOLAR        11
+
+#define    SDADC_VB_SOLAR       0
+#define    SDADC_VY_SOLAR       1
+#define    SDADC_VR_SOLAR       2
+#define    SDADC_VY             3
+#define    SDADC_IR             4
+#define    SDADC_VR             5
+#define    SDADC_VB             6
+#define    SDADC_IB_SOLAR       7
+#define    SDADC_IY_SOLAR       8
+#define    SDADC_IR_SOLAR       9
+#define    SDADC_IB            10
+#define    SDADC_IY            11
 
 #endif
