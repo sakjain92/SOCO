@@ -41,6 +41,8 @@ void Metrology(void)
   VIOffset.CurRSolarPhase += IntDataSave.OffsetCurRSolarPhase/NO_OF_SAMPLES;
   VIOffset.CurYSolarPhase += IntDataSave.OffsetCurYSolarPhase/NO_OF_SAMPLES;
   VIOffset.CurBSolarPhase += IntDataSave.OffsetCurBSolarPhase/NO_OF_SAMPLES;
+  VIOffset.Fan1Current += IntDataSave.OffsetFan1Current/NO_OF_SAMPLES;
+  VIOffset.Fan2Current += IntDataSave.OffsetFan2Current/NO_OF_SAMPLES;
 
   if(IntDataSave.RPhasePower<0)InterruptFlag |=INT_R_PHASE_REV;
   else InterruptFlag &=~INT_R_PHASE_REV;
@@ -893,4 +895,7 @@ void CalculateVoCur(void)
   InstantPara.VolBSolar=VOLTAGE_COEFF*sqrt(IntDataSave.VolBSolarPhase); 
   InstantPara.VolBRSolar=PH_VOLTAGE_COEFF*sqrt(IntDataSave.VolBRSolarPhPh);
   InstantPara.CurrentNSolar=NEU_CURRENT_COEFF*sqrt(IntDataSave.CurNeutralSolar);
+
+  InstantPara.Fan1Current=FAN_CURRENT_COEFF*sqrt(IntDataSave.Fan1Current);
+  InstantPara.Fan2Current=FAN_CURRENT_COEFF*sqrt(IntDataSave.Fan2Current);
 }

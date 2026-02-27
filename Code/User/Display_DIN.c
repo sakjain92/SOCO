@@ -68,6 +68,9 @@ void DisplayUpdate(void)
                switch(Screen[DisplayIndex][ScreenIndex].DecPos)
                {
                
+                case DIS_VAL_FAN_CURRENT:
+                 DisplayCurrentVol(*Screen[DisplayIndex][ScreenIndex].Variable,ScreenIndex,DisplayIndex);
+                 break;
                case DIS_VAL_CURRENT:
                  DisplayCurrentVol(*Screen[DisplayIndex][ScreenIndex].Variable*CtRatio,ScreenIndex,DisplayIndex);
                  break;

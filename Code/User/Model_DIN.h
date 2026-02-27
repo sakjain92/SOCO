@@ -3,7 +3,7 @@
 // 3 digit version number
 // Shown on display as X.YY
 //
-#define VERSION_NO  207
+#define VERSION_NO  209
 
 #define MODEL_COMM_PROCOM
 #define MODEL_DATA_SAVE  
@@ -251,6 +251,13 @@
 // 232) Check that voltage on inverting pin of op-amp in voltage section doesn't go negative during surge (-900V). We can reduce magnitude via using 4x gain in SDADC if required
 // 233) Check the meter passes IEC definition of Class 1 Meter (Ib = 10A, Imax = 100A)
 // 234) Is DC power supply or AC power supply ESD protected? Issue during production?
+// 235) Check data saving logic on power cut? Check no loss of data. Also check no writing to EEPROM too frequently. We need USB to fix any future bugs like EEPROM write bugs.
+// 236) Check polarity of MCB/Isolator/SPD/DG On PFC on modbus vs wiring in panel
+// 237) Maybe add an extra LED for alarm (Fan not running, MCB/Isolator trip, feedback not matching command)
+// 238) Check what happens when high short circuit current in Fan
+// 239) Relays will be turned on continuously. They are rated for 5V. Are we generating exactly 5V or higher voltage? Even 5.5V will cause issue as relays will be 24x7 turned on in some cases
+// Do we need a voltage LDO? 6V relays are non standard so procurement will be issue
+// 240) Check with PI if Power Supply section is protected from ESD properly (Is TNY protected against ESD and can ESD travel across transformer?) Should we add TVS on outputs of transfomer?
 //
 // NOTES:
 // 1) For Apparent power, we are using RMS (IEC 60038) instead of (IEC 61000-4-7) where we just measure first harmonics as we need to match energy with utility meter (and SMPS will have noise)

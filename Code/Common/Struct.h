@@ -96,6 +96,11 @@ struct INT_DATA_SUM
   float        OffsetCurRSolarPhase;
   float        OffsetCurYSolarPhase;
   float        OffsetCurBSolarPhase;
+
+  float        Fan1Current;
+  float        Fan2Current;
+  float        OffsetFan1Current;
+  float        OffsetFan2Current;
 };
 
 
@@ -145,6 +150,11 @@ struct INT_DATA_SAVE
   float     OffsetCurRSolarPhase;
   float     OffsetCurYSolarPhase;
   float     OffsetCurBSolarPhase;
+
+  float     Fan1Current;
+  float     Fan2Current;
+  float     OffsetFan1Current;
+  float     OffsetFan2Current;
 };
 
 struct INT_TIMER_COUNT
@@ -193,8 +203,8 @@ struct INST_PARA
   float     FunRVol;
   float     FunYVol;
   float     FunBVol;
-  float     Spare1;
-  float     Spare2;
+  float     Fan1Current;
+  float     Fan2Current;
   float     Spare3;
  
   float     HarRPhaseVol;
@@ -291,6 +301,9 @@ struct OFFSET
   float     CurRSolarPhase;
   float     CurYSolarPhase;
   float     CurBSolarPhase;
+
+  float     Fan1Current;
+  float     Fan2Current;
 };
 
 struct FFT_STRUCT
@@ -435,6 +448,10 @@ float     IB_SOLAR_HIGH_PH_ERROR;
 float     IB_SOLAR_MID_PH_ERROR;
 float     IB_SOLAR_LOW_PH_ERROR;
 
+float     FAN1_GAIN;
+float     FAN2_GAIN;
+
+float     unused[12];
 
 uint16_t     INIT_DATA1;          
 uint16_t     INIT_DATA2  ; 
@@ -475,8 +492,9 @@ struct GAIN_WC
   float PR_SOLAR_BETA;
   float PY_SOLAR_BETA;
   float PB_SOLAR_BETA;
-  
 
+  float FAN1_GAIN;
+  float FAN2_GAIN;
 };
 
   
@@ -568,9 +586,6 @@ struct LCD_ARRAY
 // DEVNOTE: Keep them such that each of these inputs are off when nothing
 // is attached to the controller (When the input is open, the corresponding
 // entry in this struct should be 0)
-// E.g. SPD has a NO contact which becomes NC when SPD Fails. So the entry
-// "SPDFailed" is 0 when nothing is connected to the controller (as that indicates
-// NO input which indicates SPD is healthy)
 //
 // DEVNOTE: This is sent over modbus. Keep digital inputs in order.
 // Also, using one bool per input
@@ -582,9 +597,11 @@ struct DigInputs
     bool MainsBPhaseContactorOn;
     bool LoadOnSolarContactorOn;
     bool LoadOnGridContactorOn;
-    bool SPDFailed;             
+    bool SolarIsolatorOn;
+    bool GridMCBOn;
     bool DGOff;              
     bool DC48Available;          
+    bool ACAuxAvailable;
 };
 
 // Defines various abnormal conditions detected

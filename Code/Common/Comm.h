@@ -39,6 +39,7 @@ float CalVolR,CalVolY,CalVolB,CalCurR,CalCurY,CalCurB;
 float CalVolRSolar,CalVolYSolar,CalVolBSolar,CalCurRSolar,CalCurYSolar,CalCurBSolar;
 float CalPowR,CalPowY,CalPowB;
 float CalPowRSolar,CalPowYSolar,CalPowBSolar;
+float CalFan1Current, CalFan2Current;
 struct Field Mod_TransmitFrame;
 uint8_t NoOfBytes_Low,NoOfBytes_High,Start_Add_Low,Start_Add_High;
 uint8_t AvailableByte, ArrayIndex, DataLengthRegister,DataArrLoc;

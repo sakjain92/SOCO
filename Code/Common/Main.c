@@ -181,7 +181,14 @@ void SwitchOnContactorLoadOnGrid()
 {
     SWITCH_ON_CONTACTOR_LOAD_ON_GRID;
 }
-
+void SwitchOffFans()
+{
+    SWITCH_OFF_FANS;
+}
+void SwitchOnFans()
+{
+    SWITCH_ON_FANS;
+}
 // Controls the logic controlling the relays outputs
 // This function is called once every 1 second
 // DEVNOTE: This function should consider the possibility of contactors
@@ -468,7 +475,7 @@ void ProcessRelays()
     //
     pvsArray[3].shouldContactorBeOn = pvsArray[3].isHealthy &&
                                       (!pvsArray[4].isHealthy || g_DisableLoadOnGridSeconds) &&
-                                        (g_DigInputs.DGOff || !g_DigInputs.DC48Available) &&
+                                        (g_DigInputs.DGOff) &&
                                         !pvsArray[0].isPrevContactorOn &&
                                         !pvsArray[1].isPrevContactorOn &&
                                         !pvsArray[2].isPrevContactorOn &&
@@ -503,8 +510,7 @@ void ProcessRelays()
         // to actually change before marking it as changed
         //
         bool feedbackNotMatches =
-            ((*pvsArray[i].contactorFeedback != pvsArray[i].shouldContactorBeOn) &&
-                g_DigInputs.DC48Available);
+            ((*pvsArray[i].contactorFeedback != pvsArray[i].shouldContactorBeOn));
         bool contactorStateChanged =
             pvsArray[i].shouldContactorBeOn != pvsArray[i].isPrevContactorOn;
 
@@ -709,7 +715,8 @@ void StartCalibration(void)
            SwitchOnContactorYPhaseGridHealthy,
            SwitchOnContactorBPhaseGridHealthy,
            SwitchOnContactorLoadOnSolar,
-           SwitchOnContactorLoadOnGrid
+           SwitchOnContactorLoadOnGrid,
+           SwitchOnFans
        };
        uint8_t idx = FlagDirectCalibration - CALIBRATE_OUT_1;
        DisplayOutputX(idx + 1);
@@ -728,6 +735,7 @@ void StartCalibration(void)
        SwitchOffContactorBPhaseGridHealthy();
        SwitchOffContactorLoadOnSolar();
        SwitchOffContactorLoadOnGrid();
+       SwitchOffFans();
 
        const bool* inputs[] = 
        {
@@ -736,9 +744,9 @@ void StartCalibration(void)
            &g_DigInputs.MainsBPhaseContactorOn,
            &g_DigInputs.LoadOnSolarContactorOn,
            &g_DigInputs.LoadOnGridContactorOn,
-           &g_DigInputs.SPDFailed,
-           &g_DigInputs.DGOff,
-           &g_DigInputs.DC48Available
+           &g_DigInputs.SolarIsolatorOn,
+           &g_DigInputs.GridMCBOn,
+           &g_DigInputs.DGOff
        };
        if (FlagDirectCalibration == CALIBRATE_IN_START)
        {
@@ -796,6 +804,9 @@ void StartCalibration(void)
      WorkingCopyGain.PY_SOLAR_BETA=0;
      WorkingCopyGain.PB_SOLAR_ALFA=1;
      WorkingCopyGain.PB_SOLAR_BETA=0;
+
+     WorkingCopyGain.FAN1_GAIN=1.0;
+     WorkingCopyGain.FAN2_GAIN=1.0;
    }
    if(FlagDirectCalibration == CALIBRATE_H_VI)
    {
@@ -832,6 +843,9 @@ void StartCalibration(void)
         WorkingCopyGain.PY_SOLAR_BETA=0;
         WorkingCopyGain.PB_SOLAR_ALFA=1;
         WorkingCopyGain.PB_SOLAR_BETA=0;
+
+        WorkingCopyGain.FAN1_GAIN=CalibrationCoeff.FAN1_GAIN;
+        WorkingCopyGain.FAN2_GAIN=CalibrationCoeff.FAN2_GAIN;
      }
    }
    
@@ -886,7 +900,8 @@ void StartCalibration(void)
      WorkingCopyGain.PB_SOLAR_ALFA=1;
      WorkingCopyGain.PB_SOLAR_BETA=0;
 
-       
+     WorkingCopyGain.FAN1_GAIN=CalibrationCoeff.FAN1_GAIN;
+     WorkingCopyGain.FAN2_GAIN=CalibrationCoeff.FAN2_GAIN;
    }
    if(FlagDirectCalibration == CALIBRATE_M_VI)
    {
@@ -923,6 +938,9 @@ void StartCalibration(void)
         WorkingCopyGain.PY_SOLAR_BETA=0;
         WorkingCopyGain.PB_SOLAR_ALFA=1;
         WorkingCopyGain.PB_SOLAR_BETA=0;
+
+        WorkingCopyGain.FAN1_GAIN=CalibrationCoeff.FAN1_GAIN;
+        WorkingCopyGain.FAN2_GAIN=CalibrationCoeff.FAN2_GAIN;
      }
    }
    if(FlagDirectCalibration == CALIBRATE_DIS_M_PF)
@@ -977,7 +995,8 @@ void StartCalibration(void)
      WorkingCopyGain.PB_SOLAR_ALFA=1;
      WorkingCopyGain.PB_SOLAR_BETA=0;
 
-       
+     WorkingCopyGain.FAN1_GAIN=CalibrationCoeff.FAN1_GAIN;
+     WorkingCopyGain.FAN2_GAIN=CalibrationCoeff.FAN2_GAIN;  
    }
    if(FlagDirectCalibration == CALIBRATE_L_VI)
    {
@@ -1014,6 +1033,9 @@ void StartCalibration(void)
         WorkingCopyGain.PY_SOLAR_BETA=0;
         WorkingCopyGain.PB_SOLAR_ALFA=1;
         WorkingCopyGain.PB_SOLAR_BETA=0;
+
+        WorkingCopyGain.FAN1_GAIN=CalibrationCoeff.FAN1_GAIN;
+        WorkingCopyGain.FAN2_GAIN=CalibrationCoeff.FAN2_GAIN;
      }
    }
    if(FlagDirectCalibration == CALIBRATE_DIS_L_PF)

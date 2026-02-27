@@ -74,6 +74,8 @@ Upto 10 its just the decimal place
 #define DIS_SOLAR_VAR_POS_EXP       44
 #define DIS_SOLAR_VAR_NEG_EXP       45
 
+#define DIS_VAL_FAN_CURRENT         46         
+
 const uint8_t StrRY[]="RY";
 const uint8_t StrYB[]="YB";
 const uint8_t StrBR[]="BR";
@@ -164,6 +166,8 @@ const uint8_t StrOldImpRnHr[]="OFRnHr";
 const uint8_t StrOldImpLdHr[]="OFLdHr";
 #endif
 
+const uint8_t StrFan1Current[]="FAN  1";
+const uint8_t StrFan2Current[]="FAN  2";
 
 const uint8_t StrInterr[]="  INTR";
 const uint8_t StrOldInterr[]="O INTR";
@@ -760,6 +764,30 @@ const struct object Screen[][3]=
   { 
     {  DATA_TYPE_VARIABLE,     &InstantPara.VolRSolar,     9,       DIS_SOLAR_VAR_NEG_EXP,DIGIT_1,          0,          LED_SOLAR_TOTAL },
     {  0xff,                   0,                          0,       0,                   DIGIT_2,          0,           LED_SOLAR_TOTAL }
+  },
+
+  // SCREEN 99: FAN 1 Display
+  { 
+    {  DATA_TYPE_STRING,       0,                          0,       0,                   DIGIT_6,         StrFan1Current,LED_OFF        },
+    {  0xff,                   0,                          0,       0,                   DIGIT_2,         0,             LED_OFF        }
+  },
+  // SCREEN 100: FAN 1 Current
+  {
+      { DATA_TYPE_STRING,       0,                      0,      0,                      DIGIT_2,         StrA,          LED_OFF         },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.Fan1Current,4,     DIS_VAL_FAN_CURRENT,    DIGIT_3,         0,             LED_OFF         },
+      { 0xff,                   0,                      0,      0,                      DIGIT_3,         0,             0,              }
+  },
+
+  // SCREEN 101: FAN 2 Display
+  { 
+    {  DATA_TYPE_STRING,       0,                          0,       0,                   DIGIT_6,         StrFan2Current,LED_OFF        },
+    {  0xff,                   0,                          0,       0,                   DIGIT_2,         0,             LED_OFF        }
+  },
+  // SCREEN 102: FAN 2 Current
+  {
+      { DATA_TYPE_STRING,       0,                      0,      0,                      DIGIT_2,         StrA,          LED_OFF         },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.Fan2Current,4,     DIS_VAL_FAN_CURRENT,    DIGIT_3,         0,             LED_OFF         },
+      { 0xff,                   0,                      0,      0,                      DIGIT_3,         0,             0,              }
   },
 
 };

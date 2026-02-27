@@ -17,7 +17,7 @@
 #include "extern_includes.h"
 
 void ReadSwitches(void);
-void ReadInputs(void);
+void ReadInputs();
 void CalculateFreqYBPhase(int16_t TempIntFreqVol);
 
  
@@ -34,11 +34,18 @@ struct SAMPLE   BSolarCurSample;
 struct SAMPLE   RSolarVolSample;
 struct SAMPLE   YSolarVolSample;
 struct SAMPLE   BSolarVolSample;
-
+struct SAMPLE   Fan1CurrentSample;
+struct SAMPLE   Fan2CurrentSample;
 
 extern volatile uint16_t TimeOutCommTx;
 
 uint16_t OneSecCounter;
+
+// Instantaneous sample for checking if AC/DC Aux Power supply is available
+// or not
+//
+static bool isDCPowerAvailableSample;
+static bool isACPowerAvailableSample;
 
 #define FREQ_LIMIT_VOL    (90)
 
@@ -60,14 +67,18 @@ void ProcessMainInterrupt(void)
   float IntCurRPhase,IntCurYPhase,IntCurBPhase;
   float IntCurRSolarPhase,IntCurYSolarPhase,IntCurBSolarPhase;
   float IntNeuCurrent, IntNeuSolarCurrent;
+  float IntFan1Current, IntFan2Current;
   float TempGainMult;
   int16_t TempInt;  
   uint8_t i;
+
+  isDCPowerAvailableSample = AdcDataInArray[ADC_DC_PWR]>POWER_FAIL_SENSE_VALUE;
+  isACPowerAvailableSample = AdcDataInArray[ADC_AC_PWR]>POWER_FAIL_SENSE_VALUE;
+
 #ifdef MODEL_DATA_SAVE   
-  // UNDONE: Fix this
   // If we detect power supply is dropping, then save energy data immediately
   //
-  if(/*AdcDataInArray[ADC_POWER_SENSE]<POWER_FAIL_SENSE_VALUE*/ 0)
+  if(!isDCPowerAvailableSample && !isACPowerAvailableSample)
   {
 
     if(!(InterruptFlag  & INT_DATA_SAVING_EEPROM))
@@ -153,6 +164,16 @@ void ProcessMainInterrupt(void)
   TempInt=TempInt-0x1000;
   IntCurBSolarPhase  =(float)TempInt-VIOffset.CurBSolarPhase;
   IntCurBSolarPhase *=WorkingCopyGain.IB_SOLAR_GAIN;
+
+  TempInt=AdcDataInArray[ADC_FAN_1];
+  TempInt=TempInt-0x1000;
+  IntFan1Current  =(float)TempInt-VIOffset.Fan1Current;
+  IntFan1Current *=WorkingCopyGain.FAN1_GAIN;
+
+  TempInt=AdcDataInArray[ADC_FAN_2];
+  TempInt=TempInt-0x1000;
+  IntFan2Current  =(float)TempInt-VIOffset.Fan2Current;
+  IntFan2Current *=WorkingCopyGain.FAN2_GAIN;
 
   // UNDONE: Do the current & power calculation for solar
 
@@ -282,6 +303,26 @@ void ProcessMainInterrupt(void)
   BSolarVolSample.PrevIn_1=IntVolBSolarPhase;
   IntVolBSolarPhase=TempGainMult;
 
+  TempGainMult=(Fan1CurrentSample.PrevIn_2+IntFan1Current)*FILT_600_COEFF_X1+\
+                Fan1CurrentSample.PrevIn_1*FILT_600_COEFF_X2+\
+                Fan1CurrentSample.PrevOut_1*FILT_600_COEFF_Y1+\
+                Fan1CurrentSample.PrevOut_2*FILT_600_COEFF_Y2;
+  Fan1CurrentSample.PrevOut_2=Fan1CurrentSample.PrevOut_1;
+  Fan1CurrentSample.PrevOut_1=TempGainMult;
+  Fan1CurrentSample.PrevIn_2=Fan1CurrentSample.PrevIn_1;
+  Fan1CurrentSample.PrevIn_1=IntFan1Current;
+  IntFan1Current=TempGainMult;
+
+  TempGainMult=(Fan2CurrentSample.PrevIn_2+IntFan2Current)*FILT_600_COEFF_X1+\
+                Fan2CurrentSample.PrevIn_1*FILT_600_COEFF_X2+\
+                Fan2CurrentSample.PrevOut_1*FILT_600_COEFF_Y1+\
+                Fan2CurrentSample.PrevOut_2*FILT_600_COEFF_Y2;
+  Fan2CurrentSample.PrevOut_2=Fan2CurrentSample.PrevOut_1;
+  Fan2CurrentSample.PrevOut_1=TempGainMult;
+  Fan2CurrentSample.PrevIn_2=Fan2CurrentSample.PrevIn_1;
+  Fan2CurrentSample.PrevIn_1=IntFan2Current;
+  IntFan2Current=TempGainMult;
+
   OneSecCounter++;
   if(SampleCounter==(NO_OF_SAMPLES-1))
   {
@@ -337,6 +378,11 @@ void ProcessMainInterrupt(void)
     IntDataSave.OffsetCurRSolarPhase=IntDataSum.OffsetCurRSolarPhase;
     IntDataSave.OffsetCurYSolarPhase=IntDataSum.OffsetCurYSolarPhase;
     IntDataSave.OffsetCurBSolarPhase=IntDataSum.OffsetCurBSolarPhase;
+
+    IntDataSave.Fan1Current=IntDataSum.Fan1Current;
+    IntDataSave.Fan2Current=IntDataSum.Fan2Current;
+    IntDataSave.OffsetFan1Current=IntDataSum.OffsetFan1Current;
+    IntDataSave.OffsetFan2Current=IntDataSum.OffsetFan2Current;
 
     memset(&IntDataSum, 0, sizeof(IntDataSum));
  
@@ -538,7 +584,12 @@ void ProcessMainInterrupt(void)
   IntDataSum.RSolarPhasePower +=IntVolRSolarPhase*IntCurRSolarPhase;
   IntDataSum.YSolarPhasePower +=IntVolYSolarPhase*IntCurYSolarPhase;
   IntDataSum.BSolarPhasePower +=IntVolBSolarPhase*IntCurBSolarPhase;
-  
+ 
+  IntDataSum.Fan1Current += IntFan1Current*IntFan1Current;
+  IntDataSum.Fan2Current += IntFan2Current*IntFan2Current;
+  IntDataSum.OffsetFan1Current += IntFan1Current;
+  IntDataSum.OffsetFan2Current += IntFan2Current;
+
   // Summation for FFT Purpose
   
   
@@ -634,9 +685,13 @@ static bool IsLoadOnGridContactorOn()
 {
     return INPUT_LOAD_ON_GRID_CONTACTOR_ON;
 }
-static bool IsSPDFailed()
+static bool IsSolarIsolatorOn()
 {
-    return !INPUT_SPD_HEALTHY;
+    return INPUT_SOLAR_ISOLATOR_ON;
+}
+static bool IsGridMCBOn()
+{
+    return INPUT_GRID_MCB_ON;
 }
 static bool IsDGOff()
 {
@@ -644,7 +699,11 @@ static bool IsDGOff()
 }
 static bool IsDC48Available()
 {
-    return INPUT_48V_AVAILABLE;
+    return isDCPowerAvailableSample;
+}
+static bool IsACAuxAvailable()
+{
+    return isACPowerAvailableSample;
 }
 
 // This is called to read digital inputs (debouncing)
@@ -690,9 +749,14 @@ void ReadInputs()
             .read = IsLoadOnGridContactorOn,
         },
         {
-            .val = &g_DigInputs.SPDFailed,
+            .val = &g_DigInputs.SolarIsolatorOn,
             .timer = MAX_DEBOUNCING_TICK,
-            .read = IsSPDFailed,
+            .read = IsSolarIsolatorOn,
+        },
+        {
+            .val = &g_DigInputs.GridMCBOn,
+            .timer = MAX_DEBOUNCING_TICK,
+            .read = IsGridMCBOn,
         },
         {
             .val = &g_DigInputs.DGOff,
@@ -703,6 +767,11 @@ void ReadInputs()
             .val = &g_DigInputs.DC48Available,
             .timer = MAX_DEBOUNCING_TICK,
             .read = IsDC48Available,
+        },
+        {
+            .val = &g_DigInputs.ACAuxAvailable,
+            .timer = MAX_DEBOUNCING_TICK,
+            .read = IsACAuxAvailable,
         },
     };
 

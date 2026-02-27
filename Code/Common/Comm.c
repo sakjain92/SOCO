@@ -386,7 +386,10 @@ void DirectCalibration(void)
       (InstantPara.CurrentBSolar >I_H_LOWER_LIMIT) && (InstantPara.CurrentBSolar<I_H_UPPER_LIMIT)&&
       (InstantPara.TotalPowerRSolar<PF_POWER_H_UPPER_LIMIT)&&(InstantPara.TotalPowerRSolar>PF_POWER_H_LOWER_LIMIT)&&
       (InstantPara.TotalPowerYSolar<PF_POWER_H_UPPER_LIMIT)&&(InstantPara.TotalPowerYSolar>PF_POWER_H_LOWER_LIMIT)&&
-      (InstantPara.TotalPowerBSolar<PF_POWER_H_UPPER_LIMIT)&&(InstantPara.TotalPowerBSolar>PF_POWER_H_LOWER_LIMIT)
+      (InstantPara.TotalPowerBSolar<PF_POWER_H_UPPER_LIMIT)&&(InstantPara.TotalPowerBSolar>PF_POWER_H_LOWER_LIMIT)&&
+
+      (InstantPara.Fan1Current<FAN_CUR_HIGHER_LIMIT)&&(InstantPara.Fan1Current>FAN_CUR_LOWER_LIMIT)&&
+      (InstantPara.Fan2Current<FAN_CUR_HIGHER_LIMIT)&&(InstantPara.Fan2Current>FAN_CUR_LOWER_LIMIT)
     )  
 
    {
@@ -409,6 +412,9 @@ void DirectCalibration(void)
       CalBuffer.IR_SOLAR_HIGH_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_HIGH*CalBuffer.IR_SOLAR_HIGH_GAIN)/CalCurRSolar);
       CalBuffer.IY_SOLAR_HIGH_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_HIGH*(float)CalBuffer.IY_SOLAR_HIGH_GAIN)/CalCurYSolar);
       CalBuffer.IB_SOLAR_HIGH_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_HIGH*(float)CalBuffer.IB_SOLAR_HIGH_GAIN)/CalCurBSolar);
+
+      CalBuffer.FAN1_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_FAN_CUR_SETTING*(float)CalBuffer.FAN1_GAIN)/CalFan1Current);
+      CalBuffer.FAN2_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_FAN_CUR_SETTING*(float)CalBuffer.FAN2_GAIN)/CalFan2Current);
    }
    else
    {
@@ -450,6 +456,9 @@ void AccumulateDataForCalibration(void)
    CalPowRSolar+=InstantPara.TotalPowerRSolar;
    CalPowYSolar+=InstantPara.TotalPowerYSolar;
    CalPowBSolar+=InstantPara.TotalPowerBSolar;
+
+   CalFan1Current+=InstantPara.Fan1Current;
+   CalFan2Current+=InstantPara.Fan2Current;
  }
 
 /*
@@ -478,6 +487,9 @@ void ClearCalAccumulatedData(void)
    CalPowRSolar=0;
    CalPowYSolar=0;
    CalPowBSolar=0;
+
+   CalFan1Current=0;
+   CalFan2Current=0;
 }
 
 /*

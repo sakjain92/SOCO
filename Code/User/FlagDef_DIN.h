@@ -87,7 +87,7 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 
 
 #define MAX_PARAM_LIMIT  17
-#define POWER_FAIL_SENSE_VALUE    2200
+#define POWER_FAIL_SENSE_VALUE    1241
 
 
 
@@ -152,6 +152,8 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 #define   POWER_COEFF_3P4W         2.786537E-08f
 
 #define  FUND_POWER_COEFF          4.3540E-08f
+
+#define  FAN_CURRENT_COEFF         5.1790E-06f
 
 // Minimum voltage to maintain 0.5% accuracy is about 33VAC. Taking some margin
 // UNDONE: Figure out the correct minimum value for Currents as per metering
@@ -259,6 +261,8 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 #define        VOLTAGE_TOLERANCE                     0.1f
 #define        POWER_TOLERANCE                       0.4f 
 
+#define        CAL_FAN_CUR_SETTING                   0.1f
+#define        FAN_CUR_TOLERANCE                     0.2f
 
 #define         CAL_UPF_POWER_SETTING_HIGH     ( NO_OF_CAL_ACCUMULATION_POW*CAL_VOLTAGE_SETTING_HIGH*CAL_CURRENT_SETTING_HIGH)
 #define         CAL_PF_POWER_SETTING_HIGH      (CAL_UPF_POWER_SETTING_HIGH/2)
@@ -295,6 +299,9 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 #define         UPF_POWER_L_LOWER_LIMIT        (CAL_VOLTAGE_SETTING_HIGH*CAL_CURRENT_SETTING_LOW*(1-POWER_TOLERANCE))
 #define         PF_POWER_L_UPPER_LIMIT         (UPF_POWER_L_UPPER_LIMIT*0.5)
 #define         PF_POWER_L_LOWER_LIMIT         (UPF_POWER_L_LOWER_LIMIT *0.5)
+
+#define         FAN_CUR_HIGHER_LIMIT           (CAL_FAN_CUR_SETTING*(1+FAN_CUR_TOLERANCE))
+#define         FAN_CUR_LOWER_LIMIT            (CAL_FAN_CUR_SETTING*(1-FAN_CUR_TOLERANCE))
 
 #define         PROTECTION_BIT_LOW             TO_BOOL(!(GPIOC->IDR & 0X200))
 #define         PROTECTION_BIT_HIGH            TO_BOOL(GPIOC->IDR & 0X200)
@@ -401,6 +408,9 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 #define SWITCH_OFF_CONTACTOR_LOAD_ON_GRID          TURN_RELAY5_ON
 #define SWITCH_ON_CONTACTOR_LOAD_ON_GRID           TURN_RELAY5_OFF
 
+#define SWITCH_OFF_FANS                            TURN_RELAY6_ON
+#define SWITCH_ON_FANS                             TURN_RELAY6_OFF
+
 // Inputs are Active Low
 // Inputs from contactors are NO when they are open
 // Input from SPD is NO when it's healthy
@@ -412,9 +422,9 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 #define INPUT_B_PHASE_GRID_HEALTHY_CONTACTOR_ON    TO_BOOL(!(GPIOC->IDR & PORT_BIT_8))
 #define INPUT_LOAD_ON_SOLAR_CONTACTOR_ON           TO_BOOL(!(GPIOA->IDR & PORT_BIT_8))
 #define INPUT_LOAD_ON_GRID_CONTACTOR_ON            TO_BOOL(!(GPIOF->IDR & PORT_BIT_6))
-#define INPUT_SPD_HEALTHY                          TO_BOOL(GPIOD->IDR & PORT_BIT_0)
-#define INPUT_DG_RUNNING                           TO_BOOL(GPIOD->IDR & PORT_BIT_1)
-#define INPUT_48V_AVAILABLE                        TO_BOOL(!(GPIOD->IDR & PORT_BIT_2))
+#define INPUT_SOLAR_ISOLATOR_ON                    TO_BOOL(!(GPIOD->IDR & PORT_BIT_0))
+#define INPUT_GRID_MCB_ON                          TO_BOOL(!(GPIOD->IDR & PORT_BIT_1))
+#define INPUT_DG_RUNNING                           TO_BOOL(!(GPIOD->IDR & PORT_BIT_2))
 
 #define PARA_ONLY_DATA  1
 #define PARA_WITH_DEC   2
@@ -447,6 +457,13 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 
 #define Stopbit_one     0
 #define Stopbit_two     1
+
+#define   ADC_DC_PWR            0
+#define   ADC_AC_PWR            1
+#define   ADC_FAN_1             2
+#define   ADC_FAN_2             3
+#define   ADC_A_TEMP            4
+
 #define    ADC_IR               0
 #define    ADC_VR               1
 #define    ADC_IY               2
