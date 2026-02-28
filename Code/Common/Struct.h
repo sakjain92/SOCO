@@ -101,6 +101,8 @@ struct INT_DATA_SUM
   float        Fan2Current;
   float        OffsetFan1Current;
   float        OffsetFan2Current;
+
+  float        AmbientTemperature;
 };
 
 
@@ -155,6 +157,8 @@ struct INT_DATA_SAVE
   float     Fan2Current;
   float     OffsetFan1Current;
   float     OffsetFan2Current;
+
+  float     AmbientTemperature;
 };
 
 struct INT_TIMER_COUNT
@@ -205,7 +209,7 @@ struct INST_PARA
   float     FunBVol;
   float     Fan1Current;
   float     Fan2Current;
-  float     Spare3;
+  float     AmbientTemperature;
  
   float     HarRPhaseVol;
   float     HarYPhaseVol;

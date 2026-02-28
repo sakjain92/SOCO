@@ -74,7 +74,8 @@ Upto 10 its just the decimal place
 #define DIS_SOLAR_VAR_POS_EXP       44
 #define DIS_SOLAR_VAR_NEG_EXP       45
 
-#define DIS_VAL_FAN_CURRENT         46         
+#define DIS_VAL_FAN_CURRENT         46    
+#define DIS_VAL_TEMPERATURE         47
 
 const uint8_t StrRY[]="RY";
 const uint8_t StrYB[]="YB";
@@ -100,7 +101,7 @@ const uint8_t StrVA[]="VA";
 const uint8_t StrVR[]="VR";
 const uint8_t StrPF[]="PF";
 
-
+const uint8_t StrC[]="C";
 
 
 
@@ -789,6 +790,14 @@ const struct object Screen[][3]=
       { DATA_TYPE_VARIABLE,     &InstantPara.Fan2Current,4,     DIS_VAL_FAN_CURRENT,    DIGIT_3,         0,             LED_OFF         },
       { 0xff,                   0,                      0,      0,                      DIGIT_3,         0,             0,              }
   },
+
+  // SCREEN 103: FAN 2 Current
+  {
+      { DATA_TYPE_STRING,       0,                      0,      0,                      DIGIT_2,         StrC,          LED_OFF         },   
+      { DATA_TYPE_VARIABLE,     &InstantPara.AmbientTemperature,4,     DIS_VAL_TEMPERATURE,    DIGIT_3,  0,             LED_OFF         },
+      { 0xff,                   0,                      0,      0,                      DIGIT_3,         0,             0,              }
+  },
+
 
 };
 

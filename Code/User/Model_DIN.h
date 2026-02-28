@@ -247,7 +247,8 @@
 // 230) Remove single ended current measuring circuit & corresponding all zero ohm resistors. Hopefully this will make layout easier. Make sure voltage pins on MCU and current pins on MCU are away
 // from each other if possible
 // 231) Check current and voltage measurement at 60Hz/40Hz. We currently have SDADC3 running very close to maximum frequency at 50Hz input signal.
-// We should move some of the current sampling to ADC instead of SDADC and reduce SDADC to maximum of 3 channels per SDADC
+// We should move some of the current sampling to ADC instead of SDADC and reduce SDADC to maximum of 3 channels per SDADC. Or reduce sampling frequency from 3200 (50*64) to 1600 (50*32) by using 32
+// sin/cos FT table. Less accurate FT. Matters mostly for low current measurement.
 // 232) Check that voltage on inverting pin of op-amp in voltage section doesn't go negative during surge (-900V). We can reduce magnitude via using 4x gain in SDADC if required
 // 233) Check the meter passes IEC definition of Class 1 Meter (Ib = 10A, Imax = 100A)
 // 234) Is DC power supply or AC power supply ESD protected? Issue during production?
@@ -258,6 +259,10 @@
 // 239) Relays will be turned on continuously. They are rated for 5V. Are we generating exactly 5V or higher voltage? Even 5.5V will cause issue as relays will be 24x7 turned on in some cases
 // Do we need a voltage LDO? 6V relays are non standard so procurement will be issue
 // 240) Check with PI if Power Supply section is protected from ESD properly (Is TNY protected against ESD and can ESD travel across transformer?) Should we add TVS on outputs of transfomer?
+// 241) Make sure all through hole components are cleared from soldering point for any other SMD/throughhole component
+// 242) LM355 is obselete. But we are still using it as we expect this SOCO project to not last too long and LM35 is more expensive than LM355
+// 243) Add calibration for Ambient temperature 
+//
 //
 // NOTES:
 // 1) For Apparent power, we are using RMS (IEC 60038) instead of (IEC 61000-4-7) where we just measure first harmonics as we need to match energy with utility meter (and SMPS will have noise)

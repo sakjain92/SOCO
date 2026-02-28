@@ -31,7 +31,7 @@ void DisplayRunHr(uint32_t Data,uint8_t ScrIndex, uint8_t DisIndex );
 void SetVersionDisplay(void);
 void ConvertToBCB(int32_t Data);
 void DisplayInterruption(uint32_t Data,uint8_t ScrIndex, uint8_t DisIndex );
-
+void DisplayTemperature(float TempFloat,uint8_t ScrIndex, uint8_t DisIndex );
 
 uint8_t ResolveDisplayDecimal;  
 
@@ -68,6 +68,9 @@ void DisplayUpdate(void)
                switch(Screen[DisplayIndex][ScreenIndex].DecPos)
                {
                
+                case DIS_VAL_TEMPERATURE:
+                 DisplayTemperature(*Screen[DisplayIndex][ScreenIndex].Variable,ScreenIndex,DisplayIndex);
+                 break;
                 case DIS_VAL_FAN_CURRENT:
                  DisplayCurrentVol(*Screen[DisplayIndex][ScreenIndex].Variable,ScreenIndex,DisplayIndex);
                  break;
@@ -421,7 +424,17 @@ void DisplayCurrentVol(float TempFloat,uint8_t ScrIndex, uint8_t DisIndex )
   }
 }
 
+void DisplayTemperature(float TempFloat,uint8_t ScrIndex, uint8_t DisIndex )
+{
   
+  LcdEpromBuffer[0]=0;
+  DisplayVariable(0,Screen[DisIndex][ScrIndex].NumOfDigits,
+               ROW_TOP,
+               Screen[DisIndex][ScrIndex].DigitAdd,
+               (uint32_t)TempFloat,Screen[DisIndex][ScrIndex].LedType);
+}
+
+ 
 void DisplayPower(float TempFloat,uint8_t ScrIndex, uint8_t DisIndex )
 {
   uint8_t TempFlag=0;

@@ -155,6 +155,8 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 
 #define  FAN_CURRENT_COEFF         5.1790E-06f
 
+#define  AMBIENT_TEMP_COEFF        2.929687E-05f
+
 // Minimum voltage to maintain 0.5% accuracy is about 33VAC. Taking some margin
 // UNDONE: Figure out the correct minimum value for Currents as per metering
 // standard for 0.5 class metering.

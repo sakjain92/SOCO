@@ -198,7 +198,16 @@ void Metrology(void)
   }
   
   if(InstantPara.VolBRSolar<MIN_VOL_LIMIT_PH_PH)InstantPara.VolBRSolar=0;
- 
+
+  if (InstantPara.AmbientTemperature < 0)
+  {
+      InstantPara.AmbientTemperature = 0;
+  }
+  else if (InstantPara.AmbientTemperature > 100)
+  {
+      InstantPara.AmbientTemperature = 100;
+  }
+
   // Min/Max
   /*
   InstantPara.CurrentR=1.234;
@@ -898,4 +907,6 @@ void CalculateVoCur(void)
 
   InstantPara.Fan1Current=FAN_CURRENT_COEFF*sqrt(IntDataSave.Fan1Current);
   InstantPara.Fan2Current=FAN_CURRENT_COEFF*sqrt(IntDataSave.Fan2Current);
+
+  InstantPara.AmbientTemperature=AMBIENT_TEMP_COEFF*(IntDataSave.AmbientTemperature) - 273.0;
 }

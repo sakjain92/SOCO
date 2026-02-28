@@ -127,6 +127,9 @@
 #define SCREEN_FAN_2_DISPLAY           101
 #define SCREEN_FAN_2_CURRENT           102
 
+// Temperature
+#define SCREEN_AMBIENT_TEMPERATURE     103
+
   const uint8_t SCREEN_SEQ_3P_MAIN[]=  
   {
    SCREEN_VOL_LN_R,             
@@ -201,6 +204,7 @@
    SCREEN_FAN_1_CURRENT,
    SCREEN_FAN_2_DISPLAY,
    SCREEN_FAN_2_CURRENT,
+   SCREEN_AMBIENT_TEMPERATURE,
    0XFF,
   };
   const uint8_t SCREEN_SEQ_OLD_DATA[]=
