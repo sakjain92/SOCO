@@ -199,6 +199,15 @@ void Metrology(void)
   
   if(InstantPara.VolBRSolar<MIN_VOL_LIMIT_PH_PH)InstantPara.VolBRSolar=0;
 
+  if (InstantPara.Fan1Current<MIN_FAN_CURRENT)
+  {
+    InstantPara.Fan1Current = 0;
+  }
+  if (InstantPara.Fan2Current<MIN_FAN_CURRENT)
+  {
+    InstantPara.Fan2Current = 0;
+  }
+
   if (InstantPara.AmbientTemperature < 0)
   {
       InstantPara.AmbientTemperature = 0;

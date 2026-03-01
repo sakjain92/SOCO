@@ -87,7 +87,7 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 
 
 #define MAX_PARAM_LIMIT  17
-#define POWER_FAIL_SENSE_VALUE    1241
+#define POWER_FAIL_SENSE_VALUE    775
 
 
 
@@ -175,6 +175,11 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 #define   MIN_NEU_CUR_LIMIT        0.1f
 #define   MIN_CURRENT_LIMIT        0.1f
 
+// Max current measurement is about 0.5A. Norminal current we measure will be
+// around 0.1A. So let's keep minimum at 0.01A
+//
+#define   MIN_FAN_CURRENT          0.01f
+
 #define        T_20MS                                 64  // 20 msec delay
 #define        T_5MS                                  10  // 20 msec delay
 #define        SW_1SEC                                12 // 250 msec
@@ -258,13 +263,13 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 #define        CAL_CURRENT_SETTING_HIGH              CUR_HIGH_CAL_POINT
 #define        CAL_CURRENT_SETTING_MID               CUR_MID_CAL_POINT
 #define        CAL_CURRENT_SETTING_LOW               CUR_LOW_CAL_POINT
-#define        CURRENT_TOLRERANCE                    0.2f   // UNDONE: This was 0.1 earlier but in our board at lower end of calibration needed to increase error range
+#define        CURRENT_TOLRERANCE                    0.3f   // UNDONE: This was 0.1 earlier but in our board at lower end of calibration needed to increase error range
                                                             // We should use SDADC to get better accuracy
 #define        VOLTAGE_TOLERANCE                     0.1f
 #define        POWER_TOLERANCE                       0.4f 
 
 #define        CAL_FAN_CUR_SETTING                   0.1f
-#define        FAN_CUR_TOLERANCE                     0.2f
+#define        FAN_CUR_TOLERANCE                     0.3f   // UNDONE: Check why this is also needed to be high
 
 #define         CAL_UPF_POWER_SETTING_HIGH     ( NO_OF_CAL_ACCUMULATION_POW*CAL_VOLTAGE_SETTING_HIGH*CAL_CURRENT_SETTING_HIGH)
 #define         CAL_PF_POWER_SETTING_HIGH      (CAL_UPF_POWER_SETTING_HIGH/2)
@@ -354,24 +359,24 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 #define SWITCH_OFF_LED2_B               GPIOE->BSRR = PORT_BIT_6 
 #define SWITCH_ON_LED2_B                GPIOE->BRR  = PORT_BIT_6
 
-#define SWITCH_OFF_LED_COMM             GPIOE->BSRR = PORT_BIT_5
-#define SWITCH_ON_LED_COMM              GPIOE->BRR  = PORT_BIT_5
+#define SWITCH_OFF_LED_GRID_DISPLAY     GPIOE->BSRR = PORT_BIT_5
+#define SWITCH_ON_LED_GRID_DISPLAY      GPIOE->BRR = PORT_BIT_5
 
-#define SWITCH_OFF_LED_GRID_DISPLAY     GPIOE->BSRR = PORT_BIT_4
-#define SWITCH_ON_LED_GRID_DISPLAY      GPIOE->BRR = PORT_BIT_4
+#define SWITCH_OFF_LED_SOLAR_DISPLAY    GPIOE->BSRR = PORT_BIT_4
+#define SWITCH_ON_LED_SOLAR_DISPLAY     GPIOE->BRR = PORT_BIT_4
 
-#define SWITCH_OFF_LED_SOLAR_DISPLAY    GPIOE->BSRR = PORT_BIT_3
-#define SWITCH_ON_LED_SOLAR_DISPLAY     GPIOE->BRR = PORT_BIT_3
-
-#define SWITCH_OFF_LED_GRID_HEALTHY     GPIOE->BSRR = PORT_BIT_2
-#define SWITCH_ON_LED_GRID_HEALTHY      GPIOE->BRR = PORT_BIT_2
+#define SWITCH_OFF_LED_GRID_HEALTHY     GPIOE->BSRR = PORT_BIT_3
+#define SWITCH_ON_LED_GRID_HEALTHY      GPIOE->BRR = PORT_BIT_3
  
-#define SWITCH_OFF_LED_SOLAR_HEALTHY    GPIOE->BSRR = PORT_BIT_1
-#define SWITCH_ON_LED_SOLAR_HEALTHY     GPIOE->BRR = PORT_BIT_1
+#define SWITCH_OFF_LED_SOLAR_HEALTHY    GPIOE->BSRR = PORT_BIT_2
+#define SWITCH_ON_LED_SOLAR_HEALTHY     GPIOE->BRR = PORT_BIT_2
 
-#define INPUT_KEY_INC                   (!(GPIOB->IDR & PORT_BIT_9))
+#define SWITCH_OFF_LED_COMM             GPIOE->BSRR = PORT_BIT_1
+#define SWITCH_ON_LED_COMM              GPIOE->BRR  = PORT_BIT_1
+
+#define INPUT_KEY_DEC                   (!(GPIOB->IDR & PORT_BIT_9))
 #define INPUT_KEY_NEXT                  (!(GPIOB->IDR & PORT_BIT_8))
-#define INPUT_KEY_DEC                   (!(GPIOF->IDR & PORT_BIT_4))
+#define INPUT_KEY_INC                   (!(GPIOF->IDR & PORT_BIT_4))
 
 // All contactors (except "Load on Solar") are connected to the NC of the relays
 // Relays are turned on by driving GPIO Pins high

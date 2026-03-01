@@ -63,8 +63,8 @@ const struct PH_COEFF_STRUCT CalibrationCoeff @ "FLASH_COEFF_SECTION"=
   0.0f, 
   0.0f,
   
-  0.0f,
-  0.0f,
+  1.0f,
+  1.0f,
 
   // Unused
   //

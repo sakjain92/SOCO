@@ -603,7 +603,7 @@ struct DigInputs
     bool LoadOnGridContactorOn;
     bool SolarIsolatorOn;
     bool GridMCBOn;
-    bool DGOff;              
+    bool DGOn;              
     bool DC48Available;          
     bool ACAuxAvailable;
 };

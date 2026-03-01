@@ -923,7 +923,11 @@ void DisplayDisabled(void)
   DISP_SR_OFF;
   //UpdateDisplay=1;
 };
-  
+
+// UNDONE: This is not working
+// a) Solar CT polarity inversion to checked
+// b) Incase of any error, there is no display
+//
 void StartCheckCTPolarity(void)
 {
   

@@ -475,7 +475,7 @@ void ProcessRelays()
     //
     pvsArray[3].shouldContactorBeOn = pvsArray[3].isHealthy &&
                                       (!pvsArray[4].isHealthy || g_DisableLoadOnGridSeconds) &&
-                                        (g_DigInputs.DGOff) &&
+                                        (!g_DigInputs.DGOn) &&
                                         !pvsArray[0].isPrevContactorOn &&
                                         !pvsArray[1].isPrevContactorOn &&
                                         !pvsArray[2].isPrevContactorOn &&
@@ -698,6 +698,9 @@ Ret: None
 void StartCalibration(void)
 {
 
+   // UNDONE: Test all LEDs and switches
+   // UNDONE: Test DC Aux and AC Aux
+   //
    if((SwPressed==KEY_DIR_CAL)&&(FlagDirectCalibration==0))
    {
       FlagDirectCalibration=CALIBRATE_OUT_1;
@@ -746,7 +749,7 @@ void StartCalibration(void)
            &g_DigInputs.LoadOnGridContactorOn,
            &g_DigInputs.SolarIsolatorOn,
            &g_DigInputs.GridMCBOn,
-           &g_DigInputs.DGOff
+           &g_DigInputs.DGOn
        };
        if (FlagDirectCalibration == CALIBRATE_IN_START)
        {
@@ -1136,6 +1139,8 @@ void SetWorkingGainBuffer(void)
   WorkingCopyGain.VR_SOLAR_GAIN=CalibrationCoeff.VR_SOLAR_240_GAIN;
   WorkingCopyGain.VY_SOLAR_GAIN=CalibrationCoeff.VY_SOLAR_240_GAIN;
   WorkingCopyGain.VB_SOLAR_GAIN=CalibrationCoeff.VB_SOLAR_240_GAIN;
+  WorkingCopyGain.FAN1_GAIN=CalibrationCoeff.FAN1_GAIN;
+  WorkingCopyGain.FAN2_GAIN=CalibrationCoeff.FAN2_GAIN;
 
   if(InstantPara.CurrentR>=CUR_MID_CAL_POINT)
   {

@@ -78,6 +78,9 @@ void ProcessMainInterrupt(void)
 
 #ifdef MODEL_DATA_SAVE   
   // If we detect power supply is dropping, then save energy data immediately
+  // UNDONE: This is not working
+  // Make sure it works and also make sure that it isn't being triggered
+  // multiple times
   //
   if(!isDCPowerAvailableSample && !isACPowerAvailableSample)
   {
@@ -700,9 +703,9 @@ static bool IsGridMCBOn()
 {
     return INPUT_GRID_MCB_ON;
 }
-static bool IsDGOff()
+static bool IsDGOn()
 {
-    return !INPUT_DG_RUNNING;
+    return INPUT_DG_RUNNING;
 }
 static bool IsDC48Available()
 {
@@ -766,9 +769,9 @@ void ReadInputs()
             .read = IsGridMCBOn,
         },
         {
-            .val = &g_DigInputs.DGOff,
+            .val = &g_DigInputs.DGOn,
             .timer = MAX_DEBOUNCING_TICK,
-            .read = IsDGOff,
+            .read = IsDGOn,
         },
         {
             .val = &g_DigInputs.DC48Available,

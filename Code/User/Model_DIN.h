@@ -261,7 +261,19 @@
 // 240) Check with PI if Power Supply section is protected from ESD properly (Is TNY protected against ESD and can ESD travel across transformer?) Should we add TVS on outputs of transfomer?
 // 241) Make sure all through hole components are cleared from soldering point for any other SMD/throughhole component
 // 242) LM355 is obselete. But we are still using it as we expect this SOCO project to not last too long and LM35 is more expensive than LM355
-// 243) Add calibration for Ambient temperature 
+// 243) Add calibration for Ambient temperature
+// 244) Add a 10k or 100k load on 21V PFC output so that it doesn't show high voltage
+// 245) Make sure relays are driven by 5V. For this feedback circuit in both DC and AC circuit should consists of 4.7V zener
+// 246) Make sure the communication power supply section starting from transformer output is completely isolated from rest of the circuit
+// 247) Make sure RC filter on Voltage, Current, Fan Current section are near to MCU pins as possible
+// 248) Make sure proper cuts between FAN Current inputs and RS485 as FAN current inputs are 240AC
+// 249) Add check that after calibration, shorting pin is removed
+// 250) Simplify calibration + self test (Maybe split them). Make it faster. Do it in front of me and understand how error prone?
+// 251) Fix a bug where wrong polarity of CT should cause Calibration to fail with message
+// 252) Note: There is some variation in voltage based on other phases angle/voltages. It's minor but it's still there.
+// 253) Check multiple times calibration doesn't impact any measurement
+// 254) Scope of BOM reduction: a) Remove 5V LDO, temperature sensors don't require fixed voltage b) Reduce MOV sizes c) Reduce MELF resistors from 4 to 3 as MOV exists (but make sure if MOV is slow to act, the resistors can protect still) d) Remove battery & oscillator (RTC not used) e) Make plastic cover
+// 255) DEVNOTE: Vref have to be atleast 2.4V.
 //
 //
 // NOTES:
