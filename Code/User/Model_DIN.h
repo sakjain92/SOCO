@@ -274,6 +274,24 @@
 // 253) Check multiple times calibration doesn't impact any measurement
 // 254) Scope of BOM reduction: a) Remove 5V LDO, temperature sensors don't require fixed voltage b) Reduce MOV sizes c) Reduce MELF resistors from 4 to 3 as MOV exists (but make sure if MOV is slow to act, the resistors can protect still) d) Remove battery & oscillator (RTC not used) e) Make plastic cover
 // 255) DEVNOTE: Vref have to be atleast 2.4V.
+// 256) Check BOM and see optimization possibilities. Also look into spacing between THT and SMT components to make selective soldering possible (BYV25D might not be needed. Too costly)
+// 257) Do we need conformal coating?
+// 258) Can we use usb-c port?
+// 259) ICT testing of MOVs to check values?
+// 260) Isolation between resistors and MOVs (physical isolation)
+// 261) MOV body to metallic body connection spacinng enough?
+// 262) Isolation for 10KV is not there realistically
+// 263) Start relays after sometime after the controller starts. Make sure there is delay to allow controller to start properly
+// 264) Can we use TNY285 instead of TNY280? Maybe don't change as TNY280 is used with this same transformer in COP
+// 265) Check RTC battery working fine in self-test
+// 266) Should switches be sealed
+// 267) Our hongfa relays are sealed type. They have a vent nob that needs to be mechanically opened after washing
+// 268) Make sure to mention on PCB labeling identification marks to prevent reverse components
+// 269) Make sure to add some identification mark on transformer so that it's easy to understand direction of placement
+// 270) We can also consider using Hongfa HF115F (HF115F/005-1ZS3 or G2RL-1-H-DC5)
+// 271) Should we use unidirectional 3.3V TVS for better protection
+// 272) Check the MELF resistor make in BOM. It's not the make it's supposed to be
+// 273) Cost optimization: Use 1/2W MELF resistors instead of 1W
 //
 //
 // NOTES:
@@ -327,6 +345,8 @@
 // 38) Canopy can be changed to reduced cost if possible (doesn't need to extend at back)
 // 39) Have to check Pad lock hole and also ask Kanoda to change the mechanical mounting structure
 // 40) BOM has been changed: 50A 3 pole MCB is being used, 1 sq mm wire is being used for control wiring. 35mmsq glands are being used.
+// 41) Gland plate to be earth. Glands also to be earth? Front door to be earth
+//
 //
 // Panel ventilation:
 // 1) IEC 60890 seems to state that ventilation cutouts with filters impede air circulation so much that it's equivalent to no cutouts
