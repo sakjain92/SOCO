@@ -656,8 +656,10 @@ void ProcessMainInterrupt(void)
     if(((USART2->ISR & 0X40) == 0x40)||(CounterSendComplete==TempInt)||(Timer.TransmissionFailed))
     {
       RS485Receive;
-      SWITCH_OFF_LED_COMM;
-     
+      if (!g_testingStatus.TestingModeEnabled)
+      {
+          g_LedStatus.Comm = false;
+      }
       Timer.transfercomplete=0;
       Timer.TransmissionFailed=0;
       CounterSendComplete=0;

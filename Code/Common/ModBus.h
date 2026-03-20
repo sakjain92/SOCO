@@ -14,6 +14,7 @@ extern struct Object Timer;
 extern uint16_t LoadExportOrGenerator;
 extern float PTPrimary, CTPrimary,PTSecondary,CTSecondary;
 extern float ModbusDummyFloatRegister;
+extern uint16_t SwPressed;
 
 #define CT_RATIO       2
 #define PT_RATIO       3
@@ -33,13 +34,13 @@ extern float ModbusDummyFloatRegister;
 #define InstPara_YphaseRMS      11
 #define InstPara_BphaseRMS      11
 #define InstPara_Demand         18
+// MAX_PARAM_LIMIT is here
 #define InstPara_LoadOnGridDisableSec 1
 #define InstPara_NewSolarAll    58
 #define InstPara_Solar_ENERGYIMPORT   7
 #define InstPara_Solar_ENERGYEXPORT   7
 
-#define InstPara_NewAll_Block1     27
-#define InstPara_NewAll_Block2     31
+#define InstPara_InternalTesting 1
 
 #define DATA_TYPE_16            2
 #define DATA_TYPE_32            4
@@ -779,6 +780,8 @@ const struct ModBusParameter BlockAll[]=
  { (uint8_t *)&CopySetPara[PARA_ENDIAN]                 ,          DATA_TYPE_16,     1       ,       1      },
 #endif
  
+ // LoadOnGridDisableSec
+ //
  {(uint8_t *)&g_DisableLoadOnGridSeconds                ,          DATA_TYPE_32,     1       ,       1      },
 
  // SOLAR
@@ -962,6 +965,7 @@ const struct ModBusParameter BlockAll[]=
   { (uint8_t *)&StorageBuffer.SolarExportInterruptions,	   DATA_TYPE_16	,	0	,	1	},
 #endif
 
+  { (uint8_t *)&SwPressed,                                 DATA_TYPE_16,     1       ,       1      },
 };
 
 // DEVNOTE: Digital inputs are read using read input status

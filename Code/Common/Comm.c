@@ -72,6 +72,9 @@ struct ModbusTableSection_t ModbusTableSections[] =
     {
         12200, InstPara_Solar_ENERGYEXPORT
     },
+    {
+        50000, InstPara_InternalTesting
+    }
 };
 
 /*
@@ -952,6 +955,10 @@ void ModBusCommunication(void)
                 {
                     g_testingStatus.Status[Start_Add - 40000] = enable;
                 }
+                else if (Start_Add >= 60000 && Start_Add <= 60000 + sizeof(g_LedStatus))
+                {
+                    g_LedStatus.Status[Start_Add - 60000] = enable;
+                }
                 else
                 {
                     Fun_Received |= 0x80;
@@ -1023,7 +1030,10 @@ void SendData_UART(uint8_t Add, uint8_t Func,  uint8_t Send_Length)
       Temp_CRC_Value = ModBusCRCCalculation(&Mod_TransmitFrame.Slave_Address,(Send_Length+2));   
       Mod_TransmitFrame.Data_Array[Send_Length] = Temp_CRC_Value;
       Mod_TransmitFrame.Data_Array[Send_Length+1] = Temp_CRC_Value>>8;
-      SWITCH_ON_LED_COMM;
+      if (!g_testingStatus.TestingModeEnabled)
+      {
+        g_LedStatus.Comm = true;
+      }
       RS485Transmit;
       Delay1Msec12Mhz(4);
       DMA1_Channel7->CCR &=~ 0x01;

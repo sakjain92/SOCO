@@ -13,7 +13,8 @@
 #include "extern_includes.h"
 
 extern const struct PH_COEFF_STRUCT CalibrationCoeff;
-
+void ProcessLeds();
+void ProcessRelays();
 
 /*
 Inf: Main Application 
@@ -31,10 +32,6 @@ void main(void)
   DisplayDisabled();
   SetInitialDisplay();
   RS485Receive;
-  SWITCH_OFF_LED_COMM;
-  SWITCH_OFF_LED2_R;
-  SWITCH_OFF_LED2_G;
-  SWITCH_OFF_LED2_B;
   MeterInit(); 
   if(StorageBuffer.RunningMode==RUNNING_MODE_IMPORT)StorageBuffer.ImportInterruptions++;
   else StorageBuffer.ExportInterruptions++;
@@ -54,7 +51,9 @@ void main(void)
   while(1)
   {
     RESET_WATCH_DOG;
-    CheckKey();    
+    CheckKey();
+    ProcessRelays();
+    ProcessLeds();
     if(InterruptFlag & INT_CYCLE_OVER)
     {
       ProcessIntCycleOver();
@@ -165,21 +164,29 @@ void SwitchOnContactorBPhaseGridHealthy()
 {
     g_DigOutputs.BPhaseGridUnhealthyOutput = false;
 }
+// UNDONE: Should we have these LEDs turn on even incase of errors?
+// Maybe yes. Have these LEDs turn on and let the error led show there is
+// some system issue
+//
 void SwitchOffContactorLoadOnSolar()
 {
     g_DigOutputs.LoadOnSolarOutput = false;
+    g_LedStatus.LoadOnSolar = false;
 }
 void SwitchOnContactorLoadOnSolar()
 {
     g_DigOutputs.LoadOnSolarOutput = true;
+    g_LedStatus.LoadOnSolar = true;
 }
 void SwitchOffContactorLoadOnGrid()
 {
     g_DigOutputs.LoadOffGridOutput = true;
+    g_LedStatus.LoadOnGrid = false;
 }
 void SwitchOnContactorLoadOnGrid()
 {
     g_DigOutputs.LoadOffGridOutput = false;
+    g_LedStatus.LoadOnGrid = true;
 }
 void SwitchOffFans()
 {
@@ -188,6 +195,83 @@ void SwitchOffFans()
 void SwitchOnFans()
 {
     g_DigOutputs.FansOff = false;
+}
+
+// Changes the status of leds based on the internal state set for the LEDs
+//
+void ProcessLeds()
+{
+    if (g_LedStatus.Status[0])
+    {
+        SWITCH_ON_LED1;
+    }
+    else
+    {
+        SWITCH_OFF_LED1;
+    }
+    
+    if (g_LedStatus.Status[1])
+    {
+        SWITCH_ON_LED2;
+    }
+    else
+    {
+        SWITCH_OFF_LED2;
+    }
+
+    if (g_LedStatus.Status[2])
+    {
+        SWITCH_ON_LED3;
+    }
+    else
+    {
+        SWITCH_OFF_LED3;
+    }
+
+    if (g_LedStatus.Status[3])
+    {
+        SWITCH_ON_LED4;
+    }
+    else
+    {
+        SWITCH_OFF_LED4;
+    }
+
+    if (g_LedStatus.Status[4])
+    {
+        SWITCH_ON_LED5;
+    }
+    else
+    {
+        SWITCH_OFF_LED5;
+    }
+
+    if (g_LedStatus.Status[5])
+    {
+        SWITCH_ON_LED6;
+    }
+    else
+    {
+        SWITCH_OFF_LED6;
+    }
+
+    if (g_LedStatus.Status[6])
+    {
+        SWITCH_ON_LED7;
+    }
+    else
+    {
+        SWITCH_OFF_LED7;
+    }
+
+    if (g_LedStatus.Status[7])
+    {
+        SWITCH_ON_LED8;
+    }
+    else
+    {
+        SWITCH_OFF_LED8;
+    }
 }
 
 // Changes the status of relays based on the internal state set for the relays
@@ -663,7 +747,10 @@ void Process1SecOver(void)
     EditParaPassStatus = 0;
     EditPassCount = 0;
   }
-  if((ParaBlockIndex==0)&&(FlagDirectCalibration==0)&&(pwrDlyFlag))
+  if((ParaBlockIndex==0)&&
+     (FlagDirectCalibration==0)&&
+     (pwrDlyFlag)&&
+     (!g_testingStatus.TestingModeEnabled))
   {
     UpdateDisplayIndex();
     DisplayUpdate();
@@ -673,10 +760,18 @@ void Process1SecOver(void)
   // Long press KEY_NEXT causes issue when inside calibration
   // Also, it causes issue when we are editting settings
   //
-  if(FlagDirectCalibration==0 && ParaBlockIndex==0)CheckAutoScroll();
+  if(FlagDirectCalibration==0 &&
+      ParaBlockIndex==0 &&
+      !g_testingStatus.TestingModeEnabled)
+  {
+      CheckAutoScroll();
+  }
 
-  if (FlagDirectCalibration==0)ProcessContactors();
-  ProcessRelays();
+  if (FlagDirectCalibration==0 &&
+      !g_testingStatus.TestingModeEnabled)
+  {
+      ProcessContactors();
+  }
 }
 
 /*
@@ -691,7 +786,6 @@ void ProcessIntCycleOver(void)
   {
     InitUart(CopySetPara[PARA_BAUD_RATE],CopySetPara[PARA_PARITY],CopySetPara[PARA_STOP_BIT]);
     RS485Receive;
-    SWITCH_OFF_LED_COMM;
     Timer.transfercomplete=0;
     CounterSendComplete=0;
   }

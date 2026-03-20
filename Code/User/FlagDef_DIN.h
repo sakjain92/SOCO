@@ -351,33 +351,33 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 #define LED_SOLAR_B     9
 #define LED_SOLAR_TOTAL 10
 
-#define SWITCH_OFF_LED2_R               GPIOF->BSRR = PORT_BIT_10
-#define SWITCH_ON_LED2_R                GPIOF->BRR  = PORT_BIT_10
+#define SWITCH_OFF_LED1               GPIOF->BSRR = PORT_BIT_10
+#define SWITCH_ON_LED1                GPIOF->BRR  = PORT_BIT_10
 
-#define SWITCH_OFF_LED2_G               GPIOC->BSRR = PORT_BIT_13
-#define SWITCH_ON_LED2_G                GPIOC->BRR  = PORT_BIT_13
+#define SWITCH_OFF_LED2               GPIOC->BSRR = PORT_BIT_13
+#define SWITCH_ON_LED2                GPIOC->BRR  = PORT_BIT_13
 
-#define SWITCH_OFF_LED2_B               GPIOE->BSRR = PORT_BIT_6 
-#define SWITCH_ON_LED2_B                GPIOE->BRR  = PORT_BIT_6
+#define SWITCH_OFF_LED3               GPIOE->BSRR = PORT_BIT_6 
+#define SWITCH_ON_LED3                GPIOE->BRR  = PORT_BIT_6
 
-#define SWITCH_OFF_LED_GRID_DISPLAY     GPIOE->BSRR = PORT_BIT_5
-#define SWITCH_ON_LED_GRID_DISPLAY      GPIOE->BRR = PORT_BIT_5
+#define SWITCH_OFF_LED4               GPIOE->BSRR = PORT_BIT_5
+#define SWITCH_ON_LED4                GPIOE->BRR = PORT_BIT_5
 
-#define SWITCH_OFF_LED_SOLAR_DISPLAY    GPIOE->BSRR = PORT_BIT_4
-#define SWITCH_ON_LED_SOLAR_DISPLAY     GPIOE->BRR = PORT_BIT_4
+#define SWITCH_OFF_LED5               GPIOE->BSRR = PORT_BIT_4
+#define SWITCH_ON_LED5                GPIOE->BRR = PORT_BIT_4
 
-#define SWITCH_OFF_LED_GRID_HEALTHY     GPIOE->BSRR = PORT_BIT_3
-#define SWITCH_ON_LED_GRID_HEALTHY      GPIOE->BRR = PORT_BIT_3
+#define SWITCH_OFF_LED6               GPIOE->BSRR = PORT_BIT_3
+#define SWITCH_ON_LED6                GPIOE->BRR = PORT_BIT_3
  
-#define SWITCH_OFF_LED_SOLAR_HEALTHY    GPIOE->BSRR = PORT_BIT_2
-#define SWITCH_ON_LED_SOLAR_HEALTHY     GPIOE->BRR = PORT_BIT_2
+#define SWITCH_OFF_LED7               GPIOE->BSRR = PORT_BIT_2
+#define SWITCH_ON_LED7                GPIOE->BRR = PORT_BIT_2
 
-#define SWITCH_OFF_LED_COMM             GPIOE->BSRR = PORT_BIT_1
-#define SWITCH_ON_LED_COMM              GPIOE->BRR  = PORT_BIT_1
+#define SWITCH_OFF_LED8               GPIOE->BSRR = PORT_BIT_1
+#define SWITCH_ON_LED8                GPIOE->BRR  = PORT_BIT_1
 
-#define INPUT_KEY_DEC                   (!(GPIOB->IDR & PORT_BIT_9))
-#define INPUT_KEY_NEXT                  (!(GPIOB->IDR & PORT_BIT_8))
-#define INPUT_KEY_INC                   (!(GPIOF->IDR & PORT_BIT_4))
+#define INPUT_KEY_DEC                 (!(GPIOB->IDR & PORT_BIT_9))
+#define INPUT_KEY_NEXT                (!(GPIOB->IDR & PORT_BIT_8))
+#define INPUT_KEY_INC                 (!(GPIOF->IDR & PORT_BIT_4))
 
 // All contactors (except "Load on Solar") are connected to the NC of the relays
 // Relays are turned on by driving GPIO Pins high

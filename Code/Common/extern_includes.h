@@ -1,6 +1,7 @@
 #ifndef EXTERN_INCLUDES_H
 #define EXTERN_INCLUDES_H
 
+#include "Struct.h"
 #include <string.h>
 
 extern void Delay1Msec12Mhz( uint32_t Delay);
@@ -113,6 +114,7 @@ extern uint8_t Dec2DCBArray[16];
 extern struct DigInputs g_DigInputs;
 extern struct DigOutputs g_DigOutputs;
 extern struct TestingStatus g_testingStatus;
+extern struct LedStatus g_LedStatus;
 extern struct PowerSupplyStatus g_powerSupplyStatus;
 extern void SwitchOffContactorRPhaseGridHealthy();
 extern void SwitchOnContactorRPhaseGridHealthy();

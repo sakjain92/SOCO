@@ -313,6 +313,7 @@
 // 292) Slit type antenna gland is M20 cutout with 3mm or 2mm (RJ174 is 2.7mm by datasheet, 2.8mm by sample)
 // 293) Add SOCO serial number over Modbus
 // 294) Need to test negative/error cases in firmware
+// 295) We need to change PCB and SOCO box. Add fault LED if possible and center align all the LEDs with the display
 //
 // NOTES:
 // 1) For Apparent power, we are using RMS (IEC 60038) instead of (IEC 61000-4-7) where we just measure first harmonics as we need to match energy with utility meter (and SMPS will have noise)
@@ -417,4 +418,5 @@
 // 15) BOM: Blanking plugs and Glands costing to be revised. 
 // 16) Keep SOCO near fan. Shift SPD on opposite side of panel away from fan. Change drawing accordingly.
 // 17) Can use thimbles with two control wires inserted into one thimble as per Veerendra's suggestion if convinent
+// 18) We have a digital input free. We can directly connect DIN_COMM to it to check if DIN_COMM isn't shorted to earth or something else that causes it to go to 0
 

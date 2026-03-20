@@ -189,7 +189,10 @@ void DMA1_Channel7_IRQHandler(void)
   }
   DMA1_Channel7->CCR &=~ 0x0A;
   DMA1->IFCR |= (1 << (4 * (7-1)));
-  SWITCH_OFF_LED_COMM;
+  if (!g_testingStatus.TestingModeEnabled)
+  {
+    g_LedStatus.Comm = false;
+  }
 }
 
 

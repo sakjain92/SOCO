@@ -690,6 +690,33 @@ struct DigOutputs
 };
 COMPILE_ASSERT(sizeof(struct DigOutputs) == NUMBER_OF_RELAYS);
 
+// Defines various LED status
+//
+// DEVNOTE: This is sent over modbus. Keep them in order.
+// Also, using one bool per LED
+//
+#define NUMBER_OF_LEDS    8
+struct LedStatus
+{
+    union
+    {
+        bool Status[NUMBER_OF_LEDS];
+        struct
+        {
+            bool R;
+            bool G;
+            bool B;
+            bool Grid;
+            bool Solar;
+            bool LoadOnGrid;
+            bool LoadOnSolar;
+            bool Comm;
+        };
+    };
+};
+COMPILE_ASSERT(sizeof(struct LedStatus) == NUMBER_OF_LEDS);
+
+
 // Defines the various status related to testing/calibration
 //
 // DEVNOTE: This is sent over modbus. Keep them in order.

@@ -153,6 +153,10 @@ struct Alarms g_Alarms;
 //
 struct PowerSupplyStatus g_powerSupplyStatus;
 
+// Status of all the LEDs
+//
+struct LedStatus g_LedStatus;
+
 // Defines the timing for which Load is disconnected from both Solar & Grid
 //
 uint32_t g_DisableLoadOnGridSeconds;

@@ -251,81 +251,81 @@ void LedProcess(uint8_t LED_Type)
   switch(LED_Type)
   {
     case LED_OFF:
-      SWITCH_OFF_LED_GRID_DISPLAY;
-      SWITCH_OFF_LED_SOLAR_DISPLAY;
-      SWITCH_OFF_LED2_R;
-      SWITCH_OFF_LED2_G;
-      SWITCH_OFF_LED2_B;
+      g_LedStatus.Grid = false;
+      g_LedStatus.Solar = false;
+      g_LedStatus.R = false;
+      g_LedStatus.G = false;
+      g_LedStatus.B = false;
       break;
     case LED_GRID_NONE:
-      SWITCH_ON_LED_GRID_DISPLAY;
-      SWITCH_OFF_LED_SOLAR_DISPLAY;
-      SWITCH_OFF_LED2_R;
-      SWITCH_OFF_LED2_G;
-      SWITCH_OFF_LED2_B;
+      g_LedStatus.Grid = true;
+      g_LedStatus.Solar = false;
+      g_LedStatus.R = false;
+      g_LedStatus.G = false;
+      g_LedStatus.B = false;
       break;
     case LED_GRID_R:
-      SWITCH_ON_LED_GRID_DISPLAY;
-      SWITCH_OFF_LED_SOLAR_DISPLAY;
-      SWITCH_ON_LED2_R;
-      SWITCH_OFF_LED2_G;
-      SWITCH_OFF_LED2_B;
+      g_LedStatus.Grid = true;
+      g_LedStatus.Solar = false;
+      g_LedStatus.R = true;
+      g_LedStatus.G = false;
+      g_LedStatus.B = false;
       break;
     case LED_GRID_Y:
-      SWITCH_ON_LED_GRID_DISPLAY;
-      SWITCH_OFF_LED_SOLAR_DISPLAY;
-      SWITCH_ON_LED2_R;
-      SWITCH_ON_LED2_G;
-      SWITCH_OFF_LED2_B;
+      g_LedStatus.Grid = true;
+      g_LedStatus.Solar = false;
+      g_LedStatus.R = true;
+      g_LedStatus.G = true;
+      g_LedStatus.B = false;
       break;
     case LED_GRID_B:
-      SWITCH_ON_LED_GRID_DISPLAY;
-      SWITCH_OFF_LED_SOLAR_DISPLAY;
-      SWITCH_OFF_LED2_R;
-      SWITCH_OFF_LED2_G;
-      SWITCH_ON_LED2_B;
+      g_LedStatus.Grid = true;
+      g_LedStatus.Solar = false;
+      g_LedStatus.R = false;
+      g_LedStatus.G = false;
+      g_LedStatus.B = true;
       break;
     case LED_GRID_TOTAL:
-      SWITCH_ON_LED_GRID_DISPLAY;
-      SWITCH_OFF_LED_SOLAR_DISPLAY;
-      SWITCH_ON_LED2_R;
-      SWITCH_ON_LED2_G;
-      SWITCH_ON_LED2_B;
+      g_LedStatus.Grid = true;
+      g_LedStatus.Solar = false;
+      g_LedStatus.R = true;
+      g_LedStatus.G = true;
+      g_LedStatus.B = true;
       break;
     case LED_SOLAR_NONE:
-      SWITCH_OFF_LED_GRID_DISPLAY;
-      SWITCH_ON_LED_SOLAR_DISPLAY;
-      SWITCH_OFF_LED2_R;
-      SWITCH_OFF_LED2_G;
-      SWITCH_OFF_LED2_B;
+      g_LedStatus.Grid = false;
+      g_LedStatus.Solar = true;
+      g_LedStatus.R = false;
+      g_LedStatus.G = false;
+      g_LedStatus.B = false;
       break;
     case LED_SOLAR_R:
-      SWITCH_OFF_LED_GRID_DISPLAY;
-      SWITCH_ON_LED_SOLAR_DISPLAY;
-      SWITCH_ON_LED2_R;
-      SWITCH_OFF_LED2_G;
-      SWITCH_OFF_LED2_B;
+      g_LedStatus.Grid = false;
+      g_LedStatus.Solar = true;
+      g_LedStatus.R = true;
+      g_LedStatus.G = false;
+      g_LedStatus.B = false;
       break;
     case LED_SOLAR_Y:
-      SWITCH_OFF_LED_GRID_DISPLAY;
-      SWITCH_ON_LED_SOLAR_DISPLAY;
-      SWITCH_ON_LED2_R;
-      SWITCH_ON_LED2_G;
-      SWITCH_OFF_LED2_B;
+      g_LedStatus.Grid = false;
+      g_LedStatus.Solar = true;
+      g_LedStatus.R = true;
+      g_LedStatus.G = true;
+      g_LedStatus.B = false;
       break;
     case LED_SOLAR_B:
-      SWITCH_OFF_LED_GRID_DISPLAY;
-      SWITCH_ON_LED_SOLAR_DISPLAY;
-      SWITCH_OFF_LED2_R;
-      SWITCH_OFF_LED2_G;
-      SWITCH_ON_LED2_B;
+      g_LedStatus.Grid = false;
+      g_LedStatus.Solar = true;
+      g_LedStatus.R = false;
+      g_LedStatus.G = false;
+      g_LedStatus.B = true;
       break;
     case LED_SOLAR_TOTAL:
-      SWITCH_OFF_LED_GRID_DISPLAY;
-      SWITCH_ON_LED_SOLAR_DISPLAY;
-      SWITCH_ON_LED2_R;
-      SWITCH_ON_LED2_G;
-      SWITCH_ON_LED2_B;
+      g_LedStatus.Grid = false;
+      g_LedStatus.Solar = true;
+      g_LedStatus.R = true;
+      g_LedStatus.G = true;
+      g_LedStatus.B = true;
       break;
   }
 }

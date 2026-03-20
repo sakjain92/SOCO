@@ -266,14 +266,14 @@ static void InitPort(void)
   GPIOF->AFR[0]=0;
   GPIOF->AFR[1]=0;
 
-  SWITCH_OFF_LED_COMM;
-  SWITCH_OFF_LED2_R;
-  SWITCH_OFF_LED2_G;
-  SWITCH_OFF_LED2_B;
-  SWITCH_OFF_LED_GRID_DISPLAY;
-  SWITCH_OFF_LED_SOLAR_DISPLAY;
-  SWITCH_OFF_LED_GRID_HEALTHY;
-  SWITCH_OFF_LED_SOLAR_HEALTHY;
+  SWITCH_OFF_LED1;
+  SWITCH_OFF_LED2;
+  SWITCH_OFF_LED3;
+  SWITCH_OFF_LED4;
+  SWITCH_OFF_LED5;
+  SWITCH_OFF_LED6;
+  SWITCH_OFF_LED7;
+  SWITCH_OFF_LED8;
 
   TURN_RELAY1_OFF;
   TURN_RELAY2_OFF;
@@ -601,7 +601,10 @@ void InitUart(uint8_t baud,uint8_t parity1,uint8_t Stopbit1)
   if (Stopbit1==Stopbit_one) USART2->CR2=0x00;
   else if(Stopbit1==Stopbit_two) USART2->CR2=0x200;
   RS485Receive;
-  SWITCH_OFF_LED_COMM;
+  if (!g_testingStatus.TestingModeEnabled)
+  {
+    g_LedStatus.Comm = false;
+  }
   USART2->CR1 |= 0x400002C;            // Transmitter enable, Receiver enable, RXNEIE,Receiver timeout interrupt enable
   USART2->CR2 |=  0x800000;             //Receiver timeout enable 
   USART2->CR3 =  0x1080;                 // DMA
