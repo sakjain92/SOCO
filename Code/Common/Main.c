@@ -143,53 +143,108 @@ void ProcessFreq(void)
 
 void SwitchOffContactorRPhaseGridHealthy()
 {
-    SWITCH_OFF_CONTACTOR_R_PHASE_GRID_HEALTHY;
+    g_DigOutputs.RPhaseGridUnhealthyOutput = true;
 }
 void SwitchOnContactorRPhaseGridHealthy()
 {
-    SWITCH_ON_CONTACTOR_R_PHASE_GRID_HEALTHY;
+    g_DigOutputs.RPhaseGridUnhealthyOutput = false;
 }
 void SwitchOffContactorYPhaseGridHealthy()
 {
-    SWITCH_OFF_CONTACTOR_Y_PHASE_GRID_HEALTHY;
+    g_DigOutputs.YPhaseGridUnhealthyOutput = true;
 }
 void SwitchOnContactorYPhaseGridHealthy()
 {
-    SWITCH_ON_CONTACTOR_Y_PHASE_GRID_HEALTHY;
+    g_DigOutputs.YPhaseGridUnhealthyOutput = false;
 }
 void SwitchOffContactorBPhaseGridHealthy()
 {
-    SWITCH_OFF_CONTACTOR_B_PHASE_GRID_HEALTHY;
+    g_DigOutputs.BPhaseGridUnhealthyOutput = true;
 }
 void SwitchOnContactorBPhaseGridHealthy()
 {
-    SWITCH_ON_CONTACTOR_B_PHASE_GRID_HEALTHY;
+    g_DigOutputs.BPhaseGridUnhealthyOutput = false;
 }
 void SwitchOffContactorLoadOnSolar()
 {
-    SWITCH_OFF_CONTACTOR_LOAD_ON_SOLAR;
+    g_DigOutputs.LoadOnSolarOutput = false;
 }
 void SwitchOnContactorLoadOnSolar()
 {
-    SWITCH_ON_CONTACTOR_LOAD_ON_SOLAR;
+    g_DigOutputs.LoadOnSolarOutput = true;
 }
 void SwitchOffContactorLoadOnGrid()
 {
-    SWITCH_OFF_CONTACTOR_LOAD_ON_GRID;
+    g_DigOutputs.LoadOffGridOutput = true;
 }
 void SwitchOnContactorLoadOnGrid()
 {
-    SWITCH_ON_CONTACTOR_LOAD_ON_GRID;
+    g_DigOutputs.LoadOffGridOutput = false;
 }
 void SwitchOffFans()
 {
-    SWITCH_OFF_FANS;
+    g_DigOutputs.FansOff = true;
 }
 void SwitchOnFans()
 {
-    SWITCH_ON_FANS;
+    g_DigOutputs.FansOff = false;
 }
-// Controls the logic controlling the relays outputs
+
+// Changes the status of relays based on the internal state set for the relays
+//
+void ProcessRelays()
+{
+    if (g_DigOutputs.Relays[0])
+    {
+        TURN_RELAY1_ON;
+    }
+    else
+    {
+        TURN_RELAY1_OFF;
+    }
+    if (g_DigOutputs.Relays[1])
+    {
+        TURN_RELAY2_ON;
+    }
+    else
+    {
+        TURN_RELAY2_OFF;
+    }
+    if (g_DigOutputs.Relays[2])
+    {
+        TURN_RELAY3_ON;
+    }
+    else
+    {
+        TURN_RELAY3_OFF;
+    }
+    if (g_DigOutputs.Relays[3])
+    {
+        TURN_RELAY4_ON;
+    }
+    else
+    {
+        TURN_RELAY4_OFF;
+    }
+    if (g_DigOutputs.Relays[4])
+    {
+        TURN_RELAY5_ON;
+    }
+    else
+    {
+        TURN_RELAY5_OFF;
+    }
+    if (g_DigOutputs.Relays[5])
+    {
+        TURN_RELAY6_ON;
+    }
+    else
+    {
+        TURN_RELAY6_OFF;
+    }
+}
+
+// Controls the logic controlling the contactors
 // This function is called once every 1 second
 // DEVNOTE: This function should consider the possibility of contactors
 // getting stuck and not following the state as driven by the relays
@@ -200,7 +255,7 @@ void SwitchOnFans()
 // always be some delay when changing one or more contactors that impact
 // each other
 //
-void ProcessRelays()
+void ProcessContactors()
 {
     enum StuckState
     {
@@ -619,7 +674,8 @@ void Process1SecOver(void)
   //
   if(FlagDirectCalibration==0 && ParaBlockIndex==0)CheckAutoScroll();
 
-  if (FlagDirectCalibration==0)ProcessRelays();
+  if (FlagDirectCalibration==0)ProcessContactors();
+  ProcessRelays();
 }
 
 /*
@@ -704,6 +760,10 @@ void StartCalibration(void)
    if((SwPressed==KEY_DIR_CAL)&&(FlagDirectCalibration==0))
    {
       FlagDirectCalibration=CALIBRATE_OUT_1;
+      for (uint8_t i = 0; i < NUMBER_OF_RELAYS; i++)
+      {
+        g_DigOutputs.Relays[i] = false;
+      }
    }
 
    if (FlagDirectCalibration >= CALIBRATE_OUT_1 &&
@@ -712,18 +772,9 @@ void StartCalibration(void)
        // UNDONE: This logic here might not be working
        // Not able to test outputs properly
        //
-       void (*outputs[])(void) = 
-       {
-           SwitchOnContactorRPhaseGridHealthy,
-           SwitchOnContactorYPhaseGridHealthy,
-           SwitchOnContactorBPhaseGridHealthy,
-           SwitchOnContactorLoadOnSolar,
-           SwitchOnContactorLoadOnGrid,
-           SwitchOnFans
-       };
        uint8_t idx = FlagDirectCalibration - CALIBRATE_OUT_1;
        DisplayOutputX(idx + 1);
-       outputs[idx]();
+       g_DigOutputs.Relays[idx] = true;
        if (SwPressed==KEY_NEXT)
        {
            FlagDirectCalibration++;
@@ -733,12 +784,10 @@ void StartCalibration(void)
    if (FlagDirectCalibration >= CALIBRATE_IN_START &&
         FlagDirectCalibration <= CALIBRATE_IN_8)
    {
-       SwitchOffContactorRPhaseGridHealthy();
-       SwitchOffContactorYPhaseGridHealthy();
-       SwitchOffContactorBPhaseGridHealthy();
-       SwitchOffContactorLoadOnSolar();
-       SwitchOffContactorLoadOnGrid();
-       SwitchOffFans();
+      for (uint8_t i = 0; i < NUMBER_OF_RELAYS; i++)
+      {
+        g_DigOutputs.Relays[i] = false;
+      }
 
        const bool* inputs[] = 
        {

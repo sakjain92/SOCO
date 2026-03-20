@@ -137,6 +137,13 @@ float ModbusDummyFloatRegister;
 // Defines the digital inputs status
 //
 struct DigInputs g_DigInputs;
+// Defines the digital outputs status
+//
+struct DigOutputs g_DigOutputs;
+
+// Defines the testing status
+//
+struct TestingStatus g_testingStatus;
 
 // Defined the alarms/faults detected
 //

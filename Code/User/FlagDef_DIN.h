@@ -217,6 +217,7 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 #define         CALIBRATE_OUT_3         3
 #define         CALIBRATE_OUT_4         4
 #define         CALIBRATE_OUT_5         5
+#define         CALIBRATE_OUT_6         6
 
 #define         CALIBRATE_IN_START      6
 #define         CALIBRATE_IN_1          7
@@ -398,25 +399,6 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 
 #define TURN_RELAY6_ON                              GPIOD->BSRR = PORT_BIT_3
 #define TURN_RELAY6_OFF                             GPIOD->BRR = PORT_BIT_3
-
-
-#define SWITCH_OFF_CONTACTOR_R_PHASE_GRID_HEALTHY  TURN_RELAY1_ON
-#define SWITCH_ON_CONTACTOR_R_PHASE_GRID_HEALTHY   TURN_RELAY1_OFF
-
-#define SWITCH_OFF_CONTACTOR_Y_PHASE_GRID_HEALTHY  TURN_RELAY2_ON
-#define SWITCH_ON_CONTACTOR_Y_PHASE_GRID_HEALTHY   TURN_RELAY2_OFF
-
-#define SWITCH_OFF_CONTACTOR_B_PHASE_GRID_HEALTHY  TURN_RELAY3_ON
-#define SWITCH_ON_CONTACTOR_B_PHASE_GRID_HEALTHY   TURN_RELAY3_OFF
-
-#define SWITCH_OFF_CONTACTOR_LOAD_ON_SOLAR         TURN_RELAY4_OFF
-#define SWITCH_ON_CONTACTOR_LOAD_ON_SOLAR          TURN_RELAY4_ON
-
-#define SWITCH_OFF_CONTACTOR_LOAD_ON_GRID          TURN_RELAY5_ON
-#define SWITCH_ON_CONTACTOR_LOAD_ON_GRID           TURN_RELAY5_OFF
-
-#define SWITCH_OFF_FANS                            TURN_RELAY6_ON
-#define SWITCH_ON_FANS                             TURN_RELAY6_OFF
 
 // Inputs are Active Low
 // Inputs from contactors are NO when they are open

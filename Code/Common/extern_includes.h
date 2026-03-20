@@ -111,6 +111,8 @@ extern uint8_t ParaBlockIndex,DisplayParameterBuffer[100],dispStartCnt,DisParala
 extern uint8_t Dec2DCBArray[16];
 
 extern struct DigInputs g_DigInputs;
+extern struct DigOutputs g_DigOutputs;
+extern struct TestingStatus g_testingStatus;
 extern void SwitchOffContactorRPhaseGridHealthy();
 extern void SwitchOnContactorRPhaseGridHealthy();
 extern void SwitchOffContactorYPhaseGridHealthy();
@@ -126,15 +128,4 @@ extern uint32_t g_DisableLoadOnGridSeconds;
 
 extern struct Alarms g_Alarms;
 
-#define RUNNING_MODE_IMPORT  0
-
-#define TO_BOOL(x)      (!!(x))
-
-#define ARRAY_SIZE(a)           (sizeof(a) / sizeof(a[0]))
-
-// Rounds up X (integer) to an upper integer multiple of 'factor' where 'factor' is power of two
-//
-#define ROUNDUP_POW2(x, factor)  ((((x)+(factor)-1) & ~((factor) - 1)))
-
-#define COMPILE_ASSERT(cond)    extern char dummy_assertion_array[(cond) ? 1 : -1]
 #endif

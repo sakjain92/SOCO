@@ -292,7 +292,27 @@
 // 271) Should we use unidirectional 3.3V TVS for better protection
 // 272) Check the MELF resistor make in BOM. It's not the make it's supposed to be
 // 273) Cost optimization: Use 1/2W MELF resistors instead of 1W
-//
+// 274) Wirewound resistors, MOV and MELF resistors will need conformal coating.
+// 275) 2.2kV Y cap between MCU earth & PCB Earth for ESD and Noise Reduction?
+// 276) IMPORTANT: Need to change 320V MOVs to 510V MOVs because L-N configuration can have Neutral short to another phase causing 450V AC to appear on the voltage input.
+// Check transformer specs also for 1kV+ isolation between secondary/primary
+// 277) Gemini is saying to connect DC-ive to earth with MOV instead of DC+ive. Also separate Earth will have issue during lightening. And GDT should be used in N-E.
+// 278) Add decoupling capacitors near MCU (1uf/4.7uf with separate vias)
+// 279) Check if connecting two SMPS power supply outputs via diode is a workable solution
+// 280) 1ohm resistors need to be 100ppm or better. Should we get 0.1% or similar accuracy resistors for ADC section for better accuracy?
+// 281) There is earthing voltage leaking from AC main voltage measurement to actual earth of our building. Should we just remove MOVs between N & E everywhere and concentrate only on L-N?
+// Will it be risky to have N-E or L-E MOVs in AC power supply measurement and solar measurement if external N-E earthing is damaged/not present (There would be a transient time when N-E bonnding on solar side in the panel will not exists). Should we atleast make these tracks of N-E MOV separate in such a way that damage there doesn't impact anything else?
+// 282) In software, ensure that K5 closed only after K4 closing feedback received
+// 283) Add 10nF in U10
+// 284) In DC power supply, if we had option of adding 100ohm + 100ohm, we can have two MOVs of 60V on both sides connected to Earth. Right now, N is connected to E without resistor in path
+// 285) In software, K6 should close first and then K4. Similarly, K4 should open first and then K4
+// 286) Check if any dealy needed between K4 denergize and K1/K2/K3 energized for microinverter to allow synchronizing with grid?
+// 289) In software,e nsure K1/K2/K3 all open before closing K6 as load will be divided between 3 contactors1
+// 290) ESD on tact switches? Especially when sticker is torn
+// 291) Need isolator on USB as ADC is not isolated. Needed for functional safety. Similarly check metal body.
+// 292) Slit type antenna gland is M20 cutout with 3mm or 2mm (RJ174 is 2.7mm by datasheet, 2.8mm by sample)
+// 293) Add SOCO serial number over Modbus
+// 294) Need to test negative/error cases in firmware
 //
 // NOTES:
 // 1) For Apparent power, we are using RMS (IEC 60038) instead of (IEC 61000-4-7) where we just measure first harmonics as we need to match energy with utility meter (and SMPS will have noise)
@@ -346,7 +366,22 @@
 // 39) Have to check Pad lock hole and also ask Kanoda to change the mechanical mounting structure
 // 40) BOM has been changed: 50A 3 pole MCB is being used, 1 sq mm wire is being used for control wiring. 35mmsq glands are being used.
 // 41) Gland plate to be earth. Glands also to be earth? Front door to be earth
-//
+// 42) Have to make sure the mouting plate can get out and fit into panel easily after component mounting (Heavy components). Note that the Fan will have to be installed after  mounting plate installation.
+// Check SOCO and SPD isn't impacted by FANS. Otherwise shift the Fans position from left to righ. Also, limit switch might become issue in removing/adding mounting plate into the panel
+// Seems like FANS will hit SPD and SOCO. Make sure it's easy to screw in FANs after mounting plate with components is added into panel
+// 43) Make BOM list with manufacturer's part number for thimbles, lugs, screws, nuts, wires etc. Ask braco for suggestion on parts 
+// 44) Get a panel expert for quality checking and design checking
+// 45) Check in power terminal, having cooper lugs on uninyin, alumnini lug on aluminium wire and MS nut/bolt, will having these all different metals cause oxidation/corrosion? Need experts for checks like these. MS on terminal block, will it oxidize aluminium lug or copper lugs? Mention in drawing the lug types to be used for external wiring
+// 46) Get manufacturing part numbers for all different parts
+// 47) Make it easier to understand BOM (aux contacts with contactor)
+// 48) Add temp sensor on top near EMS and middle of the panel
+// 49) 10.3+/-0.5 mm dia for ethernet LAN cable split gland, 
+// 50) SOCO to EMS RS485 (SOCO earth it)
+// 51) RS485 (3 cable), CAN (3 cables) outside panel EMS, (8 core cable, 2 DC power, 1 spare) (8 core + 4 core, 2 4G atenna split, 1 split type for LAN), One spare gland, 4 core (10.6mm OD), 8 core (?)
+// LAN cable CAT5E/CAT5 (10/100 speed) cable with good insulation (from EMS to PoE). Check Fuse rating (2A fuse is fine), 4 DI to EMS (Check if MCB & Isolator for Grid costing same. If cost almost same:), Analog is voltage measurement, Pin numbers of EMS(Jio will send female part)
+// K6 wiring from K1/K2/K3. Packaging details on last page. Plastic ban (Not below 70micron, M.P. restricted. Certifications). RSN + SOCO controller on excel (Logic to create in a document). One pallet per panel (plastic panels). Certificated palllet. Just one warehouse in Delhi. 30th April for 100 quantity. First 20 fast.
+// LAN cable 10-11mm
+// Check earthing of RS485 between SOCO and EMS
 //
 // Panel ventilation:
 // 1) IEC 60890 seems to state that ventilation cutouts with filters impede air circulation so much that it's equivalent to no cutouts
@@ -363,3 +398,23 @@
 // 1) Give relay card channel to Jio with OMRON for v1.5 of the Panel
 // 2) ACDB controller can be given to Jio for residential project also. They require it, but economical
 //
+
+// PANEL Final drawingo (17th March 2026):
+// 1) Fan at bottom sucking air in, and fan on top sucking air out
+// 2) Failure rate of AC fans to be checked
+// 3) Take Mains voltage measurement from SPD terminals and power supply for controller also.
+// 4) Checking mounting of CTs before or after MCB and how they are mounted
+// 5) Panel door to be earth
+// 6) Have to check if 35mm armoured cable can bend to go to terminal in panel (Get 25mm alumnium for testing). Can check with panel already installed at site.
+// 7) Check SPD and Earthing wiring size. Check SPD No contact is all makes also
+// 8) Make another drawing changes with more information about contruction (Change ferrule names + Stickers + Contactor pins details. Add contactor pin number details in ferrule)
+// 9) Get type test reports from C&S
+// 10) Ask if big price difference between isolator & mcb. If not, go with MCB
+// 11) We might need to make Earthing cable Uninyvin-6 in SPD
+// 12) Cable datasheet and cable OD needed for glands (Need wire samples to figure out gland requirements)
+// 13) Slit type antenna gland is M20 cutout with 3mm (2 hole) or 2mm (1 hole) (RJ174 is 2.7mm by datasheet, 2.8mm by sample). Ethernet might require metal gland.
+// 14) FAN1-CTR and FAN2-CTR to be changed to FAN1 & FAN2 in drawing. EMS numbering in drawing doesn't match physical model. Mounting plate is 875mm instead of 850mm. Fuses should be 2A.Furruleing on power wire possible? Correct Cital make spelling. Add reputed make to temperature sensor
+// 15) BOM: Blanking plugs and Glands costing to be revised. 
+// 16) Keep SOCO near fan. Shift SPD on opposite side of panel away from fan. Change drawing accordingly.
+// 17) Can use thimbles with two control wires inserted into one thimble as per Veerendra's suggestion if convinent
+

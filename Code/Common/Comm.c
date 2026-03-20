@@ -845,6 +845,16 @@ void ModBusCommunication(void)
                         100,
                         sizeof(g_Alarms),
                         (uint8_t*)(&g_Alarms)
+                    },
+                    {
+                        30000,
+                        sizeof(g_DigOutputs),
+                        (uint8_t*)(&g_DigOutputs)
+                    },
+                    {
+                        40000,
+                        sizeof(g_testingStatus),
+                        (uint8_t*)(&g_testingStatus),
                     }
                 };
 
@@ -902,7 +912,45 @@ void ModBusCommunication(void)
                 }
                 break;
             }
+            case 0x05: /*MODBUS_WRITE_SINGLE_COIL_STATUS_CODE*/
+            {
+                Start_Add_High = RecieveArray[2];
+                Start_Add_Low = RecieveArray[3];
+                Start_Add = (Start_Add_Low) + (Start_Add_High<<8);
+                NoOfBytes_High = RecieveArray[4];
+                NoOfBytes_Low = RecieveArray[5];
+                NoOfBytes = (NoOfBytes_Low) + (NoOfBytes_High<<8);
 
+                // Only 0xFF00 & 0x0000 are valid values
+                //
+                if (NoOfBytes != 0x0000 && NoOfBytes != 0xFF00)
+                {
+                    Fun_Received |= 0x80;
+                    Mod_TransmitFrame.Data_Array[0] = 0x03;
+                    SendData_UART((uint8_t)CopySetPara[PARA_DEVICE_ID], Fun_Received,1);
+                    Fun_Received &=~ 0x80;
+                    break;
+                }
+
+                bool enable = (NoOfBytes == 0xFF00);
+
+                if (Start_Add >= 30000 && Start_Add <= 30000 + sizeof(g_DigOutputs))
+                {
+                    g_DigOutputs.Relays[Start_Add - 30000] = enable;
+                }
+                else if (Start_Add >= 40000 && Start_Add <= 40000 + sizeof(g_testingStatus))
+                {
+                    g_testingStatus.Status[Start_Add - 40000] = enable;
+                }
+                else
+                {
+                    Fun_Received |= 0x80;
+                    Mod_TransmitFrame.Data_Array[0] = 0x02;
+                    SendData_UART((uint8_t)CopySetPara[PARA_DEVICE_ID], Fun_Received,1);
+                    Fun_Received &=~ 0x80;
+                    break;
+                }
+            }
        ///// Exception Response for Illegal Function //////    
           default:
             if((Fun_Received != 0x03))

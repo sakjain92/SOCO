@@ -4,6 +4,18 @@
 #include "stm32f37x.h"
 #include <stdbool.h>
 
+#define RUNNING_MODE_IMPORT  0
+
+#define TO_BOOL(x)      (!!(x))
+
+#define ARRAY_SIZE(a)           (sizeof(a) / sizeof(a[0]))
+
+// Rounds up X (integer) to an upper integer multiple of 'factor' where 'factor' is power of two
+//
+#define ROUNDUP_POW2(x, factor)  ((((x)+(factor)-1) & ~((factor) - 1)))
+
+#define COMPILE_ASSERT(cond)    extern char dummy_assertion_array[(cond) ? 1 : -1]
+
 struct STORE 
 {
     uint32_t  StorageCounter;
@@ -624,6 +636,47 @@ struct Alarms
     bool LoadOnSolarContactorStuckClosed;
     bool LoadOnGridContactorStuckOpen;
     bool LoadOnGridContactorStuckClosed;
+};
+
+// Defines various relay status
+//
+// DEVNOTE: This is sent over modbus. Keep them in order.
+// Also, using one bool per relay (with true = Relay On)
+//
+#define NUMBER_OF_RELAYS    6
+struct DigOutputs
+{
+    union
+    {
+        bool Relays[NUMBER_OF_RELAYS];
+        struct
+        {
+            bool RPhaseGridUnhealthyOutput; // NC used for R Grid Healthy
+            bool YPhaseGridUnhealthyOutput; // NC used for Y Grid Healthy
+            bool BPhaseGridUnhealthyOutput; // NC used for B Grid Healthy
+            bool LoadOnSolarOutput;         // NO used for Load On Solar
+            bool LoadOffGridOutput;         // NC used for Load On Grid
+            bool FansOff;                   // NC used for Fans On
+        };
+    };
+};
+COMPILE_ASSERT(sizeof(struct DigOutputs) == NUMBER_OF_RELAYS);
+
+// Defines the various status related to testing/calibration
+//
+// DEVNOTE: This is sent over modbus. Keep them in order.
+// Also, using one bool per status (with true = status = true)
+//
+struct TestingStatus
+{
+    union
+    {
+        bool Status[1];
+        struct
+        {
+            bool TestingModeEnabled;
+        };
+    };
 };
 
 #endif
