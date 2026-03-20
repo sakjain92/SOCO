@@ -847,6 +847,16 @@ void ModBusCommunication(void)
                         (uint8_t*)(&g_Alarms)
                     },
                     {
+                        200,
+                        sizeof(g_powerSupplyStatus),
+                        (uint8_t*)(&g_powerSupplyStatus)
+                    },
+                    {
+                        20000,
+                        sizeof(g_DigInputs),
+                        (uint8_t*)(&g_DigInputs)
+                    },
+                    {
                         30000,
                         sizeof(g_DigOutputs),
                         (uint8_t*)(&g_DigOutputs)

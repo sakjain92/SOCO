@@ -149,6 +149,10 @@ struct TestingStatus g_testingStatus;
 //
 struct Alarms g_Alarms;
 
+// Status of all the power supplies
+//
+struct PowerSupplyStatus g_powerSupplyStatus;
+
 // Defines the timing for which Load is disconnected from both Solar & Grid
 //
 uint32_t g_DisableLoadOnGridSeconds;

@@ -606,19 +606,47 @@ struct LCD_ARRAY
 // DEVNOTE: This is sent over modbus. Keep digital inputs in order.
 // Also, using one bool per input
 //
+#define NUMBER_OF_INPUTS    8
 struct DigInputs
 {
-    bool MainsRPhaseContactorOn; 
-    bool MainsYPhaseContactorOn;
-    bool MainsBPhaseContactorOn;
-    bool LoadOnSolarContactorOn;
-    bool LoadOnGridContactorOn;
-    bool SolarIsolatorOn;
-    bool GridMCBOn;
-    bool DGOn;              
-    bool DC48Available;          
-    bool ACAuxAvailable;
+    union
+    {
+        bool Inputs[NUMBER_OF_INPUTS];
+        struct
+        {
+            bool MainsRPhaseContactorOn; 
+            bool MainsYPhaseContactorOn;
+            bool MainsBPhaseContactorOn;
+            bool LoadOnSolarContactorOn;
+            bool LoadOnGridContactorOn;
+            bool SolarNeutralEarthContactorOn;
+            bool DGOff;
+            bool unused;
+        };
+    };
 };
+
+COMPILE_ASSERT(sizeof(struct DigInputs) == NUMBER_OF_INPUTS);
+
+// All power supply on/off status
+// DEVNOTE: This is sent over modbus. Keep them in order.
+// Also, using one bool per power supply status
+//
+#define NUMBER_OF_POWER_SUPPLIES    2
+struct PowerSupplyStatus
+{
+    union
+    {
+        bool Status[NUMBER_OF_POWER_SUPPLIES];
+        struct
+        {
+            bool DCPowerSupplyStatus;
+            bool ACPowerSupplyStatus;
+        };
+    };
+};
+
+COMPILE_ASSERT(sizeof(struct PowerSupplyStatus) == NUMBER_OF_POWER_SUPPLIES);
 
 // Defines various abnormal conditions detected
 //

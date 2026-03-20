@@ -675,135 +675,71 @@ void ProcessMainInterrupt(void)
   }
 }
 
-static bool IsRPhaseGridHealthyContactorOn()
-{
-    return INPUT_R_PHASE_GRID_HEALTHY_CONTACTOR_ON;
-}
-static bool IsYPhaseGridHealthyContactorOn()
-{
-    return INPUT_Y_PHASE_GRID_HEALTHY_CONTACTOR_ON;
-}
-static bool IsBPhaseGridHealthyContactorOn()
-{
-    return INPUT_B_PHASE_GRID_HEALTHY_CONTACTOR_ON;
-}
-static bool IsLoadOnSolarContactorOn()
-{
-    return INPUT_LOAD_ON_SOLAR_CONTACTOR_ON;
-}
-static bool IsLoadOnGridContactorOn()
-{
-    return INPUT_LOAD_ON_GRID_CONTACTOR_ON;
-}
-static bool IsSolarIsolatorOn()
-{
-    return INPUT_SOLAR_ISOLATOR_ON;
-}
-static bool IsGridMCBOn()
-{
-    return INPUT_GRID_MCB_ON;
-}
-static bool IsDGOn()
-{
-    return INPUT_DG_RUNNING;
-}
-static bool IsDC48Available()
-{
-    return isDCPowerAvailableSample;
-}
-static bool IsACAuxAvailable()
-{
-    return isACPowerAvailableSample;
-}
-
 // This is called to read digital inputs (debouncing)
 // This function is called once every 20 msec
 //
 void ReadInputs()
 {
-    struct DigInputState
+    static bool* ptr[NUMBER_OF_INPUTS + NUMBER_OF_POWER_SUPPLIES] =
     {
-        bool* val;
-        uint8_t timer;
-        bool (*read)(void);
+        &g_DigInputs.Inputs[0],
+        &g_DigInputs.Inputs[1],
+        &g_DigInputs.Inputs[2],
+        &g_DigInputs.Inputs[3],
+        &g_DigInputs.Inputs[4],
+        &g_DigInputs.Inputs[5],
+        &g_DigInputs.Inputs[6],
+        &g_DigInputs.Inputs[7],
+        &g_powerSupplyStatus.Status[0],
+        &g_powerSupplyStatus.Status[1],
     };
-
+    bool currentValues[NUMBER_OF_INPUTS + NUMBER_OF_POWER_SUPPLIES] = 
+    {
+        IS_DIG_INPUT_1_HIGH(),
+        IS_DIG_INPUT_2_HIGH(),
+        IS_DIG_INPUT_3_HIGH(),
+        IS_DIG_INPUT_4_HIGH(),
+        IS_DIG_INPUT_5_HIGH(),
+        IS_DIG_INPUT_6_HIGH(),
+        IS_DIG_INPUT_7_HIGH(),
+        IS_DIG_INPUT_8_HIGH(),
+        isDCPowerAvailableSample,
+        isACPowerAvailableSample,
+    };
     // DEVNOTE: Keep this debouncing ticks to less than 1 sec in total
     //
 #define MAX_DEBOUNCING_TICK 5
-    static struct DigInputState dinStateArray[] =
+    static uint8_t timers[NUMBER_OF_INPUTS + NUMBER_OF_POWER_SUPPLIES] = 
     {
-        {
-            .val = &g_DigInputs.MainsRPhaseContactorOn,
-            .timer = MAX_DEBOUNCING_TICK,
-            .read = IsRPhaseGridHealthyContactorOn,
-        },
-        {
-            .val = &g_DigInputs.MainsYPhaseContactorOn,
-            .timer = MAX_DEBOUNCING_TICK,
-            .read = IsYPhaseGridHealthyContactorOn,
-        },
-        {
-            .val = &g_DigInputs.MainsBPhaseContactorOn,
-            .timer = MAX_DEBOUNCING_TICK,
-            .read = IsBPhaseGridHealthyContactorOn,
-        },
-        {
-            .val = &g_DigInputs.LoadOnSolarContactorOn,
-            .timer = MAX_DEBOUNCING_TICK,
-            .read = IsLoadOnSolarContactorOn,
-        },
-        {
-            .val = &g_DigInputs.LoadOnGridContactorOn,
-            .timer = MAX_DEBOUNCING_TICK,
-            .read = IsLoadOnGridContactorOn,
-        },
-        {
-            .val = &g_DigInputs.SolarIsolatorOn,
-            .timer = MAX_DEBOUNCING_TICK,
-            .read = IsSolarIsolatorOn,
-        },
-        {
-            .val = &g_DigInputs.GridMCBOn,
-            .timer = MAX_DEBOUNCING_TICK,
-            .read = IsGridMCBOn,
-        },
-        {
-            .val = &g_DigInputs.DGOn,
-            .timer = MAX_DEBOUNCING_TICK,
-            .read = IsDGOn,
-        },
-        {
-            .val = &g_DigInputs.DC48Available,
-            .timer = MAX_DEBOUNCING_TICK,
-            .read = IsDC48Available,
-        },
-        {
-            .val = &g_DigInputs.ACAuxAvailable,
-            .timer = MAX_DEBOUNCING_TICK,
-            .read = IsACAuxAvailable,
-        },
+        MAX_DEBOUNCING_TICK,
+        MAX_DEBOUNCING_TICK,
+        MAX_DEBOUNCING_TICK,
+        MAX_DEBOUNCING_TICK,
+        MAX_DEBOUNCING_TICK,
+        MAX_DEBOUNCING_TICK,
+        MAX_DEBOUNCING_TICK,
+        MAX_DEBOUNCING_TICK,
+        MAX_DEBOUNCING_TICK,
+        MAX_DEBOUNCING_TICK,
     };
 
-    for (uint8_t i = 0; i < ARRAY_SIZE(dinStateArray); i++)
+    for (uint8_t i = 0; i < NUMBER_OF_INPUTS + NUMBER_OF_POWER_SUPPLIES; i++)
     {
-        struct DigInputState* dinState = &dinStateArray[i];
-
-        if (dinState->read() != *dinState->val)
+        if (currentValues[i] != *ptr[i])
         {
-            if (dinState->timer)
+            if (timers[i])
             {
-                dinState->timer--;
+                timers[i]--;
             }
-            if (!dinState->timer)
+            if (!timers[i])
             {
-                *dinState->val = !*dinState->val;
-                dinState->timer = MAX_DEBOUNCING_TICK;
+                *ptr[i] = !*ptr[i];
+                timers[i] = MAX_DEBOUNCING_TICK;
             }
         }
         else
         {
-            dinState->timer = MAX_DEBOUNCING_TICK;
+            timers[i] = MAX_DEBOUNCING_TICK;
         }
     }
 #undef MAX_DEBOUNCING_TICK

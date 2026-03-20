@@ -404,6 +404,7 @@ void ProcessContactors()
             .stuckOpen = &g_Alarms.LoadOnGridContactorStuckOpen,
             .stuckClosed = &g_Alarms.LoadOnGridContactorStuckClosed,
         }
+        // UNDONE: K6 logic to be added here for fault detection
     };
 
     if (!initialized)
@@ -530,7 +531,7 @@ void ProcessContactors()
     //
     pvsArray[3].shouldContactorBeOn = pvsArray[3].isHealthy &&
                                       (!pvsArray[4].isHealthy || g_DisableLoadOnGridSeconds) &&
-                                        (!g_DigInputs.DGOn) &&
+                                        (g_DigInputs.DGOff) &&
                                         !pvsArray[0].isPrevContactorOn &&
                                         !pvsArray[1].isPrevContactorOn &&
                                         !pvsArray[2].isPrevContactorOn &&
@@ -789,22 +790,11 @@ void StartCalibration(void)
         g_DigOutputs.Relays[i] = false;
       }
 
-       const bool* inputs[] = 
-       {
-           &g_DigInputs.MainsRPhaseContactorOn,
-           &g_DigInputs.MainsYPhaseContactorOn,
-           &g_DigInputs.MainsBPhaseContactorOn,
-           &g_DigInputs.LoadOnSolarContactorOn,
-           &g_DigInputs.LoadOnGridContactorOn,
-           &g_DigInputs.SolarIsolatorOn,
-           &g_DigInputs.GridMCBOn,
-           &g_DigInputs.DGOn
-       };
        if (FlagDirectCalibration == CALIBRATE_IN_START)
        {
-            for (uint8_t i = 0; i < ARRAY_SIZE(inputs); i++)
+            for (uint8_t i = 0; i < NUMBER_OF_INPUTS; i++)
             {
-                if (*inputs[i])
+                if (g_DigInputs.Inputs[i])
                 {
                     DisplayImproperSettings();
                 }
@@ -814,7 +804,7 @@ void StartCalibration(void)
 
        uint8_t idx = FlagDirectCalibration - CALIBRATE_IN_1;
        DisplayInputX(idx + 1);
-       if (*inputs[idx])
+       if (g_DigInputs.Inputs[idx])
        {
            FlagDirectCalibration++;
            if (FlagDirectCalibration == CALIBRATE_VOL_CUR_START)

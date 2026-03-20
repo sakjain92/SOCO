@@ -401,19 +401,15 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 #define TURN_RELAY6_OFF                             GPIOD->BRR = PORT_BIT_3
 
 // Inputs are Active Low
-// Inputs from contactors are NO when they are open
-// Input from SPD is NO when it's healthy
-// Input from 48V is NC when it's healthy
-// Input from DG is NO when it's running
 //
-#define INPUT_R_PHASE_GRID_HEALTHY_CONTACTOR_ON    TO_BOOL(!(GPIOC->IDR & PORT_BIT_6))
-#define INPUT_Y_PHASE_GRID_HEALTHY_CONTACTOR_ON    TO_BOOL(!(GPIOC->IDR & PORT_BIT_7))
-#define INPUT_B_PHASE_GRID_HEALTHY_CONTACTOR_ON    TO_BOOL(!(GPIOC->IDR & PORT_BIT_8))
-#define INPUT_LOAD_ON_SOLAR_CONTACTOR_ON           TO_BOOL(!(GPIOA->IDR & PORT_BIT_8))
-#define INPUT_LOAD_ON_GRID_CONTACTOR_ON            TO_BOOL(!(GPIOF->IDR & PORT_BIT_6))
-#define INPUT_SOLAR_ISOLATOR_ON                    TO_BOOL(!(GPIOD->IDR & PORT_BIT_0))
-#define INPUT_GRID_MCB_ON                          TO_BOOL(!(GPIOD->IDR & PORT_BIT_1))
-#define INPUT_DG_RUNNING                           TO_BOOL(!(GPIOD->IDR & PORT_BIT_2))
+#define IS_DIG_INPUT_1_HIGH()                      TO_BOOL(!(GPIOC->IDR & PORT_BIT_6))
+#define IS_DIG_INPUT_2_HIGH()                      TO_BOOL(!(GPIOC->IDR & PORT_BIT_7))
+#define IS_DIG_INPUT_3_HIGH()                      TO_BOOL(!(GPIOC->IDR & PORT_BIT_8))
+#define IS_DIG_INPUT_4_HIGH()                      TO_BOOL(!(GPIOA->IDR & PORT_BIT_8))
+#define IS_DIG_INPUT_5_HIGH()                      TO_BOOL(!(GPIOF->IDR & PORT_BIT_6))
+#define IS_DIG_INPUT_6_HIGH()                      TO_BOOL(!(GPIOD->IDR & PORT_BIT_0))
+#define IS_DIG_INPUT_7_HIGH()                      TO_BOOL(!(GPIOD->IDR & PORT_BIT_1))
+#define IS_DIG_INPUT_8_HIGH()                      TO_BOOL(!(GPIOD->IDR & PORT_BIT_2))
 
 #define PARA_ONLY_DATA  1
 #define PARA_WITH_DEC   2
