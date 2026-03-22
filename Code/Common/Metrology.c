@@ -18,6 +18,14 @@
 #include "arm_const_structs.h"
 #include "extern_includes.h"
 
+static float SafeSqrtf(float value)
+{
+    if(value <= 0.0f)
+    {
+        return 0.0f;
+    }
+    return sqrtf(value);
+}
 
 void CalculateHarmonicComponents(void);
 void CalculateVoCur(void);
@@ -321,6 +329,7 @@ void Metrology(void)
   { 
       InstantPara.PowerFactorR=InstantPara.TotalPowerR/InstantPara.AppPowerR;
       if(InstantPara.PowerFactorR>1.0)InstantPara.PowerFactorR=1.0;
+      if(InstantPara.PowerFactorR<-1.0)InstantPara.PowerFactorR=-1.0;
       
   }
   else InstantPara.PowerFactorR=1.0;
@@ -330,6 +339,7 @@ void Metrology(void)
      
     InstantPara.PowerFactorY=InstantPara.TotalPowerY/InstantPara.AppPowerY;
     if(InstantPara.PowerFactorY>1.0)InstantPara.PowerFactorY=1.0;
+    if(InstantPara.PowerFactorY<-1.0)InstantPara.PowerFactorY=-1.0;
   }
   else InstantPara.PowerFactorY=1.0;
   
@@ -337,6 +347,7 @@ void Metrology(void)
   {
       InstantPara.PowerFactorB=InstantPara.TotalPowerB/InstantPara.AppPowerB;
       if(InstantPara.PowerFactorB>1.0)InstantPara.PowerFactorB=1.0;
+      if(InstantPara.PowerFactorB<-1.0)InstantPara.PowerFactorB=-1.0;
   }
   else InstantPara.PowerFactorB=1.0;
   InstantPara.TotalAppPower=InstantPara.AppPowerR+InstantPara.AppPowerY+InstantPara.AppPowerB;
@@ -344,6 +355,7 @@ void Metrology(void)
   {
     InstantPara.TotalPowerFactor=InstantPara.SumTotalPower/InstantPara.TotalAppPower;
     if(InstantPara.TotalPowerFactor>1.0)InstantPara.TotalPowerFactor=1.0;
+    if(InstantPara.TotalPowerFactor<-1.0)InstantPara.TotalPowerFactor=-1.0;
   }
   else InstantPara.TotalPowerFactor=1.0;
   
@@ -414,6 +426,7 @@ void Metrology(void)
   { 
       InstantPara.PowerFactorRSolar=InstantPara.TotalPowerRSolar/InstantPara.AppPowerRSolar;
       if(InstantPara.PowerFactorRSolar>1.0)InstantPara.PowerFactorRSolar=1.0;
+      if(InstantPara.PowerFactorRSolar<-1.0)InstantPara.PowerFactorRSolar=-1.0;
       
   }
   else InstantPara.PowerFactorRSolar=1.0;
@@ -423,6 +436,7 @@ void Metrology(void)
      
     InstantPara.PowerFactorYSolar=InstantPara.TotalPowerYSolar/InstantPara.AppPowerYSolar;
     if(InstantPara.PowerFactorYSolar>1.0)InstantPara.PowerFactorYSolar=1.0;
+    if(InstantPara.PowerFactorYSolar<-1.0)InstantPara.PowerFactorYSolar=-1.0;
   }
   else InstantPara.PowerFactorYSolar=1.0;
   
@@ -430,6 +444,7 @@ void Metrology(void)
   {
       InstantPara.PowerFactorBSolar=InstantPara.TotalPowerBSolar/InstantPara.AppPowerBSolar;
       if(InstantPara.PowerFactorBSolar>1.0)InstantPara.PowerFactorBSolar=1.0;
+      if(InstantPara.PowerFactorBSolar<-1.0)InstantPara.PowerFactorBSolar=-1.0;
   }
   else InstantPara.PowerFactorBSolar=1.0;
   InstantPara.TotalAppPowerSolar=InstantPara.AppPowerRSolar+InstantPara.AppPowerYSolar+InstantPara.AppPowerBSolar;
@@ -437,6 +452,7 @@ void Metrology(void)
   {
     InstantPara.TotalPowerFactorSolar=InstantPara.SumTotalPowerSolar/InstantPara.TotalAppPowerSolar;
     if(InstantPara.TotalPowerFactorSolar>1.0)InstantPara.TotalPowerFactorSolar=1.0;
+    if(InstantPara.TotalPowerFactorSolar<-1.0)InstantPara.TotalPowerFactorSolar=-1.0;
   }
   else InstantPara.TotalPowerFactorSolar=1.0;
   
@@ -687,13 +703,13 @@ void Metrology(void)
   
   // UNDONE: Is this neccessary?
   //
-  if(InstantPara.PowerFactorR>0.9985)InstantPara.ReactPowerR=0;
-  if(InstantPara.PowerFactorY>0.9985)InstantPara.ReactPowerY=0;
-  if(InstantPara.PowerFactorB>0.9985)InstantPara.ReactPowerB=0;
+  if(fabs(InstantPara.PowerFactorR)>0.9985)InstantPara.ReactPowerR=0;
+  if(fabs(InstantPara.PowerFactorY)>0.9985)InstantPara.ReactPowerY=0;
+  if(fabs(InstantPara.PowerFactorB)>0.9985)InstantPara.ReactPowerB=0;
 
-  if(InstantPara.PowerFactorRSolar>0.9985)InstantPara.ReactPowerRSolar=0;
-  if(InstantPara.PowerFactorYSolar>0.9985)InstantPara.ReactPowerYSolar=0;
-  if(InstantPara.PowerFactorBSolar>0.9985)InstantPara.ReactPowerBSolar=0;
+  if(fabs(InstantPara.PowerFactorRSolar)>0.9985)InstantPara.ReactPowerRSolar=0;
+  if(fabs(InstantPara.PowerFactorYSolar)>0.9985)InstantPara.ReactPowerYSolar=0;
+  if(fabs(InstantPara.PowerFactorBSolar)>0.9985)InstantPara.ReactPowerBSolar=0;
 
   /*
   if((InstantPara.TotalReactPower<1)&&(InstantPara.TotalPowerFactor!=1))
@@ -810,13 +826,13 @@ void CalculateHarmonicComponents(void)
                  (FftSampleData.FFT_BSolarVolCosSave[i]*FftSampleData.FFT_BSolarCurSinSave[i]));
 
   }
-  InstantPara.FunRVol=FUND_VOL_COEFF*sqrt(TempRVol/50);
-  InstantPara.FunYVol=FUND_VOL_COEFF*sqrt(TempYVol/50);
-  InstantPara.FunBVol=FUND_VOL_COEFF*sqrt(TempBVol/50);
-  InstantPara.FunRCurr=FUND_CURRENT_COEFF*sqrt(TempRCur/50);
-  InstantPara.FunYCurr=FUND_CURRENT_COEFF*sqrt(TempYCur/50);
-  InstantPara.FunBCurr=FUND_CURRENT_COEFF*sqrt(TempBCur/50);
-  InstantPara.FunNCurr=FUND_CURRENT_COEFF*sqrt(TempNCur/50);
+  InstantPara.FunRVol=FUND_VOL_COEFF*SafeSqrtf(TempRVol/50);
+  InstantPara.FunYVol=FUND_VOL_COEFF*SafeSqrtf(TempYVol/50);
+  InstantPara.FunBVol=FUND_VOL_COEFF*SafeSqrtf(TempBVol/50);
+  InstantPara.FunRCurr=FUND_CURRENT_COEFF*SafeSqrtf(TempRCur/50);
+  InstantPara.FunYCurr=FUND_CURRENT_COEFF*SafeSqrtf(TempYCur/50);
+  InstantPara.FunBCurr=FUND_CURRENT_COEFF*SafeSqrtf(TempBCur/50);
+  InstantPara.FunNCurr=FUND_CURRENT_COEFF*SafeSqrtf(TempNCur/50);
   InstantPara.FunPowerR=FUND_POWER_COEFF*TempRW/50;
   InstantPara.FunPowerY=FUND_POWER_COEFF*TempYW/50;
   InstantPara.FunPowerB=FUND_POWER_COEFF*TempBW/50;
@@ -832,10 +848,10 @@ void CalculateHarmonicComponents(void)
     
   InstantPara.TotalReactPower=InstantPara.ReactPowerR+InstantPara.ReactPowerY+InstantPara.ReactPowerB;  
 
-  InstantPara.FunRSolarCurr=FUND_CURRENT_COEFF*sqrt(TempRSolarCur/50);
-  InstantPara.FunYSolarCurr=FUND_CURRENT_COEFF*sqrt(TempYSolarCur/50);
-  InstantPara.FunBSolarCurr=FUND_CURRENT_COEFF*sqrt(TempBSolarCur/50);
-  InstantPara.FunNSolarCurr=FUND_CURRENT_COEFF*sqrt(TempNSolarCur/50);
+  InstantPara.FunRSolarCurr=FUND_CURRENT_COEFF*SafeSqrtf(TempRSolarCur/50);
+  InstantPara.FunYSolarCurr=FUND_CURRENT_COEFF*SafeSqrtf(TempYSolarCur/50);
+  InstantPara.FunBSolarCurr=FUND_CURRENT_COEFF*SafeSqrtf(TempBSolarCur/50);
+  InstantPara.FunNSolarCurr=FUND_CURRENT_COEFF*SafeSqrtf(TempNSolarCur/50);
   InstantPara.FunPowerSolarR=FUND_POWER_COEFF*TempRSolarW/50;
   InstantPara.FunPowerSolarY=FUND_POWER_COEFF*TempYSolarW/50;
   InstantPara.FunPowerSolarB=FUND_POWER_COEFF*TempBSolarW/50;
@@ -854,26 +870,27 @@ void CalculateHarmonicComponents(void)
 
   if(InstantPara.VolR>InstantPara.FunRVol)
   {
-    InstantPara.HarRPhaseVol=sqrt(InstantPara.VolR*InstantPara.VolR-InstantPara.FunRVol*InstantPara.FunRVol);
+    InstantPara.HarRPhaseVol=SafeSqrtf(InstantPara.VolR*InstantPara.VolR-InstantPara.FunRVol*InstantPara.FunRVol);
   }
   else InstantPara.HarRPhaseVol=0;
   if(InstantPara.VolY>InstantPara.FunYVol)
-    InstantPara.HarYPhaseVol=sqrt(InstantPara.VolY*InstantPara.VolY-InstantPara.FunYVol*InstantPara.FunYVol);
+    InstantPara.HarYPhaseVol=SafeSqrtf(InstantPara.VolY*InstantPara.VolY-InstantPara.FunYVol*InstantPara.FunYVol);
   else InstantPara.HarYPhaseVol=0;
   if(InstantPara.VolB>InstantPara.FunBVol)
-    InstantPara.HarBPhaseVol=sqrt(InstantPara.VolB*InstantPara.VolB-InstantPara.FunBVol*InstantPara.FunBVol);
+    InstantPara.HarBPhaseVol=SafeSqrtf(InstantPara.VolB*InstantPara.VolB-InstantPara.FunBVol*InstantPara.FunBVol);
   else InstantPara.HarBPhaseVol=0;
   
   if(InstantPara.CurrentR>InstantPara.FunRCurr)
-    InstantPara.HarRPhaseCur=sqrt(InstantPara.CurrentR*InstantPara.CurrentR-InstantPara.FunRCurr*InstantPara.FunRCurr);
+    InstantPara.HarRPhaseCur=SafeSqrtf(InstantPara.CurrentR*InstantPara.CurrentR-InstantPara.FunRCurr*InstantPara.FunRCurr);
   else InstantPara.HarRPhaseCur=0;
   if(InstantPara.CurrentY>InstantPara.FunYCurr)
-    InstantPara.HarYPhaseCur=sqrt(InstantPara.CurrentY*InstantPara.CurrentY-InstantPara.FunYCurr*InstantPara.FunYCurr);
+    InstantPara.HarYPhaseCur=SafeSqrtf(InstantPara.CurrentY*InstantPara.CurrentY-InstantPara.FunYCurr*InstantPara.FunYCurr);
   else InstantPara.HarYPhaseCur=0;
   if(InstantPara.CurrentB>InstantPara.FunBCurr)
-    InstantPara.HarBPhaseCur=sqrt(InstantPara.CurrentB*InstantPara.CurrentB-InstantPara.FunBCurr*InstantPara.FunBCurr);
+    InstantPara.HarBPhaseCur=SafeSqrtf(InstantPara.CurrentB*InstantPara.CurrentB-InstantPara.FunBCurr*InstantPara.FunBCurr);
   else InstantPara.HarBPhaseCur=0;
-  
+ 
+  /* UNUSED: Check whether division is safe here. Can be division by non-zero
   if(InstantPara.VolR>5)
     InstantPara.ThdRPhaseVol=100*InstantPara.HarRPhaseVol/InstantPara.FunRVol;
   else InstantPara.ThdRPhaseVol=0;
@@ -893,38 +910,36 @@ void CalculateHarmonicComponents(void)
   if(InstantPara.CurrentB>0.02)
     InstantPara.ThdBPhaseCur=100*InstantPara.HarBPhaseCur/InstantPara.FunBCurr;
   else InstantPara.ThdBPhaseCur=0;
-  
-  
-  
+  */
 }
 
 void CalculateVoCur(void)
 {
 
-  InstantPara.CurrentR=CURRENT_COEFF*sqrt(IntDataSave.CurRPhase); 
-  InstantPara.CurrentY=CURRENT_COEFF*sqrt(IntDataSave.CurYPhase); 
-  InstantPara.CurrentB=CURRENT_COEFF*sqrt(IntDataSave.CurBPhase); 
-  InstantPara.VolR=VOLTAGE_COEFF*sqrt(IntDataSave.VolRPhase); 
-  InstantPara.VolRY=PH_VOLTAGE_COEFF*sqrt(IntDataSave.VolRYPhPh); 
-  InstantPara.VolY=VOLTAGE_COEFF*sqrt(IntDataSave.VolYPhase); 
-  InstantPara.VolYB=PH_VOLTAGE_COEFF*sqrt(IntDataSave.VolYBPhPh); 
-  InstantPara.VolB=VOLTAGE_COEFF*sqrt(IntDataSave.VolBPhase); 
-  InstantPara.VolBR=PH_VOLTAGE_COEFF*sqrt(IntDataSave.VolBRPhPh); 
-  InstantPara.CurrentN=NEU_CURRENT_COEFF*sqrt(IntDataSave.CurNeutral);
+  InstantPara.CurrentR=CURRENT_COEFF*SafeSqrtf(IntDataSave.CurRPhase); 
+  InstantPara.CurrentY=CURRENT_COEFF*SafeSqrtf(IntDataSave.CurYPhase); 
+  InstantPara.CurrentB=CURRENT_COEFF*SafeSqrtf(IntDataSave.CurBPhase); 
+  InstantPara.VolR=VOLTAGE_COEFF*SafeSqrtf(IntDataSave.VolRPhase); 
+  InstantPara.VolRY=PH_VOLTAGE_COEFF*SafeSqrtf(IntDataSave.VolRYPhPh); 
+  InstantPara.VolY=VOLTAGE_COEFF*SafeSqrtf(IntDataSave.VolYPhase); 
+  InstantPara.VolYB=PH_VOLTAGE_COEFF*SafeSqrtf(IntDataSave.VolYBPhPh); 
+  InstantPara.VolB=VOLTAGE_COEFF*SafeSqrtf(IntDataSave.VolBPhase); 
+  InstantPara.VolBR=PH_VOLTAGE_COEFF*SafeSqrtf(IntDataSave.VolBRPhPh); 
+  InstantPara.CurrentN=NEU_CURRENT_COEFF*SafeSqrtf(IntDataSave.CurNeutral);
 
-  InstantPara.CurrentRSolar=CURRENT_COEFF*sqrt(IntDataSave.CurRSolarPhase); 
-  InstantPara.CurrentYSolar=CURRENT_COEFF*sqrt(IntDataSave.CurYSolarPhase); 
-  InstantPara.CurrentBSolar=CURRENT_COEFF*sqrt(IntDataSave.CurBSolarPhase); 
-  InstantPara.VolRSolar=VOLTAGE_COEFF*sqrt(IntDataSave.VolRSolarPhase); 
-  InstantPara.VolRYSolar=PH_VOLTAGE_COEFF*sqrt(IntDataSave.VolRYSolarPhPh); 
-  InstantPara.VolYSolar=VOLTAGE_COEFF*sqrt(IntDataSave.VolYSolarPhase); 
-  InstantPara.VolYBSolar=PH_VOLTAGE_COEFF*sqrt(IntDataSave.VolYBSolarPhPh); 
-  InstantPara.VolBSolar=VOLTAGE_COEFF*sqrt(IntDataSave.VolBSolarPhase); 
-  InstantPara.VolBRSolar=PH_VOLTAGE_COEFF*sqrt(IntDataSave.VolBRSolarPhPh);
-  InstantPara.CurrentNSolar=NEU_CURRENT_COEFF*sqrt(IntDataSave.CurNeutralSolar);
+  InstantPara.CurrentRSolar=CURRENT_COEFF*SafeSqrtf(IntDataSave.CurRSolarPhase); 
+  InstantPara.CurrentYSolar=CURRENT_COEFF*SafeSqrtf(IntDataSave.CurYSolarPhase); 
+  InstantPara.CurrentBSolar=CURRENT_COEFF*SafeSqrtf(IntDataSave.CurBSolarPhase); 
+  InstantPara.VolRSolar=VOLTAGE_COEFF*SafeSqrtf(IntDataSave.VolRSolarPhase); 
+  InstantPara.VolRYSolar=PH_VOLTAGE_COEFF*SafeSqrtf(IntDataSave.VolRYSolarPhPh); 
+  InstantPara.VolYSolar=VOLTAGE_COEFF*SafeSqrtf(IntDataSave.VolYSolarPhase); 
+  InstantPara.VolYBSolar=PH_VOLTAGE_COEFF*SafeSqrtf(IntDataSave.VolYBSolarPhPh); 
+  InstantPara.VolBSolar=VOLTAGE_COEFF*SafeSqrtf(IntDataSave.VolBSolarPhase); 
+  InstantPara.VolBRSolar=PH_VOLTAGE_COEFF*SafeSqrtf(IntDataSave.VolBRSolarPhPh);
+  InstantPara.CurrentNSolar=NEU_CURRENT_COEFF*SafeSqrtf(IntDataSave.CurNeutralSolar);
 
-  InstantPara.Fan1Current=FAN_CURRENT_COEFF*sqrt(IntDataSave.Fan1Current);
-  InstantPara.Fan2Current=FAN_CURRENT_COEFF*sqrt(IntDataSave.Fan2Current);
+  InstantPara.Fan1Current=FAN_CURRENT_COEFF*SafeSqrtf(IntDataSave.Fan1Current);
+  InstantPara.Fan2Current=FAN_CURRENT_COEFF*SafeSqrtf(IntDataSave.Fan2Current);
 
   InstantPara.AmbientTemperature=AMBIENT_TEMP_COEFF*(IntDataSave.AmbientTemperature) - 273.0;
 }
