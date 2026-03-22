@@ -1288,14 +1288,14 @@ void SetWorkingGainBuffer(void)
   else if(InstantPara.CurrentR>=CUR_LOW_CAL_POINT)
   {
     Slope=(CalibrationCoeff.IR_MID_GAIN-CalibrationCoeff.IR_LOW_GAIN)/(CUR_MID_CAL_POINT-CUR_LOW_CAL_POINT);
-    Offset=CalibrationCoeff.IR_MID_GAIN-Slope;
+    Offset=CalibrationCoeff.IR_MID_GAIN-CUR_MID_CAL_POINT*Slope;
     WorkingCopyGain.IR_GAIN=Offset+Slope*InstantPara.CurrentR;
   }
   else WorkingCopyGain.IR_GAIN=CalibrationCoeff.IR_LOW_GAIN;
  
   if(InstantPara.CurrentY>=CUR_MID_CAL_POINT)
   {
-    if(InstantPara.CurrentY>CUR_HIGH_CAL_POINT)WorkingCopyGain.IY_GAIN=CalibrationCoeff.IY_HIGH_GAIN;
+    if(InstantPara.CurrentY>=CUR_HIGH_CAL_POINT)WorkingCopyGain.IY_GAIN=CalibrationCoeff.IY_HIGH_GAIN;
     else
     {
       Slope=(CalibrationCoeff.IY_HIGH_GAIN-CalibrationCoeff.IY_MID_GAIN)/(CUR_HIGH_CAL_POINT-CUR_MID_CAL_POINT);
@@ -1306,7 +1306,7 @@ void SetWorkingGainBuffer(void)
   else if(InstantPara.CurrentY>=CUR_LOW_CAL_POINT)
   {
     Slope=(CalibrationCoeff.IY_MID_GAIN-CalibrationCoeff.IY_LOW_GAIN)/(CUR_MID_CAL_POINT-CUR_LOW_CAL_POINT);
-    Offset=CalibrationCoeff.IY_MID_GAIN-Slope;
+    Offset=CalibrationCoeff.IY_MID_GAIN-CUR_MID_CAL_POINT*Slope;
     WorkingCopyGain.IY_GAIN=Offset+Slope*InstantPara.CurrentY;
   }
   else WorkingCopyGain.IY_GAIN=CalibrationCoeff.IY_LOW_GAIN;
@@ -1323,7 +1323,7 @@ void SetWorkingGainBuffer(void)
   else if(InstantPara.CurrentB>=CUR_LOW_CAL_POINT)
   {
     Slope=(CalibrationCoeff.IB_MID_GAIN-CalibrationCoeff.IB_LOW_GAIN)/(CUR_MID_CAL_POINT-CUR_LOW_CAL_POINT);
-    Offset=CalibrationCoeff.IB_MID_GAIN-Slope;
+    Offset=CalibrationCoeff.IB_MID_GAIN-CUR_MID_CAL_POINT*Slope;
     WorkingCopyGain.IB_GAIN=Offset+Slope*InstantPara.CurrentB;
   }
   else WorkingCopyGain.IB_GAIN=CalibrationCoeff.IB_LOW_GAIN;  
@@ -1342,14 +1342,14 @@ void SetWorkingGainBuffer(void)
   else if(InstantPara.CurrentRSolar>=CUR_LOW_CAL_POINT)
   {
     Slope=(CalibrationCoeff.IR_SOLAR_MID_GAIN-CalibrationCoeff.IR_SOLAR_LOW_GAIN)/(CUR_MID_CAL_POINT-CUR_LOW_CAL_POINT);
-    Offset=CalibrationCoeff.IR_SOLAR_MID_GAIN-Slope;
+    Offset=CalibrationCoeff.IR_SOLAR_MID_GAIN-CUR_MID_CAL_POINT*Slope;
     WorkingCopyGain.IR_SOLAR_GAIN=Offset+Slope*InstantPara.CurrentRSolar;
   }
   else WorkingCopyGain.IR_SOLAR_GAIN=CalibrationCoeff.IR_SOLAR_LOW_GAIN;
  
   if(InstantPara.CurrentYSolar>=CUR_MID_CAL_POINT)
   {
-    if(InstantPara.CurrentYSolar>CUR_HIGH_CAL_POINT)WorkingCopyGain.IY_SOLAR_GAIN=CalibrationCoeff.IY_SOLAR_HIGH_GAIN;
+    if(InstantPara.CurrentYSolar>=CUR_HIGH_CAL_POINT)WorkingCopyGain.IY_SOLAR_GAIN=CalibrationCoeff.IY_SOLAR_HIGH_GAIN;
     else
     {
       Slope=(CalibrationCoeff.IY_SOLAR_HIGH_GAIN-CalibrationCoeff.IY_SOLAR_MID_GAIN)/(CUR_HIGH_CAL_POINT-CUR_MID_CAL_POINT);
@@ -1360,7 +1360,7 @@ void SetWorkingGainBuffer(void)
   else if(InstantPara.CurrentYSolar>=CUR_LOW_CAL_POINT)
   {
     Slope=(CalibrationCoeff.IY_SOLAR_MID_GAIN-CalibrationCoeff.IY_SOLAR_LOW_GAIN)/(CUR_MID_CAL_POINT-CUR_LOW_CAL_POINT);
-    Offset=CalibrationCoeff.IY_SOLAR_MID_GAIN-Slope;
+    Offset=CalibrationCoeff.IY_SOLAR_MID_GAIN-CUR_MID_CAL_POINT*Slope;
     WorkingCopyGain.IY_SOLAR_GAIN=Offset+Slope*InstantPara.CurrentYSolar;
   }
   else WorkingCopyGain.IY_SOLAR_GAIN=CalibrationCoeff.IY_SOLAR_LOW_GAIN;
@@ -1377,7 +1377,7 @@ void SetWorkingGainBuffer(void)
   else if(InstantPara.CurrentBSolar>=CUR_LOW_CAL_POINT)
   {
     Slope=(CalibrationCoeff.IB_SOLAR_MID_GAIN-CalibrationCoeff.IB_SOLAR_LOW_GAIN)/(CUR_MID_CAL_POINT-CUR_LOW_CAL_POINT);
-    Offset=CalibrationCoeff.IB_SOLAR_MID_GAIN-Slope;
+    Offset=CalibrationCoeff.IB_SOLAR_MID_GAIN-CUR_MID_CAL_POINT*Slope;
     WorkingCopyGain.IB_SOLAR_GAIN=Offset+Slope*InstantPara.CurrentBSolar;
   }
   else WorkingCopyGain.IB_SOLAR_GAIN=CalibrationCoeff.IB_SOLAR_LOW_GAIN;  
