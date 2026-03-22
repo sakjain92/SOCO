@@ -934,9 +934,9 @@ void StartCheckCTPolarity(void)
   for (uint8_t i=0;i<16;i++)BufferToDisplay[i]=0;
   if(InterruptFlag  & INT_R_PHASE_REV)
     DisplayString(ROW_TOP,DIGIT_3,(uint8_t *)DIS_INV_R,LED_GRID_R);
-  if(InterruptFlag  & INT_Y_PHASE_REV);
+  if(InterruptFlag  & INT_Y_PHASE_REV)
     DisplayString(ROW_TOP,DIGIT_2,(uint8_t *)DIS_INV_Y,LED_GRID_Y);
-  if(InterruptFlag  & INT_B_PHASE_REV);
+  if(InterruptFlag  & INT_B_PHASE_REV)
     DisplayString(ROW_TOP,DIGIT_1,(uint8_t *)DIS_INV_B,LED_GRID_B);
   UpdateDisplay=1;
   DisplayScrollCounter=10; 

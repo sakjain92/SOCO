@@ -824,10 +824,10 @@ const struct ModBusParameter BlockAll[]=
   { (uint8_t *)&InstantPara.TotalPowerBSolar	,	DATA_TYPE_Float	,	1	,	CT_PT_RATIO	},
   { (uint8_t *)&InstantPara.SumTotalPowerSolar,	    DATA_TYPE_Float	,	1	,	CT_PT_RATIO	},
 #else
-  { (uint8_t *)&InstantPara.TotalPowerR	,	        DATA_TYPE_Float	,	0	,	CT_PT_RATIO	},
-  { (uint8_t *)&InstantPara.TotalPowerY	,	        DATA_TYPE_Float	,	0	,	CT_PT_RATIO	},
-  { (uint8_t *)&InstantPara.TotalPowerB	,	        DATA_TYPE_Float	,	0	,	CT_PT_RATIO	},
-  { (uint8_t *)&InstantPara.SumTotalPower,	        DATA_TYPE_Float	,	0	,	CT_PT_RATIO	},
+  { (uint8_t *)&InstantPara.TotalPowerRSolar	,	DATA_TYPE_Float	,	0	,	CT_PT_RATIO	},
+  { (uint8_t *)&InstantPara.TotalPowerYSolar	,	DATA_TYPE_Float	,	0	,	CT_PT_RATIO	},
+  { (uint8_t *)&InstantPara.TotalPowerBSolar	,   DATA_TYPE_Float	,	0	,	CT_PT_RATIO	},
+  { (uint8_t *)&InstantPara.SumTotalPowerSolar,	    DATA_TYPE_Float	,	0	,	CT_PT_RATIO	},
 #endif
   { (uint8_t *)&ModbusDummyFloatRegister	,	    DATA_TYPE_Float	,	1	,	CT_PT_RATIO	},
   { (uint8_t *)&ModbusDummyFloatRegister	,	    DATA_TYPE_Float	,	1	,	CT_PT_RATIO	},
