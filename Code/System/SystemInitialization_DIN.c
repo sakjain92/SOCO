@@ -182,7 +182,10 @@ static void InitPort(void)
   GPIOB->AFR[0]=0x77000;
   GPIOB->AFR[1]=0;
 
-  // PC0-PC5: -
+  // DEVNOTE: Don't use PC13. Limit source current (3mA)
+  // PC0: LED2: Output, Push Pull
+  // PC1: LED9: Output, Push Pull
+  // PC2-PC5: -
   // PC6: PFC1: Input, No pull up/pull down
   // PC7: PFC2: Input, No pull up/pull down
   // PC8: PFC3: Input, No pull up/pull down
@@ -190,10 +193,9 @@ static void InitPort(void)
   // PC10: - (Unused Calibrator TX)
   // PC11: - (Unused Calibrator RX)
   // PC12: DIS2: Output, Push Pull
-  // PC13: LED2: Output, Push Pull
-  // PC14-PC15:-
+  // PC13-PC15:-
   //
-  GPIOC->MODER=0X05000000;
+  GPIOC->MODER=0X01000005;
   GPIOC->OTYPER=0;
   GPIOC->OSPEEDR=0;
   GPIOC->PUPDR=0x80000;
@@ -207,7 +209,7 @@ static void InitPort(void)
   // PD4: RL3: Output, Push-pull
   // PD5: RL5: Output, Push-pull
   // PD6: RL1: Output, Push-pull
-  // PD7: RL2: Output, Push-pull
+  // PD7: RL4: Output, Push-pull
   // PD8: IBP_M+: SDADC3_6P
   // PD9: IBP_M-: SDADC3_6M
   // PD10: IRP_P+: SDADC3_4P
@@ -224,7 +226,7 @@ static void InitPort(void)
   GPIOD->AFR[0]=0;
   GPIOD->AFR[1]=0;
 
-  // PE0: RL4: Output, Push Pull
+  // PE0: RL2: Output, Push Pull
   // PE1: LED8: Output, Push Pull
   // PE2: LED7: Output, Push Pull
   // PE3: LED6: Output, Push Pull

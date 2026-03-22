@@ -87,7 +87,7 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 
 
 #define MAX_PARAM_LIMIT  17
-#define POWER_FAIL_SENSE_VALUE    775
+#define POWER_FAIL_SENSE_VALUE    1692
 
 
 
@@ -139,9 +139,9 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 // An equivalent schenider model: https://download.schneider-electric.com/files?p_Doc_Ref=BRU19338&p_enDocType=Instruction+sheet
 //
 
-#define   VOLTAGE_COEFF            2.75479E-04f
+#define   VOLTAGE_COEFF            2.69740E-04f
 #define   PH_VOLTAGE_COEFF         (VOLTAGE_COEFF)
-#define   FUND_VOL_COEFF           3.4435E-04f
+#define   FUND_VOL_COEFF           3.3717E-04f
 
 #define   CURRENT_COEFF            1.0115E-04f
 #define   NEU_CURRENT_COEFF        (CURRENT_COEFF)
@@ -149,13 +149,13 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 #define   FUND_CURRENT_COEFF       1.2644E-04f
 
 
-#define   POWER_COEFF_3P4W         2.786537E-08f
+#define   POWER_COEFF_3P4W         2.728484E-08f
 
-#define  FUND_POWER_COEFF          4.3540E-08f
+#define  FUND_POWER_COEFF          4.2633E-08f
 
-#define  FAN_CURRENT_COEFF         5.1790E-06f
+#define  FAN_CURRENT_COEFF         1.1653E-05f
 
-#define  AMBIENT_TEMP_COEFF        2.929687E-05f
+#define  AMBIENT_TEMP_COEFF        4.119873E-05f
 
 // Minimum voltage to maintain 0.5% accuracy is about 33VAC. Taking some margin
 // UNDONE: Figure out the correct minimum value for Currents as per metering
@@ -354,8 +354,8 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 #define SWITCH_OFF_LED1               GPIOF->BSRR = PORT_BIT_10
 #define SWITCH_ON_LED1                GPIOF->BRR  = PORT_BIT_10
 
-#define SWITCH_OFF_LED2               GPIOC->BSRR = PORT_BIT_13
-#define SWITCH_ON_LED2                GPIOC->BRR  = PORT_BIT_13
+#define SWITCH_OFF_LED2               GPIOC->BSRR = PORT_BIT_0
+#define SWITCH_ON_LED2                GPIOC->BRR  = PORT_BIT_0
 
 #define SWITCH_OFF_LED3               GPIOE->BSRR = PORT_BIT_6 
 #define SWITCH_ON_LED3                GPIOE->BRR  = PORT_BIT_6
@@ -375,6 +375,9 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 #define SWITCH_OFF_LED8               GPIOE->BSRR = PORT_BIT_1
 #define SWITCH_ON_LED8                GPIOE->BRR  = PORT_BIT_1
 
+#define SWITCH_OFF_LED9               GPIOC->BSRR = PORT_BIT_1
+#define SWITCH_ON_LED9                GPIOC->BRR  = PORT_BIT_1
+
 #define INPUT_KEY_DEC                 (!(GPIOB->IDR & PORT_BIT_9))
 #define INPUT_KEY_NEXT                (!(GPIOB->IDR & PORT_BIT_8))
 #define INPUT_KEY_INC                 (!(GPIOF->IDR & PORT_BIT_4))
@@ -385,14 +388,14 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 #define TURN_RELAY1_ON                              GPIOD->BSRR = PORT_BIT_6
 #define TURN_RELAY1_OFF                             GPIOD->BRR = PORT_BIT_6
 
-#define TURN_RELAY2_ON                              GPIOD->BSRR = PORT_BIT_7
-#define TURN_RELAY2_OFF                             GPIOD->BRR = PORT_BIT_7
+#define TURN_RELAY2_ON                              GPIOE->BSRR = PORT_BIT_0
+#define TURN_RELAY2_OFF                             GPIOE->BRR = PORT_BIT_0
 
 #define TURN_RELAY3_ON                              GPIOD->BSRR = PORT_BIT_4
 #define TURN_RELAY3_OFF                             GPIOD->BRR = PORT_BIT_4
 
-#define TURN_RELAY4_ON                              GPIOE->BSRR = PORT_BIT_0
-#define TURN_RELAY4_OFF                             GPIOE->BRR = PORT_BIT_0
+#define TURN_RELAY4_ON                              GPIOD->BSRR = PORT_BIT_7
+#define TURN_RELAY4_OFF                             GPIOD->BRR = PORT_BIT_7
 
 #define TURN_RELAY5_ON                              GPIOD->BSRR = PORT_BIT_5
 #define TURN_RELAY5_OFF                             GPIOD->BRR = PORT_BIT_5

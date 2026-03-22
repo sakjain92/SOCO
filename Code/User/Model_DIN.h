@@ -314,6 +314,41 @@
 // 293) Add SOCO serial number over Modbus
 // 294) Need to test negative/error cases in firmware
 // 295) We need to change PCB and SOCO box. Add fault LED if possible and center align all the LEDs with the display
+// 296) Should we remove RTC battery? Since another failure point. If really need RTC, can add RTC battery and then we have to add functional testing for RTC battery
+// 297) Left in automated testing: RTC battery, USB port, display, temp sensor, earthing with metallic body, soco serial number bar code scanning, 
+// 298) Should we have barcode on PCB for tracking?
+// 299) Add conformal coating but PCB should be baked
+// 300) Should we do aging of the product (8 hours waiting for testing in a high temperature environment?)
+// 301) Keep SOCO near the fan
+// 302) Should we use high temperature capacitors (105C instead of 85C) to increase it's lifecycle
+// 303) SMT, Throughole, barcode printing (QR Code) on PCB, conformal coating, functional testing, aging (burn-in at 2-4 hours for infant mortaility in hot chamber, 
+// stress all functionality for 4 hours. Can we do 24 hours? Can do this for the first 100 units and then on sampling basis. Monitor for all reboots or any issue in any functionality).
+// Check cleaning flux/baking PCB before conformal coatingn. FCT after box building is 
+// mandatory to check for switches and LEDs. 
+// 304) Shouldn't PCB studs be on top part of the SOCO metal box to align the leds/switches? Make LED and switches cutouts slightly bigger. Reduce the number of the studs in the metal box
+// as too many currently
+// 305) When current is non zero and voltage is zero, power factor is fluctuating whereas it should 1
+// 306) We need to add large EEPROM like in STM32f373 for firmware upgradation over modbus. This is a change in BOM. Might not be needed if firmware size is less than 50% of the flash size
+// 307) Check meterology code for 4 quadrant bug. For example, I see we don't check what happens if power factor exceeds -1 but we do check if it exceeds 1
+// 308) When calibration fails, need to tell reason for failure to operator. Same for functional testing.
+// 309) Check for whether switches having long legs can cause failure
+// 310) Calibrate at 100A also
+// 311) Need to test for calibration where we check for calibration with wide variance on board. Is board able to calibrate properly in all conditions?
+// 312) It seems that uncalibrated values are too far away from actual values. Check why is this the case? Read (https://ww1.microchip.com/downloads/en/DeviceDoc/51964A.pdf?utm_source=chatgpt.com)
+// for single phase calibration
+// 313) After calibration, our test jig should again check all variables (frequency, current, voltage, power factor, power etc) all various points to check if calibration completed properly
+// after restarting the meter (we should cross check if meter actually restarted)
+// 314) The DIN_COMM is about 50V+ when left open and 35V when all digital inputs connected. Too much variation? Also, can it travel large distance like DG PFC?
+// Also make sure creepage clearance away from generation of DIN_COMM internally from other parts of power supply (other voltages). IMPORTANT. Same
+// for Vcc of RS485
+// 315) Remove NC wherever mentioned in schematic. Check resistors everywhere in schematics where there is an option
+// 316) In v1.6 schematic, change voltage divider load from 4.7k to 3.6k (8 resistors in total). Also change R196, R197 & R198 to 470 ohm (1206). Also in RS485 section some ground on PCB is broken
+// and needs to be fixed. We also need to change R201 and R208 to 2.2k. We also need to check if unique part numbers increased after this change. So tell change to Jagdish.
+// Also R98 and C109 should be removed from BOM. Check if R326 and similar needs to be added in BOM
+// Things left in v1.6 PCB: Y phase PF fix, RS485 software fix, Temp sensor accuracy fix, Fix excel sheet, add 9th LED, add details in modbus table, light up full display on self-test
+//
+// 317) Investigate why before calibration Grid R phase curretm and Solar B phase current are low and Grid Y Phase power factor is low? IMPORTANT
+// 318) Should we sample directly from transformer output voltage for AC/DC Aux? Better to use a transistor to be safer? Add a zener diode for safety or ESD diode?
 //
 // NOTES:
 // 1) For Apparent power, we are using RMS (IEC 60038) instead of (IEC 61000-4-7) where we just measure first harmonics as we need to match energy with utility meter (and SMPS will have noise)
