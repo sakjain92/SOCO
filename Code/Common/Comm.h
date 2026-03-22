@@ -42,7 +42,7 @@ float CalPowRSolar,CalPowYSolar,CalPowBSolar;
 float CalFan1Current, CalFan2Current;
 struct Field Mod_TransmitFrame;
 uint8_t NoOfBytes_Low,NoOfBytes_High,Start_Add_Low,Start_Add_High;
-uint8_t AvailableByte, ArrayIndex, DataLengthRegister,DataArrLoc;
+uint8_t AvailableByte, DataLengthRegister,DataArrLoc;
 uint8_t Data_Received[MAX_BYTE_TO_RECIEVE];
 uint16_t CRC_Received, CRC_Calculated,ByteCount,Start_Add;
 uint16_t Temp_Start_Add=0;

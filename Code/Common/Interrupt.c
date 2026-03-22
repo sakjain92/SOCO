@@ -517,10 +517,10 @@ void ProcessMainInterrupt(void)
   IntNeuCurrent +=IntCurRPhase;
   IntNeuCurrent +=IntCurYPhase;
   IntNeuCurrent +=IntCurBPhase;
-  
+
   IntDataSum.CurNeutral +=IntNeuCurrent*IntNeuCurrent;
   
-// Phase compensation  y [n] = x[n]+ b x[n -1]
+// Phase compensation  y [n] = a(x[n]+ bx[n -1])
   // This is probably phase compensation for the phase shift introduced
   // by internal CTs
   //

@@ -503,8 +503,9 @@ Ret: None
 float W,PhasenRadian,D,B,A;
 void CalPF(float Error, float * CalGainBufferPointer,float * CalBetaBufferPointer)
 {
-    
-    
+    // UNDONE: This doesn't work for large power factor errors
+    // UNDONE: Check if W is fixed or changes with changing solar/grid frequency
+    //
     PhasenRadian=acos(0.5*(1+Error))-(3.14159265/3);
     W=(3.14159265)/32;  // 2*freq*PI/sampling freq
     D=PhasenRadian/W;
@@ -593,7 +594,7 @@ void ModBusCommunication(void)
             Timer.DoubleData = 0;
             
             bool found = false;
-            ArrayIndex = 0;
+            uint16_t ArrayIndex = 0;
             for (uint8_t i = 0; i < ARRAY_SIZE(ModbusTableSections); i++)
             {
                 if ((Start_Add >= ModbusTableSections[i].address) &&
@@ -780,6 +781,7 @@ void ModBusCommunication(void)
             break;
           }
           case 0x10:
+          {
               Start_Add_High = RecieveArray[2];
               Start_Add_Low = RecieveArray[3];
               Start_Add = (Start_Add_Low) + (Start_Add_High<<8);
@@ -808,8 +810,6 @@ void ModBusCommunication(void)
                       RecieveArray[8]<<16+
                       RecieveArray[7]<<24;
 
-                  memcpy(Mod_TransmitFrame.Data_Array, &RecieveArray[2], 4);
-                  SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received,4);
               }
               else  ///// Illegal Data Address //////
               {
@@ -818,9 +818,12 @@ void ModBusCommunication(void)
                 Mod_TransmitFrame.Data_Array[0] = 0x02;
                 SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received,1);
                 Fun_Received &=~ 0x80;
-               
               }
+              memcpy(Mod_TransmitFrame.Data_Array, &RecieveArray[2], 4);
+              SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received,4);
               break;
+            }
+            case 0x1 /*MODBUS_READ_COIL_STATUS_CODE*/:
             case 0x2 /*MODBUS_READ_INPUT_STATUS_CODE*/:
             {
                 Start_Add_High = RecieveArray[2];
@@ -868,6 +871,11 @@ void ModBusCommunication(void)
                         40000,
                         sizeof(g_testingStatus),
                         (uint8_t*)(&g_testingStatus),
+                    },
+                    {
+                        60000,
+                        sizeof(g_LedStatus),
+                        (uint8_t*)(&g_LedStatus),
                     }
                 };
 
@@ -955,6 +963,10 @@ void ModBusCommunication(void)
                 {
                     g_testingStatus.Status[Start_Add - 40000] = enable;
                 }
+                else if (Start_Add == 0)
+                {
+                    NVIC_SystemReset();
+                }
                 else if (Start_Add >= 60000 && Start_Add <= 60000 + sizeof(g_LedStatus))
                 {
                     g_LedStatus.Status[Start_Add - 60000] = enable;
@@ -967,15 +979,21 @@ void ModBusCommunication(void)
                     Fun_Received &=~ 0x80;
                     break;
                 }
+                memcpy(Mod_TransmitFrame.Data_Array, &RecieveArray[2], 4);
+                SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received,4);
+                break;
             }
        ///// Exception Response for Illegal Function //////    
           default:
+          {
             if((Fun_Received != 0x03))
             {
               Fun_Received |= 0x80;
               Mod_TransmitFrame.Data_Array[0] = 0x01;
               SendData_UART((uint8_t)CopySetPara[PARA_DEVICE_ID], Fun_Received,1);
-            }        
+            }
+            break;
+          }
        }
      }
      ReceiveLength=0;
