@@ -291,14 +291,17 @@ void Metrology(void)
   InstantPara.TotalPowerR=POWER_COEFF_3P4W*IntDataSave.RPhasePower;
   if(InstantPara.CurrentR<MIN_TOTAL_CUR_LIMIT)InstantPara.TotalPowerR=InstantPara.FunPowerR;
   if(InstantPara.CurrentR==0)InstantPara.TotalPowerR=0; // Starting
+  if(InstantPara.VolR==0)InstantPara.TotalPowerR=0; // Starting
 
   InstantPara.TotalPowerY=POWER_COEFF_3P4W*IntDataSave.YPhasePower;
   if(InstantPara.CurrentY<MIN_TOTAL_CUR_LIMIT)InstantPara.TotalPowerY=InstantPara.FunPowerY;
   if(InstantPara.CurrentY==0)InstantPara.TotalPowerY=0; // Starting 
+  if(InstantPara.VolY==0)InstantPara.TotalPowerY=0; // Starting 
  
   InstantPara.TotalPowerB=POWER_COEFF_3P4W*IntDataSave.BPhasePower;
   if(InstantPara.CurrentB<MIN_TOTAL_CUR_LIMIT)InstantPara.TotalPowerB=InstantPara.FunPowerB;
   if(InstantPara.CurrentB==0)InstantPara.TotalPowerB=0; // Starting
+  if(InstantPara.VolB==0)InstantPara.TotalPowerB=0; // Starting
 
   InstantPara.SumTotalPower=(InstantPara.TotalPowerR+InstantPara.TotalPowerY+InstantPara.TotalPowerB);
 
@@ -382,12 +385,18 @@ void Metrology(void)
   InstantPara.TotalPowerRSolar=POWER_COEFF_3P4W*IntDataSave.RSolarPhasePower;
   if(InstantPara.CurrentRSolar<MIN_TOTAL_CUR_LIMIT)InstantPara.TotalPowerRSolar=InstantPara.FunPowerSolarR;
   if(InstantPara.CurrentRSolar==0)InstantPara.TotalPowerRSolar=0; // Starting 
+  if(InstantPara.VolRSolar==0)InstantPara.TotalPowerRSolar=0; // Starting 
+  
   InstantPara.TotalPowerYSolar=POWER_COEFF_3P4W*IntDataSave.YSolarPhasePower;
   if(InstantPara.CurrentYSolar<MIN_TOTAL_CUR_LIMIT)InstantPara.TotalPowerYSolar=InstantPara.FunPowerSolarY;
   if(InstantPara.CurrentYSolar==0)InstantPara.TotalPowerYSolar=0; // Starting 
+  if(InstantPara.VolYSolar==0)InstantPara.TotalPowerYSolar=0; // Starting 
+  
   InstantPara.TotalPowerBSolar=POWER_COEFF_3P4W*IntDataSave.BSolarPhasePower;
   if(InstantPara.CurrentBSolar<MIN_TOTAL_CUR_LIMIT)InstantPara.TotalPowerBSolar=InstantPara.FunPowerSolarB;
   if(InstantPara.CurrentBSolar==0)InstantPara.TotalPowerBSolar=0; // Starting 
+  if(InstantPara.VolBSolar==0)InstantPara.TotalPowerBSolar=0; // Starting 
+  
   InstantPara.SumTotalPowerSolar=(InstantPara.TotalPowerRSolar+InstantPara.TotalPowerYSolar+InstantPara.TotalPowerBSolar);
 
   InstantPara.TotalReactPowerSolar=InstantPara.ReactPowerRSolar+InstantPara.ReactPowerYSolar+InstantPara.ReactPowerBSolar;
