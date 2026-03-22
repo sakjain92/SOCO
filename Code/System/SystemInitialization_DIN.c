@@ -311,7 +311,7 @@ static void SetPwrRegisters(void)
 
 static void SetDmaRegisters(void)
 {
-  DMA1_Channel1->CNDTR=0X5; // NO OF DATA TRANSFER
+  DMA1_Channel1->CNDTR=0X6; // NO OF DATA TRANSFER
   DMA1_Channel1->CPAR=(uint32_t)&ADC1->DR;
   DMA1_Channel1->CMAR=(uint32_t)&AdcDataInArray;
   // DMA Enabled, Circular Mode, Memmory Increment, 16 bits pheripheral size, 16 bits memory size
@@ -369,14 +369,16 @@ static void SetAdc(void)
   // 3rd Sequence: FAN_1_Current: 3
   // 4th Sequence: FAN_2_Current: 6
   // 5th Sequence: A_TEMP: 7
+  // 6th Sequence: VREFINT: 17
   //
-  ADC1->SQR3=0x730CA4;
+  ADC1->SQR3=0x22730CA4;
   ADC1->SQR2=0x0;
-  // 5 total sequences
-  ADC1->SQR1=0x400000;
-  
-  // ADC On, Enable Calibration, DMA enabled, JSWSRTART Trigger, SWSTART Trigger, Enable exrternal trigger
-  ADC1->CR2=0X1E7105;
+  // 6 total sequences
+  ADC1->SQR1=0x500000;
+
+  // ADC On, Enable Calibration, DMA enabled, JSWSRTART Trigger, SWSTART Trigger, Enable external trigger
+  // Bit 23 (TSVREFE): enable internal VREFINT channel
+  ADC1->CR2=0X9E7105;
 
 }
 

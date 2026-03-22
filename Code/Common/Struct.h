@@ -115,6 +115,7 @@ struct INT_DATA_SUM
   float        OffsetFan2Current;
 
   float        AmbientTemperature;
+  float        VRefInt;
 };
 
 
@@ -171,6 +172,7 @@ struct INT_DATA_SAVE
   float     OffsetFan2Current;
 
   float     AmbientTemperature;
+  float     VRefInt;
 };
 
 struct INT_TIMER_COUNT

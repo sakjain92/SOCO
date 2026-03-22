@@ -941,5 +941,21 @@ void CalculateVoCur(void)
   InstantPara.Fan1Current=FAN_CURRENT_COEFF*SafeSqrtf(IntDataSave.Fan1Current);
   InstantPara.Fan2Current=FAN_CURRENT_COEFF*SafeSqrtf(IntDataSave.Fan2Current);
 
-  InstantPara.AmbientTemperature=AMBIENT_TEMP_COEFF*(IntDataSave.AmbientTemperature) - 273.0;
+  // VrefIntActual = VREFINT_CAL_VDDA * (*VREFINT_CAL_ADDR) / 4096
+  // because *VREFINT_CAL_ADDR stores the actual VREF_INT ADC count when VREF+=VREFINT_CAL_VDDA
+  // at manufacturing
+  //
+  float VrefIntActual = VREFINT_CAL_VDDA * (*VREFINT_CAL_ADDR) / 4096.0f;
+
+  // VrefInt(Measured) = (VrefIntActual / VREF+) * 4096
+  // So VREF+ / 4096 = VrefIntActual / VrefInt(Measured)
+  // So AmbientTemp (ADC) = AmbientTemp (K) * 0.01 * 0.5 / VREF+ * 4096
+  // AmbientTemp (K) =   AmbientTemp (ADC) / (0.01*0.5) * VrefIntActual / VrefInt(Measured)
+  // AmbientTemp (C) =   AmbientTemp (ADC) / (0.01*0.5) * VrefIntActual / VrefInt(Measured) - 273
+  //
+  // Note: LM335Z outputs 0.01V for every 1K temperature and
+  // we have a voltage divider at it's output
+  //
+  InstantPara.AmbientTemperature = (IntDataSave.AmbientTemperature / IntDataSave.VRefInt)
+                                   * VrefIntActual / (0.01f * AMBIENT_TEMP_DIVIDER_RATIO) - 273.0f;
 }

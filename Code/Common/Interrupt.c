@@ -69,6 +69,7 @@ void ProcessMainInterrupt(void)
   float IntNeuCurrent, IntNeuSolarCurrent;
   float IntFan1Current, IntFan2Current;
   float IntAmbientTemperature;
+  float IntVRefInt;
   float TempGainMult;
   int16_t TempInt;  
   uint8_t i;
@@ -180,6 +181,7 @@ void ProcessMainInterrupt(void)
   IntFan2Current *=WorkingCopyGain.FAN2_GAIN;
 
   IntAmbientTemperature=AdcDataInArray[ADC_A_TEMP];
+  IntVRefInt=AdcDataInArray[ADC_VREFINT];
 
   // UNDONE: Do the current & power calculation for solar
 
@@ -391,6 +393,7 @@ void ProcessMainInterrupt(void)
     IntDataSave.OffsetFan2Current=IntDataSum.OffsetFan2Current;
 
     IntDataSave.AmbientTemperature = IntDataSum.AmbientTemperature;
+    IntDataSave.VRefInt            = IntDataSum.VRefInt;
 
     memset(&IntDataSum, 0, sizeof(IntDataSum));
  
@@ -599,6 +602,7 @@ void ProcessMainInterrupt(void)
   IntDataSum.OffsetFan2Current += IntFan2Current;
 
   IntDataSum.AmbientTemperature += IntAmbientTemperature;
+  IntDataSum.VRefInt            += IntVRefInt;
 
   // Summation for FFT Purpose
   

@@ -155,7 +155,11 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 
 #define  FAN_CURRENT_COEFF         1.1653E-05f
 
-#define  AMBIENT_TEMP_COEFF        4.119873E-05f
+#define  AMBIENT_TEMP_DIVIDER_RATIO 0.5f
+
+// VREFINT factory calibration: raw ADC count measured at VDDA=3.3V, T=30degC
+#define  VREFINT_CAL_ADDR          ((volatile uint16_t*)0x1FFFF7BAU)
+#define  VREFINT_CAL_VDDA          3.3f
 
 // Minimum voltage to maintain 0.5% accuracy is about 33VAC. Taking some margin
 // UNDONE: Figure out the correct minimum value for Currents as per metering
@@ -451,6 +455,7 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 #define   ADC_FAN_1             2
 #define   ADC_FAN_2             3
 #define   ADC_A_TEMP            4
+#define   ADC_VREFINT           5
 
 #define    ADC_IR               0
 #define    ADC_VR               1

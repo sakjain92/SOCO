@@ -346,9 +346,11 @@
 // and needs to be fixed. We also need to change R201 and R208 to 2.2k. We also need to check if unique part numbers increased after this change. So tell change to Jagdish.
 // Also R98 and C109 should be removed from BOM. Check if R326 and similar needs to be added in BOM
 // Things left in v1.6 PCB: Y phase PF fix, RS485 software fix, Temp sensor accuracy fix, Fix excel sheet, add 9th LED, add details in modbus table, light up full display on self-test
+// Change R60, R90 to 1206 as "21V" is actually 50-55V. Also, C72 and C53 are 63V. Very close to 
 //
 // 317) Investigate why before calibration Grid R phase curretm and Solar B phase current are low and Grid Y Phase power factor is low? IMPORTANT
-// 318) Should we sample directly from transformer output voltage for AC/DC Aux? Better to use a transistor to be safer? Add a zener diode for safety or ESD diode?
+// 318) Should we sample directly from transformer output voltage for AC/DC Aux? Better to use a transistor to be safer? Add a zener diode for safety or ESD diode? Add series resistor to MCU
+// 319) All 0603 resistors that we are using have TERRIBLE TCR. VERY TERRIBLE. IMPORTANT. This includes the reference voltage generators resistors, voltage resistors, fan current shunt, temperature sensor resistors (PPM might not matter in voltage dividers but accuracy matters maybe, like in temperature sensor area). Use 0.1% accuracy resistors for temperature sensors atleast
 //
 // NOTES:
 // 1) For Apparent power, we are using RMS (IEC 60038) instead of (IEC 61000-4-7) where we just measure first harmonics as we need to match energy with utility meter (and SMPS will have noise)
