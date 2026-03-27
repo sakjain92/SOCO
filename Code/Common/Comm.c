@@ -177,6 +177,21 @@ void DirectCalibration(void)
       TempFloat=(CalPowBSolar-CAL_PF_POWER_SETTING_LOW)/CAL_PF_POWER_SETTING_LOW;
       CalBuffer.IB_SOLAR_LOW_PH_ERROR=TempFloat-0.001;
 
+      if (CalBuffer.IR_LOW_PH_ERROR>PH_ERROR_D_ZERO ||
+          CalBuffer.IR_LOW_PH_ERROR<PH_ERROR_D_MAX ||
+          CalBuffer.IY_LOW_PH_ERROR>PH_ERROR_D_ZERO ||
+          CalBuffer.IY_LOW_PH_ERROR<PH_ERROR_D_MAX ||
+          CalBuffer.IB_LOW_PH_ERROR>PH_ERROR_D_ZERO ||
+          CalBuffer.IB_LOW_PH_ERROR<PH_ERROR_D_MAX ||
+          CalBuffer.IR_SOLAR_LOW_PH_ERROR>PH_ERROR_D_ZERO ||
+          CalBuffer.IR_SOLAR_LOW_PH_ERROR<PH_ERROR_D_MAX ||
+          CalBuffer.IY_SOLAR_LOW_PH_ERROR>PH_ERROR_D_ZERO ||
+          CalBuffer.IY_SOLAR_LOW_PH_ERROR<PH_ERROR_D_MAX ||
+          CalBuffer.IB_SOLAR_LOW_PH_ERROR>PH_ERROR_D_ZERO ||
+          CalBuffer.IB_SOLAR_LOW_PH_ERROR<PH_ERROR_D_MAX)
+      {
+          DisplayImproperSettings();
+      }
       
    }
    else 
@@ -267,6 +282,22 @@ void DirectCalibration(void)
 
       TempFloat=(CalPowBSolar-CAL_PF_POWER_SETTING_MID)/CAL_PF_POWER_SETTING_MID;
       CalBuffer.IB_SOLAR_MID_PH_ERROR=TempFloat-0.001;
+
+      if (CalBuffer.IR_MID_PH_ERROR>PH_ERROR_D_ZERO ||
+          CalBuffer.IR_MID_PH_ERROR<PH_ERROR_D_MAX ||
+          CalBuffer.IY_MID_PH_ERROR>PH_ERROR_D_ZERO ||
+          CalBuffer.IY_MID_PH_ERROR<PH_ERROR_D_MAX ||
+          CalBuffer.IB_MID_PH_ERROR>PH_ERROR_D_ZERO ||
+          CalBuffer.IB_MID_PH_ERROR<PH_ERROR_D_MAX ||
+          CalBuffer.IR_SOLAR_MID_PH_ERROR>PH_ERROR_D_ZERO ||
+          CalBuffer.IR_SOLAR_MID_PH_ERROR<PH_ERROR_D_MAX ||
+          CalBuffer.IY_SOLAR_MID_PH_ERROR>PH_ERROR_D_ZERO ||
+          CalBuffer.IY_SOLAR_MID_PH_ERROR<PH_ERROR_D_MAX ||
+          CalBuffer.IB_SOLAR_MID_PH_ERROR>PH_ERROR_D_ZERO ||
+          CalBuffer.IB_SOLAR_MID_PH_ERROR<PH_ERROR_D_MAX)
+      {
+          DisplayImproperSettings();
+      }
    }
    else
    {
@@ -361,6 +392,22 @@ void DirectCalibration(void)
 
       TempFloat=(CalPowBSolar-CAL_PF_POWER_SETTING_HIGH)/CAL_PF_POWER_SETTING_HIGH;
       CalBuffer.IB_SOLAR_HIGH_PH_ERROR=TempFloat-0.001;
+
+      if (CalBuffer.IR_HIGH_PH_ERROR>PH_ERROR_D_ZERO ||
+          CalBuffer.IR_HIGH_PH_ERROR<PH_ERROR_D_MAX ||
+          CalBuffer.IY_HIGH_PH_ERROR>PH_ERROR_D_ZERO ||
+          CalBuffer.IY_HIGH_PH_ERROR<PH_ERROR_D_MAX ||
+          CalBuffer.IB_HIGH_PH_ERROR>PH_ERROR_D_ZERO ||
+          CalBuffer.IB_HIGH_PH_ERROR<PH_ERROR_D_MAX ||
+          CalBuffer.IR_SOLAR_HIGH_PH_ERROR>PH_ERROR_D_ZERO ||
+          CalBuffer.IR_SOLAR_HIGH_PH_ERROR<PH_ERROR_D_MAX ||
+          CalBuffer.IY_SOLAR_HIGH_PH_ERROR>PH_ERROR_D_ZERO ||
+          CalBuffer.IY_SOLAR_HIGH_PH_ERROR<PH_ERROR_D_MAX ||
+          CalBuffer.IB_SOLAR_HIGH_PH_ERROR>PH_ERROR_D_ZERO ||
+          CalBuffer.IB_SOLAR_HIGH_PH_ERROR<PH_ERROR_D_MAX)
+      {
+          DisplayImproperSettings();
+      }
    }
    else
    {
@@ -501,19 +548,30 @@ Inp: Error, gain pointer, value pointer
 Ret: None
 */  
 float W,PhasenRadian,D,B,A;
-void CalPF(float Error, float * CalGainBufferPointer,float * CalBetaBufferPointer)
+void CalPF(float Error, float * CalGainBufferPointer, float * CalBetaBufferPointer, uint8_t * CalIntDelayPointer)
 {
-    // UNDONE: This doesn't work for large power factor errors
-    // UNDONE: Check if W is fixed or changes with changing solar/grid frequency
+    // Phase correction: converts PH_ERROR to IIR filter coefficients A, B and
+    // an integer sample delay.
     //
-    PhasenRadian=acos(0.5*(1+Error))-(3.14159265/3);
-    W=(3.14159265)/32;  // 2*freq*PI/sampling freq
+    // D = total fractional-sample delay needed.  For D >= 1, the integer part
+    // is stored in *CalIntDelayPointer and only the fractional part (< 1) is
+    // fed into the IIR formula, keeping the discriminant positive for all
+    // valid inputs.
+    //
+    // Valid input range: PH_ERROR_D_MAX <= Error <= PH_ERROR_D_ZERO
+    // (enforced by bounds check in DirectCalibration before values are stored).
+    //
+    W=(3.14159265f)/32;  // 2*freq*PI/sampling freq
+    PhasenRadian=acos(0.5f*(1+Error))-(3.14159265f/3);
     D=PhasenRadian/W;
-    B=-((1-2*D)*cos(W)-sqrt(((1-2*D)*(1-2*D)*cos(W)*cos(W))+(4*D*(1-D))))/(2*(1-D));
+
+    *CalIntDelayPointer=(uint8_t)D;
+    float fracD = D - (float)(*CalIntDelayPointer);
+
+    B=-((1-2*fracD)*cos(W)-sqrt(((1-2*fracD)*(1-2*fracD)*cos(W)*cos(W))+(4*fracD*(1-fracD))))/(2*(1-fracD));
     A=1/(sqrt(((cos(W)+B)*(cos(W)+B))+sin(W)*sin(W)));
     *CalGainBufferPointer=A;
     *CalBetaBufferPointer=B;
-  
 }
    
 /*
@@ -794,22 +852,25 @@ void ModBusCommunication(void)
                 Start_Add -= 4100;
                 //Start_Add +=2; // To remove system configuration
                 CheckPasswordEdit(Start_Add/2,NoOfBytes);
-              }
-              
+                break;
+              } 
               else if((Start_Add >= 5000)&&(Start_Add <= 5000+(MAX_PARAM_LIMIT*2))&&(!(Start_Add %2)))
               {
                 Start_Add -= 5000;
                 //Start_Add +=2; // To remove system configuration
                 ModbusUpdateParameter(Start_Add/2,NoOfBytes);
+                break;
               }
               else if (Start_Add == 6000 && NoOfBytes == 2)
               {
                   g_DisableLoadOnGridSeconds =
-                      RecieveArray[10] +
-                      RecieveArray[9]<<8 +
-                      RecieveArray[8]<<16+
-                      RecieveArray[7]<<24;
-
+                      ((uint32_t)RecieveArray[10]) +
+                      ((uint32_t)RecieveArray[9]<<8) +
+                      ((uint32_t)RecieveArray[8]<<16)+
+                      ((uint32_t)RecieveArray[7]<<24);
+                  memcpy(Mod_TransmitFrame.Data_Array, &RecieveArray[2], 4);
+                  SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received,4);
+                  break;
               }
               else  ///// Illegal Data Address //////
               {
@@ -818,9 +879,8 @@ void ModBusCommunication(void)
                 Mod_TransmitFrame.Data_Array[0] = 0x02;
                 SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received,1);
                 Fun_Received &=~ 0x80;
+                break;
               }
-              memcpy(Mod_TransmitFrame.Data_Array, &RecieveArray[2], 4);
-              SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received,4);
               break;
             }
             case 0x1 /*MODBUS_READ_COIL_STATUS_CODE*/:
@@ -929,6 +989,7 @@ void ModBusCommunication(void)
                     Fun_Received |= 0x80;
                     Mod_TransmitFrame.Data_Array[0] = 0x02;
                     SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received,1);
+                    Fun_Received &=~ 0x80;
                     break;
                 }
                 break;
@@ -955,11 +1016,11 @@ void ModBusCommunication(void)
 
                 bool enable = (NoOfBytes == 0xFF00);
 
-                if (Start_Add >= 30000 && Start_Add <= 30000 + sizeof(g_DigOutputs))
+                if (Start_Add >= 30000 && Start_Add < 30000 + sizeof(g_DigOutputs))
                 {
                     g_DigOutputs.Relays[Start_Add - 30000] = enable;
                 }
-                else if (Start_Add >= 40000 && Start_Add <= 40000 + sizeof(g_testingStatus))
+                else if (Start_Add >= 40000 && Start_Add < 40000 + sizeof(g_testingStatus))
                 {
                     g_testingStatus.Status[Start_Add - 40000] = enable;
                 }
@@ -967,7 +1028,7 @@ void ModBusCommunication(void)
                 {
                     NVIC_SystemReset();
                 }
-                else if (Start_Add >= 60000 && Start_Add <= 60000 + sizeof(g_LedStatus))
+                else if (Start_Add >= 60000 && Start_Add < 60000 + sizeof(g_LedStatus))
                 {
                     g_LedStatus.Status[Start_Add - 60000] = enable;
                 }
@@ -991,6 +1052,7 @@ void ModBusCommunication(void)
               Fun_Received |= 0x80;
               Mod_TransmitFrame.Data_Array[0] = 0x01;
               SendData_UART((uint8_t)CopySetPara[PARA_DEVICE_ID], Fun_Received,1);
+              Fun_Received &=~ 0x80;
             }
             break;
           }
@@ -1098,16 +1160,16 @@ void ModbusUpdateParameter(uint16_t Address,uint16_t NoOfBytes)
     {
       Mod_TransmitFrame.Data_Array[0] = 0x03;
       Fun_Received |= 0x80;
-      //SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received,1);
+      SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received,1);
+      Fun_Received &=~ 0x80;
+      return;
     }
-    else
-    {
-      for( Temp32=0;Temp32<MAX_PARAM_LIMIT;Temp32++)CopySetPara[Temp32]=ModCopySetPara[Temp32];
-      UpdateEditSettings();  
-      Mod_TransmitFrame.Data_Array[0] = 5;     // Ack
-      Delay1Msec12Mhz(20);
-      EditParaPassStatus = 0;
-    }
+      
+    for( Temp32=0;Temp32<MAX_PARAM_LIMIT;Temp32++)CopySetPara[Temp32]=ModCopySetPara[Temp32];
+    UpdateEditSettings();  
+    Mod_TransmitFrame.Data_Array[0] = 5;     // Ack
+    Delay1Msec12Mhz(20);
+    EditParaPassStatus = 0;
     
     SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received,1);
 }
@@ -1140,15 +1202,13 @@ void CheckPasswordEdit(uint16_t Address,uint16_t NoOfBytes)
     {
       Mod_TransmitFrame.Data_Array[0] = 0x03;
       Fun_Received |= 0x80;
-      //SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received,1);
+      SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received,1);
+      Fun_Received &=~ 0x80;
+      return;
     }
-    else
-    {
-      Mod_TransmitFrame.Data_Array[0] = 5;     // Ack
-      EditParaPassStatus=1;
-      
-      Delay1Msec12Mhz(20);
-    }
+    Mod_TransmitFrame.Data_Array[0] = 5;     // Ack
+    EditParaPassStatus=1;
+    Delay1Msec12Mhz(20);
     
     SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received,1);
 }

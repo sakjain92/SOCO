@@ -87,7 +87,7 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 
 
 #define MAX_PARAM_LIMIT  17
-#define POWER_FAIL_SENSE_VALUE    1692
+#define POWER_FAIL_SENSE_VALUE    2503
 
 
 
@@ -271,7 +271,16 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 #define        CURRENT_TOLRERANCE                    0.3f   // UNDONE: This was 0.1 earlier but in our board at lower end of calibration needed to increase error range
                                                             // We should use SDADC to get better accuracy
 #define        VOLTAGE_TOLERANCE                     0.1f
-#define        POWER_TOLERANCE                       0.4f 
+#define        POWER_TOLERANCE                       0.4f
+
+// PH_ERROR is stored as (P_measured - P_expected)/P_expected - 0.001.
+// CalPF() converts PH_ERROR to a fractional-sample delay D.
+// PH_ERROR_D_ZERO: upper bound; values above this give D < 0 (invalid).
+// PH_ERROR_D_MAX:  lower bound; values below this give D >= 4 (exceeds 4
+//                  previous-sample buffer used in phase correction).
+//
+#define        PH_ERROR_D_ZERO                       (0.0f)
+#define        PH_ERROR_D_MAX                        (-0.735f)
 
 #define        CAL_FAN_CUR_SETTING                   0.1f
 #define        FAN_CUR_TOLERANCE                     0.3f   // UNDONE: Check why this is also needed to be high

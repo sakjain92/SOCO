@@ -513,6 +513,15 @@ struct GAIN_WC
 
   float FAN1_GAIN;
   float FAN2_GAIN;
+
+  // Integer sample delay for phase correction (0-3). The fractional part is
+  // handled by the IIR filter via PR_ALFA/PR_BETA above.
+  uint8_t PR_INT_DELAY;
+  uint8_t PY_INT_DELAY;
+  uint8_t PB_INT_DELAY;
+  uint8_t PR_SOLAR_INT_DELAY;
+  uint8_t PY_SOLAR_INT_DELAY;
+  uint8_t PB_SOLAR_INT_DELAY;
 };
 
   

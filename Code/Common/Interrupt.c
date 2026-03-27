@@ -523,24 +523,45 @@ void ProcessMainInterrupt(void)
 
   IntDataSum.CurNeutral +=IntNeuCurrent*IntNeuCurrent;
   
-// Phase compensation  y [n] = a(x[n]+ bx[n -1])
-  // This is probably phase compensation for the phase shift introduced
-  // by internal CTs
+// Phase compensation: y[n] = A*(x[n-int_D] + B*x[n-int_D-1])
+  // The integer part of the delay (int_D) selects which stored samples to use.
+  // The fractional part is handled by the IIR coefficients A (ALFA) and B (BETA).
+  // History is maintained as a 4-deep shift register per channel.
   //
-  TempGainMult=  (WorkingCopyGain.PR_BETA*IntRPrevSample);
-  IntRPrevSample=IntVolRPhase;
-  IntVolRPhase +=TempGainMult;
-  IntVolRPhase=(WorkingCopyGain.PR_ALFA*IntVolRPhase);
-  
-  TempGainMult=  (WorkingCopyGain.PY_BETA*IntYPrevSample);
-  IntYPrevSample=IntVolYPhase;
-  IntVolYPhase +=TempGainMult;
-  IntVolYPhase=(WorkingCopyGain.PY_ALFA*IntVolYPhase);
-  
-  TempGainMult=  (WorkingCopyGain.PB_BETA*IntBPrevSample);
-  IntBPrevSample=IntVolBPhase;
-  IntVolBPhase +=TempGainMult;
-  IntVolBPhase=(WorkingCopyGain.PB_ALFA*IntVolBPhase);
+  float VCur,VPrev,IntVolRPhaseOrig,IntVolYPhaseOrig,IntVolBPhaseOrig;
+
+  IntVolRPhaseOrig=IntVolRPhase;
+  if(WorkingCopyGain.PR_INT_DELAY==0)      {VCur=IntVolRPhase;    VPrev=IntRPrevSample;}
+  else if(WorkingCopyGain.PR_INT_DELAY==1) {VCur=IntRPrevSample;  VPrev=IntRPrev2Sample;}
+  else if(WorkingCopyGain.PR_INT_DELAY==2) {VCur=IntRPrev2Sample; VPrev=IntRPrev3Sample;}
+  else                                     {VCur=IntRPrev3Sample; VPrev=IntRPrev4Sample;}
+  IntVolRPhase=WorkingCopyGain.PR_ALFA*(VCur+WorkingCopyGain.PR_BETA*VPrev);
+  IntRPrev4Sample=IntRPrev3Sample;
+  IntRPrev3Sample=IntRPrev2Sample;
+  IntRPrev2Sample=IntRPrevSample;
+  IntRPrevSample=IntVolRPhaseOrig;
+
+  IntVolYPhaseOrig=IntVolYPhase;
+  if(WorkingCopyGain.PY_INT_DELAY==0)      {VCur=IntVolYPhase;    VPrev=IntYPrevSample;}
+  else if(WorkingCopyGain.PY_INT_DELAY==1) {VCur=IntYPrevSample;  VPrev=IntYPrev2Sample;}
+  else if(WorkingCopyGain.PY_INT_DELAY==2) {VCur=IntYPrev2Sample; VPrev=IntYPrev3Sample;}
+  else                                     {VCur=IntYPrev3Sample; VPrev=IntYPrev4Sample;}
+  IntVolYPhase=WorkingCopyGain.PY_ALFA*(VCur+WorkingCopyGain.PY_BETA*VPrev);
+  IntYPrev4Sample=IntYPrev3Sample;
+  IntYPrev3Sample=IntYPrev2Sample;
+  IntYPrev2Sample=IntYPrevSample;
+  IntYPrevSample=IntVolYPhaseOrig;
+
+  IntVolBPhaseOrig=IntVolBPhase;
+  if(WorkingCopyGain.PB_INT_DELAY==0)      {VCur=IntVolBPhase;    VPrev=IntBPrevSample;}
+  else if(WorkingCopyGain.PB_INT_DELAY==1) {VCur=IntBPrevSample;  VPrev=IntBPrev2Sample;}
+  else if(WorkingCopyGain.PB_INT_DELAY==2) {VCur=IntBPrev2Sample; VPrev=IntBPrev3Sample;}
+  else                                     {VCur=IntBPrev3Sample; VPrev=IntBPrev4Sample;}
+  IntVolBPhase=WorkingCopyGain.PB_ALFA*(VCur+WorkingCopyGain.PB_BETA*VPrev);
+  IntBPrev4Sample=IntBPrev3Sample;
+  IntBPrev3Sample=IntBPrev2Sample;
+  IntBPrev2Sample=IntBPrevSample;
+  IntBPrevSample=IntVolBPhaseOrig;
  
   IntDataSum.RPhasePower +=IntVolRPhase*IntCurRPhase;
   IntDataSum.YPhasePower +=IntVolYPhase*IntCurYPhase;
@@ -577,20 +598,40 @@ void ProcessMainInterrupt(void)
   
   IntDataSum.CurNeutralSolar +=IntNeuSolarCurrent*IntNeuSolarCurrent;
 
-  TempGainMult=  (WorkingCopyGain.PR_SOLAR_BETA*IntRSolarPrevSample);
-  IntRSolarPrevSample=IntVolRSolarPhase;
-  IntVolRSolarPhase +=TempGainMult;
-  IntVolRSolarPhase=(WorkingCopyGain.PR_SOLAR_ALFA*IntVolRSolarPhase);
-  
-  TempGainMult=  (WorkingCopyGain.PY_SOLAR_BETA*IntYSolarPrevSample);
-  IntYSolarPrevSample=IntVolYSolarPhase;
-  IntVolYSolarPhase +=TempGainMult;
-  IntVolYSolarPhase=(WorkingCopyGain.PY_SOLAR_ALFA*IntVolYSolarPhase);
-  
-  TempGainMult=  (WorkingCopyGain.PB_SOLAR_BETA*IntBSolarPrevSample);
-  IntBSolarPrevSample=IntVolBSolarPhase;
-  IntVolBSolarPhase +=TempGainMult;
-  IntVolBSolarPhase=(WorkingCopyGain.PB_SOLAR_ALFA*IntVolBSolarPhase);
+  float IntVolRSolarPhaseOrig,IntVolYSolarPhaseOrig,IntVolBSolarPhaseOrig;
+
+  IntVolRSolarPhaseOrig=IntVolRSolarPhase;
+  if(WorkingCopyGain.PR_SOLAR_INT_DELAY==0)      {VCur=IntVolRSolarPhase;    VPrev=IntRSolarPrevSample;}
+  else if(WorkingCopyGain.PR_SOLAR_INT_DELAY==1) {VCur=IntRSolarPrevSample;  VPrev=IntRSolarPrev2Sample;}
+  else if(WorkingCopyGain.PR_SOLAR_INT_DELAY==2) {VCur=IntRSolarPrev2Sample; VPrev=IntRSolarPrev3Sample;}
+  else                                           {VCur=IntRSolarPrev3Sample; VPrev=IntRSolarPrev4Sample;}
+  IntVolRSolarPhase=WorkingCopyGain.PR_SOLAR_ALFA*(VCur+WorkingCopyGain.PR_SOLAR_BETA*VPrev);
+  IntRSolarPrev4Sample=IntRSolarPrev3Sample;
+  IntRSolarPrev3Sample=IntRSolarPrev2Sample;
+  IntRSolarPrev2Sample=IntRSolarPrevSample;
+  IntRSolarPrevSample=IntVolRSolarPhaseOrig;
+
+  IntVolYSolarPhaseOrig=IntVolYSolarPhase;
+  if(WorkingCopyGain.PY_SOLAR_INT_DELAY==0)      {VCur=IntVolYSolarPhase;    VPrev=IntYSolarPrevSample;}
+  else if(WorkingCopyGain.PY_SOLAR_INT_DELAY==1) {VCur=IntYSolarPrevSample;  VPrev=IntYSolarPrev2Sample;}
+  else if(WorkingCopyGain.PY_SOLAR_INT_DELAY==2) {VCur=IntYSolarPrev2Sample; VPrev=IntYSolarPrev3Sample;}
+  else                                           {VCur=IntYSolarPrev3Sample; VPrev=IntYSolarPrev4Sample;}
+  IntVolYSolarPhase=WorkingCopyGain.PY_SOLAR_ALFA*(VCur+WorkingCopyGain.PY_SOLAR_BETA*VPrev);
+  IntYSolarPrev4Sample=IntYSolarPrev3Sample;
+  IntYSolarPrev3Sample=IntYSolarPrev2Sample;
+  IntYSolarPrev2Sample=IntYSolarPrevSample;
+  IntYSolarPrevSample=IntVolYSolarPhaseOrig;
+
+  IntVolBSolarPhaseOrig=IntVolBSolarPhase;
+  if(WorkingCopyGain.PB_SOLAR_INT_DELAY==0)      {VCur=IntVolBSolarPhase;    VPrev=IntBSolarPrevSample;}
+  else if(WorkingCopyGain.PB_SOLAR_INT_DELAY==1) {VCur=IntBSolarPrevSample;  VPrev=IntBSolarPrev2Sample;}
+  else if(WorkingCopyGain.PB_SOLAR_INT_DELAY==2) {VCur=IntBSolarPrev2Sample; VPrev=IntBSolarPrev3Sample;}
+  else                                           {VCur=IntBSolarPrev3Sample; VPrev=IntBSolarPrev4Sample;}
+  IntVolBSolarPhase=WorkingCopyGain.PB_SOLAR_ALFA*(VCur+WorkingCopyGain.PB_SOLAR_BETA*VPrev);
+  IntBSolarPrev4Sample=IntBSolarPrev3Sample;
+  IntBSolarPrev3Sample=IntBSolarPrev2Sample;
+  IntBSolarPrev2Sample=IntBSolarPrevSample;
+  IntBSolarPrevSample=IntVolBSolarPhaseOrig;
 
   IntDataSum.RSolarPhasePower +=IntVolRSolarPhase*IntCurRSolarPhase;
   IntDataSum.YSolarPhasePower +=IntVolYSolarPhase*IntCurYSolarPhase;

@@ -351,6 +351,27 @@
 // 317) Investigate why before calibration Grid R phase curretm and Solar B phase current are low and Grid Y Phase power factor is low? IMPORTANT
 // 318) Should we sample directly from transformer output voltage for AC/DC Aux? Better to use a transistor to be safer? Add a zener diode for safety or ESD diode? Add series resistor to MCU
 // 319) All 0603 resistors that we are using have TERRIBLE TCR. VERY TERRIBLE. IMPORTANT. This includes the reference voltage generators resistors, voltage resistors, fan current shunt, temperature sensor resistors (PPM might not matter in voltage dividers but accuracy matters maybe, like in temperature sensor area). Use 0.1% accuracy resistors for temperature sensors atleast
+// 320) Temperature sensor changes value on restart
+// 321) Add 1 100ohm in parallel to the 100ohm in DC circuit. The 100ohm is getting hot.
+// 322) Number of surges in MOV and wirewound resistors is important
+// 323) In Grid R Phase, upto 2% error on power factor at low current (probably some impact of voltage lines on current signal)
+// 324) Ideally all sensitive resistors of 1% should be from same reel when used in the product (Don't try and use resistors from different reels on the same board)
+// 325) Check with PI what is the maximum voltage at no-load on "21V" since we have a 85DC MOV there (We want to limit the voltage to less than 40VDC)
+// 326) AC power supply should work with L-L incase of mis-wiring. Also, currently DC power supply near the AC power supply. So need to be careful about connections. Can we do something there?
+// for shutdown on overvoltage?
+// 327) Let's make 100ohm in DC to 47ohm. Allows for more room for frequency to TNY280
+// 328) Use 105C rated electrolytic capacitors for longer life
+// 329) Add GDTs between MOVs and Earth on power supply to extend life of MOVs?
+// 330) Might need to go with 1MB EEPROM for firmware upgrade over modbus
+// 331) Should we add fast blowing fuses in panel and recommend accordingly?
+// 332) Fix reading of DC Aux and AC Aux (via fixing for 2.7V variation)
+// 333) Change the M7 in AC rectifying circuit to S1Y
+// 334) Add a 150V TVS on DIN_COMM output after resistors?
+// 335) Do we need 4 layer PCB?
+// 336) Should we do 5 * 1M melf in AC section without MOV & 100W and then do 10-15 mme spacing between last resistor and high voltage section?
+// 337) Add a software modbus feature: Detecting AC Aux is not available when it should. Indicates Fuse blown. Store this persistently and signal to consumer. Also, add a fuse in Neutral also?
+// IMPORTANT.
+// 338) We are stating 10A to be the basic/calibration current so we should calibrate at this. Also at 1A and 0.4A and 100A
 //
 // NOTES:
 // 1) For Apparent power, we are using RMS (IEC 60038) instead of (IEC 61000-4-7) where we just measure first harmonics as we need to match energy with utility meter (and SMPS will have noise)
@@ -456,4 +477,38 @@
 // 16) Keep SOCO near fan. Shift SPD on opposite side of panel away from fan. Change drawing accordingly.
 // 17) Can use thimbles with two control wires inserted into one thimble as per Veerendra's suggestion if convinent
 // 18) We have a digital input free. We can directly connect DIN_COMM to it to check if DIN_COMM isn't shorted to earth or something else that causes it to go to 0
-
+// 19) Ask every panel builder to connect metallic body of SOCO to panel earth. Make changes in our panel drawing also.
+// 20) Changes in drawing: Part number for Isolator from C&S changed a bit, PoE has Earthing connection, SOCO metallic body needs to be Earthed (Add in PDI of Jio)
+// 21) Need 5 units of EMS box with custom testing logic (we have to tell) for panel testing from Jio
+//
+//
+// Jagdish:
+// 1) Suggesting 550VAC instead of 510VAC
+// 2) 47ohm need to be 9W, derate after 25C (Need 150 pulses, ask Vishay, minimum 7W, or 2 * 100ohm)
+// 3) 47ohm better than 100ohm
+// 4) MOV L-E & N-E 550V
+// 5) L-E is optional MOV but keep optional
+// 6) CM is needed for CE/RiE (Might help with EFT/EMI. Get checked for CE/RE)
+// 7) Should we increse voltage of 48+ - E to 320V or 550V? But higher MOV rating impacting other circuit
+// 8) TVS on secondary of winding needed
+// 9) 10nF on LDOs
+// 10) Dischaege resistor for safety
+// 11) 4layers for I2C (100kHz), 1 plane for ground. 6Mhz
+// 12) MOV on DI isn't strictly needed. Check MOV for Earth To Neutral also there
+//
+// Suggestion: Go with GDT from N-E and 48+ to E with 400V or more flash point. Add this before any resistor. High current rating. 3 pin GDT is good here (2 * B88069X2880)
+// Suggestion: Go with 5 MELF resistor chain with proper conformal coating, 3mm cuts between phases and 10mm or more between last resistor and low voltage section
+// Suggestion: Go with 60VDC MOV in digital input section with 100ohm resistor for now with proper mounting of MOVs (through-hole). Don't have a MOV to Earth here?
+// Suggestion: Go with 320V MOV on L-N on power line? Hopefully blows up the fuse. Check if fuse gets blow on L-L here
+// Suggestion: Add TVS on secondary windings of MOVs
+// Suggestion: Can reduce MOSEFET in power supply
+// Suggestion: In opto-coupler, we should use 60V TVS to be safe with 2.2k resistor or add a M7 in parallel
+// Suggestion:  2.2 nF / 250VAC class-Y2 capacitor from GND to Earth or a GDT from GND to earth
+// Suggestion: Need to test surge (common mode and differential mode) at 70C at high humidity at 100+ pulses at minimum 3 samples
+// (Both polarities, all port combinations: L-N, L-PE, N-PE for each phase on both Grid and Solar inputs = 18 combinations × 2 polarities × 5 surges = 180 surge applications per unit for voltage inputs alone)
+// Suggestion: Test for Hi-Pot also
+// Suggestion: Add N-E, 48+-E, DIN_COMM -ive - E MOV and then to a single GDT. Still need 510V MOV on AC along with S1Y. Add a fault in
+// Suggestion: Add cuts in metallic body for heat flow
+// Suggestion: Check MELF pads on PCBs. Seems like they might be combination of 1206 and 0207. We don't need 1206 here. Can decrease pad size a bit and add a proper 3mm or 3.5mm cut
+// (Do we need 1206 provision if we already have 0207). 
+// Suggestion: Add 3mm cut between terminals of R/Y/B voltage

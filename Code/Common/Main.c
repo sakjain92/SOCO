@@ -923,10 +923,13 @@ void StartCalibration(void)
      WorkingCopyGain.IB_GAIN=1.0f;
      WorkingCopyGain.PR_ALFA=1;
      WorkingCopyGain.PR_BETA=0;
+     WorkingCopyGain.PR_INT_DELAY=0;
      WorkingCopyGain.PY_ALFA=1;
      WorkingCopyGain.PY_BETA=0;
+     WorkingCopyGain.PY_INT_DELAY=0;
      WorkingCopyGain.PB_ALFA=1;
      WorkingCopyGain.PB_BETA=0;
+     WorkingCopyGain.PB_INT_DELAY=0;
 
      WorkingCopyGain.VR_SOLAR_GAIN=1.0f;
      WorkingCopyGain.VY_SOLAR_GAIN=1.0f;
@@ -936,10 +939,13 @@ void StartCalibration(void)
      WorkingCopyGain.IB_SOLAR_GAIN=1.0f;
      WorkingCopyGain.PR_SOLAR_ALFA=1;
      WorkingCopyGain.PR_SOLAR_BETA=0;
+     WorkingCopyGain.PR_SOLAR_INT_DELAY=0;
      WorkingCopyGain.PY_SOLAR_ALFA=1;
      WorkingCopyGain.PY_SOLAR_BETA=0;
+     WorkingCopyGain.PY_SOLAR_INT_DELAY=0;
      WorkingCopyGain.PB_SOLAR_ALFA=1;
      WorkingCopyGain.PB_SOLAR_BETA=0;
+     WorkingCopyGain.PB_SOLAR_INT_DELAY=0;
 
      WorkingCopyGain.FAN1_GAIN=1.0;
      WorkingCopyGain.FAN2_GAIN=1.0;
@@ -962,10 +968,13 @@ void StartCalibration(void)
         WorkingCopyGain.VB_GAIN=CalibrationCoeff.VB_240_GAIN;
         WorkingCopyGain.PR_ALFA=1;
         WorkingCopyGain.PR_BETA=0;
+        WorkingCopyGain.PR_INT_DELAY=0;
         WorkingCopyGain.PY_ALFA=1;
         WorkingCopyGain.PY_BETA=0;
+        WorkingCopyGain.PY_INT_DELAY=0;
         WorkingCopyGain.PB_ALFA=1;
         WorkingCopyGain.PB_BETA=0;
+        WorkingCopyGain.PB_INT_DELAY=0;
 
         WorkingCopyGain.IR_SOLAR_GAIN=CalibrationCoeff.IR_SOLAR_HIGH_GAIN;
         WorkingCopyGain.IY_SOLAR_GAIN=CalibrationCoeff.IY_SOLAR_HIGH_GAIN;
@@ -975,10 +984,13 @@ void StartCalibration(void)
         WorkingCopyGain.VB_SOLAR_GAIN=CalibrationCoeff.VB_SOLAR_240_GAIN;
         WorkingCopyGain.PR_SOLAR_ALFA=1;
         WorkingCopyGain.PR_SOLAR_BETA=0;
+        WorkingCopyGain.PR_SOLAR_INT_DELAY=0;
         WorkingCopyGain.PY_SOLAR_ALFA=1;
         WorkingCopyGain.PY_SOLAR_BETA=0;
+        WorkingCopyGain.PY_SOLAR_INT_DELAY=0;
         WorkingCopyGain.PB_SOLAR_ALFA=1;
         WorkingCopyGain.PB_SOLAR_BETA=0;
+        WorkingCopyGain.PB_SOLAR_INT_DELAY=0;
 
         WorkingCopyGain.FAN1_GAIN=CalibrationCoeff.FAN1_GAIN;
         WorkingCopyGain.FAN2_GAIN=CalibrationCoeff.FAN2_GAIN;
@@ -1018,10 +1030,13 @@ void StartCalibration(void)
      WorkingCopyGain.VB_GAIN=CalibrationCoeff.VB_240_GAIN;
      WorkingCopyGain.PR_ALFA=1;
      WorkingCopyGain.PR_BETA=0;
+     WorkingCopyGain.PR_INT_DELAY=0;
      WorkingCopyGain.PY_ALFA=1;
      WorkingCopyGain.PY_BETA=0;
+     WorkingCopyGain.PY_INT_DELAY=0;
      WorkingCopyGain.PB_ALFA=1;
      WorkingCopyGain.PB_BETA=0;
+     WorkingCopyGain.PB_INT_DELAY=0;
 
      WorkingCopyGain.IR_SOLAR_GAIN=1.0f;
      WorkingCopyGain.IY_SOLAR_GAIN=1.0f;
@@ -1031,10 +1046,13 @@ void StartCalibration(void)
      WorkingCopyGain.VB_SOLAR_GAIN=CalibrationCoeff.VB_SOLAR_240_GAIN;
      WorkingCopyGain.PR_SOLAR_ALFA=1;
      WorkingCopyGain.PR_SOLAR_BETA=0;
+     WorkingCopyGain.PR_SOLAR_INT_DELAY=0;
      WorkingCopyGain.PY_SOLAR_ALFA=1;
      WorkingCopyGain.PY_SOLAR_BETA=0;
+     WorkingCopyGain.PY_SOLAR_INT_DELAY=0;
      WorkingCopyGain.PB_SOLAR_ALFA=1;
      WorkingCopyGain.PB_SOLAR_BETA=0;
+     WorkingCopyGain.PB_SOLAR_INT_DELAY=0;
 
      WorkingCopyGain.FAN1_GAIN=CalibrationCoeff.FAN1_GAIN;
      WorkingCopyGain.FAN2_GAIN=CalibrationCoeff.FAN2_GAIN;
@@ -1057,10 +1075,13 @@ void StartCalibration(void)
         WorkingCopyGain.VB_GAIN=CalibrationCoeff.VB_240_GAIN;
         WorkingCopyGain.PR_ALFA=1;
         WorkingCopyGain.PR_BETA=0;
+        WorkingCopyGain.PR_INT_DELAY=0;
         WorkingCopyGain.PY_ALFA=1;
         WorkingCopyGain.PY_BETA=0;
+        WorkingCopyGain.PY_INT_DELAY=0;
         WorkingCopyGain.PB_ALFA=1;
         WorkingCopyGain.PB_BETA=0;
+        WorkingCopyGain.PB_INT_DELAY=0;
 
         WorkingCopyGain.IR_SOLAR_GAIN=CalibrationCoeff.IR_SOLAR_MID_GAIN;
         WorkingCopyGain.IY_SOLAR_GAIN=CalibrationCoeff.IY_SOLAR_MID_GAIN;
@@ -1070,10 +1091,13 @@ void StartCalibration(void)
         WorkingCopyGain.VB_SOLAR_GAIN=CalibrationCoeff.VB_SOLAR_240_GAIN;
         WorkingCopyGain.PR_SOLAR_ALFA=1;
         WorkingCopyGain.PR_SOLAR_BETA=0;
+        WorkingCopyGain.PR_SOLAR_INT_DELAY=0;
         WorkingCopyGain.PY_SOLAR_ALFA=1;
         WorkingCopyGain.PY_SOLAR_BETA=0;
+        WorkingCopyGain.PY_SOLAR_INT_DELAY=0;
         WorkingCopyGain.PB_SOLAR_ALFA=1;
         WorkingCopyGain.PB_SOLAR_BETA=0;
+        WorkingCopyGain.PB_SOLAR_INT_DELAY=0;
 
         WorkingCopyGain.FAN1_GAIN=CalibrationCoeff.FAN1_GAIN;
         WorkingCopyGain.FAN2_GAIN=CalibrationCoeff.FAN2_GAIN;
@@ -1113,10 +1137,13 @@ void StartCalibration(void)
      WorkingCopyGain.VB_GAIN=CalibrationCoeff.VB_240_GAIN;
      WorkingCopyGain.PR_ALFA=1;
      WorkingCopyGain.PR_BETA=0;
+     WorkingCopyGain.PR_INT_DELAY=0;
      WorkingCopyGain.PY_ALFA=1;
      WorkingCopyGain.PY_BETA=0;
+     WorkingCopyGain.PY_INT_DELAY=0;
      WorkingCopyGain.PB_ALFA=1;
      WorkingCopyGain.PB_BETA=0;
+     WorkingCopyGain.PB_INT_DELAY=0;
 
      WorkingCopyGain.IR_SOLAR_GAIN=1.0f;
      WorkingCopyGain.IY_SOLAR_GAIN=1.0f;
@@ -1126,10 +1153,13 @@ void StartCalibration(void)
      WorkingCopyGain.VB_SOLAR_GAIN=CalibrationCoeff.VB_SOLAR_240_GAIN;
      WorkingCopyGain.PR_SOLAR_ALFA=1;
      WorkingCopyGain.PR_SOLAR_BETA=0;
+     WorkingCopyGain.PR_SOLAR_INT_DELAY=0;
      WorkingCopyGain.PY_SOLAR_ALFA=1;
      WorkingCopyGain.PY_SOLAR_BETA=0;
+     WorkingCopyGain.PY_SOLAR_INT_DELAY=0;
      WorkingCopyGain.PB_SOLAR_ALFA=1;
      WorkingCopyGain.PB_SOLAR_BETA=0;
+     WorkingCopyGain.PB_SOLAR_INT_DELAY=0;
 
      WorkingCopyGain.FAN1_GAIN=CalibrationCoeff.FAN1_GAIN;
      WorkingCopyGain.FAN2_GAIN=CalibrationCoeff.FAN2_GAIN;  
@@ -1152,10 +1182,13 @@ void StartCalibration(void)
         WorkingCopyGain.VB_GAIN=CalibrationCoeff.VB_240_GAIN;
         WorkingCopyGain.PR_ALFA=1;
         WorkingCopyGain.PR_BETA=0;
+        WorkingCopyGain.PR_INT_DELAY=0;
         WorkingCopyGain.PY_ALFA=1;
         WorkingCopyGain.PY_BETA=0;
+        WorkingCopyGain.PY_INT_DELAY=0;
         WorkingCopyGain.PB_ALFA=1;
         WorkingCopyGain.PB_BETA=0;
+        WorkingCopyGain.PB_INT_DELAY=0;
 
         WorkingCopyGain.IR_SOLAR_GAIN=CalibrationCoeff.IR_SOLAR_LOW_GAIN;
         WorkingCopyGain.IY_SOLAR_GAIN=CalibrationCoeff.IY_SOLAR_LOW_GAIN;
@@ -1165,10 +1198,13 @@ void StartCalibration(void)
         WorkingCopyGain.VB_SOLAR_GAIN=CalibrationCoeff.VB_SOLAR_240_GAIN;
         WorkingCopyGain.PR_SOLAR_ALFA=1;
         WorkingCopyGain.PR_SOLAR_BETA=0;
+        WorkingCopyGain.PR_SOLAR_INT_DELAY=0;
         WorkingCopyGain.PY_SOLAR_ALFA=1;
         WorkingCopyGain.PY_SOLAR_BETA=0;
+        WorkingCopyGain.PY_SOLAR_INT_DELAY=0;
         WorkingCopyGain.PB_SOLAR_ALFA=1;
         WorkingCopyGain.PB_SOLAR_BETA=0;
+        WorkingCopyGain.PB_SOLAR_INT_DELAY=0;
 
         WorkingCopyGain.FAN1_GAIN=CalibrationCoeff.FAN1_GAIN;
         WorkingCopyGain.FAN2_GAIN=CalibrationCoeff.FAN2_GAIN;
@@ -1238,21 +1274,21 @@ void FillCurrentGainArray(void)
   for(i=0;i<StepLow+1;i++)BufferBetaY[i+StepHigh]=CalibrationCoeff.IY_MID_PH_ERROR+(CalibrationCoeff.IY_LOW_PH_ERROR-CalibrationCoeff.IY_MID_PH_ERROR)*i/StepLow;
   for(i=0;i<StepLow+1;i++)BufferBetaB[i+StepHigh]=CalibrationCoeff.IB_MID_PH_ERROR+(CalibrationCoeff.IB_LOW_PH_ERROR-CalibrationCoeff.IB_MID_PH_ERROR)*i/StepLow;
   
-  for(i=0;i<50;i++)CalPF(BufferBetaR[i],&BufferAlfaR[i],&BufferBetaR[i]);
-  for(i=0;i<50;i++)CalPF(BufferBetaY[i],&BufferAlfaY[i],&BufferBetaY[i]);
-  for(i=0;i<50;i++)CalPF(BufferBetaB[i],&BufferAlfaB[i],&BufferBetaB[i]);
+  for(i=0;i<50;i++)CalPF(BufferBetaR[i],&BufferAlfaR[i],&BufferBetaR[i],&BufferIntDelayR[i]);
+  for(i=0;i<50;i++)CalPF(BufferBetaY[i],&BufferAlfaY[i],&BufferBetaY[i],&BufferIntDelayY[i]);
+  for(i=0;i<50;i++)CalPF(BufferBetaB[i],&BufferAlfaB[i],&BufferBetaB[i],&BufferIntDelayB[i]);
 
   for(i=0;i<StepHigh;i++)BufferBetaRSolar[i]=CalibrationCoeff.IR_SOLAR_HIGH_PH_ERROR+(CalibrationCoeff.IR_SOLAR_MID_PH_ERROR-CalibrationCoeff.IR_SOLAR_HIGH_PH_ERROR)*i/StepHigh;
   for(i=0;i<StepHigh;i++)BufferBetaYSolar[i]=CalibrationCoeff.IY_SOLAR_HIGH_PH_ERROR+(CalibrationCoeff.IY_SOLAR_MID_PH_ERROR-CalibrationCoeff.IY_SOLAR_HIGH_PH_ERROR)*i/StepHigh;
   for(i=0;i<StepHigh;i++)BufferBetaBSolar[i]=CalibrationCoeff.IB_SOLAR_HIGH_PH_ERROR+(CalibrationCoeff.IB_SOLAR_MID_PH_ERROR-CalibrationCoeff.IB_SOLAR_HIGH_PH_ERROR)*i/StepHigh;
-  
+
   for(i=0;i<StepLow+1;i++)BufferBetaRSolar[i+StepHigh]=CalibrationCoeff.IR_SOLAR_MID_PH_ERROR+(CalibrationCoeff.IR_SOLAR_LOW_PH_ERROR-CalibrationCoeff.IR_SOLAR_MID_PH_ERROR)*i/StepLow;
   for(i=0;i<StepLow+1;i++)BufferBetaYSolar[i+StepHigh]=CalibrationCoeff.IY_SOLAR_MID_PH_ERROR+(CalibrationCoeff.IY_SOLAR_LOW_PH_ERROR-CalibrationCoeff.IY_SOLAR_MID_PH_ERROR)*i/StepLow;
   for(i=0;i<StepLow+1;i++)BufferBetaBSolar[i+StepHigh]=CalibrationCoeff.IB_SOLAR_MID_PH_ERROR+(CalibrationCoeff.IB_SOLAR_LOW_PH_ERROR-CalibrationCoeff.IB_SOLAR_MID_PH_ERROR)*i/StepLow;
-  
-  for(i=0;i<50;i++)CalPF(BufferBetaRSolar[i],&BufferAlfaRSolar[i],&BufferBetaRSolar[i]);
-  for(i=0;i<50;i++)CalPF(BufferBetaYSolar[i],&BufferAlfaYSolar[i],&BufferBetaYSolar[i]);
-  for(i=0;i<50;i++)CalPF(BufferBetaBSolar[i],&BufferAlfaBSolar[i],&BufferBetaBSolar[i]);
+
+  for(i=0;i<50;i++)CalPF(BufferBetaRSolar[i],&BufferAlfaRSolar[i],&BufferBetaRSolar[i],&BufferIntDelayRSolar[i]);
+  for(i=0;i<50;i++)CalPF(BufferBetaYSolar[i],&BufferAlfaYSolar[i],&BufferBetaYSolar[i],&BufferIntDelayYSolar[i]);
+  for(i=0;i<50;i++)CalPF(BufferBetaBSolar[i],&BufferAlfaBSolar[i],&BufferBetaBSolar[i],&BufferIntDelayBSolar[i]);
 
 }
   
@@ -1389,13 +1425,15 @@ void SetWorkingGainBuffer(void)
   TempChar=50-TempChar;
   WorkingCopyGain.PR_ALFA=BufferAlfaR[TempChar];
   WorkingCopyGain.PR_BETA=BufferBetaR[TempChar];
-  
+  WorkingCopyGain.PR_INT_DELAY=BufferIntDelayR[TempChar];
+
   TempChar=(uint8_t)(InstantPara.CurrentY/(float)(CUR_LOW_CAL_POINT));
   if(TempChar>=50)TempChar=50;
   else if(TempChar==0)TempChar=1;
   TempChar=50-TempChar;
   WorkingCopyGain.PY_ALFA=BufferAlfaY[TempChar];
   WorkingCopyGain.PY_BETA=BufferBetaY[TempChar];
+  WorkingCopyGain.PY_INT_DELAY=BufferIntDelayY[TempChar];
 
   TempChar=(uint8_t)(InstantPara.CurrentB/(float)(CUR_LOW_CAL_POINT));
   if(TempChar>=50)TempChar=50;
@@ -1403,6 +1441,7 @@ void SetWorkingGainBuffer(void)
   TempChar=50-TempChar;
   WorkingCopyGain.PB_ALFA=BufferAlfaB[TempChar];
   WorkingCopyGain.PB_BETA=BufferBetaB[TempChar];
+  WorkingCopyGain.PB_INT_DELAY=BufferIntDelayB[TempChar];
 
   // Solar
   //
@@ -1412,13 +1451,15 @@ void SetWorkingGainBuffer(void)
   TempChar=50-TempChar;
   WorkingCopyGain.PR_SOLAR_ALFA=BufferAlfaRSolar[TempChar];
   WorkingCopyGain.PR_SOLAR_BETA=BufferBetaRSolar[TempChar];
-  
+  WorkingCopyGain.PR_SOLAR_INT_DELAY=BufferIntDelayRSolar[TempChar];
+
   TempChar=(uint8_t)(InstantPara.CurrentYSolar/(float)(CUR_LOW_CAL_POINT));
   if(TempChar>=50)TempChar=50;
   else if(TempChar==0)TempChar=1;
   TempChar=50-TempChar;
   WorkingCopyGain.PY_SOLAR_ALFA=BufferAlfaYSolar[TempChar];
   WorkingCopyGain.PY_SOLAR_BETA=BufferBetaYSolar[TempChar];
+  WorkingCopyGain.PY_SOLAR_INT_DELAY=BufferIntDelayYSolar[TempChar];
 
   TempChar=(uint8_t)(InstantPara.CurrentBSolar/(float)(CUR_LOW_CAL_POINT));
   if(TempChar>=50)TempChar=50;
@@ -1426,6 +1467,7 @@ void SetWorkingGainBuffer(void)
   TempChar=50-TempChar;
   WorkingCopyGain.PB_SOLAR_ALFA=BufferAlfaBSolar[TempChar];
   WorkingCopyGain.PB_SOLAR_BETA=BufferBetaBSolar[TempChar];
+  WorkingCopyGain.PB_SOLAR_INT_DELAY=BufferIntDelayBSolar[TempChar];
 }
   /*
 Inf: Save Data in Eeprom
