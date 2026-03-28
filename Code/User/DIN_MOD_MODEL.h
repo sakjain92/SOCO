@@ -75,3 +75,4 @@ The desired paramters should be selected as per the model
   //#define MODBUS_OLD_LH_IMPORT
   //#define MODBUS_OLD_INTERRUPT_IMPORT
   //#define MODBUS_CTPT_Ratio
+  #define MODBUS_FAN_TEMP

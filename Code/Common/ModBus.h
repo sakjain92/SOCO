@@ -37,6 +37,7 @@ extern uint16_t SwPressed;
 // MAX_PARAM_LIMIT is here
 #define InstPara_GridFreq       3
 #define InstPara_LoadOnGridDisableSec 1
+#define InstPara_FanTemp        3
 #define InstPara_NewSolarAll    58
 #define InstPara_SolarFreq      3
 #define InstPara_Solar_ENERGYIMPORT   7
@@ -990,6 +991,20 @@ const struct ModBusParameter BlockAll[]=
   { (uint8_t *)&StorageBuffer.SolarExportInterruptions,	   DATA_TYPE_16	,	0	,	1	},
 #endif
 
+ ////////////////////////     FAN CURRENT & AMBIENT TEMP (base 20000)  /////////
+ //
+#ifdef MODBUS_FAN_TEMP
+  { (uint8_t *)&InstantPara.Fan1Current      ,           DATA_TYPE_Float	,	1	,	1	},
+  { (uint8_t *)&InstantPara.Fan2Current      ,           DATA_TYPE_Float	,	1	,	1	},
+  { (uint8_t *)&InstantPara.AmbientTemperature,          DATA_TYPE_Float	,	1	,	1	},
+#else
+  { (uint8_t *)&InstantPara.Fan1Current      ,           DATA_TYPE_Float	,	0	,	1	},
+  { (uint8_t *)&InstantPara.Fan2Current      ,           DATA_TYPE_Float	,	0	,	1	},
+  { (uint8_t *)&InstantPara.AmbientTemperature,          DATA_TYPE_Float	,	0	,	1	},
+#endif
+
+ ////////////////////////     INTERNAL TESTING (base 50000)  /////////
+ //
   { (uint8_t *)&SwPressed,                                 DATA_TYPE_16,     1       ,       1      },
 };
 

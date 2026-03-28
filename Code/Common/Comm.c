@@ -79,6 +79,9 @@ struct ModbusTableSection_t ModbusTableSections[] =
         12200, InstPara_Solar_ENERGYEXPORT
     },
     {
+        20000, InstPara_FanTemp,
+    },
+    {
         50000, InstPara_InternalTesting
     }
 };
