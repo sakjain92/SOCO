@@ -480,6 +480,9 @@
 // 19) Ask every panel builder to connect metallic body of SOCO to panel earth. Make changes in our panel drawing also.
 // 20) Changes in drawing: Part number for Isolator from C&S changed a bit, PoE has Earthing connection, SOCO metallic body needs to be Earthed (Add in PDI of Jio)
 // 21) Need 5 units of EMS box with custom testing logic (we have to tell) for panel testing from Jio
+// 22) Model name of Netstar has spelling mistake
+// 23) Fan should be > 50 or > 85? Checked. It's 50 CFM
+// 24) Get new isolator model verified from Jio. Also glands to be verified. Also connectors for EMS from different vendors (We might not need all connectors)
 //
 //
 // Jagdish:

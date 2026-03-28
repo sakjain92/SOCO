@@ -19,7 +19,7 @@
 void ReadSwitches(void);
 void ReadInputs();
 void CalculateFreqYBPhase(int16_t TempIntFreqVol);
-
+void CalculateFreqPerPhase(struct FreqMeasState *s, int16_t TempIntFreqVol);
  
 struct SAMPLE   RCurSample;
 struct SAMPLE   YCurSample;
@@ -46,8 +46,6 @@ uint16_t OneSecCounter;
 //
 static bool isDCPowerAvailableSample;
 static bool isACPowerAvailableSample;
-
-#define FREQ_LIMIT_VOL    (90)
 
 // UNDONE: The harmonics code assumes that the interrupt timer is setup such
 // that it is called f * 3200 Hz where f is the freqency of input.
@@ -492,6 +490,16 @@ void ProcessMainInterrupt(void)
     else if(FreqSampleFlag==3)CalculateFreqYBPhase((uint16_t)IntVolBPhase);
     else if(FreqSampleFlag==4)CalculateFreqYBPhase((uint16_t)IntVolRPhase);
   }
+  //
+  // Per-phase frequency zero-crossing on all 6 phases
+  //
+  CalculateFreqPerPhase(&g_FreqState.RPhase, (uint16_t)IntVolRPhase);
+  CalculateFreqPerPhase(&g_FreqState.YPhase, (uint16_t)IntVolYPhase);
+  CalculateFreqPerPhase(&g_FreqState.BPhase, (uint16_t)IntVolBPhase);
+  CalculateFreqPerPhase(&g_FreqState.RSolarPhase, (uint16_t)IntVolRSolarPhase);
+  CalculateFreqPerPhase(&g_FreqState.YSolarPhase, (uint16_t)IntVolYSolarPhase);
+  CalculateFreqPerPhase(&g_FreqState.BSolarPhase, (uint16_t)IntVolBSolarPhase);
+
   IntDataSum.OffsetVolRPhase +=IntVolRPhase;
   IntDataSum.OffsetVolYPhase +=IntVolYPhase;
   IntDataSum.OffsetVolBPhase +=IntVolBPhase;
@@ -797,7 +805,7 @@ void CalculateFreqYBPhase(int16_t TempIntFreqVol)
 {
     FilOut_1=TempIntFreqVol;
  
-    if(RYFreqMeasDuration>20e6)
+    if(RYFreqMeasDuration>20000000u)
     {
 
       CycleCounter=0;
@@ -810,7 +818,7 @@ void CalculateFreqYBPhase(int16_t TempIntFreqVol)
     {
       RYFreqMeasDuration +=IntTimerCount.TimerPresentValue;
       freqcounter++;
-      if((FilOut_1>=FREQ_LIMIT_VOL)&&(PrevSampleVol<FREQ_LIMIT_VOL))
+      if((FilOut_1>=FREQ_LIMIT_VOL_ADC)&&(PrevSampleVol<FREQ_LIMIT_VOL_ADC))
       {
         CycleCounter++;
         if(CycleCounter==50)
@@ -828,11 +836,51 @@ void CalculateFreqYBPhase(int16_t TempIntFreqVol)
       RYFreqMeasDuration=0;
       CycleCounter=0;
       freqcounter=0;
-      if((FilOut_1>FREQ_LIMIT_VOL)&&(PrevSampleVol<FREQ_LIMIT_VOL))
+      if((FilOut_1>FREQ_LIMIT_VOL_ADC)&&(PrevSampleVol<FREQ_LIMIT_VOL_ADC))
         FreqFlag |=FF_HIGH_DETECTED;
     }
-    PrevSampleVol=FilOut_1;    
-  
+    PrevSampleVol=FilOut_1;
+
+}
+
+//
+// Generic per-phase frequency measurement via zero-crossing detection
+// Each phase has its own FreqMeasState so frequencies are independent
+// UNDONE: Verify FREQ_LIMIT_VOL * 20e6 and complete frequency logic
+//
+void CalculateFreqPerPhase(struct FreqMeasState *s, int16_t TempIntFreqVol)
+{
+    if(s->MeasDuration>20000000u)
+    {
+      s->CycleCounter=0;
+      s->MeasDuration=0;
+      s->SaveMeasDuration=0;
+      s->Flag &=~FF_HIGH_DETECTED;
+    }
+
+    if(s->Flag & FF_HIGH_DETECTED)
+    {
+      s->MeasDuration +=IntTimerCount.TimerPresentValue;
+      if((TempIntFreqVol>=FREQ_LIMIT_VOL_ADC)&&(s->PrevSampleVol<FREQ_LIMIT_VOL_ADC))
+      {
+        s->CycleCounter++;
+        if(s->CycleCounter==50)
+        {
+          s->Flag |=FF_MEAS_OVER;
+          s->CycleCounter=0;
+          s->SaveMeasDuration=s->MeasDuration;
+          s->MeasDuration=0;
+        }
+      }
+    }
+    else
+    {
+      s->MeasDuration=0;
+      s->CycleCounter=0;
+      if((TempIntFreqVol>FREQ_LIMIT_VOL_ADC)&&(s->PrevSampleVol<FREQ_LIMIT_VOL_ADC))
+        s->Flag |=FF_HIGH_DETECTED;
+    }
+    s->PrevSampleVol=TempIntFreqVol;
 }
 
   void ReadSwitches(void)

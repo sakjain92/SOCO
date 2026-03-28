@@ -602,7 +602,7 @@ void Metrology(void)
     __enable_interrupt();
   }
 #endif // MODEL_DATA_SAVE
-  if(InstantPara.VolR>10.0f)
+  if(InstantPara.VolR>FREQ_LIMIT_VOL)
   {
     //FreqSampleFlag=4;
     FreqSampleFlag=1;
@@ -610,10 +610,10 @@ void Metrology(void)
     //CycleCounter=0;
     //RYFreqMeasDuration=0;
   }
-  else if(InstantPara.VolY>10.0f)FreqSampleFlag=2;
-  else if(InstantPara.VolB>10.0f)FreqSampleFlag=3;
+  else if(InstantPara.VolY>FREQ_LIMIT_VOL)FreqSampleFlag=2;
+  else if(InstantPara.VolB>FREQ_LIMIT_VOL)FreqSampleFlag=3;
   else FreqSampleFlag=0;
-  
+
    // Unbalance Current and Voltage
   if(InstantPara.CurrentR>InstantPara.CurrentY)
   {

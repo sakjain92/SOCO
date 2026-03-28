@@ -130,6 +130,16 @@
 // Temperature
 #define SCREEN_AMBIENT_TEMPERATURE     103
 
+// Grid Frequency per-phase
+#define SCREEN_FREQ_R                  104
+#define SCREEN_FREQ_Y                  105
+#define SCREEN_FREQ_B                  106
+
+// Solar Frequency per-phase
+#define SCREEN_FREQ_R_SOLAR            107
+#define SCREEN_FREQ_Y_SOLAR            108
+#define SCREEN_FREQ_B_SOLAR            109
+
   const uint8_t SCREEN_SEQ_3P_MAIN[]=  
   {
    SCREEN_VOL_LN_R,             
@@ -175,7 +185,13 @@
    SCREEN_PF_R_SOLAR,                 
    SCREEN_PF_Y_SOLAR,                 
    SCREEN_PF_B_SOLAR,                 
-   SCREEN_SUM_PF_3P_SOLAR,            
+   SCREEN_SUM_PF_3P_SOLAR,
+   SCREEN_FREQ_R,
+   SCREEN_FREQ_Y,
+   SCREEN_FREQ_B,
+   SCREEN_FREQ_R_SOLAR,
+   SCREEN_FREQ_Y_SOLAR,
+   SCREEN_FREQ_B_SOLAR,
    SCREEN_IMP_ENE_W_STR,        
    SCREEN_IMP_ENE_W_VAL,        
    SCREEN_IMP_ENE_W_VAL_SOLAR,        

@@ -791,13 +791,49 @@ const struct object Screen[][3]=
       { 0xff,                   0,                      0,      0,                      DIGIT_3,         0,             0,              }
   },
 
-  // SCREEN 103: FAN 2 Current
+  // SCREEN 103: Ambient Temperature
   {
-      { DATA_TYPE_STRING,       0,                      0,      0,                      DIGIT_2,         StrC,          LED_OFF         },   
+      { DATA_TYPE_STRING,       0,                      0,      0,                      DIGIT_2,         StrC,          LED_OFF         },
       { DATA_TYPE_VARIABLE,     &InstantPara.AmbientTemperature,4,     DIS_VAL_TEMPERATURE,    DIGIT_3,  0,             LED_OFF         },
       { 0xff,                   0,                      0,      0,                      DIGIT_3,         0,             0,              }
   },
 
+  // SCREEN 104: Grid Frequency R Phase
+  {
+      { DATA_TYPE_STRING,       0,                              0,      0,              DIGIT_2,         StrHZ,         LED_GRID_R      },
+      { DATA_TYPE_VARIABLE,     &InstantPara.FrequencyR,        4,      DIS_VAL_FREQ,   DIGIT_3,         0,             LED_GRID_R      },
+      { 0xff,                   0,                              0,      0,              DIGIT_3,         0,             LED_OFF         }
+  },
+  // SCREEN 105: Grid Frequency Y Phase
+  {
+      { DATA_TYPE_STRING,       0,                              0,      0,              DIGIT_2,         StrHZ,         LED_GRID_Y      },
+      { DATA_TYPE_VARIABLE,     &InstantPara.FrequencyY,        4,      DIS_VAL_FREQ,   DIGIT_3,         0,             LED_GRID_Y      },
+      { 0xff,                   0,                              0,      0,              DIGIT_3,         0,             LED_OFF         }
+  },
+  // SCREEN 106: Grid Frequency B Phase
+  {
+      { DATA_TYPE_STRING,       0,                              0,      0,              DIGIT_2,         StrHZ,         LED_GRID_B      },
+      { DATA_TYPE_VARIABLE,     &InstantPara.FrequencyB,        4,      DIS_VAL_FREQ,   DIGIT_3,         0,             LED_GRID_B      },
+      { 0xff,                   0,                              0,      0,              DIGIT_3,         0,             LED_OFF         }
+  },
+  // SCREEN 107: Solar Frequency R Phase
+  {
+      { DATA_TYPE_STRING,       0,                              0,      0,              DIGIT_2,         StrHZ,         LED_SOLAR_R     },
+      { DATA_TYPE_VARIABLE,     &InstantPara.FrequencyRSolar,   4,      DIS_VAL_FREQ,   DIGIT_3,         0,             LED_SOLAR_R     },
+      { 0xff,                   0,                              0,      0,              DIGIT_3,         0,             LED_OFF         }
+  },
+  // SCREEN 108: Solar Frequency Y Phase
+  {
+      { DATA_TYPE_STRING,       0,                              0,      0,              DIGIT_2,         StrHZ,         LED_SOLAR_Y     },
+      { DATA_TYPE_VARIABLE,     &InstantPara.FrequencyYSolar,   4,      DIS_VAL_FREQ,   DIGIT_3,         0,             LED_SOLAR_Y     },
+      { 0xff,                   0,                              0,      0,              DIGIT_3,         0,             LED_OFF         }
+  },
+  // SCREEN 109: Solar Frequency B Phase
+  {
+      { DATA_TYPE_STRING,       0,                              0,      0,              DIGIT_2,         StrHZ,         LED_SOLAR_B     },
+      { DATA_TYPE_VARIABLE,     &InstantPara.FrequencyBSolar,   4,      DIS_VAL_FREQ,   DIGIT_3,         0,             LED_SOLAR_B     },
+      { 0xff,                   0,                              0,      0,              DIGIT_3,         0,             LED_OFF         }
+  },
 
 };
 

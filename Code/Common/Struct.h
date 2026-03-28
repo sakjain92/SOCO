@@ -214,6 +214,9 @@ struct INST_PARA
   float     PowerFactorB;
   float     TotalPowerFactor;
   float     Frequency;
+  float     FrequencyR;
+  float     FrequencyY;
+  float     FrequencyB;
   float     FunRCurr;
   float     FunYCurr;
   float     FunBCurr;
@@ -294,6 +297,9 @@ struct INST_PARA
   float     PowerFactorYSolar;
   float     PowerFactorBSolar;
   float     TotalPowerFactorSolar;
+  float     FrequencyRSolar;
+  float     FrequencyYSolar;
+  float     FrequencyBSolar;
   float     FunRSolarCurr;
   float     FunYSolarCurr;
   float     FunBSolarCurr;
@@ -301,6 +307,27 @@ struct INST_PARA
   float     FunPowerSolarR;
   float     FunPowerSolarY;
   float     FunPowerSolarB;
+};
+
+// Per-phase frequency zero-crossing detector state
+//
+struct FreqMeasState
+{
+    uint32_t MeasDuration;
+    uint32_t SaveMeasDuration;
+    int16_t  PrevSampleVol;
+    uint8_t  Flag;
+    uint8_t  CycleCounter;
+};
+
+struct FreqMeasStates
+{
+    struct FreqMeasState RPhase;
+    struct FreqMeasState YPhase;
+    struct FreqMeasState BPhase;
+    struct FreqMeasState RSolarPhase;
+    struct FreqMeasState YSolarPhase;
+    struct FreqMeasState BSolarPhase;
 };
 
 struct OFFSET

@@ -161,6 +161,13 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 #define  VREFINT_CAL_ADDR          ((volatile uint16_t*)0x1FFFF7BAU)
 #define  VREFINT_CAL_VDDA          3.3f
 
+// Zero-crossing threshold value of ADC reading of voltages
+#define FREQ_LIMIT_VOL_ADC    (90)
+
+// Minimum voltage to be able to measure frequency accurately
+// (Currently doesn't matter as FREQ_LIMIT_VOL < MIN_VOL_LIMIT)
+#define FREQ_LIMIT_VOL         10.0f
+
 // Minimum voltage to maintain 0.5% accuracy is about 33VAC. Taking some margin
 // UNDONE: Figure out the correct minimum value for Currents as per metering
 // standard for 0.5 class metering.

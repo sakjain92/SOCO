@@ -100,6 +100,7 @@ uint64_t SumWattPerPulseTick;
 uint32_t WattPerPulseTick,IntWattPerPulseTick;
 uint32_t CaptureValueSum;
 uint32_t InterruptFlag,RYFreqMeasDuration,SaveFreqMeasDuration;
+struct FreqMeasStates g_FreqState;
 uint16_t PreviousCaptureCount,CaptureValueSav,CaptureSumCounter,LastChangeFreq;
 float IntRPrevSample,IntYPrevSample,IntBPrevSample;
 float IntRPrev2Sample,IntYPrev2Sample,IntBPrev2Sample;

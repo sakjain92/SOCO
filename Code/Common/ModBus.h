@@ -35,8 +35,10 @@ extern uint16_t SwPressed;
 #define InstPara_BphaseRMS      11
 #define InstPara_Demand         18
 // MAX_PARAM_LIMIT is here
+#define InstPara_GridFreq       3
 #define InstPara_LoadOnGridDisableSec 1
 #define InstPara_NewSolarAll    58
+#define InstPara_SolarFreq      3
 #define InstPara_Solar_ENERGYIMPORT   7
 #define InstPara_Solar_ENERGYEXPORT   7
 
@@ -233,9 +235,20 @@ const struct ModBusParameter BlockAll[]=
   { (uint8_t *)&PTSecondary	,	       DATA_TYPE_Float	,	0	,	1	},
   { (uint8_t *)&CTPrimary	,	       DATA_TYPE_Float	,	0	,	1	},
   { (uint8_t *)&CTSecondary	,	       DATA_TYPE_Float	,	0	,	1	},
-#endif 
-  
-  
+#endif
+
+  ////////////////////////     GRID FREQUENCY (base 1200)  /////////////////////
+  //
+#ifdef MODBUS_FREQ
+  { (uint8_t *)&InstantPara.FrequencyR	,	       DATA_TYPE_Float	,	1	,	1	},
+  { (uint8_t *)&InstantPara.FrequencyY	,	       DATA_TYPE_Float	,	1	,	1	},
+  { (uint8_t *)&InstantPara.FrequencyB	,	       DATA_TYPE_Float	,	1	,	1	},
+#else
+  { (uint8_t *)&InstantPara.FrequencyR	,	       DATA_TYPE_Float	,	0	,	1	},
+  { (uint8_t *)&InstantPara.FrequencyY	,	       DATA_TYPE_Float	,	0	,	1	},
+  { (uint8_t *)&InstantPara.FrequencyB	,	       DATA_TYPE_Float	,	0	,	1	},
+#endif
+
   ////////////////////////     THD    ////////////////////////////////////////////	7					
 #ifdef MODBUS_THD 							
   { (uint8_t *)&InstantPara.ThdRPhaseVol	,	DATA_TYPE_Float	,	1	,	1	},
@@ -895,6 +908,18 @@ const struct ModBusParameter BlockAll[]=
   { (uint8_t *)&ModbusDummyFloatRegister,           DATA_TYPE_Float	,	0	,	1	},
   { (uint8_t *)&ModbusDummyFloatRegister,           DATA_TYPE_Float	,	0	,	1	},
   { (uint8_t *)&ModbusDummyFloatRegister,           DATA_TYPE_Float	,	0	,	1	},
+
+  ////////////////////////     SOLAR FREQUENCY (base 11200)  /////////////////
+  //
+#ifdef MODBUS_FREQ
+  { (uint8_t *)&InstantPara.FrequencyRSolar	,      DATA_TYPE_Float	,	1	,	1	},
+  { (uint8_t *)&InstantPara.FrequencyYSolar	,      DATA_TYPE_Float	,	1	,	1	},
+  { (uint8_t *)&InstantPara.FrequencyBSolar	,      DATA_TYPE_Float	,	1	,	1	},
+#else
+  { (uint8_t *)&InstantPara.FrequencyRSolar	,      DATA_TYPE_Float	,	0	,	1	},
+  { (uint8_t *)&InstantPara.FrequencyYSolar	,      DATA_TYPE_Float	,	0	,	1	},
+  { (uint8_t *)&InstantPara.FrequencyBSolar	,      DATA_TYPE_Float	,	0	,	1	},
+#endif
 
   ////////////////////////  SOLAR ENERGY IMPORT  /////////////////////////////	6						
 #ifdef MODBUS_RH_IMPORT								

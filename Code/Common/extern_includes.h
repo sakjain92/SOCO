@@ -95,6 +95,7 @@ extern uint8_t LcdEpromBuffer[512];
 extern uint16_t AdcDataInArray[24],SampleCounter;
 extern int16_t SdAdcDataInArray[12];
 extern uint32_t InterruptFlag,RYFreqMeasDuration,SaveFreqMeasDuration;
+extern struct FreqMeasStates g_FreqState;
 extern uint32_t WattPerPulseTick,IntWattPerPulseTick;
 extern uint64_t SumWattPerPulseTick;
 extern float IntRPrevSample,IntYPrevSample,IntBPrevSample;

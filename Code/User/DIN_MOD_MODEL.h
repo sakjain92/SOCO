@@ -51,7 +51,7 @@ The desired paramters should be selected as per the model
   #define MODBUS_CUR
   #define MODBUS_CUR_NEU
   //#define MODBUS_AVG_CUR
-  //#define MODBUS_FREQ
+  #define MODBUS_FREQ
   //#define MODBUS_CUR_UNBAL
   //#define MODBUS_VOL_UNBAL
   #define MODBUS_ACTIVE_POWER

@@ -140,6 +140,63 @@ void ProcessFreq(void)
   }
 }
 
+/*
+Inf: Compute frequency from a per-phase zero-crossing state
+Inp: FreqMeasState pointer
+Ret: Frequency in Hz, or negative if no new measurement
+*/
+static float ComputeFreqFromState(struct FreqMeasState *s)
+{
+  if(s->Flag & FF_MEAS_OVER)
+  {
+    s->Flag &=~FF_MEAS_OVER;
+    return (6e10/((float)s->SaveMeasDuration))/100;
+  }
+  return -1.0f;
+}
+
+/* UNDONE: Move this code to Metrology.c
+ *
+Inf: Per-phase frequency calculation from zero-crossing data
+Inp: None
+Ret: None
+*/
+void ProcessPerPhaseFreq(void)
+{
+  float freq;
+
+  //
+  // Grid R/Y/B phase frequencies
+  //
+  freq = ComputeFreqFromState(&g_FreqState.RPhase);
+  if(freq >= 0) InstantPara.FrequencyR = freq;
+  if (InstantPara.VolR < FREQ_LIMIT_VOL) InstantPara.FrequencyR = 0;
+
+  freq = ComputeFreqFromState(&g_FreqState.YPhase);
+  if(freq >= 0) InstantPara.FrequencyY = freq;
+  if (InstantPara.VolY < FREQ_LIMIT_VOL) InstantPara.FrequencyY = 0;
+
+
+  freq = ComputeFreqFromState(&g_FreqState.BPhase);
+  if(freq >= 0) InstantPara.FrequencyB = freq;
+  if (InstantPara.VolB < FREQ_LIMIT_VOL) InstantPara.FrequencyB = 0;
+
+  //
+  // Solar R/Y/B phase frequencies
+  //
+  freq = ComputeFreqFromState(&g_FreqState.RSolarPhase);
+  if(freq >= 0) InstantPara.FrequencyRSolar = freq;
+  if (InstantPara.VolRSolar < FREQ_LIMIT_VOL) InstantPara.FrequencyRSolar = 0;
+
+  freq = ComputeFreqFromState(&g_FreqState.YSolarPhase);
+  if(freq >= 0) InstantPara.FrequencyYSolar = freq;
+  if (InstantPara.VolYSolar < FREQ_LIMIT_VOL) InstantPara.FrequencyYSolar = 0;
+
+  freq = ComputeFreqFromState(&g_FreqState.BSolarPhase);
+  if(freq >= 0) InstantPara.FrequencyBSolar = freq;
+  if (InstantPara.VolBSolar < FREQ_LIMIT_VOL) InstantPara.FrequencyBSolar = 0;
+}
+
 void SwitchOffContactorRPhaseGridHealthy()
 {
     g_DigOutputs.RPhaseGridUnhealthyOutput = true;
@@ -792,7 +849,8 @@ void ProcessIntCycleOver(void)
 #endif
   InterruptFlag &= ~INT_CYCLE_OVER;
   ProcessFreq();
-  Metrology(); 
+  ProcessPerPhaseFreq();
+  Metrology();
   if(FlagDirectCalibration==0)SetWorkingGainBuffer(); 
 }
    

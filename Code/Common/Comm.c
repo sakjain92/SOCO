@@ -28,6 +28,9 @@ struct ModbusTableSection_t ModbusTableSections[] =
         1000, InstPara_NewAll
     },
     {
+        1200, InstPara_GridFreq
+    },
+    {
         2000, InstPara_THD
     },
     {
@@ -65,6 +68,9 @@ struct ModbusTableSection_t ModbusTableSections[] =
     },
     {
         11000, InstPara_NewSolarAll
+    },
+    {
+        11200, InstPara_SolarFreq
     },
     {
         12100, InstPara_Solar_ENERGYIMPORT
