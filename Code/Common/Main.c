@@ -771,6 +771,92 @@ void ProcessContactors()
 #undef MAX_CONTACTOR_CHANGE_LATENCY
 }
 
+// Controls fan relay (Relay 6, NC) based on ambient temperature
+// with configurable over/under temperature thresholds and delay timers.
+//
+// Fan ON:  temperature > over-temp setting for over-temp delay seconds
+// Fan OFF: temperature < under-temp setting for under-temp delay seconds
+//
+// Relay 6 is Normally Closed, so:
+//   FansOff = false (relay de-energized) → contact closed → fans ON
+//   FansOff = true  (relay energized)    → contact open   → fans OFF
+//
+// Called once per second from Process1SecOver()
+//
+void ProcessFanRelay()
+{
+    static bool fansOn = false;
+    static uint16_t delayCounter = 0;
+    static bool initialized = false;
+
+    if (!initialized)
+    {
+        initialized = true;
+        delayCounter = CopySetPara[PARA_OVER_TEMPERATURE_DELAY];
+    }
+
+    if (CopySetPara[PARA_FAN_DISABLED])
+    {
+        SwitchOffFans();
+        fansOn = false;
+        delayCounter = CopySetPara[PARA_OVER_TEMPERATURE_DELAY];
+        return;
+    }
+
+    float temp = InstantPara.AmbientTemperature;
+
+    if (!fansOn)
+    {
+        // Fans are currently OFF — check if temperature exceeds
+        // over-temperature threshold
+        //
+        if (temp > (float)CopySetPara[PARA_OVER_TEMPERATURE])
+        {
+            if (delayCounter)
+            {
+                delayCounter--;
+            }
+            if (!delayCounter)
+            {
+                fansOn = true;
+                SwitchOnFans();
+                delayCounter = CopySetPara[PARA_UNDER_TEMPERATURE_DELAY];
+            }
+        }
+        else
+        {
+            // Temperature is below threshold — reset delay counter
+            //
+            delayCounter = CopySetPara[PARA_OVER_TEMPERATURE_DELAY];
+        }
+    }
+    else
+    {
+        // Fans are currently ON — check if temperature drops below
+        // under-temperature threshold
+        //
+        if (temp < (float)CopySetPara[PARA_UNDER_TEMPERATURE])
+        {
+            if (delayCounter)
+            {
+                delayCounter--;
+            }
+            if (!delayCounter)
+            {
+                fansOn = false;
+                SwitchOffFans();
+                delayCounter = CopySetPara[PARA_OVER_TEMPERATURE_DELAY];
+            }
+        }
+        else
+        {
+            // Temperature is above threshold — reset delay counter
+            //
+            delayCounter = CopySetPara[PARA_UNDER_TEMPERATURE_DELAY];
+        }
+    }
+}
+
 /*
 Inf: 1 sec process API
 Inp: None
@@ -828,6 +914,7 @@ void Process1SecOver(void)
       !g_testingStatus.TestingModeEnabled)
   {
       ProcessContactors();
+      ProcessFanRelay();
   }
 }
 

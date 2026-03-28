@@ -1138,6 +1138,8 @@ void SendData_UART(uint8_t Add, uint8_t Func,  uint8_t Send_Length)
 Inf: Update Edit parameters through modbus
 Inp: Address and number of bytes to edit
 Ret: None
+UNDONE: Do we need to restart the controller on any setting update?
+Check carefully on this.
 */
 
 uint16_t ModCopySetPara[MAX_PARAM_LIMIT+1];
