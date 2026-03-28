@@ -86,7 +86,7 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 
 
 
-#define MAX_PARAM_LIMIT  17
+#define MAX_PARAM_LIMIT  25
 #define POWER_FAIL_SENSE_VALUE    2503
 
 

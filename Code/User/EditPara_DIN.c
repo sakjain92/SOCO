@@ -190,8 +190,12 @@ void EditDisplayParameter(void)
        // p=(uint8_t *)DisBaudRate[TempEditDisVar];
       //  DisplayString8x16(DISPLAY_PAGE7,0,p);
    //     break;
-   case EDIT_ENDIAN_TYPE:    
+   case EDIT_ENDIAN_TYPE:
         p=(uint8_t *)DisEndTyp[TempEditDisVar];
+        DisplayString(ROW_TOP,3, p,0);
+        break;
+   case EDIT_DEC_ON_OFF:
+        p=(uint8_t *)DisOnOff[TempEditDisVar];
         DisplayString(ROW_TOP,3, p,0);
         break;
 

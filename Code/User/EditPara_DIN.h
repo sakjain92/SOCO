@@ -108,6 +108,21 @@ const uint8_t DIS_SOLAR_OV_RESET[]="SOVR";
 const uint8_t DIS_SOLAR_FAIL[]="S FL";
 const uint8_t DIS_SOLAR_RETURN[]="S RT";
 
+const uint8_t DIS_FAN_UC[]="FNUC";
+const uint8_t DIS_FAN_OC[]="FNOC";
+const uint8_t DIS_UNDER_TEMP[]="UTMP";
+const uint8_t DIS_OVER_TEMP[]="OTMP";
+const uint8_t DIS_UNDER_TEMP_DELAY[]="UTPD";
+const uint8_t DIS_OVER_TEMP_DELAY[]="OTPD";
+const uint8_t DIS_DG_DETECT[]="DG D";
+const uint8_t DIS_FAN_DISABLED[]="FAND";
+
+const uint8_t   DisOnOff0[]=" OFF";
+const uint8_t   DisOnOff1[]="  ON";
+const uint8_t   *DisOnOff[]={DisOnOff0,DisOnOff1};
+
+#define EDIT_DEC_ON_OFF              18
+
 struct EditStart
 {
   uint8_t  *FirstLine;
@@ -121,8 +136,8 @@ struct EditStart
 const struct EditStart StartSelectingBlock[12]=
 {
   {(uint8_t*)0,                    0,   0,       0,                       0},// Should always be first Line.
-  {(uint8_t*)DIS_EDIT,             0,   16,       EditSystemParameter,    1},
-  {(uint8_t*)DIS_VIEW,             0,   16,       ViewSystemParameter,    0},
+  {(uint8_t*)DIS_EDIT,             0,   24,       EditSystemParameter,    1},
+  {(uint8_t*)DIS_VIEW,             0,   24,       ViewSystemParameter,    0},
 #ifdef MODEL_DIS_OLD_DATA
   {(uint8_t*)DIS_OLD,             0,   16,       ViewOldData,            0},
 #endif
@@ -296,6 +311,112 @@ const struct Parameter EditParameters[MAX_PARAM_LIMIT]=
          5,                                     //Default Value
     },
 
+    // In milli-ampere
+    {
+         PARA_FAN_UNDER_CURRENT,              // VariableIndex
+         DIS_FAN_UC,                          //*DesArrayTop
+         10,                                  //MinValue
+         400,                                 // Max value (mA)
+         1,                                   //StepValue
+         0,                                   //DecimalPosition
+         3,                                   //ParaMeterLength
+         0,                                   //DisableType
+         0,                                   //DataWithDecUnit
+         50,                                  //Default Value
+    },
+
+    // In milli-ampere
+    {
+         PARA_FAN_OVER_CURRENT,               // VariableIndex
+         DIS_FAN_OC,                          //*DesArrayTop
+         10,                                  //MinValue
+         400,                                 // Max value (mA)
+         1,                                   //StepValue
+         0,                                   //DecimalPosition
+         3,                                   //ParaMeterLength
+         0,                                   //DisableType
+         0,                                   //DataWithDecUnit
+         200,                                 //Default Value
+    },
+
+    {
+         PARA_OVER_TEMPERATURE,               // VariableIndex
+         DIS_OVER_TEMP,                       //*DesArrayTop
+         30,                                  //MinValue
+         99,                                  // Max value (Celsius)
+         1,                                   //StepValue
+         0,                                   //DecimalPosition
+         2,                                   //ParaMeterLength
+         0,                                   //DisableType
+         0,                                   //DataWithDecUnit
+         40,                                  //Default Value
+    },
+
+    {
+         PARA_UNDER_TEMPERATURE,              // VariableIndex
+         DIS_UNDER_TEMP,                      //*DesArrayTop
+         30,                                  //MinValue
+         99,                                  // Max value (Celsius)
+         1,                                   //StepValue
+         0,                                   //DecimalPosition
+         2,                                   //ParaMeterLength
+         0,                                   //DisableType
+         0,                                   //DataWithDecUnit
+         30,                                  //Default Value
+    },
+
+    {
+         PARA_OVER_TEMPERATURE_DELAY,         // VariableIndex
+         DIS_OVER_TEMP_DELAY,                 //*DesArrayTop
+         1,                                   //MinValue
+         999,                                 // Max value (Seconds)
+         1,                                   //StepValue
+         0,                                   //DecimalPosition
+         3,                                   //ParaMeterLength
+         0,                                   //DisableType
+         0,                                   //DataWithDecUnit
+         10,                                  //Default Value
+    },
+
+    {
+         PARA_UNDER_TEMPERATURE_DELAY,        // VariableIndex
+         DIS_UNDER_TEMP_DELAY,                //*DesArrayTop
+         1,                                   //MinValue
+         999,                                 // Max value (Seconds)
+         1,                                   //StepValue
+         0,                                   //DecimalPosition
+         3,                                   //ParaMeterLength
+         0,                                   //DisableType
+         0,                                   //DataWithDecUnit
+         10,                                  //Default Value
+    },
+
+    {
+         PARA_DG_DETECT_DISABLED,             // VariableIndex
+         DIS_DG_DETECT,                       //*DesArrayTop
+         0,                                   //MinValue
+         1,                                   // Max value
+         1,                                   //StepValue
+         EDIT_DEC_ON_OFF,                     //DecimalPosition
+         16,                                  //ParaMeterLength
+         0,                                   //DisableType
+         0,                                   //DataWithDecUnit
+         0,                                   //Default Value
+    },
+
+    {
+         PARA_FAN_DISABLED,                   // VariableIndex
+         DIS_FAN_DISABLED,                    //*DesArrayTop
+         0,                                   //MinValue
+         1,                                   // Max value
+         1,                                   //StepValue
+         EDIT_DEC_ON_OFF,                     //DecimalPosition
+         16,                                  //ParaMeterLength
+         0,                                   //DisableType
+         0,                                   //DataWithDecUnit
+         0,                                   //Default Value
+    },
+
     {    
     
          PARA_DEVICE_ID,                          // VariableIndex
@@ -353,20 +474,19 @@ const struct Parameter EditParameters[MAX_PARAM_LIMIT]=
          0,                                      //Default Value
     },
     
-    {    
-  
+    {
+
        PARA_ENDIAN,                          // VariableIndex
        DIS_SEL_END,                          //*DesArrayTop
        0,                                        //MinValue
        1,                                      // Max value
        1,                                       //StepValue
        EDIT_ENDIAN_TYPE,                      //DecimalPosition
-       16,                                      //ParaMeterLength    
+       16,                                      //ParaMeterLength
         0,                                      //DisableType
        0,                                       //DataWithDecUnit
        0,                                      //Default Value
   },
-   
   };
 
 

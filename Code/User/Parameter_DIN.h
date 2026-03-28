@@ -20,13 +20,19 @@
 #define     PARA_SOLAR_OVER_VOLT_RESET  9
 #define     PARA_SOLAR_FAIL_DELAY      10
 #define     PARA_SOLAR_RETURN_DELAY    11
-#define     PARA_DEVICE_ID             12
-#define     PARA_BAUD_RATE             13
-#define     PARA_PARITY                14
-#define     PARA_STOP_BIT              15
-#define     PARA_ENDIAN                16
-
-
+#define     PARA_FAN_UNDER_CURRENT     12
+#define     PARA_FAN_OVER_CURRENT      13
+#define     PARA_OVER_TEMPERATURE      14
+#define     PARA_UNDER_TEMPERATURE     15
+#define     PARA_OVER_TEMPERATURE_DELAY  16
+#define     PARA_UNDER_TEMPERATURE_DELAY 17
+#define     PARA_DG_DETECT_DISABLED    18
+#define     PARA_FAN_DISABLED          19
+#define     PARA_DEVICE_ID             20
+#define     PARA_BAUD_RATE             21
+#define     PARA_PARITY                22
+#define     PARA_STOP_BIT              23
+#define     PARA_ENDIAN                24
 
 
 
@@ -52,6 +58,7 @@ These all shall be array of strings. The array shall end with a null string
 #define EDIT_DEC_PARITY               15
 #define EDIT_DEC_STOP_BIT             16
 #define EDIT_ENDIAN_TYPE              17
+#define EDIT_DEC_ON_OFF               18
 
 
 

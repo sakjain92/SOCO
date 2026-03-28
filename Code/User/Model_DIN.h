@@ -483,6 +483,7 @@
 // 22) Model name of Netstar has spelling mistake
 // 23) Fan should be > 50 or > 85? Checked. It's 50 CFM
 // 24) Get new isolator model verified from Jio. Also glands to be verified. Also connectors for EMS from different vendors (We might not need all connectors)
+// 25) SOCO datasheet mentions fan current as 0-5A. It should be 0-400mA
 //
 //
 // Jagdish:

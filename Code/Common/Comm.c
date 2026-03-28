@@ -61,9 +61,6 @@ struct ModbusTableSection_t ModbusTableSections[] =
         3000, InstPara_Demand
     },
     {
-        5000, MAX_PARAM_LIMIT
-    },
-    {
         6000, InstPara_LoadOnGridDisableSec,
     },
     {
@@ -80,6 +77,9 @@ struct ModbusTableSection_t ModbusTableSections[] =
     },
     {
         20000, InstPara_FanTemp,
+    },
+    {
+        30000, MAX_PARAM_LIMIT
     },
     {
         50000, InstPara_InternalTesting
@@ -863,13 +863,6 @@ void ModBusCommunication(void)
                 CheckPasswordEdit(Start_Add/2,NoOfBytes);
                 break;
               } 
-              else if((Start_Add >= 5000)&&(Start_Add <= 5000+(MAX_PARAM_LIMIT*2))&&(!(Start_Add %2)))
-              {
-                Start_Add -= 5000;
-                //Start_Add +=2; // To remove system configuration
-                ModbusUpdateParameter(Start_Add/2,NoOfBytes);
-                break;
-              }
               else if (Start_Add == 6000 && NoOfBytes == 2)
               {
                   g_DisableLoadOnGridSeconds =
@@ -880,6 +873,13 @@ void ModBusCommunication(void)
                   memcpy(Mod_TransmitFrame.Data_Array, &RecieveArray[2], 4);
                   SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received,4);
                   break;
+              }
+              else if((Start_Add >= 30000)&&(Start_Add <= 30000+(MAX_PARAM_LIMIT*2))&&(!(Start_Add %2)))
+              {
+                Start_Add -= 30000;
+                //Start_Add +=2; // To remove system configuration
+                ModbusUpdateParameter(Start_Add/2,NoOfBytes);
+                break;
               }
               else  ///// Illegal Data Address //////
               {

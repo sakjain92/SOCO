@@ -34,7 +34,6 @@ extern uint16_t SwPressed;
 #define InstPara_YphaseRMS      11
 #define InstPara_BphaseRMS      11
 #define InstPara_Demand         18
-// MAX_PARAM_LIMIT is here
 #define InstPara_GridFreq       3
 #define InstPara_LoadOnGridDisableSec 1
 #define InstPara_FanTemp        3
@@ -42,7 +41,7 @@ extern uint16_t SwPressed;
 #define InstPara_SolarFreq      3
 #define InstPara_Solar_ENERGYIMPORT   7
 #define InstPara_Solar_ENERGYEXPORT   7
-
+// MAX_PARAM_LIMIT is here
 #define InstPara_InternalTesting 1
 
 #define DATA_TYPE_16            2
@@ -769,6 +768,14 @@ const struct ModBusParameter BlockAll[]=
  { (uint8_t *)&CopySetPara[PARA_SOLAR_OVER_VOLT_RESET]  ,          DATA_TYPE_16,     1       ,       1      },
  { (uint8_t *)&CopySetPara[PARA_SOLAR_FAIL_DELAY]       ,          DATA_TYPE_16,     1       ,       1      },
  { (uint8_t *)&CopySetPara[PARA_SOLAR_RETURN_DELAY]      ,         DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_FAN_UNDER_CURRENT]      ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_FAN_OVER_CURRENT]       ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_OVER_TEMPERATURE]       ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_UNDER_TEMPERATURE]      ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_OVER_TEMPERATURE_DELAY] ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_UNDER_TEMPERATURE_DELAY],          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_DG_DETECT_DISABLED]     ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_FAN_DISABLED]           ,          DATA_TYPE_16,     1       ,       1      },
  { (uint8_t *)&CopySetPara[PARA_DEVICE_ID]              ,          DATA_TYPE_16,     1       ,       1      },
  { (uint8_t *)&CopySetPara[PARA_BAUD_RATE]              ,          DATA_TYPE_16,     1       ,       1      },
  { (uint8_t *)&CopySetPara[PARA_PARITY]                 ,          DATA_TYPE_16,     1       ,       1      },
@@ -787,6 +794,14 @@ const struct ModBusParameter BlockAll[]=
  { (uint8_t *)&CopySetPara[PARA_SOLAR_OVER_VOLT_RESET]  ,          DATA_TYPE_16,     1       ,       1      },
  { (uint8_t *)&CopySetPara[PARA_SOLAR_FAIL_DELAY]       ,          DATA_TYPE_16,     1       ,       1      },
  { (uint8_t *)&CopySetPara[PARA_SOLAR_RETURN_DELAY]      ,         DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_FAN_UNDER_CURRENT]      ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_FAN_OVER_CURRENT]       ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_OVER_TEMPERATURE]       ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_UNDER_TEMPERATURE]      ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_OVER_TEMPERATURE_DELAY] ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_UNDER_TEMPERATURE_DELAY],          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_DG_DETECT_DISABLED]     ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_FAN_DISABLED]           ,          DATA_TYPE_16,     1       ,       1      },
  { (uint8_t *)&CopySetPara[PARA_DEVICE_ID]              ,          DATA_TYPE_16,     1       ,       1      },
  { (uint8_t *)&CopySetPara[PARA_BAUD_RATE]              ,          DATA_TYPE_16,     1       ,       1      },
  { (uint8_t *)&CopySetPara[PARA_PARITY]                 ,          DATA_TYPE_16,     1       ,       1      },
