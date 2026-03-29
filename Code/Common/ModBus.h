@@ -42,7 +42,7 @@ extern uint16_t SwPressed;
 #define InstPara_Solar_ENERGYEXPORT   7
 #define InstPara_FanTemp        3
 // MAX_PARAM_LIMIT is here
-#define InstPara_InternalTesting 4
+#define InstPara_InternalTesting 6
 
 #define DATA_TYPE_16            2
 #define DATA_TYPE_32            4
@@ -1021,9 +1021,11 @@ const struct ModBusParameter BlockAll[]=
  ////////////////////////     INTERNAL TESTING (base 50000)  /////////
  //
   { (uint8_t *)&SwPressed,                                 DATA_TYPE_16,     1       ,       1      },
-  { (uint8_t *)&g_ProductInfo.SerialNumber[0],              DATA_TYPE_32,     1       ,       1      },
+  { (uint8_t *)&g_ProductInfo.SerialNumber[0],             DATA_TYPE_32,     1       ,       1      },
   { (uint8_t *)&g_ProductInfo.SerialNumber[1],             DATA_TYPE_32,     1       ,       1      },
   { (uint8_t *)&g_VersionNumber,                           DATA_TYPE_32,     1       ,       1      },
+  { (uint8_t *)&g_ProductInfo.FunctionallyTestedFlag,      DATA_TYPE_32,     1       ,       1      },
+  { (uint8_t *)&g_ProductInfo.CalibratedFlag,              DATA_TYPE_32,     1       ,       1      },
 };
 
 // DEVNOTE: Digital inputs are read using read input status

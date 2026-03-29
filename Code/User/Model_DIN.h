@@ -525,7 +525,7 @@
 // Suggestion: Mention in SOCO datasheet that FAN current is upto 400mA and that CTs supplied with SOCO are 0.5 class CTs and SOCO is class 1 meter
 //
 //
-// Tested/Calibrated: Implementation read/write
+// Tested/Calibrated: Implementation read/write. Implement state machine for calibration.
 // Earthing?
 // Display Test
 // Should SOCO default device ID be 100?

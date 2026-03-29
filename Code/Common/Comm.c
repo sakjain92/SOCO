@@ -911,6 +911,55 @@ void ModBusCommunication(void)
                   SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received,4);
                   break;
               }
+              else if((Start_Add == 50008) && (NoOfBytes == 1))
+              {
+                  // Write tested flag. Only allowed when test mode is enabled.
+                  //
+                  if (!g_testingStatus.TestingModeEnabled)
+                  {
+                      Fun_Received |= 0x80;
+                      Mod_TransmitFrame.Data_Array[0] = 0x03;
+                      SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received,1);
+                      Fun_Received &=~ 0x80;
+                      break;
+                  }
+                  g_ProductInfo.FunctionallyTestedFlag =
+                      ((uint32_t)RecieveArray[10]) +
+                      ((uint32_t)RecieveArray[9]<<8) +
+                      ((uint32_t)RecieveArray[8]<<16)+
+                      ((uint32_t)RecieveArray[7]<<24);
+                  EepromWrite(PRODUCT_INFO_LOC,
+                              sizeof(struct ProductInfo), EXT_EEPROM,
+                              (uint8_t *)&g_ProductInfo);
+                  memcpy(Mod_TransmitFrame.Data_Array, &RecieveArray[2], 4);
+                  SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received,4);
+                  break;
+              }
+              else if((Start_Add == 50010) && (NoOfBytes == 1))
+              {
+                  // Write calibrated flag. Only allowed when test mode is enabled.
+                  //
+                  if (!g_testingStatus.TestingModeEnabled)
+                  {
+                      Fun_Received |= 0x80;
+                      Mod_TransmitFrame.Data_Array[0] = 0x03;
+                      SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received,1);
+                      Fun_Received &=~ 0x80;
+                      break;
+                  }
+                  g_ProductInfo.CalibratedFlag =
+                      ((uint32_t)RecieveArray[10]) +
+                      ((uint32_t)RecieveArray[9]<<8) +
+                      ((uint32_t)RecieveArray[8]<<16)+
+                      ((uint32_t)RecieveArray[7]<<24);
+                  EepromWrite(PRODUCT_INFO_LOC,
+                              sizeof(struct ProductInfo), EXT_EEPROM,
+                              (uint8_t *)&g_ProductInfo);
+                  memcpy(Mod_TransmitFrame.Data_Array, &RecieveArray[2], 4);
+                  SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received,4);
+                  break;
+              }
+
               else  ///// Illegal Data Address //////
               {
 
