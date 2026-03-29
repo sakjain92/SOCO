@@ -170,4 +170,13 @@ struct LedStatus g_LedStatus;
 // Defines the timing for which Load is disconnected from both Solar & Grid
 //
 uint32_t g_DisableLoadOnGridSeconds;
+
+// Persistent product information (serial number, etc.)
+// Stored in EEPROM at PRODUCT_INFO_LOC
+//
+struct ProductInfo g_ProductInfo;
+
+// Version number exposed over Modbus
+//
+uint32_t g_VersionNumber;
 #endif

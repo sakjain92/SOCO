@@ -33,6 +33,16 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 
 #define  PASSWORD_SAV_LOC              (POWER_DN_SAVE_PAGE+MAX_DATA_SAVE_SIZE)
 #define  SCROLL_LOCK_LOC               (PASSWORD_SAV_LOC+EEPROM_PAGE_LENGTH)
+#define  PRODUCT_INFO_LOC              (SCROLL_LOCK_LOC+EEPROM_PAGE_LENGTH)
+#define  PRODUCT_INFO_SIZE             EEPROM_PAGE_LENGTH
+
+#define  EEPROM_END                     (PRODUCT_INFO_LOC + PRODUCT_INFO_SIZE - 1)
+
+// Using inline assert since COMPILE_ASSERT macro (from Struct.h) is not
+// available here due to include ordering.
+//
+extern char _product_info_fits_in_eeprom[
+    (EEPROM_END < EEPROM_PAGE_LENGTH * MAX_NUM_PAGES) ? 1 : -1];
 
 #define  DATA_SAVE_DEBAR_TIME          5
 #define  DATA_SAVE_DURATION           (30+DATA_SAVE_DEBAR_TIME) // External EEPROM Data Saved every 30 Sec

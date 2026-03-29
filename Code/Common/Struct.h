@@ -3,6 +3,7 @@
 
 #include "stm32f37x.h"
 #include <stdbool.h>
+#include "FlagDef_DIN.h"
 
 #define RUNNING_MODE_IMPORT  0
 
@@ -753,6 +754,17 @@ struct LedStatus
     };
 };
 COMPILE_ASSERT(sizeof(struct LedStatus) == NUMBER_OF_LEDS);
+
+
+// Persistent product information stored in 1 EEPROM page (64 bytes)
+// at PRODUCT_INFO_LOC. All fields are zero-initialized at first use.
+//
+struct ProductInfo
+{
+    uint32_t SerialNumber[2];          // 8 bytes: lower and upper halves
+    uint8_t  Reserved[56];             // 56 bytes: reserved for future use
+};
+COMPILE_ASSERT(sizeof(struct ProductInfo) == PRODUCT_INFO_SIZE);
 
 
 // Defines the various status related to testing/calibration

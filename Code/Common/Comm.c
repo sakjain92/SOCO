@@ -881,6 +881,36 @@ void ModBusCommunication(void)
                 ModbusUpdateParameter(Start_Add/2,NoOfBytes);
                 break;
               }
+              else if((Start_Add == 50002) && (NoOfBytes == 4))
+              {
+                  // Write serial number (lower 32 bits at 50003, upper 32 bits
+                  // at 50005). Only allowed when test mode is enabled.
+                  //
+                  if (!g_testingStatus.TestingModeEnabled)
+                  {
+                      Fun_Received |= 0x80;
+                      Mod_TransmitFrame.Data_Array[0] = 0x03;
+                      SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received,1);
+                      Fun_Received &=~ 0x80;
+                      break;
+                  }
+                  g_ProductInfo.SerialNumber[0] =
+                      ((uint32_t)RecieveArray[10]) +
+                      ((uint32_t)RecieveArray[9]<<8) +
+                      ((uint32_t)RecieveArray[8]<<16)+
+                      ((uint32_t)RecieveArray[7]<<24);
+                  g_ProductInfo.SerialNumber[1] =
+                      ((uint32_t)RecieveArray[14]) +
+                      ((uint32_t)RecieveArray[13]<<8) +
+                      ((uint32_t)RecieveArray[12]<<16)+
+                      ((uint32_t)RecieveArray[11]<<24);
+                  EepromWrite(PRODUCT_INFO_LOC,
+                              sizeof(struct ProductInfo), EXT_EEPROM,
+                              (uint8_t *)&g_ProductInfo);
+                  memcpy(Mod_TransmitFrame.Data_Array, &RecieveArray[2], 4);
+                  SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received,4);
+                  break;
+              }
               else  ///// Illegal Data Address //////
               {
 

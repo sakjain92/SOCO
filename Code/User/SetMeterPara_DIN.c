@@ -28,6 +28,9 @@ void SetMeterParameters(void)
  
   //EepromRead(TRIP_DATA_LOC,sizeof(StorageBuffer),EXT_EEPROM,(uint8_t *)&TripData );
   EepromRead(OLD_DATA_LOC,sizeof(StorageBuffer),EXT_EEPROM,(uint8_t *)&OldData );  // read old data
+  EepromRead(PRODUCT_INFO_LOC, sizeof(struct ProductInfo), EXT_EEPROM,
+             (uint8_t *)&g_ProductInfo);
+  g_VersionNumber = VERSION_NO;
 #ifdef MODEL_RS485
   InitUart(CopySetPara[PARA_BAUD_RATE],CopySetPara[PARA_PARITY],CopySetPara[PARA_STOP_BIT]);
 #endif
