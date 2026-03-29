@@ -667,12 +667,15 @@ void ProcessContactors()
     // But if DG is running, 48V should be available.
     // So if 48V is not present we assume DG is not running.
     //
+    // If DG detection is disabled via PARA_DG_DETECT_DISABLED, treat DG
+    // as always off (i.e. never block solar on account of DG).
+    //
     // Also, can't turn on Solar contactor if any of the mains contactor is stuck
     // in open condition
     //
     pvsArray[3].shouldContactorBeOn = pvsArray[3].isHealthy &&
                                       (!pvsArray[4].isHealthy || g_DisableLoadOnGridSeconds) &&
-                                        (g_DigInputs.DGOff) &&
+                                        (CopySetPara[PARA_DG_DETECT_DISABLED] || g_DigInputs.DGOff) &&
                                         !pvsArray[0].isPrevContactorOn &&
                                         !pvsArray[1].isPrevContactorOn &&
                                         !pvsArray[2].isPrevContactorOn &&
