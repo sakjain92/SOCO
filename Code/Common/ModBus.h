@@ -24,6 +24,7 @@ extern uint16_t SwPressed;
 // registers in a block at a time
 //
 #define InstPara_NewAll         58
+#define InstPara_GridFreq       3
 #define InstPara_THD            6
 #define InstPara_ENERGYIMPORT   7
 #define InstPara_ENERGYEXPORT   7
@@ -34,13 +35,12 @@ extern uint16_t SwPressed;
 #define InstPara_YphaseRMS      11
 #define InstPara_BphaseRMS      11
 #define InstPara_Demand         18
-#define InstPara_GridFreq       3
 #define InstPara_LoadOnGridDisableSec 1
-#define InstPara_FanTemp        3
 #define InstPara_NewSolarAll    58
 #define InstPara_SolarFreq      3
 #define InstPara_Solar_ENERGYIMPORT   7
 #define InstPara_Solar_ENERGYEXPORT   7
+#define InstPara_FanTemp        3
 // MAX_PARAM_LIMIT is here
 #define InstPara_InternalTesting 1
 
@@ -753,62 +753,7 @@ const struct ModBusParameter BlockAll[]=
  { (uint8_t *)&InstantPara.VyMax    ,          DATA_TYPE_Float,     0       ,       PT_RATIO      },
  { (uint8_t *)&InstantPara.VbMax    ,          DATA_TYPE_Float,     0       ,       PT_RATIO      },
 #endif
- 
- /////////////////////Edit Para for Delta Model//////////////////////
-#ifdef MODBUS_EDIT_PARA
- { (uint8_t *)&CopySetPara[PARA_MAINS_UNDER_VOLT]       ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_MAINS_OVER_VOLT]        ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_MAINS_UNDER_VOLT_RESET] ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_MAINS_OVER_VOLT_RESET]  ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_MAINS_FAIL_DELAY]       ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_MAINS_RETURN_DELAY]      ,         DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_SOLAR_UNDER_VOLT]       ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_SOLAR_OVER_VOLT]        ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_SOLAR_UNDER_VOLT_RESET] ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_SOLAR_OVER_VOLT_RESET]  ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_SOLAR_FAIL_DELAY]       ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_SOLAR_RETURN_DELAY]      ,         DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_FAN_UNDER_CURRENT]      ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_FAN_OVER_CURRENT]       ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_OVER_TEMPERATURE]       ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_UNDER_TEMPERATURE]      ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_OVER_TEMPERATURE_DELAY] ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_UNDER_TEMPERATURE_DELAY],          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_DG_DETECT_DISABLED]     ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_FAN_DISABLED]           ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_DEVICE_ID]              ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_BAUD_RATE]              ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_PARITY]                 ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_STOP_BIT]               ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_ENDIAN]                 ,          DATA_TYPE_16,     1       ,       1      },
-#else
- { (uint8_t *)&CopySetPara[PARA_MAINS_UNDER_VOLT]       ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_MAINS_OVER_VOLT]        ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_MAINS_UNDER_VOLT_RESET] ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_MAINS_OVER_VOLT_RESET]  ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_MAINS_FAIL_DELAY]       ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_MAINS_RETURN_DELAY]      ,         DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_SOLAR_UNDER_VOLT]       ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_SOLAR_OVER_VOLT]        ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_SOLAR_UNDER_VOLT_RESET] ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_SOLAR_OVER_VOLT_RESET]  ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_SOLAR_FAIL_DELAY]       ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_SOLAR_RETURN_DELAY]      ,         DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_FAN_UNDER_CURRENT]      ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_FAN_OVER_CURRENT]       ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_OVER_TEMPERATURE]       ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_UNDER_TEMPERATURE]      ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_OVER_TEMPERATURE_DELAY] ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_UNDER_TEMPERATURE_DELAY],          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_DG_DETECT_DISABLED]     ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_FAN_DISABLED]           ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_DEVICE_ID]              ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_BAUD_RATE]              ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_PARITY]                 ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_STOP_BIT]               ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_ENDIAN]                 ,          DATA_TYPE_16,     1       ,       1      },
-#endif
- 
+  
  // LoadOnGridDisableSec
  //
  {(uint8_t *)&g_DisableLoadOnGridSeconds                ,          DATA_TYPE_32,     1       ,       1      },
@@ -1016,6 +961,61 @@ const struct ModBusParameter BlockAll[]=
   { (uint8_t *)&InstantPara.Fan1Current      ,           DATA_TYPE_Float	,	0	,	1	},
   { (uint8_t *)&InstantPara.Fan2Current      ,           DATA_TYPE_Float	,	0	,	1	},
   { (uint8_t *)&InstantPara.AmbientTemperature,          DATA_TYPE_Float	,	0	,	1	},
+#endif
+
+/////////////////////Edit Para for Delta Model//////////////////////
+#ifdef MODBUS_EDIT_PARA
+ { (uint8_t *)&CopySetPara[PARA_MAINS_UNDER_VOLT]       ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_MAINS_OVER_VOLT]        ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_MAINS_UNDER_VOLT_RESET] ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_MAINS_OVER_VOLT_RESET]  ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_MAINS_FAIL_DELAY]       ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_MAINS_RETURN_DELAY]      ,         DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_SOLAR_UNDER_VOLT]       ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_SOLAR_OVER_VOLT]        ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_SOLAR_UNDER_VOLT_RESET] ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_SOLAR_OVER_VOLT_RESET]  ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_SOLAR_FAIL_DELAY]       ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_SOLAR_RETURN_DELAY]      ,         DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_FAN_UNDER_CURRENT]      ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_FAN_OVER_CURRENT]       ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_OVER_TEMPERATURE]       ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_UNDER_TEMPERATURE]      ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_OVER_TEMPERATURE_DELAY] ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_UNDER_TEMPERATURE_DELAY],          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_DG_DETECT_DISABLED]     ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_FAN_DISABLED]           ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_DEVICE_ID]              ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_BAUD_RATE]              ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_PARITY]                 ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_STOP_BIT]               ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_ENDIAN]                 ,          DATA_TYPE_16,     1       ,       1      },
+#else
+ { (uint8_t *)&CopySetPara[PARA_MAINS_UNDER_VOLT]       ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_MAINS_OVER_VOLT]        ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_MAINS_UNDER_VOLT_RESET] ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_MAINS_OVER_VOLT_RESET]  ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_MAINS_FAIL_DELAY]       ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_MAINS_RETURN_DELAY]      ,         DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_SOLAR_UNDER_VOLT]       ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_SOLAR_OVER_VOLT]        ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_SOLAR_UNDER_VOLT_RESET] ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_SOLAR_OVER_VOLT_RESET]  ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_SOLAR_FAIL_DELAY]       ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_SOLAR_RETURN_DELAY]      ,         DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_FAN_UNDER_CURRENT]      ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_FAN_OVER_CURRENT]       ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_OVER_TEMPERATURE]       ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_UNDER_TEMPERATURE]      ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_OVER_TEMPERATURE_DELAY] ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_UNDER_TEMPERATURE_DELAY],          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_DG_DETECT_DISABLED]     ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_FAN_DISABLED]           ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_DEVICE_ID]              ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_BAUD_RATE]              ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_PARITY]                 ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_STOP_BIT]               ,          DATA_TYPE_16,     1       ,       1      },
+ { (uint8_t *)&CopySetPara[PARA_ENDIAN]                 ,          DATA_TYPE_16,     1       ,       1      },
 #endif
 
  ////////////////////////     INTERNAL TESTING (base 50000)  /////////
