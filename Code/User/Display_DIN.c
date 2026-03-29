@@ -248,6 +248,10 @@ void ConvertToBCB(int32_t Data)
 
 void LedProcess(uint8_t LED_Type)
 {
+  if (g_testingStatus.TestingModeEnabled)
+  {
+      return;
+  }
   switch(LED_Type)
   {
     case LED_OFF:

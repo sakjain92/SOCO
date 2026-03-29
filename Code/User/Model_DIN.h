@@ -372,6 +372,7 @@
 // 337) Add a software modbus feature: Detecting AC Aux is not available when it should. Indicates Fuse blown. Store this persistently and signal to consumer. Also, add a fuse in Neutral also?
 // IMPORTANT.
 // 338) We are stating 10A to be the basic/calibration current so we should calibrate at this. Also at 1A and 0.4A and 100A
+// 339) We should expose AC/DC measured voltage to user over modbus for production testing
 //
 // NOTES:
 // 1) For Apparent power, we are using RMS (IEC 60038) instead of (IEC 61000-4-7) where we just measure first harmonics as we need to match energy with utility meter (and SMPS will have noise)
@@ -516,3 +517,8 @@
 // Suggestion: Check MELF pads on PCBs. Seems like they might be combination of 1206 and 0207. We don't need 1206 here. Can decrease pad size a bit and add a proper 3mm or 3.5mm cut
 // (Do we need 1206 provision if we already have 0207). 
 // Suggestion: Add 3mm cut between terminals of R/Y/B voltage
+// Suggestion: FAN CT wire pad should be next to terminal in case external Short as pads will burn. Tracks from terminal to wire pads need to be both sides with vias
+// Suggestion: Need to verify door limit switch (But since it runs on 12V, should be fine)
+// Suggestion: 4.7k in FAN current circuit for reference instead of 1k
+// Suggestion: Add vias on both side tracks in FAN current section and voltage measurement section. Keep FAN current wire pad next to terminal
+// Suggestion: Should we add fast blown fuse in panel to protect power supply? Should we also add LED indication in fuse to make it easier?
