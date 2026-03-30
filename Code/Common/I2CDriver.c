@@ -21,7 +21,7 @@ void I2CRead(uint16_t DataLocation, uint8_t NoOfBytes, uint8_t DeviceAddress, ui
 
   I2C2->CR2 = (uint8_t)DeviceAddress;
   I2C2->CR2 &=~I2C_CR2_RD_WRN;               //Direction
-  I2C2->CR2 |=  I2C_CR2_START+0x20000;                //Generate Start and no of bytes to transmit(2)
+  I2C2->CR2 |=  I2C_CR2_START | (2 << 16);                //Generate Start and no of bytes to transmit(2)
   counter = 0;
   while(I2C2->CR2 & I2C_CR2_START)
   {
@@ -56,6 +56,8 @@ void I2CRead(uint16_t DataLocation, uint8_t NoOfBytes, uint8_t DeviceAddress, ui
   }
 
   I2C2->CR2 |= I2C_CR2_RD_WRN;               //Direction change
+  I2C2->CR2 &= ~0xFF0000;                    //Clear NBYTES field
+  //
   I2C2->CR2 |= (uint32_t)(NoOfBytes * 65536) & 0xFF0000;
   I2C2->CR2 |= I2C_CR2_START;                //Generate Start
   counter = 0;
@@ -84,6 +86,7 @@ void I2CRead(uint16_t DataLocation, uint8_t NoOfBytes, uint8_t DeviceAddress, ui
   }
   I2C2->CR2 |= I2C_CR2_STOP;
   //Stop
+  //
   counter = 0;
   while(!(I2C2->ISR & I2C_ISR_STOPF))
   {
@@ -93,7 +96,10 @@ void I2CRead(uint16_t DataLocation, uint8_t NoOfBytes, uint8_t DeviceAddress, ui
       break;
     }
   }
+  I2C2->ICR = I2C_ICR_STOPCF;                //Clear STOPF flag
+  //
   //Busy
+  //
   counter = 0;
   while(I2C2->ISR & I2C_ISR_BUSY)
   {
@@ -104,7 +110,7 @@ void I2CRead(uint16_t DataLocation, uint8_t NoOfBytes, uint8_t DeviceAddress, ui
     }
   }
 
-  I2C2->CR1 &=~I2C_CR1_PE;   
+  I2C2->CR1 &=~I2C_CR1_PE;
 }
 
 void EepromRead(uint16_t DataLocation, uint16_t NoOfBytes, uint8_t DeviceAddress, uint8_t *DataArray)
@@ -126,7 +132,7 @@ void I2CWrite(uint16_t DataLocation,uint8_t NoOfBytes,uint8_t DeviceAddress,uint
   uint32_t TempBytes;
   uint32_t counter = 0;
   TempVariable  = DataLocation & 0xFFFF;
-  TempBytes = (uint32_t)NoOfBytes+2 << 16;
+  TempBytes = (uint32_t)(NoOfBytes + 2) << 16;
   
   I2C2->CR1 |= I2C_CR1_PE;                     //PE enable
 
@@ -179,8 +185,9 @@ void I2CWrite(uint16_t DataLocation,uint8_t NoOfBytes,uint8_t DeviceAddress,uint
       }
     }
   }
-  I2C2->CR2 |= I2C_CR2_STOP;                  
+  I2C2->CR2 |= I2C_CR2_STOP;
   //Stop
+  //
   counter = 0;
   while(!(I2C2->ISR & I2C_ISR_STOPF))
   {
@@ -190,8 +197,11 @@ void I2CWrite(uint16_t DataLocation,uint8_t NoOfBytes,uint8_t DeviceAddress,uint
       break;
     }
   }
+  I2C2->ICR = I2C_ICR_STOPCF;                //Clear STOPF flag
+  //
 
   //Busy
+  //
   counter = 0;
   while(I2C2->ISR & I2C_ISR_BUSY)
   {
@@ -207,7 +217,7 @@ void I2CWrite(uint16_t DataLocation,uint8_t NoOfBytes,uint8_t DeviceAddress,uint
 void CheckEpromFree(uint8_t DeviceAddress)
 {
   uint32_t Temp=0;
-  I2C2->CR2=DeviceAddress+0x02000000;
+  I2C2->CR2 = DeviceAddress | (2 << 24);
   I2C2->CR1 |= I2C_CR1_PE;
   uint32_t counter = 0;
 
