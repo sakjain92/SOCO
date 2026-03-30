@@ -1033,6 +1033,11 @@ void ModBusCommunication(void)
                         (uint8_t*)(&g_powerSupplyStatus)
                     },
                     {
+                        400,
+                        sizeof(g_DigOutputs),
+                        (uint8_t*)(&g_DigOutputs)
+                    },
+                    {
                         20000,
                         sizeof(g_DigInputs),
                         (uint8_t*)(&g_DigInputs)
@@ -1131,7 +1136,8 @@ void ModBusCommunication(void)
 
                 bool enable = (NoOfBytes == 0xFF00);
 
-                if (Start_Add >= 30000 && Start_Add < 30000 + sizeof(g_DigOutputs))
+                if ((Start_Add >= 30000 && Start_Add < 30000 + sizeof(g_DigOutputs))&&
+                     g_testingStatus.TestingModeEnabled)
                 {
                     g_DigOutputs.Relays[Start_Add - 30000] = enable;
                 }
@@ -1139,11 +1145,12 @@ void ModBusCommunication(void)
                 {
                     g_testingStatus.Status[Start_Add - 40000] = enable;
                 }
-                else if (Start_Add == 0)
+                else if ((Start_Add == 45000) && g_testingStatus.TestingModeEnabled)
                 {
                     NVIC_SystemReset();
                 }
-                else if (Start_Add >= 60000 && Start_Add < 60000 + sizeof(g_LedStatus))
+                else if ((Start_Add >= 60000 && Start_Add < 60000 + sizeof(g_LedStatus)) &&
+                         g_testingStatus.TestingModeEnabled)
                 {
                     g_LedStatus.Status[Start_Add - 60000] = enable;
                 }
