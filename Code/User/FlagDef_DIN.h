@@ -240,31 +240,31 @@ extern char _product_info_fits_in_eeprom[
 #define         CALIBRATE_OUT_5         5
 #define         CALIBRATE_OUT_6         6
 
-#define         CALIBRATE_IN_START      6
-#define         CALIBRATE_IN_1          7
-#define         CALIBRATE_IN_2          8
-#define         CALIBRATE_IN_3          9
-#define         CALIBRATE_IN_4          10
-#define         CALIBRATE_IN_5          11
-#define         CALIBRATE_IN_6          12
-#define         CALIBRATE_IN_7          13
-#define         CALIBRATE_IN_8          14
+#define         CALIBRATE_IN_START      7
+#define         CALIBRATE_IN_1          8
+#define         CALIBRATE_IN_2          9
+#define         CALIBRATE_IN_3          10
+#define         CALIBRATE_IN_4          11
+#define         CALIBRATE_IN_5          12
+#define         CALIBRATE_IN_6          13
+#define         CALIBRATE_IN_7          14
+#define         CALIBRATE_IN_8          15
 
-#define         CALIBRATE_VOL_CUR_START 15
-#define         CALIBRATE_DIS_H_VI      16
-#define         CALIBRATE_H_VI          17
-#define         CALIBRATE_DIS_H_PF      18
-#define         CALIBRATE_H_PF          19
+#define         CALIBRATE_VOL_CUR_START 16
+#define         CALIBRATE_DIS_H_VI      17
+#define         CALIBRATE_H_VI          18
+#define         CALIBRATE_DIS_H_PF      19
+#define         CALIBRATE_H_PF          20
 
-#define         CALIBRATE_DIS_M_VI      20
-#define         CALIBRATE_M_VI          21
-#define         CALIBRATE_DIS_M_PF      22
-#define         CALIBRATE_M_PF          23
+#define         CALIBRATE_DIS_M_VI      21
+#define         CALIBRATE_M_VI          22
+#define         CALIBRATE_DIS_M_PF      23
+#define         CALIBRATE_M_PF          24
 
-#define         CALIBRATE_DIS_L_VI      24
-#define         CALIBRATE_L_VI          25
-#define         CALIBRATE_DIS_L_PF      26
-#define         CALIBRATE_L_PF          27
+#define         CALIBRATE_DIS_L_VI      25
+#define         CALIBRATE_L_VI          26
+#define         CALIBRATE_DIS_L_PF      27
+#define         CALIBRATE_L_PF          28
 
 #define         CALIBRATE_END           127
 #define         CALIBRATE_ERROR         126

@@ -1041,7 +1041,7 @@ void StartCalibration(void)
    }
 
    if (FlagDirectCalibration >= CALIBRATE_OUT_1 &&
-       FlagDirectCalibration <= CALIBRATE_OUT_5)
+       FlagDirectCalibration <= CALIBRATE_OUT_6)
    {
        // UNDONE: This logic here might not be working
        // Not able to test outputs properly
