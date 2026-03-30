@@ -342,7 +342,7 @@ const struct Parameter EditParameters[MAX_PARAM_LIMIT]=
     {
          PARA_OVER_TEMPERATURE,               // VariableIndex
          DIS_OVER_TEMP,                       //*DesArrayTop
-         30,                                  //MinValue
+         0,                                   //MinValue
          99,                                  // Max value (Celsius)
          1,                                   //StepValue
          0,                                   //DecimalPosition
@@ -355,7 +355,7 @@ const struct Parameter EditParameters[MAX_PARAM_LIMIT]=
     {
          PARA_UNDER_TEMPERATURE,              // VariableIndex
          DIS_UNDER_TEMP,                      //*DesArrayTop
-         30,                                  //MinValue
+         0,                                   //MinValue
          99,                                  // Max value (Celsius)
          1,                                   //StepValue
          0,                                   //DecimalPosition
