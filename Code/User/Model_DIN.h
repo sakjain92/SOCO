@@ -523,6 +523,7 @@
 // Suggestion: Add vias on both side tracks in FAN current section and voltage measurement section. Keep FAN current wire pad next to terminal
 // Suggestion: Should we add fast blown fuse in panel to protect power supply? Should we also add LED indication in fuse to make it easier?
 // Suggestion: Mention in SOCO datasheet that FAN current is upto 400mA and that CTs supplied with SOCO are 0.5 class CTs and SOCO is class 1 meter
+// Suggestion: Why Grid Y Phase has high phase error
 //
 //
 // Tested/Calibrated: Implementation read/write. Implement state machine for calibration.

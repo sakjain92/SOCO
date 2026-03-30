@@ -289,7 +289,7 @@ extern char _product_info_fits_in_eeprom[
 #define        CURRENT_TOLRERANCE                    0.3f   // UNDONE: This was 0.1 earlier but in our board at lower end of calibration needed to increase error range
                                                             // We should use SDADC to get better accuracy
 #define        VOLTAGE_TOLERANCE                     0.1f
-#define        POWER_TOLERANCE                       0.4f
+#define        POWER_TOLERANCE                       0.4f   // UNDONE: This should be made less but Grid Y phase has unusually large phase error
 
 // PH_ERROR is stored as (P_measured - P_expected)/P_expected - 0.001.
 // CalPF() converts PH_ERROR to a fractional-sample delay D.
