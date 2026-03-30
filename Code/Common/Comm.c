@@ -959,9 +959,11 @@ void ModBusCommunication(void)
               }
               else if((Start_Add == 50010) && (NoOfBytes == 2))
               {
-                  // Write calibrated flag. Only allowed when test mode is enabled.
+                  // Write calibrated flag. Only allowed when test mode is
+                  // enabled AND calibration has completed successfully.
                   //
-                  if (!g_testingStatus.TestingModeEnabled)
+                  if (!g_testingStatus.TestingModeEnabled ||
+                      (FlagDirectCalibration != CALIBRATE_END))
                   {
                       Fun_Received |= 0x80;
                       Mod_TransmitFrame.Data_Array[0] = 0x03;
