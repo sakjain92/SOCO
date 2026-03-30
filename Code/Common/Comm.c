@@ -76,6 +76,9 @@ struct ModbusTableSection_t ModbusTableSections[] =
         12200, InstPara_Solar_ENERGYEXPORT
     },
     {
+        16000, InstPara_LoadOnSolarDisableSec,
+    },
+    {
         20000, InstPara_FanTemp,
     },
     {
@@ -874,6 +877,17 @@ void ModBusCommunication(void)
               else if (Start_Add == 6000 && NoOfBytes == 2)
               {
                   g_DisableLoadOnGridSeconds =
+                      ((uint32_t)RecieveArray[10]) +
+                      ((uint32_t)RecieveArray[9]<<8) +
+                      ((uint32_t)RecieveArray[8]<<16)+
+                      ((uint32_t)RecieveArray[7]<<24);
+                  memcpy(Mod_TransmitFrame.Data_Array, &RecieveArray[2], 4);
+                  SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received,4);
+                  break;
+              }
+              else if (Start_Add == 16000 && NoOfBytes == 2)
+              {
+                  g_DisableLoadOnSolarSeconds =
                       ((uint32_t)RecieveArray[10]) +
                       ((uint32_t)RecieveArray[9]<<8) +
                       ((uint32_t)RecieveArray[8]<<16)+

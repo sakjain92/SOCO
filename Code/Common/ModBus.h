@@ -40,6 +40,7 @@ extern uint16_t SwPressed;
 #define InstPara_SolarFreq      3
 #define InstPara_Solar_ENERGYIMPORT   7
 #define InstPara_Solar_ENERGYEXPORT   7
+#define InstPara_LoadOnSolarDisableSec 1
 #define InstPara_FanTemp        3
 // MAX_PARAM_LIMIT is here
 #define InstPara_InternalTesting 7
@@ -950,6 +951,10 @@ const struct ModBusParameter BlockAll[]=
 #else
   { (uint8_t *)&StorageBuffer.SolarExportInterruptions,	   DATA_TYPE_16	,	0	,	1	},
 #endif
+
+ // LoadOnSolarDisableSec (base 16000)
+ //
+ {(uint8_t *)&g_DisableLoadOnSolarSeconds,                 DATA_TYPE_32,     1       ,       1      },
 
  ////////////////////////     FAN CURRENT & AMBIENT TEMP (base 20000)  /////////
  //

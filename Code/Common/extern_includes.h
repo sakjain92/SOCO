@@ -136,6 +136,7 @@ extern void SwitchOffContactorLoadOnGrid();
 extern void SwitchOnContactorLoadOnGrid();
 
 extern uint32_t g_DisableLoadOnGridSeconds;
+extern uint32_t g_DisableLoadOnSolarSeconds;
 
 extern struct ProductInfo g_ProductInfo;
 extern uint32_t g_VersionNumber;

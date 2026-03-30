@@ -679,7 +679,8 @@ void ProcessContactors()
                                         !pvsArray[0].isPrevContactorOn &&
                                         !pvsArray[1].isPrevContactorOn &&
                                         !pvsArray[2].isPrevContactorOn &&
-                                        !pvsArray[4].isPrevContactorOn;
+                                        !pvsArray[4].isPrevContactorOn &&
+                                        (g_DisableLoadOnSolarSeconds == 0);
     pvsArray[4].shouldContactorBeOn = pvsArray[4].isHealthy &&
                                         (g_DisableLoadOnGridSeconds == 0) &&
                                         !pvsArray[3].isPrevContactorOn;
@@ -687,6 +688,10 @@ void ProcessContactors()
     if (g_DisableLoadOnGridSeconds)
     {
         g_DisableLoadOnGridSeconds--;
+    }
+    if (g_DisableLoadOnSolarSeconds)
+    {
+        g_DisableLoadOnSolarSeconds--;
     }
 
     // DEVNOTE: Follow break before make for all contactors
