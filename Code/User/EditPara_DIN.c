@@ -385,9 +385,11 @@ void UpdateEditSettings(void)
       EepromWrite(SCROLL_LOCK_LOC,2,EXT_EEPROM,(uint8_t *)&DisplaySetup.DisplayScrollStatus );
       DisplayDisabled();
       // __enable_interrupt();
-    }     
-#endif
+      ParaSettingUpdate();
+    }
+#else
     ParaSettingUpdate();
+#endif
     OutOfEdit();
     InterruptFlag &=~(PASSWORD_CHECK_ON+PASSWORD_VERIFIED+PASSWORD_FOR_VIEW);
 }
