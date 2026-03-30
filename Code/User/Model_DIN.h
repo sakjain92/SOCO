@@ -529,4 +529,11 @@
 // Earthing?
 // Display Test
 // Should SOCO default device ID be 100?
-// Send updated datasheet to customer and also default values of settings
+// Send updated datasheet to customer and also default values of settings.
+// 
+//
+// Testing Infra:
+// 1) Make sure during calibration, to only read/write at frequence of max once per second
+// 2) During calibration first check if the product was tested
+// 3) During calibration check serial number matches with internal serial number
+// 4) 

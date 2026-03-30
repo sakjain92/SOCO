@@ -135,9 +135,9 @@ void WriteFlashData(void)
 /*
 Inf: Calibration Process 
 Inp: None
-Ret: None
+Ret: True on success, else false
 */
-void DirectCalibration(void)
+bool DirectCalibration(void)
 {
  float TempFloat;
 
@@ -162,11 +162,11 @@ void DirectCalibration(void)
     )
    {
 
-      ProtectionReset();              
+      ProtectionReset();
       __disable_interrupt();
       __no_operation();
       RESET_WATCH_DOG;
-      SaveFlashData();  
+      SaveFlashData();
 
       TempFloat=(CalPowR-CAL_PF_POWER_SETTING_LOW)/CAL_PF_POWER_SETTING_LOW;
       CalBuffer.IR_LOW_PH_ERROR=TempFloat-0.001;
@@ -199,16 +199,16 @@ void DirectCalibration(void)
           CalBuffer.IB_SOLAR_LOW_PH_ERROR>PH_ERROR_D_ZERO ||
           CalBuffer.IB_SOLAR_LOW_PH_ERROR<PH_ERROR_D_MAX)
       {
-          DisplayImproperSettings();
+          FlagDirectCalibration = CALIBRATE_ERROR;
       }
-      
+
    }
-   else 
+   else
    {
-       DisplayImproperSettings();
-   } 
- } 
-  
+       FlagDirectCalibration = CALIBRATE_ERROR;
+   }
+ }
+
  if(FlagDirectCalibration==CALIBRATE_L_VI)
  {
    if(
@@ -228,12 +228,12 @@ void DirectCalibration(void)
     )
    {
 
-      ProtectionReset();              
+      ProtectionReset();
       __disable_interrupt();
       __no_operation();
       RESET_WATCH_DOG;
-      SaveFlashData();  
-            
+      SaveFlashData();
+
       CalBuffer.IR_LOW_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_LOW)/CalCurR);
       CalBuffer.IY_LOW_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_LOW)/CalCurY);
       CalBuffer.IB_LOW_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_LOW)/CalCurB);
@@ -241,14 +241,14 @@ void DirectCalibration(void)
       CalBuffer.IR_SOLAR_LOW_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_LOW)/CalCurRSolar);
       CalBuffer.IY_SOLAR_LOW_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_LOW)/CalCurYSolar);
       CalBuffer.IB_SOLAR_LOW_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_LOW)/CalCurBSolar);
-      
+
    }
    else
    {
-       DisplayImproperSettings();
-   } 
- } 
-  
+       FlagDirectCalibration = CALIBRATE_ERROR;
+   }
+ }
+
  else if(FlagDirectCalibration==CALIBRATE_M_PF)
  {
    if(
@@ -265,14 +265,14 @@ void DirectCalibration(void)
       (InstantPara.TotalPowerRSolar<PF_POWER_M_UPPER_LIMIT)&&(InstantPara.TotalPowerRSolar>PF_POWER_M_LOWER_LIMIT)&&
       (InstantPara.TotalPowerYSolar<PF_POWER_M_UPPER_LIMIT)&&(InstantPara.TotalPowerYSolar>PF_POWER_M_LOWER_LIMIT)&&
       (InstantPara.TotalPowerBSolar<PF_POWER_M_UPPER_LIMIT)&&(InstantPara.TotalPowerBSolar>PF_POWER_M_LOWER_LIMIT)
-    )  
+    )
    {
 
-      ProtectionReset();              
+      ProtectionReset();
       __disable_interrupt();
       __no_operation();
       RESET_WATCH_DOG;
-      SaveFlashData();  
+      SaveFlashData();
 
       TempFloat=(CalPowR-CAL_PF_POWER_SETTING_MID)/CAL_PF_POWER_SETTING_MID;
       CalBuffer.IR_MID_PH_ERROR=TempFloat-0.001;
@@ -305,15 +305,15 @@ void DirectCalibration(void)
           CalBuffer.IB_SOLAR_MID_PH_ERROR>PH_ERROR_D_ZERO ||
           CalBuffer.IB_SOLAR_MID_PH_ERROR<PH_ERROR_D_MAX)
       {
-          DisplayImproperSettings();
+          FlagDirectCalibration = CALIBRATE_ERROR;
       }
    }
    else
    {
-       DisplayImproperSettings();
-   } 
- } 
-  
+       FlagDirectCalibration = CALIBRATE_ERROR;
+   }
+ }
+
  else if(FlagDirectCalibration==CALIBRATE_M_VI)
  {
    if(
@@ -330,15 +330,15 @@ void DirectCalibration(void)
       (InstantPara.TotalPowerRSolar<PF_POWER_M_UPPER_LIMIT)&&(InstantPara.TotalPowerRSolar>PF_POWER_M_LOWER_LIMIT)&&
       (InstantPara.TotalPowerYSolar<PF_POWER_M_UPPER_LIMIT)&&(InstantPara.TotalPowerYSolar>PF_POWER_M_LOWER_LIMIT)&&
       (InstantPara.TotalPowerBSolar<PF_POWER_M_UPPER_LIMIT)&&(InstantPara.TotalPowerBSolar>PF_POWER_M_LOWER_LIMIT)
-    )  
+    )
    {
 
-      ProtectionReset();              
+      ProtectionReset();
       __disable_interrupt();
       __no_operation();
       RESET_WATCH_DOG;
-      SaveFlashData();  
-            
+      SaveFlashData();
+
       CalBuffer.IR_MID_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_MID)/CalCurR);
       CalBuffer.IY_MID_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_MID)/CalCurY);
       CalBuffer.IB_MID_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_MID)/CalCurB);
@@ -349,15 +349,15 @@ void DirectCalibration(void)
    }
    else
    {
-       DisplayImproperSettings();
-   } 
- } 
-   
+       FlagDirectCalibration = CALIBRATE_ERROR;
+   }
+ }
+
  else if(FlagDirectCalibration==CALIBRATE_H_PF)
  {
    if(
-     (InstantPara.VolR >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolR<VOLTAGE_HIGHER_LIMIT) &&  
-      (InstantPara.VolY >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolY<VOLTAGE_HIGHER_LIMIT)&& 
+     (InstantPara.VolR >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolR<VOLTAGE_HIGHER_LIMIT) &&
+      (InstantPara.VolY >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolY<VOLTAGE_HIGHER_LIMIT)&&
       (InstantPara.VolB >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolB<VOLTAGE_HIGHER_LIMIT) &&
       (InstantPara.CurrentR >I_H_LOWER_LIMIT) && (InstantPara.CurrentR<I_H_UPPER_LIMIT)&&
       (InstantPara.CurrentY >I_H_LOWER_LIMIT)&& (InstantPara.CurrentY<I_H_UPPER_LIMIT)&&
@@ -366,8 +366,8 @@ void DirectCalibration(void)
       (InstantPara.TotalPowerY<PF_POWER_H_UPPER_LIMIT)&&(InstantPara.TotalPowerY>PF_POWER_H_LOWER_LIMIT)&&
       (InstantPara.TotalPowerB<PF_POWER_H_UPPER_LIMIT)&&(InstantPara.TotalPowerB>PF_POWER_H_LOWER_LIMIT)&&
 
-      (InstantPara.VolRSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolRSolar<VOLTAGE_HIGHER_LIMIT) &&  
-      (InstantPara.VolYSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolYSolar<VOLTAGE_HIGHER_LIMIT)&& 
+      (InstantPara.VolRSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolRSolar<VOLTAGE_HIGHER_LIMIT) &&
+      (InstantPara.VolYSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolYSolar<VOLTAGE_HIGHER_LIMIT)&&
       (InstantPara.VolBSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolBSolar<VOLTAGE_HIGHER_LIMIT) &&
       (InstantPara.CurrentRSolar >I_H_LOWER_LIMIT) && (InstantPara.CurrentRSolar<I_H_UPPER_LIMIT)&&
       (InstantPara.CurrentYSolar >I_H_LOWER_LIMIT)&& (InstantPara.CurrentYSolar<I_H_UPPER_LIMIT)&&
@@ -375,15 +375,15 @@ void DirectCalibration(void)
       (InstantPara.TotalPowerRSolar<PF_POWER_H_UPPER_LIMIT)&&(InstantPara.TotalPowerRSolar>PF_POWER_H_LOWER_LIMIT)&&
       (InstantPara.TotalPowerYSolar<PF_POWER_H_UPPER_LIMIT)&&(InstantPara.TotalPowerYSolar>PF_POWER_H_LOWER_LIMIT)&&
       (InstantPara.TotalPowerBSolar<PF_POWER_H_UPPER_LIMIT)&&(InstantPara.TotalPowerBSolar>PF_POWER_H_LOWER_LIMIT)
-    )  
+    )
    {
 
-      ProtectionReset();              
+      ProtectionReset();
       __disable_interrupt();
       __no_operation();
       RESET_WATCH_DOG;
-      SaveFlashData();  
-      
+      SaveFlashData();
+
       TempFloat=(CalPowR-CAL_PF_POWER_SETTING_HIGH)/CAL_PF_POWER_SETTING_HIGH;
       CalBuffer.IR_HIGH_PH_ERROR=TempFloat-0.001;
 
@@ -415,21 +415,21 @@ void DirectCalibration(void)
           CalBuffer.IB_SOLAR_HIGH_PH_ERROR>PH_ERROR_D_ZERO ||
           CalBuffer.IB_SOLAR_HIGH_PH_ERROR<PH_ERROR_D_MAX)
       {
-          DisplayImproperSettings();
+          FlagDirectCalibration = CALIBRATE_ERROR;
       }
    }
    else
    {
-       DisplayImproperSettings();
-   } 
+       FlagDirectCalibration = CALIBRATE_ERROR;
+   }
  }
- 
+
   else if(FlagDirectCalibration==CALIBRATE_H_VI)
   {
     if(
-      (InstantPara.VolR >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolR<VOLTAGE_HIGHER_LIMIT) &&  
-      (InstantPara.VolY >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolY<VOLTAGE_HIGHER_LIMIT)&& 
-      (InstantPara.VolB >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolB<VOLTAGE_HIGHER_LIMIT) && 
+      (InstantPara.VolR >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolR<VOLTAGE_HIGHER_LIMIT) &&
+      (InstantPara.VolY >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolY<VOLTAGE_HIGHER_LIMIT)&&
+      (InstantPara.VolB >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolB<VOLTAGE_HIGHER_LIMIT) &&
       (InstantPara.CurrentR >I_H_LOWER_LIMIT) && (InstantPara.CurrentR<I_H_UPPER_LIMIT)&&
       (InstantPara.CurrentY >I_H_LOWER_LIMIT)&& (InstantPara.CurrentY<I_H_UPPER_LIMIT)&&
       (InstantPara.CurrentB >I_H_LOWER_LIMIT) && (InstantPara.CurrentB<I_H_UPPER_LIMIT)&&
@@ -437,9 +437,9 @@ void DirectCalibration(void)
       (InstantPara.TotalPowerY<PF_POWER_H_UPPER_LIMIT)&&(InstantPara.TotalPowerY>PF_POWER_H_LOWER_LIMIT)&&
       (InstantPara.TotalPowerB<PF_POWER_H_UPPER_LIMIT)&&(InstantPara.TotalPowerB>PF_POWER_H_LOWER_LIMIT) &&
 
-      (InstantPara.VolRSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolRSolar<VOLTAGE_HIGHER_LIMIT) &&  
-      (InstantPara.VolYSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolYSolar<VOLTAGE_HIGHER_LIMIT)&& 
-      (InstantPara.VolBSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolBSolar<VOLTAGE_HIGHER_LIMIT) && 
+      (InstantPara.VolRSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolRSolar<VOLTAGE_HIGHER_LIMIT) &&
+      (InstantPara.VolYSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolYSolar<VOLTAGE_HIGHER_LIMIT)&&
+      (InstantPara.VolBSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolBSolar<VOLTAGE_HIGHER_LIMIT) &&
       (InstantPara.CurrentRSolar >I_H_LOWER_LIMIT) && (InstantPara.CurrentRSolar<I_H_UPPER_LIMIT)&&
       (InstantPara.CurrentYSolar >I_H_LOWER_LIMIT)&& (InstantPara.CurrentYSolar<I_H_UPPER_LIMIT)&&
       (InstantPara.CurrentBSolar >I_H_LOWER_LIMIT) && (InstantPara.CurrentBSolar<I_H_UPPER_LIMIT)&&
@@ -449,15 +449,15 @@ void DirectCalibration(void)
 
       (InstantPara.Fan1Current<FAN_CUR_HIGHER_LIMIT)&&(InstantPara.Fan1Current>FAN_CUR_LOWER_LIMIT)&&
       (InstantPara.Fan2Current<FAN_CUR_HIGHER_LIMIT)&&(InstantPara.Fan2Current>FAN_CUR_LOWER_LIMIT)
-    )  
+    )
 
    {
 
-      ProtectionReset();              
+      ProtectionReset();
       __disable_interrupt();
       __no_operation();
       RESET_WATCH_DOG;
-      SaveFlashData();  
+      SaveFlashData();
       CalBuffer.VR_240_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_VOLTAGE_SETTING_HIGH)/CalVolR);
       CalBuffer.VY_240_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_VOLTAGE_SETTING_HIGH)/CalVolY);
       CalBuffer.VB_240_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_VOLTAGE_SETTING_HIGH)/CalVolB);
@@ -477,16 +477,24 @@ void DirectCalibration(void)
    }
    else
    {
-       DisplayImproperSettings();
-   } 
+       FlagDirectCalibration = CALIBRATE_ERROR;
+   }
   }
-  
 
   RESET_WATCH_DOG;
-  WriteFlashData();
+  if (FlagDirectCalibration != CALIBRATE_ERROR)
+  {
+    WriteFlashData();
+  }
   RESET_WATCH_DOG;
   ClearInterruptVariables();
   __enable_interrupt();
+
+  if (FlagDirectCalibration == CALIBRATE_ERROR)
+  {
+      return false;
+  }
+  return true;
 }
 
 /*
@@ -911,7 +919,7 @@ void ModBusCommunication(void)
                   SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received,4);
                   break;
               }
-              else if((Start_Add == 50008) && (NoOfBytes == 1))
+              else if((Start_Add == 50008) && (NoOfBytes == 2))
               {
                   // Write tested flag. Only allowed when test mode is enabled.
                   //
@@ -935,7 +943,7 @@ void ModBusCommunication(void)
                   SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received,4);
                   break;
               }
-              else if((Start_Add == 50010) && (NoOfBytes == 1))
+              else if((Start_Add == 50010) && (NoOfBytes == 2))
               {
                   // Write calibrated flag. Only allowed when test mode is enabled.
                   //
@@ -960,6 +968,25 @@ void ModBusCommunication(void)
                   break;
               }
 
+              else if((Start_Add == 50012) && (NoOfBytes == 2))
+              {
+                  // Advance calibration state when calibrations state in a 
+                  // wait point. Only allowed when test mode is
+                  // enabled.
+                  //
+                  if (!g_testingStatus.TestingModeEnabled)
+                  {
+                      Fun_Received |= 0x80;
+                      Mod_TransmitFrame.Data_Array[0] = 0x03;
+                      SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received,1);
+                      Fun_Received &=~ 0x80;
+                      break;
+                  }
+                  ModbusAdvanceFlagDirectCalibration = true;
+                  memcpy(Mod_TransmitFrame.Data_Array, &RecieveArray[2], 4);
+                  SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received,4);
+                  break;
+              }
               else  ///// Illegal Data Address //////
               {
 

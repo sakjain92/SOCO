@@ -28,7 +28,7 @@
 uint16_t ModBusCRCCalculation(uint8_t * str,uint8_t length);
 void SendData_UART(uint8_t Add, uint8_t Func,  uint8_t Send_Length);
 void CalPF(float Error, float * CalGainBufferPointer, float * CalBetaBufferPointer, uint8_t * CalIntDelayPointer);
-void DirectCalibration(void);
+bool DirectCalibration(void);
 void ModbusUpdateParameter(uint16_t Address,uint16_t NoOfBytes);
 void CheckPasswordEdit(uint16_t Address,uint16_t NoOfBytes);
 

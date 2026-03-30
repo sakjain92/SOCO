@@ -867,7 +867,9 @@ Ret: None
 */
 void Process1SecOver(void)
 {
-  if(PROTECTION_BIT_HIGH)
+  if(PROTECTION_BIT_HIGH ||
+     ModbusAdvanceFlagDirectCalibration ||
+     FlagDirectCalibration!=0)
   {
     StartCalibration(); 
     if(SwPressed==KEY_CT_CHK)StartCheckCTPolarity();
@@ -999,7 +1001,25 @@ void StartCalibration(void)
 
    // UNDONE: Test all LEDs and switches
    // UNDONE: Test DC Aux and AC Aux
+   // UNDONE: Check CT polarity over modbus
    //
+   //
+
+   // If in an error state, stall. The Modbus script can read the error
+   // code
+   //
+   if (FlagDirectCalibration == CALIBRATE_ERROR)
+   {
+       DisplayImproperSettings();
+       return;
+   }
+
+   if (FlagDirectCalibration == CALIBRATE_END)
+   {
+       DisplayDoneCal();
+       return;
+   }
+
    if((SwPressed==KEY_DIR_CAL)&&(FlagDirectCalibration==0))
    {
       FlagDirectCalibration=CALIBRATE_OUT_1;
@@ -1008,6 +1028,17 @@ void StartCalibration(void)
         g_DigOutputs.Relays[i] = false;
       }
    }
+   else if ((ModbusAdvanceFlagDirectCalibration) && (FlagDirectCalibration==0))
+   {
+       FlagDirectCalibration = CALIBRATE_DIS_H_VI;
+   }
+
+   bool advanceStateMachineInput = false;
+   if ((SwPressed==KEY_NEXT) || (ModbusAdvanceFlagDirectCalibration))
+   {
+       advanceStateMachineInput = true;
+       ModbusAdvanceFlagDirectCalibration = 0;
+   }
 
    if (FlagDirectCalibration >= CALIBRATE_OUT_1 &&
        FlagDirectCalibration <= CALIBRATE_OUT_5)
@@ -1015,7 +1046,7 @@ void StartCalibration(void)
        // UNDONE: This logic here might not be working
        // Not able to test outputs properly
        //
-       uint8_t idx = FlagDirectCalibration - CALIBRATE_OUT_1;
+       uint32_t idx = FlagDirectCalibration - CALIBRATE_OUT_1;
        DisplayOutputX(idx + 1);
        g_DigOutputs.Relays[idx] = true;
        if (SwPressed==KEY_NEXT)
@@ -1038,13 +1069,14 @@ void StartCalibration(void)
             {
                 if (g_DigInputs.Inputs[i])
                 {
-                    DisplayImproperSettings();
+                    FlagDirectCalibration = CALIBRATE_ERROR;
+                    return;
                 }
             }
             FlagDirectCalibration = CALIBRATE_IN_1;
        }
 
-       uint8_t idx = FlagDirectCalibration - CALIBRATE_IN_1;
+       uint32_t idx = FlagDirectCalibration - CALIBRATE_IN_1;
        DisplayInputX(idx + 1);
        if (g_DigInputs.Inputs[idx])
        {
@@ -1058,7 +1090,7 @@ void StartCalibration(void)
        }
    }
 
-   if((SwPressed==KEY_NEXT)&& (FlagDirectCalibration == CALIBRATE_DIS_H_VI))
+   if(advanceStateMachineInput && (FlagDirectCalibration == CALIBRATE_DIS_H_VI))
    {
      DisplayCalHighVI();
      FlagDirectCalibration=CALIBRATE_H_VI;
@@ -1106,7 +1138,10 @@ void StartCalibration(void)
      else if(CalibrationGapCounter<(NO_OF_CAL_ACCUMULATION_VI+CAL_ACC_DELAY))AccumulateDataForCalibration();
      else
      {
-        DirectCalibration();
+        if (!DirectCalibration())
+        {
+            return;
+        }
         FlagDirectCalibration=CALIBRATE_DIS_H_PF;
         WorkingCopyGain.IR_GAIN=CalibrationCoeff.IR_HIGH_GAIN;
         WorkingCopyGain.IY_GAIN=CalibrationCoeff.IY_HIGH_GAIN;
@@ -1160,12 +1195,15 @@ void StartCalibration(void)
      else if(CalibrationGapCounter<(NO_OF_CAL_ACCUMULATION_POW+CAL_ACC_DELAY))AccumulateDataForCalibration();
      else
      {
-        DirectCalibration();
+        if (!DirectCalibration())
+        {
+            return;
+        }
         DisplaySetMidPF();
         FlagDirectCalibration=CALIBRATE_DIS_M_VI;
      }
    }
-   if((SwPressed==KEY_NEXT)&& (FlagDirectCalibration == CALIBRATE_DIS_M_VI))
+   if(advanceStateMachineInput && (FlagDirectCalibration == CALIBRATE_DIS_M_VI))
    {
      DisplayCalMidVI();
      FlagDirectCalibration=CALIBRATE_M_VI;
@@ -1213,7 +1251,11 @@ void StartCalibration(void)
      else if(CalibrationGapCounter<(NO_OF_CAL_ACCUMULATION_VI+CAL_ACC_DELAY))AccumulateDataForCalibration();
      else
      {
-        DirectCalibration();
+        if (!DirectCalibration())
+        {
+            return;
+        }
+        
         FlagDirectCalibration=CALIBRATE_DIS_M_PF;
         WorkingCopyGain.IR_GAIN=CalibrationCoeff.IR_MID_GAIN;
         WorkingCopyGain.IY_GAIN=CalibrationCoeff.IY_MID_GAIN;
@@ -1266,13 +1308,16 @@ void StartCalibration(void)
      else if(CalibrationGapCounter<(NO_OF_CAL_ACCUMULATION_POW+CAL_ACC_DELAY))AccumulateDataForCalibration();
      else
      {
-        DirectCalibration();
+        if (!DirectCalibration())
+        {
+            return;
+        }
         DisplaySetLowPF();
         FlagDirectCalibration=CALIBRATE_DIS_L_VI;
      }
    }
    
-   if((SwPressed==KEY_NEXT)&& (FlagDirectCalibration == CALIBRATE_DIS_L_VI))
+   if(advanceStateMachineInput && (FlagDirectCalibration == CALIBRATE_DIS_L_VI))
    {
      DisplayCalLowVI();
      FlagDirectCalibration=CALIBRATE_L_VI;
@@ -1320,7 +1365,11 @@ void StartCalibration(void)
      else if(CalibrationGapCounter<(NO_OF_CAL_ACCUMULATION_VI+CAL_ACC_DELAY))AccumulateDataForCalibration();
      else
      {
-        DirectCalibration();
+        if (!DirectCalibration())
+        {
+            return;
+        }
+
         FlagDirectCalibration=CALIBRATE_DIS_L_PF;
         WorkingCopyGain.IR_GAIN=CalibrationCoeff.IR_LOW_GAIN;
         WorkingCopyGain.IY_GAIN=CalibrationCoeff.IY_LOW_GAIN;
@@ -1379,15 +1428,13 @@ void StartCalibration(void)
      else if(CalibrationGapCounter<(NO_OF_CAL_ACCUMULATION_POW+CAL_ACC_DELAY))AccumulateDataForCalibration();
      else
      {
-        DirectCalibration();
+        if (!DirectCalibration())
+        {
+            return;
+        }
         FlagDirectCalibration = CALIBRATE_END;
      }
    }
-   if (FlagDirectCalibration >= CALIBRATE_END)
-   {
-     DisplayDoneCal();
-   }
-
    // UNDONE: Do a formal check of keys and also the 5V input incase
    // we add support for measuring 5V.
    // UNDONE: We need to test RS485 also here or better if we make the

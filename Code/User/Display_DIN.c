@@ -4,11 +4,118 @@
   * @author  MRM R&D Team
   * @version V1.0.0
   * @date    07-06-2022
-  * @brief   This file contains all the functions definitions 
+  * @brief   This file contains all the functions definitions
              for the display
 ******************************************************************************
 */
 
+/*
+******************************************************************************
+  DISPLAY HARDWARE & SOFTWARE ARCHITECTURE
+******************************************************************************
+
+  HARDWARE
+  --------
+  Display module  : CL6-5819BSR (mixed 14-segment + 7-segment LED module)
+  Schematic       : Document/Sch/REX TOP 1.2 _ DISPLAY.pdf
+  Driver ICs      : 2x cascaded 74HC595 shift registers (U1, U2)
+                    -> 16 segment outputs total (L0-L15)
+  Multiplexing    : 5 COM lines (COM1-COM5) driven by BC857 PNP transistors
+                    (Q1-Q5) via GPIO pins -> Common Anode display
+  Connector       : J3 (CON20A, 20-pin) connects main PCB to display board
+
+  MCU Control Signals (active-low shift register interface):
+    MOSI  (PA0)  - Serial data line           (DIS_DATA_BIT)
+    SCK   (PA1)  - Shift register clock       (SR_CLOCK_BIT)
+    RCLK  (PF2)  - Output register latch      (OUTREG_CLOCK_BIT)
+    OE    (PA2)  - Output enable              (DISP_SR_ON / DISP_SR_OFF)
+
+  COM Line GPIOs (active-low, accent PNP transistors):
+    COM1 = PF9,  COM2 = PB7,  COM3 = PB6,  COM4 = PC12,  COM5 = PA15
+
+  Standalone Indicator LEDs (active-low GPIOs, accent accent accent):
+    LED1 = PF10, LED2 = PC0,  LED3 = PE6,  LED4 = PE5,  LED5 = PE4
+    LED6 = PE3,  LED7 = PE2,  LED8 = PE1,  LED9 = PC1
+    Controlled via SWITCH_ON_LEDx / SWITCH_OFF_LEDx macros in FlagDef_DIN.h
+    Driven by LedProcess() and ProcessLeds() based on g_LedStatus struct
+
+  SEGMENT ACTIVE LOGIC
+  --------------------
+  Common anode display: segments light up when segment pin is LOW.
+  InterruptDisplayRefresh() inverts data before shifting: Data = ~Data
+    Buffer bit = 1  ->  ~1 = 0  ->  shift register output LOW  ->  segment ON
+    Buffer bit = 0  ->  ~0 = 1  ->  shift register output HIGH ->  segment OFF
+
+  DISPLAY BUFFER
+  --------------
+  BufferToDisplay[24] (uint16_t) - working buffer, written by display functions
+  BufferForDisplay[24] (uint16_t) - ISR buffer, copied from BufferToDisplay
+                                    when UpdateDisplay == 1
+
+  Buffer layout (5 entries per group, one per COM line):
+    Index [0..4]   : COM1-COM5, shifted first  (enters shift chain first)
+    Index [5..9]   : COM1-COM5, shifted second
+    Index [10..14] : COM1-COM5, shifted last   (remains in last shift registers)
+
+  DisplayVariable() and DisplayString() write to BufferToDisplay[10 + digit_pos].
+  DisplayUpdate() clears BufferToDisplay[0..15] to zero before each update.
+
+  DIGIT POSITIONS
+  ---------------
+  DIGIT_1 (0) through DIGIT_4 (3): 14-segment characters
+    Each uses a 16-bit value from CHAR_NEU_14_SEG[] or CHAR_ALFA_14_SEG[]
+    (defined in fonts_DIN.h)
+
+  DIGIT_5 / DIGIT_6 (both = 4): packed 7-segment pair
+    Low byte  = first  7-seg digit (CHAR_NEU_7_SEG[])
+    High byte = second 7-seg digit (CHAR_NEU_7_SEG[] << 8)
+
+  DECIMAL POINTS
+  --------------
+  Controlled by setting bit 8 (0x100) on the relevant digit buffer entry:
+    DECIMAL_DIGIT_2 (1) through DECIMAL_DIGIT_4 (3):
+      BufferToDisplay[10 + decimal_pos] |= 0x100
+    DECIMAL_DIGIT_5 (4):
+      BufferToDisplay[14] |= 1   (bit 0 of packed 7-seg pair)
+    DECIMAL_DIGIT_6 (5):
+      BufferToDisplay[14] |= 0x100
+
+  ISR DISPLAY REFRESH (InterruptDisplayRefresh)
+  ---------------------------------------------
+  Called from ADC interrupt (Interrupt.c), cycles through COM0-COM4.
+  Per COM line:
+    1. Shift out BufferForDisplay[COM]      (16 bits, first group)
+    2. Shift out BufferForDisplay[COM + 5]  (16 bits, second group)
+    3. Shift out BufferForDisplay[COM + 10] (16 bits, third group)
+    4. Disable all COM lines
+    5. Latch data (RCLK pulse)
+    6. Enable active COM line
+    7. Enable shift register output (DISP_SR_ON)
+
+  FONT TABLES (fonts_DIN.h)
+  -------------------------
+  CHAR_NEU_14_SEG[10]   : 14-segment numeric font (0-9), 16-bit per char
+  CHAR_ALFA_14_SEG[]    : 14-segment alphanumeric font (0-9, A-Z, symbols)
+  CHAR_NEU_7_SEG[10]    : 7-segment numeric font (0-9), 8-bit per char
+  CHAR_ALFA_7_SEG[]     : 7-segment alpha font (A-Z), 8-bit per char
+
+  All segments ON  : "8" = 65152 (14-seg) / 254 (7-seg)
+  All segments OFF : 0
+
+  KEY FUNCTIONS
+  -------------
+  DisplayUpdate()           : Main display update, selects screen and formats
+  DisplayVariable()         : Display numeric value with decimal at digit pos
+  DisplayString()           : Display string label at digit position
+  InterruptDisplayRefresh() : ISR that shifts buffer data to shift registers
+  DisplayDisabled()         : Zeros buffer and disables shift register output
+  DisplayAllOn()            : Turns ON all segments and all indicator LEDs
+  DisplayAllOff()           : Turns OFF all segments and all indicator LEDs
+  LedProcess()              : Sets g_LedStatus flags based on LED_TYPE enum
+  ProcessLeds() (Main.c)    : Reads g_LedStatus and drives GPIO LED pins
+
+******************************************************************************
+*/
 
 #include "stm32f37x.h"
 #include <stdio.h>
@@ -41,6 +148,8 @@ extern  const uint8_t CHAR_NEU_7_SEG[];
 extern  const uint8_t CHAR_ALFA_7_SEG[];
 uint16_t BufferForDisplay[24],ComInUsed;
 void LedProcess(uint8_t LED_Type);
+void DisplayAllOn(void);
+void DisplayAllOff(void);
 
 void DisplayUpdate(void)
 {
@@ -927,6 +1036,40 @@ void DisplayDisabled(void)
   DISP_SR_OFF;
   //UpdateDisplay=1;
 };
+
+// Turn ON all segments on the display and all standalone indicator LEDs
+//
+void DisplayAllOn(void)
+{
+  for (uint8_t i=0;i<15;i++)BufferToDisplay[i]=0xFFFF;
+  UpdateDisplay=1;
+  SWITCH_ON_LED1;
+  SWITCH_ON_LED2;
+  SWITCH_ON_LED3;
+  SWITCH_ON_LED4;
+  SWITCH_ON_LED5;
+  SWITCH_ON_LED6;
+  SWITCH_ON_LED7;
+  SWITCH_ON_LED8;
+  SWITCH_ON_LED9;
+}
+
+// Turn OFF all segments on the display and all standalone indicator LEDs
+//
+void DisplayAllOff(void)
+{
+  for (uint8_t i=0;i<15;i++)BufferToDisplay[i]=0;
+  UpdateDisplay=1;
+  SWITCH_OFF_LED1;
+  SWITCH_OFF_LED2;
+  SWITCH_OFF_LED3;
+  SWITCH_OFF_LED4;
+  SWITCH_OFF_LED5;
+  SWITCH_OFF_LED6;
+  SWITCH_OFF_LED7;
+  SWITCH_OFF_LED8;
+  SWITCH_OFF_LED9;
+}
 
 // UNDONE: This is not working
 // a) Solar CT polarity inversion to checked

@@ -36,7 +36,7 @@ extern void InitUart(uint8_t baud,uint8_t parity1,uint8_t Stopbit1);
 extern void ClearCalAccumulatedData(void);
 extern void DisplayUpdate(void);
 extern void InitializeHardware(void);
-extern void DirectCalibration(void);
+extern bool DirectCalibration(void);
 extern void PowerDownDataSave(void);
 extern  void AccumulateDataForCalibration(void);
 extern void Metrology(void);
@@ -81,7 +81,8 @@ extern uint8_t RecieveArray[MAX_BYTE_TO_RECIEVE],ScrollChangeCounter,DisplayScro
 extern uint16_t TimerCounter,NoOfBytes;
 extern uint8_t ReceiveLength;
 extern uint8_t pwrDlyFlag,StartDelayCount,EditPassCount;
-extern uint8_t FlagDirectCalibration,CalibrationGapCounter;
+extern uint32_t FlagDirectCalibration, ModbusAdvanceFlagDirectCalibration;
+extern uint8_t CalibrationGapCounter;
 extern uint8_t EditParaPassStatus;
 extern struct STORE StorageBuffer;
 extern  struct STORE OldData;

@@ -266,7 +266,8 @@ extern char _product_info_fits_in_eeprom[
 #define         CALIBRATE_DIS_L_PF      26
 #define         CALIBRATE_L_PF          27
 
-#define         CALIBRATE_END           28
+#define         CALIBRATE_END           127
+#define         CALIBRATE_ERROR         126
 
 // The ratio between CUR_HIGH_CAL_POINT/CUR_MID_CAL_POINT should be 5:1
 // The ratio between CUR_MID_CAL_POINT/CUR_LOW_CAL_POINT should be 10:1
