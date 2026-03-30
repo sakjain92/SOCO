@@ -793,7 +793,6 @@ void ProcessContactors()
 //
 void ProcessFanRelay()
 {
-    static bool fansOn = false;
     static uint16_t delayCounter = 0;
     static bool initialized = false;
 
@@ -801,19 +800,19 @@ void ProcessFanRelay()
     {
         initialized = true;
         delayCounter = CopySetPara[PARA_OVER_TEMPERATURE_DELAY];
+        SwitchOffFans();
     }
 
     if (CopySetPara[PARA_FAN_DISABLED])
     {
         SwitchOffFans();
-        fansOn = false;
         delayCounter = CopySetPara[PARA_OVER_TEMPERATURE_DELAY];
         return;
     }
 
     float temp = InstantPara.AmbientTemperature;
 
-    if (!fansOn)
+    if (g_DigOutputs.FansOff)
     {
         // Fans are currently OFF — check if temperature exceeds
         // over-temperature threshold
@@ -826,7 +825,6 @@ void ProcessFanRelay()
             }
             if (!delayCounter)
             {
-                fansOn = true;
                 SwitchOnFans();
                 delayCounter = CopySetPara[PARA_UNDER_TEMPERATURE_DELAY];
             }
@@ -851,7 +849,6 @@ void ProcessFanRelay()
             }
             if (!delayCounter)
             {
-                fansOn = false;
                 SwitchOffFans();
                 delayCounter = CopySetPara[PARA_OVER_TEMPERATURE_DELAY];
             }
