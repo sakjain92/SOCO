@@ -250,7 +250,9 @@ void EepromWrite(uint16_t DataLocation,uint16_t NoOfBytes,uint8_t DeviceAddress,
 {
   while (NoOfBytes)
   {
-    uint8_t toWrite = NoOfBytes > EEPROM_PAGE_LENGTH ? EEPROM_PAGE_LENGTH : NoOfBytes;
+    uint8_t pageRemaining = EEPROM_PAGE_LENGTH - (DataLocation % EEPROM_PAGE_LENGTH);  //Bytes left in current page
+    //
+    uint8_t toWrite = NoOfBytes > pageRemaining ? pageRemaining : NoOfBytes;
     I2CWrite(DataLocation,toWrite,DeviceAddress,DataArray);
     CheckEpromFree(EXT_EEPROM);
     DataLocation += toWrite;
