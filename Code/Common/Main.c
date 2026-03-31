@@ -36,6 +36,8 @@ void main(void)
   if(StorageBuffer.RunningMode==RUNNING_MODE_IMPORT)StorageBuffer.ImportInterruptions++;
   else StorageBuffer.ExportInterruptions++;
 
+  // UNDONE: This is wrong. We should add running mode for solar separately
+  //
   if(StorageBuffer.RunningMode==RUNNING_MODE_IMPORT)StorageBuffer.SolarImportInterruptions++;
   else StorageBuffer.SolarExportInterruptions++;
 
@@ -512,8 +514,6 @@ void ProcessContactors()
             .failDelayParaIdx = PARA_SOLAR_FAIL_DELAY,
             .returnDelayParaIdx = PARA_SOLAR_RETURN_DELAY,
             .TimeLeft = 0,
-            // UNDONE: Change this to actual solar R Phase
-            //
             .vol = &InstantPara.VolRSolar,
             .turnContactorOn = SwitchOnContactorLoadOnSolar,
             .turnContactorOff = SwitchOffContactorLoadOnSolar,
@@ -671,7 +671,7 @@ void ProcessContactors()
     // as always off (i.e. never block solar on account of DG).
     //
     // Also, can't turn on Solar contactor if any of the mains contactor is stuck
-    // in open condition
+    // in closed condition
     //
     pvsArray[3].shouldContactorBeOn = pvsArray[3].isHealthy &&
                                       (!pvsArray[4].isHealthy || g_DisableLoadOnGridSeconds) &&
@@ -1416,12 +1416,6 @@ void StartCalibration(void)
      ResetCalSys();
    }
    
-   if(FlagDirectCalibration == CALIBRATE_DIS_L_PF)
-   {
-     DisplayCalLowPF();
-     FlagDirectCalibration=CALIBRATE_L_PF;
-     ResetCalSys();
-   }   
    if(FlagDirectCalibration == CALIBRATE_L_PF)
    {
      CalibrationGapCounter++;
