@@ -1039,7 +1039,7 @@ void ModBusCommunication(void)
                         (uint8_t*)(&g_DigInputs)
                     },
                     {
-                        100,
+                        600,
                         sizeof(g_Alarms),
                         (uint8_t*)(&g_Alarms)
                     },
