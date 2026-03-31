@@ -764,9 +764,17 @@ COMPILE_ASSERT(STUCK_SECONDS > DRIVE_GAP_SECONDS);
         !g_LoadStatus.LoadOnSolar &&
         (g_DisableLoadOnSolarSeconds > 0);
 
+    // Only report solar unhealthy when we can actually measure solar
+    // voltage (no mains phase contactor on). Otherwise, isHealthy is
+    // forced false by the grid-backfeed override above and does not
+    // reflect actual solar voltage state.
+    //
     g_LoadStatus.LoadOnSolarDisabledSolarRPhaseUnhealthy =
         !g_LoadStatus.LoadOnSolar &&
-        !c[IDX_SOLAR].isHealthy;
+        !c[IDX_SOLAR].isHealthy &&
+        !c[IDX_R].acknowledgedOn &&
+        !c[IDX_Y].acknowledgedOn &&
+        !c[IDX_B].acknowledgedOn;
 
     g_LoadStatus.LoadOnSolarDisabledGridHealthy =
         !g_LoadStatus.LoadOnSolar &&
