@@ -167,7 +167,7 @@ const struct Parameter EditParameters[MAX_PARAM_LIMIT]=
          3,                                       //ParaMeterLength
          0,                                       //DisableType
          0,                                       //DataWithDecUnit
-         120,                                     //Default Value
+         180,                                     //Default Value
     },
 
     {
@@ -193,7 +193,7 @@ const struct Parameter EditParameters[MAX_PARAM_LIMIT]=
          3,                                       //ParaMeterLength
          0,                                       //DisableType
          0,                                       //DataWithDecUnit
-         160,                                     //Default Value
+         200,                                     //Default Value
     },
 
     {
@@ -244,7 +244,7 @@ const struct Parameter EditParameters[MAX_PARAM_LIMIT]=
          3,                                       //ParaMeterLength
          0,                                       //DisableType
          0,                                       //DataWithDecUnit
-         120,                                     //Default Value
+         160,                                     //Default Value
     },
 
     {
@@ -270,7 +270,7 @@ const struct Parameter EditParameters[MAX_PARAM_LIMIT]=
          3,                                       //ParaMeterLength
          0,                                       //DisableType
          0,                                       //DataWithDecUnit
-         160,                                     //Default Value
+         180,                                     //Default Value
     },
 
     {
@@ -308,7 +308,7 @@ const struct Parameter EditParameters[MAX_PARAM_LIMIT]=
          3,                                       //ParaMeterLength
          0,                                       //DisableType
          0,                                       //DataWithDecUnit
-         5,                                     //Default Value
+         120,                                     //Default Value
     },
 
     // In milli-ampere
