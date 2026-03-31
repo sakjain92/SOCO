@@ -164,6 +164,10 @@ struct Alarms g_Alarms;
 //
 struct VoltageHealth g_voltageHealth;
 
+// Load status (reasons why load is not on grid/solar)
+//
+struct LoadStatus g_LoadStatus;
+
 // Status of all the power supplies
 //
 struct PowerSupplyStatus g_powerSupplyStatus;

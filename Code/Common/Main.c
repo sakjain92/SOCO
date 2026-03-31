@@ -737,6 +737,48 @@ COMPILE_ASSERT(STUCK_SECONDS > DRIVE_GAP_SECONDS);
         c[IDX_SOLAR_NE].wantOn = false;
     }
 
+    // ---- Load status flags (exposed over modbus) ----
+    //
+    // Indicate reasons why load is not on grid or solar. Each flag is
+    // true when the corresponding condition is actively preventing load
+    // from being on that source.
+    //
+    g_LoadStatus.LoadOnGrid = c[IDX_LOAD_GRID].acknowledgedOn;
+    
+    g_LoadStatus.LoadOnGridUserDisabled =
+        !g_LoadStatus.LoadOnGrid &&
+        (g_DisableLoadOnGridSeconds > 0);
+
+    g_LoadStatus.LoadOnGridDisabledGridRPhaseUnhealthy =
+        !g_LoadStatus.LoadOnGrid &&
+        !c[IDX_R].isHealthy;
+
+    g_LoadStatus.LoadOnGridDisabledSolarHealthy =
+        !g_LoadStatus.LoadOnGrid &&
+        c[IDX_SOLAR].acknowledgedOn;
+    
+    g_LoadStatus.LoadOnSolar = c[IDX_SOLAR].acknowledgedOn &&
+                                c[IDX_SOLAR_NE].acknowledgedOn;
+
+    g_LoadStatus.LoadOnSolarUserDisabled =
+        !g_LoadStatus.LoadOnSolar &&
+        (g_DisableLoadOnSolarSeconds > 0);
+
+    g_LoadStatus.LoadOnSolarDisabledSolarRPhaseUnhealthy =
+        !g_LoadStatus.LoadOnSolar &&
+        !c[IDX_SOLAR].isHealthy;
+
+    g_LoadStatus.LoadOnSolarDisabledGridHealthy =
+        !g_LoadStatus.LoadOnSolar &&
+        (c[IDX_R].acknowledgedOn ||
+         c[IDX_Y].acknowledgedOn ||
+         c[IDX_B].acknowledgedOn ||
+         c[IDX_LOAD_GRID].acknowledgedOn);
+
+    g_LoadStatus.LoadOnSolarDisabledDGRunning =
+        !g_LoadStatus.LoadOnSolar &&
+        !CopySetPara[PARA_DG_DETECT_DISABLED] && !g_DigInputs.DGOff;
+
     // ---- Phase 3: Drive relays with break-before-make gap ----
     //
     // If any contactor is newly turning off this cycle, start a gap timer.

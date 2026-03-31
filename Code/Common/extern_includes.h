@@ -143,5 +143,6 @@ extern uint32_t g_VersionNumber;
 
 extern struct Alarms g_Alarms;
 extern struct VoltageHealth g_voltageHealth;
+extern struct LoadStatus g_LoadStatus;
 
 #endif

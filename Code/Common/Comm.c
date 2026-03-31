@@ -1059,6 +1059,11 @@ void ModBusCommunication(void)
                         (uint8_t*)(&g_DigOutputs)
                     },
                     {
+                        800,
+                        sizeof(g_LoadStatus),
+                        (uint8_t*)(&g_LoadStatus)
+                    },
+                    {
                         20000,
                         sizeof(g_DigInputs),
                         (uint8_t*)(&g_DigInputs)

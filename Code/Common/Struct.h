@@ -711,30 +711,38 @@ struct Alarms
 //
 // DEVNOTE: This is sent over modbus. Keep them in order.
 //
-#define NUMBER_OF_VOLTAGE_HEALTH_FLAGS    12
 struct VoltageHealth
 {
-    union
-    {
-        bool Status[NUMBER_OF_VOLTAGE_HEALTH_FLAGS];
-        struct
-        {
-            bool GridRPhaseUnderVoltage;
-            bool GridRPhaseOverVoltage;
-            bool GridYPhaseUnderVoltage;
-            bool GridYPhaseOverVoltage;
-            bool GridBPhaseUnderVoltage;
-            bool GridBPhaseOverVoltage;
-            bool SolarRPhaseUnderVoltage;
-            bool SolarRPhaseOverVoltage;
-            bool SolarYPhaseUnderVoltage;
-            bool SolarYPhaseOverVoltage;
-            bool SolarBPhaseUnderVoltage;
-            bool SolarBPhaseOverVoltage;
-        };
-    };
+    bool GridRPhaseUnderVoltage;
+    bool GridRPhaseOverVoltage;
+    bool GridYPhaseUnderVoltage;
+    bool GridYPhaseOverVoltage;
+    bool GridBPhaseUnderVoltage;
+    bool GridBPhaseOverVoltage;
+    bool SolarRPhaseUnderVoltage;
+    bool SolarRPhaseOverVoltage;
+    bool SolarYPhaseUnderVoltage;
+    bool SolarYPhaseOverVoltage;
+    bool SolarBPhaseUnderVoltage;
+    bool SolarBPhaseOverVoltage;
 };
-COMPILE_ASSERT(sizeof(struct VoltageHealth) == NUMBER_OF_VOLTAGE_HEALTH_FLAGS);
+
+// Reasons why load is not on grid or solar (true = condition active)
+//
+// DEVNOTE: This is sent over modbus. Keep them in order.
+//
+struct LoadStatus
+{
+    bool LoadOnGrid;
+    bool LoadOnGridUserDisabled;
+    bool LoadOnGridDisabledGridRPhaseUnhealthy;
+    bool LoadOnGridDisabledSolarHealthy;
+    bool LoadOnSolar;
+    bool LoadOnSolarUserDisabled;
+    bool LoadOnSolarDisabledSolarRPhaseUnhealthy;
+    bool LoadOnSolarDisabledGridHealthy;
+    bool LoadOnSolarDisabledDGRunning;
+};
 
 // Defines various relay status
 //
