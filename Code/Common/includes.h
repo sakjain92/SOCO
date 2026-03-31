@@ -168,6 +168,10 @@ struct VoltageHealth g_voltageHealth;
 //
 struct LoadStatus g_LoadStatus;
 
+// Fan fault status (short/open circuit per fan)
+//
+struct FanFaults g_FanFaults;
+
 // Status of all the power supplies
 //
 struct PowerSupplyStatus g_powerSupplyStatus;

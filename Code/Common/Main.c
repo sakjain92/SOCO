@@ -960,6 +960,86 @@ void ProcessFanRelay()
     }
 }
 
+// Detects fan short-circuit and open-circuit faults based on measured
+// fan current vs configurable thresholds.
+//
+// Short circuit: fan current > PARA_FAN_OVER_CURRENT (fans on or off)
+// Open circuit:  fan current < PARA_FAN_UNDER_CURRENT when fans are ON
+//
+// Both fault set and fault clear require the condition to persist for
+// FAN_FAULT_DELAY_SECONDS before the state changes.
+//
+// UNDONE: Make fan fault delay a user-configurable setting.
+// UNDONE: Add over/under frequency protection for grid and solar as
+// user-configurable settings with hysteresis, similar to voltage
+// protection in ProcessContactors().
+//
+// Called once per second from Process1SecOver()
+//
+void ProcessFanFaults()
+{
+#define FAN_FAULT_DELAY_SECONDS 10
+
+    struct FanCheck
+    {
+        float*  current;
+        float   limit;
+        bool    faultWhenAbove;  // true: fault if current > limit
+                                 // false: fault if current < limit
+        bool*   alarm;
+        uint8_t timer;
+    };
+
+    // Parameters are in mA, InstantPara.FanXCurrent is in Amps
+    //
+    float overLimit  = (float)CopySetPara[PARA_FAN_OVER_CURRENT]  / 1000.0f;
+    float underLimit = (float)CopySetPara[PARA_FAN_UNDER_CURRENT] / 1000.0f;
+    bool fansOn = !g_DigOutputs.FansOff;
+
+    static struct FanCheck checks[] =
+    {
+        { &InstantPara.Fan1Current, 0, true,  &g_FanFaults.Fan1ShortCircuit, FAN_FAULT_DELAY_SECONDS },
+        { &InstantPara.Fan1Current, 0, false, &g_FanFaults.Fan1OpenCircuit,  FAN_FAULT_DELAY_SECONDS },
+        { &InstantPara.Fan2Current, 0, true,  &g_FanFaults.Fan2ShortCircuit, FAN_FAULT_DELAY_SECONDS },
+        { &InstantPara.Fan2Current, 0, false, &g_FanFaults.Fan2OpenCircuit,  FAN_FAULT_DELAY_SECONDS },
+    };
+
+    // Update limits each call as settings can change
+    //
+    for (uint8_t i = 0; i < ARRAY_SIZE(checks); i++)
+        checks[i].limit = checks[i].faultWhenAbove ? overLimit : underLimit;
+
+    for (uint8_t i = 0; i < ARRAY_SIZE(checks); i++)
+    {
+        bool faultCondition;
+        if (checks[i].faultWhenAbove)
+            faultCondition = (*checks[i].current > checks[i].limit);
+        else
+            faultCondition = (fansOn && *checks[i].current < checks[i].limit);
+
+        // Steady state: condition matches alarm, nothing to do
+        //
+        if (faultCondition == *checks[i].alarm)
+        {
+            checks[i].timer = FAN_FAULT_DELAY_SECONDS;
+        }
+        // Mismatch: condition disagrees with alarm, count down to flip
+        //
+        else
+        {
+            if (checks[i].timer)
+                checks[i].timer--;
+            if (!checks[i].timer)
+            {
+                *checks[i].alarm = faultCondition;
+                checks[i].timer = FAN_FAULT_DELAY_SECONDS;
+            }
+        }
+    }
+
+#undef FAN_FAULT_DELAY_SECONDS
+}
+
 /*
 Inf: 1 sec process API
 Inp: None
@@ -1020,6 +1100,7 @@ void Process1SecOver(void)
   {
       ProcessContactors();
       ProcessFanRelay();
+      ProcessFanFaults();
   }
 }
 

@@ -1064,6 +1064,11 @@ void ModBusCommunication(void)
                         (uint8_t*)(&g_LoadStatus)
                     },
                     {
+                        900,
+                        sizeof(g_FanFaults),
+                        (uint8_t*)(&g_FanFaults)
+                    },
+                    {
                         20000,
                         sizeof(g_DigInputs),
                         (uint8_t*)(&g_DigInputs)
@@ -1306,7 +1311,11 @@ void ModbusUpdateParameter(uint16_t Address,uint16_t NoOfBytes)
       else if(EditParameters[Temp32].DisableType ==0)error = 1;
       Temp32++;
     }
-    if(error || (!EditParaPassStatus))
+    
+    // For now, we are removing the need to set a password to edit any parameter
+    // over modbus
+    //
+    if(error /*|| (!EditParaPassStatus)*/)
     {
       Mod_TransmitFrame.Data_Array[0] = 0x03;
       Fun_Received |= 0x80;

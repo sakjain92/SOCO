@@ -531,7 +531,8 @@
 // UNDONE: Do we need to add frequency protection for grid?
 // UNDONE: Add fan current delay
 // UNDONE: Add FOTA and few error detection flags also (e.g. voltage without current or current without voltage or feedback wire open or contact weld)
-//
+// UNDONE: If we send software to EMS, we have to add some protection against them making products without us
+// Let's put code in test mode till calibration is completed
 //
 // Tested/Calibrated: Implementation read/write. Implement state machine for calibration.
 // Earthing?
@@ -545,3 +546,4 @@
 // 2) During calibration first check if the product was tested
 // 3) During calibration check serial number matches with internal serial number
 // 4) 
+//

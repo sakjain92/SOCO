@@ -744,6 +744,18 @@ struct LoadStatus
     bool LoadOnSolarDisabledDGRunning;
 };
 
+// Fan fault flags (true = fault condition active)
+//
+// DEVNOTE: This is sent over modbus. Keep them in order.
+//
+struct FanFaults
+{
+    bool Fan1ShortCircuit;
+    bool Fan1OpenCircuit;
+    bool Fan2ShortCircuit;
+    bool Fan2OpenCircuit;
+};
+
 // Defines various relay status
 //
 // DEVNOTE: This is sent over modbus. Keep them in order.
