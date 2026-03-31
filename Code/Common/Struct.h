@@ -703,6 +703,8 @@ struct Alarms
     bool LoadOnSolarContactorStuckClosed;
     bool LoadOnGridContactorStuckOpen;
     bool LoadOnGridContactorStuckClosed;
+    bool SolarNeutralEarthContactorStuckOpen;
+    bool SolarNeutralEarthContactorStuckClosed;
 };
 
 // Voltage health status flags (true = fault condition active)

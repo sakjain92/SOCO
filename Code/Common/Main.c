@@ -409,7 +409,7 @@ void ProcessContactors()
 COMPILE_ASSERT(SETTLE_SECONDS < STUCK_SECONDS);
 COMPILE_ASSERT(STUCK_SECONDS > DRIVE_GAP_SECONDS);
 
-    enum { IDX_R = 0, IDX_Y, IDX_B, IDX_SOLAR, IDX_LOAD_GRID, NUM_CONTACTORS };
+    enum { IDX_R = 0, IDX_Y, IDX_B, IDX_SOLAR, IDX_LOAD_GRID, IDX_SOLAR_NE, NUM_CONTACTORS };
 
     struct Contactor
     {
@@ -545,8 +545,27 @@ COMPILE_ASSERT(STUCK_SECONDS > DRIVE_GAP_SECONDS);
             .settleTimer         = SETTLE_SECONDS,
             .stuckTimer          = STUCK_SECONDS,
         },
-        // UNDONE: K6 logic to be added here for fault detection
+        // [IDX_SOLAR_NE] Solar Neutral/Earth K6 (NO relay — in parallel with K4,
+        // shares same relay drive but has separate feedback)
         //
+        {
+            .overVoltParam       = PARA_SOLAR_OVER_VOLT,
+            .underVoltParam      = PARA_SOLAR_UNDER_VOLT,
+            .overVoltResetParam  = PARA_SOLAR_OVER_VOLT_RESET,
+            .underVoltResetParam = PARA_SOLAR_UNDER_VOLT_RESET,
+            .failDelayParam      = PARA_SOLAR_FAIL_DELAY,
+            .returnDelayParam    = PARA_SOLAR_RETURN_DELAY,
+            .voltage             = &InstantPara.VolRSolar,
+            .driveOn             = SwitchOnContactorLoadOnSolar,
+            .driveOff            = SwitchOffContactorLoadOnSolar,
+            .feedback            = &g_DigInputs.SolarNeutralEarthContactorOn,
+            .alarmStuckOpen      = &g_Alarms.SolarNeutralEarthContactorStuckOpen,
+            .alarmStuckClosed    = &g_Alarms.SolarNeutralEarthContactorStuckClosed,
+            .isHealthy           = false,
+            .wantOn              = false,
+            .settleTimer         = SETTLE_SECONDS,
+            .stuckTimer          = STUCK_SECONDS,
+        },
     };
 
     if (!initialized)
@@ -560,6 +579,7 @@ COMPILE_ASSERT(STUCK_SECONDS > DRIVE_GAP_SECONDS);
         c[IDX_R].healthTimer = c[IDX_Y].healthTimer = c[IDX_B].healthTimer =
             c[IDX_LOAD_GRID].healthTimer = CopySetPara[PARA_MAINS_FAIL_DELAY];
         c[IDX_SOLAR].healthTimer = CopySetPara[PARA_SOLAR_RETURN_DELAY];
+        c[IDX_SOLAR_NE].healthTimer = CopySetPara[PARA_SOLAR_RETURN_DELAY];
     }
 
     // ---- Phase 1: Voltage health check with hysteresis ----
@@ -620,6 +640,8 @@ COMPILE_ASSERT(STUCK_SECONDS > DRIVE_GAP_SECONDS);
     {
         c[IDX_SOLAR].isHealthy = false;
         c[IDX_SOLAR].healthTimer = CopySetPara[c[IDX_SOLAR].returnDelayParam];
+        c[IDX_SOLAR_NE].isHealthy = false;
+        c[IDX_SOLAR_NE].healthTimer = CopySetPara[c[IDX_SOLAR_NE].returnDelayParam];
     }
 
     // ---- Voltage health status flags (exposed over modbus) ----
@@ -661,13 +683,13 @@ COMPILE_ASSERT(STUCK_SECONDS > DRIVE_GAP_SECONDS);
     // turning off K5 but remembering that it is stuck.
     //
     c[IDX_R].wantOn = c[IDX_R].isHealthy &&
-                      !c[IDX_SOLAR].acknowledgedOn &&
+                      !c[IDX_SOLAR_NE].acknowledgedOn &&
                       (g_DisableLoadOnGridSeconds == 0);
     c[IDX_Y].wantOn = c[IDX_R].isHealthy && c[IDX_Y].isHealthy &&
-                      !c[IDX_SOLAR].acknowledgedOn &&
+                      !c[IDX_SOLAR_NE].acknowledgedOn &&
                       (g_DisableLoadOnGridSeconds == 0);
     c[IDX_B].wantOn = c[IDX_R].isHealthy && c[IDX_B].isHealthy &&
-                      !c[IDX_SOLAR].acknowledgedOn &&
+                      !c[IDX_SOLAR_NE].acknowledgedOn &&
                       (g_DisableLoadOnGridSeconds == 0);
 
     // Solar contactor: on when solar healthy AND grid not available or
@@ -698,16 +720,21 @@ COMPILE_ASSERT(STUCK_SECONDS > DRIVE_GAP_SECONDS);
     if (g_DisableLoadOnSolarSeconds)
         g_DisableLoadOnSolarSeconds--;
 
+    // K6 (Solar Neutral/Earth) is in parallel with K4 — always mirrors K4
+    //
+    c[IDX_SOLAR_NE].wantOn = c[IDX_SOLAR].wantOn;
+
     // Safety: grid always takes priority over solar. If both want to
     // be on (should not happen via decision logic above, but defends
     // against bugs or memory corruption), force solar off rather than
     // disconnecting everything — keeps load powered via grid.
     //
-    if (c[IDX_SOLAR].wantOn &&
+    if ((c[IDX_SOLAR].wantOn || c[IDX_SOLAR_NE].wantOn) &&
         (c[IDX_R].wantOn || c[IDX_Y].wantOn || c[IDX_B].wantOn ||
          c[IDX_LOAD_GRID].wantOn))
     {
         c[IDX_SOLAR].wantOn = false;
+        c[IDX_SOLAR_NE].wantOn = false;
     }
 
     // ---- Phase 3: Drive relays with break-before-make gap ----
