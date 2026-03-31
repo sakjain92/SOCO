@@ -3,7 +3,7 @@
 // 3 digit version number
 // Shown on display as X.YY
 //
-#define VERSION_NO  209
+#define VERSION_NO  211
 
 #define MODEL_COMM_PROCOM
 #define MODEL_DATA_SAVE  
@@ -529,6 +529,8 @@
 // Sugeestion: Let's try and keep provision for USB as a fail safe option. Can keep it covered with gasket but ESD important for production also
 // Suggestion: Need to calibrate at 100A also
 // UNDONE: Do we need to add frequency protection for grid?
+// UNDONE: Add fan current delay
+// UNDONE: Add FOTA and few error detection flags also (e.g. voltage without current or current without voltage or feedback wire open or contact weld)
 //
 //
 // Tested/Calibrated: Implementation read/write. Implement state machine for calibration.
