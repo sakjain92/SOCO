@@ -189,11 +189,19 @@ extern char _product_info_fits_in_eeprom[
 // Seems like a bug in implementation logic likely)
 // Also, at lower current we are getting higher error in power factor
 // (Need to investigate this. Is this cause of noise?)
+// 
+// UNDONE: Check if this needs to be increased to 80V
 //
 #define   MIN_VOL_LIMIT            70.0f
 #define   MIN_VOL_LIMIT_PH_PH      (MIN_VOL_LIMIT * 1.732f)
 #define   MIN_TOTAL_CUR_LIMIT      0.8f
 #define   MIN_NEU_CUR_LIMIT        0.1f
+
+// Base current (Calibration current) that we are specifying is 10A. Rated current
+// is 100A. Starting current then will be 0.04 * Ib for class 1 meter = 0.4A
+// UNDONE: For now, not changing this to 0.4f since we need 0.4A for calibration.
+// We should increase calibration point maybe?
+//
 #define   MIN_CURRENT_LIMIT        0.1f
 
 // Max current measurement is about 0.5A. Norminal current we measure will be

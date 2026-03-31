@@ -524,6 +524,11 @@
 // Suggestion: Should we add fast blown fuse in panel to protect power supply? Should we also add LED indication in fuse to make it easier?
 // Suggestion: Mention in SOCO datasheet that FAN current is upto 400mA and that CTs supplied with SOCO are 0.5 class CTs and SOCO is class 1 meter
 // Suggestion: Why Grid Y Phase has high phase error
+// Suggestion: UNDONE: When we implement bootloader, keep provision for it to be able to do all modbus related firmware upgradation work so that incase there is a bug in the actual app
+// where it gets stuck, the bootloader should allow control of modbus related functionality for FOTA. 
+// Sugeestion: Let's try and keep provision for USB as a fail safe option. Can keep it covered with gasket but ESD important for production also
+// Suggestion: Need to calibrate at 100A also
+// UNDONE: Do we need to add frequency protection for grid?
 //
 //
 // Tested/Calibrated: Implementation read/write. Implement state machine for calibration.
