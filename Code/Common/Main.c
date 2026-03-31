@@ -622,6 +622,33 @@ COMPILE_ASSERT(STUCK_SECONDS > DRIVE_GAP_SECONDS);
         c[IDX_SOLAR].healthTimer = CopySetPara[c[IDX_SOLAR].returnDelayParam];
     }
 
+    // ---- Voltage health status flags (exposed over modbus) ----
+    //
+    g_voltageHealth.GridRPhaseUnderVoltage =
+        (InstantPara.VolR < CopySetPara[PARA_MAINS_UNDER_VOLT]);
+    g_voltageHealth.GridRPhaseOverVoltage =
+        (InstantPara.VolR > CopySetPara[PARA_MAINS_OVER_VOLT]);
+    g_voltageHealth.GridYPhaseUnderVoltage =
+        (InstantPara.VolY < CopySetPara[PARA_MAINS_UNDER_VOLT]);
+    g_voltageHealth.GridYPhaseOverVoltage =
+        (InstantPara.VolY > CopySetPara[PARA_MAINS_OVER_VOLT]);
+    g_voltageHealth.GridBPhaseUnderVoltage =
+        (InstantPara.VolB < CopySetPara[PARA_MAINS_UNDER_VOLT]);
+    g_voltageHealth.GridBPhaseOverVoltage =
+        (InstantPara.VolB > CopySetPara[PARA_MAINS_OVER_VOLT]);
+    g_voltageHealth.SolarRPhaseUnderVoltage =
+        (InstantPara.VolRSolar < CopySetPara[PARA_SOLAR_UNDER_VOLT]);
+    g_voltageHealth.SolarRPhaseOverVoltage =
+        (InstantPara.VolRSolar > CopySetPara[PARA_SOLAR_OVER_VOLT]);
+    g_voltageHealth.SolarYPhaseUnderVoltage =
+        (InstantPara.VolYSolar < CopySetPara[PARA_SOLAR_UNDER_VOLT]);
+    g_voltageHealth.SolarYPhaseOverVoltage =
+        (InstantPara.VolYSolar > CopySetPara[PARA_SOLAR_OVER_VOLT]);
+    g_voltageHealth.SolarBPhaseUnderVoltage =
+        (InstantPara.VolBSolar < CopySetPara[PARA_SOLAR_UNDER_VOLT]);
+    g_voltageHealth.SolarBPhaseOverVoltage =
+        (InstantPara.VolBSolar > CopySetPara[PARA_SOLAR_OVER_VOLT]);
+
     // ---- Phase 2: Contactor decision logic ----
     //
     // Grid phase contactors: on when healthy AND solar confirmed off AND

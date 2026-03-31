@@ -705,6 +705,35 @@ struct Alarms
     bool LoadOnGridContactorStuckClosed;
 };
 
+// Voltage health status flags (true = fault condition active)
+//
+// DEVNOTE: This is sent over modbus. Keep them in order.
+//
+#define NUMBER_OF_VOLTAGE_HEALTH_FLAGS    12
+struct VoltageHealth
+{
+    union
+    {
+        bool Status[NUMBER_OF_VOLTAGE_HEALTH_FLAGS];
+        struct
+        {
+            bool GridRPhaseUnderVoltage;
+            bool GridRPhaseOverVoltage;
+            bool GridYPhaseUnderVoltage;
+            bool GridYPhaseOverVoltage;
+            bool GridBPhaseUnderVoltage;
+            bool GridBPhaseOverVoltage;
+            bool SolarRPhaseUnderVoltage;
+            bool SolarRPhaseOverVoltage;
+            bool SolarYPhaseUnderVoltage;
+            bool SolarYPhaseOverVoltage;
+            bool SolarBPhaseUnderVoltage;
+            bool SolarBPhaseOverVoltage;
+        };
+    };
+};
+COMPILE_ASSERT(sizeof(struct VoltageHealth) == NUMBER_OF_VOLTAGE_HEALTH_FLAGS);
+
 // Defines various relay status
 //
 // DEVNOTE: This is sent over modbus. Keep them in order.

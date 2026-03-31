@@ -160,6 +160,10 @@ struct TestingStatus g_testingStatus;
 //
 struct Alarms g_Alarms;
 
+// Voltage health status (under/over voltage per phase)
+//
+struct VoltageHealth g_voltageHealth;
+
 // Status of all the power supplies
 //
 struct PowerSupplyStatus g_powerSupplyStatus;

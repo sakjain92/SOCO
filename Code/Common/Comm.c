@@ -1049,6 +1049,11 @@ void ModBusCommunication(void)
                         (uint8_t*)(&g_powerSupplyStatus)
                     },
                     {
+                        300,
+                        sizeof(g_voltageHealth),
+                        (uint8_t*)(&g_voltageHealth)
+                    },
+                    {
                         400,
                         sizeof(g_DigOutputs),
                         (uint8_t*)(&g_DigOutputs)
