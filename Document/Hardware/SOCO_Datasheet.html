@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOCO-T1 - Solar + Grid Controller - Product Datasheet</title>
+<style>
+  @page {
+    size: A4;
+    margin: 10mm 15mm;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 9.5pt;
+    line-height: 1.45;
+    color: #1a1a1a;
+    background: #fff;
+    max-width: 210mm;
+    margin: 0 auto;
+    padding: 12mm 16mm;
+  }
+
+  /* ---- HEADER ---- */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 3px solid #0057a8;
+    padding-bottom: 10px;
+    margin-bottom: 14px;
+  }
+  .header-left h1 {
+    font-size: 26pt;
+    font-weight: 700;
+    color: #0057a8;
+    letter-spacing: 2px;
+    margin: 0;
+  }
+  .header-left .subtitle {
+    font-size: 11pt;
+    color: #444;
+    font-weight: 400;
+    margin-top: 2px;
+  }
+  .header-right {
+    text-align: right;
+    font-size: 8.5pt;
+    color: #555;
+    line-height: 1.5;
+  }
+  .header-right .company {
+    font-weight: 600;
+    font-size: 9.5pt;
+    color: #0057a8;
+  }
+  .model-summary {
+    font-size: 9pt;
+    font-weight: 600;
+    color: #333;
+    margin: 4px 0 6px 0;
+  }
+
+  /* ---- SECTIONS ---- */
+  .section {
+    margin-bottom: 16px;
+  }
+  .section-title {
+    font-size: 12pt;
+    font-weight: 700;
+    color: #0057a8;
+    border-bottom: 1.5px solid #c5d9ed;
+    padding-bottom: 3px;
+    margin-bottom: 8px;
+  }
+  .subsection-title {
+    font-size: 10pt;
+    font-weight: 600;
+    color: #333;
+    margin: 10px 0 5px 0;
+  }
+
+  /* ---- PRINT ---- */
+  @media print {
+    body { padding: 0; margin: 0; max-width: none; }
+    .section, table, .note, .features-grid, p {
+      page-break-inside: auto !important;
+      break-inside: auto !important;
+    }
+    tr {
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+    .section-title, .subsection-title {
+      page-break-after: avoid;
+      break-after: avoid;
+    }
+    .page-break { page-break-before: always; }
+    thead { display: table-header-group; }
+  }
+  p, .note {
+    margin-bottom: 6px;
+  }
+  .overview-text {
+    font-size: 9.5pt;
+    color: #333;
+    line-height: 1.55;
+    margin-bottom: 6px;
+  }
+  .app-tag {
+    display: inline-block;
+    background: #f3f3f3;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    padding: 1px 7px;
+    font-size: 8pt;
+    color: #444;
+    margin: 0 3px 3px 0;
+  }
+
+  /* ---- FEATURES ---- */
+  .features-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 4px 0;
+    margin-bottom: 4px;
+  }
+  .feature-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 5px;
+    font-size: 8.8pt;
+    padding: 2px 0;
+  }
+  .feature-item .icon {
+    color: #0057a8;
+    font-weight: 700;
+    font-size: 9pt;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* ---- TABLES ---- */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 8px;
+    font-size: 8.8pt;
+  }
+  th, td {
+    border: 1px solid #d0d8e0;
+    padding: 4px 8px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: #0057a8;
+    color: #fff;
+    font-weight: 600;
+    font-size: 8.5pt;
+    letter-spacing: 0.3px;
+  }
+  tr:nth-child(even) td {
+    background: #f6f9fc;
+  }
+  td:first-child {
+    font-weight: 500;
+    color: #333;
+  }
+
+  /* compact table variant */
+  table.compact td, table.compact th {
+    padding: 3px 6px;
+    font-size: 8.5pt;
+  }
+
+  /* ---- NOTES ---- */
+  .note {
+    background: #f7f9fb;
+    border-left: 3px solid #0057a8;
+    padding: 5px 10px;
+    font-size: 8.5pt;
+    color: #444;
+    margin: 6px 0 8px 0;
+  }
+  .note strong { color: #0057a8; }
+
+  /* ---- FOOTER ---- */
+  .footer {
+    margin-top: 20px;
+    padding-top: 8px;
+    border-top: 1.5px solid #c5d9ed;
+    display: flex;
+    justify-content: space-between;
+    font-size: 7.5pt;
+    color: #888;
+  }
+
+  /* ---- PAGE BREAKS ---- */
+  .page-break {
+    page-break-before: always;
+    margin-top: 0;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ HEADER ============ -->
+<div class="header">
+  <div class="header-left">
+    <h1>SOCO-T1</h1>
+    <div class="subtitle">Solar + Grid Controller &mdash; Product Datasheet</div>
+  </div>
+  <div class="header-right">
+    <div class="company">MRM Procom Pvt. Ltd.</div>
+    Series: SOCO &nbsp;|&nbsp; Model: SOCO-T1<br>
+    Revision v0.4 &nbsp;|&nbsp; 2026-04-01<br>
+  </div>
+</div>
+
+<!-- ============ 1. OVERVIEW ============ -->
+<div class="section">
+  <div class="section-title">1. Overview</div>
+  <p class="overview-text">
+    SOCO-T1 is a three-phase <strong>Solar and Grid Controller</strong>
+    designed for industrial and telecom applications where load must be managed between a mains grid supply and a
+    solar supply. The controller continuously measures both sources independently, manages relay-driven contactors
+    to switch loads, and exposes all data over an isolated Modbus RTU (RS-485) interface.
+  </p>
+  <div>
+    <span class="app-tag">Telecom tower panels</span>
+    <span class="app-tag">Solar-grid hybrid systems</span>
+    <span class="app-tag">Automatic source changeover</span>
+    <span class="app-tag">Industrial power management</span>
+  </div>
+</div>
+
+<!-- ============ 2. KEY FEATURES ============ -->
+<div class="section">
+  <div class="section-title">2. Key Features</div>
+  <div class="features-grid">
+    <div class="feature-item"><span class="icon">&#9654;</span> Simultaneous, independent measurement of <strong>Grid</strong> and <strong>Solar</strong> sources &mdash; both three-phase, four-wire</div>
+    <div class="feature-item"><span class="icon">&#9654;</span> Grid and Solar (individual) measurement: voltage, current, active/reactive/apparent power, power factor, energy (4-quadrant), frequency, neutral current</div>
+    <div class="feature-item"><span class="icon">&#9654;</span> <strong>6 relay outputs</strong> (SPDT, potential-free) for driving contactors and fan control</div>
+    <div class="feature-item"><span class="icon">&#9654;</span> <strong>8 potential-free digital inputs</strong> with isolated internal supply for contactor feedback monitoring</div>
+    <div class="feature-item"><span class="icon">&#9654;</span> Configurable <strong>over/under voltage thresholds</strong> and <strong>fail/return time delays</strong> independently for Grid and Solar sources</div>
+    <div class="feature-item"><span class="icon">&#9654;</span> <strong>Ambient temperature measurement</strong> with fan control relay</div>
+    <div class="feature-item"><span class="icon">&#9654;</span> <strong>Fan current monitoring</strong> on two channels for open/short-circuit fault protection</div>
+    <div class="feature-item"><span class="icon">&#9654;</span> <strong>Isolated RS-485 Modbus RTU</strong> communication</div>
+    <div class="feature-item"><span class="icon">&#9654;</span> Dual auxiliary supply: <strong>40&ndash;60 V DC</strong> and <strong>100&ndash;300 V AC</strong></div>
+    <div class="feature-item"><span class="icon">&#9654;</span> <strong>6-digit alphanumeric LED display</strong></div>
+  </div>
+</div>
+
+<!-- ============ 3. ELECTRICAL SPECIFICATIONS ============ -->
+<div class="section">
+  <div class="section-title">3. Electrical Specifications</div>
+
+  <div class="subsection-title">3.1 Voltage Measurement Inputs</div>
+  <table class="compact">
+    <tr><th style="width:40%">Parameter</th><th>Specification</th></tr>
+    <tr><td>Sources monitored</td><td>Grid and Solar (independent)</td></tr>
+    <tr><td>Configuration</td><td>3-phase, 4-wire (3P4W) (Grid and Solar individually)</td></tr>
+    <tr><td>Input terminals</td><td>Vr, Vy, Vb, Vn (Grid and Solar individually)</td></tr>
+    <tr><td>Measurement range (L-N)</td><td>80 &ndash; 300 V AC</td></tr>
+    <tr><td>Nominal voltage (L-N)</td><td>240 V</td></tr>
+    <tr><td>Input frequency</td><td>45 &ndash; 65 Hz</td></tr>
+    <tr><td>Burden</td><td>&lt; 0.2 VA per phase</td></tr>
+  </table>
+
+  <div class="subsection-title">3.2 Current Measurement Inputs</div>
+  <table class="compact">
+    <tr><th style="width:40%">Parameter</th><th>Specification</th></tr>
+    <tr><td>Sources monitored</td><td>Grid and Solar (independent)</td></tr>
+    <tr><td>Input terminals</td><td>Ir, Iy, Ib, Icomm (Grid and Solar individually; via external CT)</td></tr>
+    <tr><td>CT burden</td><td>&lt; 0.2 VA per phase</td></tr>
+    <tr><td>Starting current</td><td>0.4 A</td></tr>
+    <tr><td>Maximum primary current</td><td>120 A</td></tr>
+    <tr><td>Basic Current</td><td>10 A</td></tr>
+  </table>
+  <div class="note"><strong>Note:</strong> Current measurement is via external current transformers (CTs). 6 External CTs (100A) available on request with SOCO-T1</div>
+
+  <div class="subsection-title">3.3 Auxiliary Power Supply</div>
+  <table class="compact">
+    <tr><th style="width:40%">Parameter</th><th>Specification</th></tr>
+    <tr><td>DC input</td><td>40 &ndash; 60 V DC (reverse-polarity protected; positive-ground compatible)</td></tr>
+    <tr><td>AC input</td><td>100 &ndash; 300 V AC</td></tr>
+    <tr><td>Simultaneous use</td><td>Yes</td></tr>
+    <tr><td>Power consumption</td><td>&lt; 5 VA</td></tr>
+  </table>
+
+  <div class="subsection-title">3.4 Relay Outputs</div>
+  <table class="compact">
+    <tr><th style="width:40%">Parameter</th><th>Specification</th></tr>
+    <tr><td>Number of outputs</td><td>6 (SPDT, voltage-free)</td></tr>
+    <tr><td>Rated contact voltage</td><td>250 V AC</td></tr>
+    <tr><td>Maximum switching voltage</td><td>250 V AC</td></tr>
+    <tr><td>Continuous current (at 250 V AC)</td><td>8 A</td></tr>
+    <tr><td>Electrical life</td><td>10<sup>6</sup> operations</td></tr>
+    <tr><td>Contact resistance</td><td>&le; 100 m&Omega;</td></tr>
+  </table>
+
+  <p style="font-weight:600; font-size:8.8pt; margin: 6px 0 4px 0;">Relay output assignments (factory default):</p>
+  <table class="compact">
+    <tr><th>Output</th><th>Assignment</th><th>Normal State (coil de-energised)</th></tr>
+    <tr><td>Output 1</td><td>Drives Grid R-phase contactor coil</td><td>NC closed (contactor ON)</td></tr>
+    <tr><td>Output 2</td><td>Drives Grid Y-phase contactor coil</td><td>NC closed (contactor ON)</td></tr>
+    <tr><td>Output 3</td><td>Drives Grid B-phase contactor coil</td><td>NC closed (contactor ON)</td></tr>
+    <tr><td>Output 4</td><td>Drives load-on-solar contactor coil</td><td>NO open (contactor OFF)</td></tr>
+    <tr><td>Output 5</td><td>Drives load-on-grid contactor coil</td><td>NC closed (contactor ON)</td></tr>
+    <tr><td>Output 6</td><td>Panel fan control</td><td>NC closed (fan ON)</td></tr>
+  </table>
+  <div class="note"><strong>Note:</strong> Output 1/2/3 and Output 5 use the <strong>Normally Closed</strong> contact so that contactors remain operational if the controller loses power. Output 4 (Load on Solar) uses the <strong>Normally Open</strong> contact.</div>
+
+  <div class="subsection-title">3.5 Digital Inputs</div>
+  <table class="compact">
+    <tr><th style="width:40%">Parameter</th><th>Specification</th></tr>
+    <tr><td>Number of inputs</td><td>8 (potential-free)</td></tr>
+    <tr><td>Input power supply</td><td>Isolated DC supply provided</td></tr>
+  </table>
+
+  <p style="font-weight:600; font-size:8.8pt; margin: 6px 0 4px 0;">Digital input assignments:</p>
+  <table class="compact">
+    <tr><th>Input</th><th>Assignment</th></tr>
+    <tr><td>DIN1</td><td>Grid R-phase contactor feedback</td></tr>
+    <tr><td>DIN2</td><td>Grid Y-phase contactor feedback</td></tr>
+    <tr><td>DIN3</td><td>Grid B-phase contactor feedback</td></tr>
+    <tr><td>DIN4</td><td>Load-on-Solar contactor feedback</td></tr>
+    <tr><td>DIN5</td><td>Load-on-Grid contactor feedback</td></tr>
+    <tr><td>DIN6</td><td>Solar neutral-earth contactor feedback</td></tr>
+    <tr><td>DIN7</td><td>DG Off signal</td></tr>
+    <tr><td>DIN8</td><td>Spare</td></tr>
+  </table>
+
+  <div class="subsection-title">3.6 Fan Current Inputs</div>
+  <table class="compact">
+    <tr><th style="width:40%">Parameter</th><th>Specification</th></tr>
+    <tr><td>Sources monitored</td><td>Fan 1, Fan 2 (independent)</td></tr>
+    <tr><td>Input terminals</td><td>FAN1, FAN2, FAN_COMM</td></tr>
+    <tr><td>CT burden</td><td>&lt; 0.2 VA per phase</td></tr>
+    <tr><td>Starting current</td><td>0.05 A</td></tr>
+    <tr><td>Maximum primary current</td><td>0.4 A</td></tr>
+    <tr><td>Purpose</td><td>Under-current / over-current protection for panel cooling fans</td></tr>
+  </table>
+
+  <div class="subsection-title">3.7 Ambient Temperature</div>
+  <table class="compact">
+    <tr><th style="width:40%">Parameter</th><th>Specification</th></tr>
+    <tr><td>Sensor location</td><td>Inside controller enclosure</td></tr>
+    <tr><td>Measurement range</td><td>0 &ndash; 100 &deg;C</td></tr>
+    <tr><td>Purpose</td><td>Controls panel fan control (fan is switched on when temperature exceeds user set threshold)</td></tr>
+  </table>
+
+  <div class="subsection-title">3.8 RS-485 Communication</div>
+  <table class="compact">
+    <tr><th style="width:40%">Parameter</th><th>Specification</th></tr>
+    <tr><td>Protocol</td><td>Modbus RTU</td></tr>
+    <tr><td>Physical interface</td><td>RS-485, half-duplex, 2-wire</td></tr>
+    <tr><td>Isolation</td><td>Opto-isolated (galvanic isolation between RS-485 bus and controller)</td></tr>
+    <tr><td>Baud rates</td><td>1200 / 2400 / 4800 / 9600 / 19200 bps (user-selectable)</td></tr>
+    <tr><td>Parity</td><td>None / Even / Odd (user-selectable)</td></tr>
+    <tr><td>Stop bits</td><td>1 or 2 (user-selectable)</td></tr>
+    <tr><td>Device (slave) address</td><td>1 &ndash; 247 (user-configurable)</td></tr>
+    <tr><td>Byte order</td><td>Big-endian</td></tr>
+  </table>
+</div>
+
+<!-- ============ 4. MEASURED PARAMETERS ============ -->
+<div class="section page-break">
+  <div class="section-title">3. Measured Parameters</div>
+  <p style="margin-bottom:8px; font-size:8.8pt; color:#444;">All parameters below are measured independently for <strong>Grid</strong> and <strong>Solar</strong> sources unless noted.</p>
+
+  <div class="subsection-title">3.1 Voltage</div>
+  <table class="compact">
+    <tr><th>Parameter</th><th>Symbol</th></tr>
+    <tr><td>Phase-to-Neutral (each)</td><td>Vr, Vy, Vb</td></tr>
+  </table>
+
+  <div class="subsection-title">3.2 Current</div>
+  <table class="compact">
+    <tr><th>Parameter</th><th>Symbol</th></tr>
+    <tr><td>Phase current (each)</td><td>Ir, Iy, Ib</td></tr>
+    <tr><td>Calculated neutral current</td><td>In</td></tr>
+  </table>
+
+  <div class="subsection-title">3.3 Power</div>
+  <table class="compact">
+    <tr><th>Parameter</th><th>Symbol</th></tr>
+    <tr><td>Active power per phase</td><td>Wr, Wy, Wb</td></tr>
+    <tr><td>Total active power</td><td>W<sub>total</sub></td></tr>
+    <tr><td>Reactive power per phase</td><td>VARr, VARy, VARb</td></tr>
+    <tr><td>Total reactive power</td><td>VAR<sub>total</sub></td></tr>
+    <tr><td>Apparent power per phase</td><td>VAr, VAy, VAb</td></tr>
+    <tr><td>Total apparent power</td><td>VA<sub>total</sub></td></tr>
+    <tr><td>Power factor per phase</td><td>PFr, PFy, PFb</td></tr>
+    <tr><td>Total power factor</td><td>PF<sub>total</sub></td></tr>
+  </table>
+
+  <div class="subsection-title">3.4 Energy (4-quadrant)</div>
+  <table class="compact">
+    <tr><th>Parameter</th><th>Symbol</th></tr>
+    <tr><td>Active energy import</td><td>Wh<sub>import</sub></td></tr>
+    <tr><td>Active energy export</td><td>Wh<sub>export</sub></td></tr>
+    <tr><td>Reactive energy import (inductive)</td><td>VARh<sub>import</sub> (+)</td></tr>
+    <tr><td>Reactive energy import (capacitive)</td><td>VARh<sub>import</sub> (&minus;)</td></tr>
+    <tr><td>Reactive energy export (inductive)</td><td>VARh<sub>export</sub> (+)</td></tr>
+    <tr><td>Reactive energy export (capacitive)</td><td>VARh<sub>export</sub> (&minus;)</td></tr>
+    <tr><td>Apparent energy import</td><td>VAh<sub>import</sub></td></tr>
+    <tr><td>Apparent energy export</td><td>VAh<sub>export</sub></td></tr>
+  </table>
+
+  <div class="subsection-title">3.5 Frequency</div>
+  <table class="compact">
+    <tr><th>Parameter</th><th>Symbol</th></tr>
+    <tr><td>Frequency per phase</td><td>Hz<sub>r</sub>, Hz<sub>y</sub>, Hz<sub>b</sub></td></tr>
+  </table>
+
+  <div class="subsection-title">3.6 Other Parameters</div>
+  <table class="compact">
+    <tr><th>Parameter</th><th>Unit</th></tr>
+    <tr><td>Ambient temperature</td><td>&deg;C</td></tr>
+    <tr><td>Fan 1 current</td><td>A</td></tr>
+    <tr><td>Fan 2 current</td><td>A</td></tr>
+  </table>
+
+  <div class="subsection-title">3.7 Accuracy</div>
+  <table class="compact">
+    <tr><th>Parameter</th><th>Accuracy</th></tr>
+    <tr><td>Active / reactive / apparent energy</td><td>Class 1.0 (IEC 62053-21)</td></tr>
+    <tr><td>Voltage</td><td>1% of reading (above 80 V L-N)</td></tr>
+    <tr><td>Current</td><td>1% of reading (above 10% of basic current)</td></tr>
+    <tr><td>Ambient temperature</td><td>&plusmn; 2 &deg;C (range 0 &ndash; 100 &deg;C)</td></tr>
+    <tr><td>Fan current</td><td>&plusmn; 5% (range 0 &ndash; 0.4 A)</td></tr>
+  </table>
+</div>
+
+<!-- ============ 4. USER INTERFACE ============ -->
+<div class="section">
+  <div class="section-title">4. User Interface</div>
+
+  <div class="subsection-title">4.1 Display</div>
+  <table class="compact">
+    <tr><th style="width:40%">Parameter</th><th>Specification</th></tr>
+    <tr><td>Type</td><td>6-digit, single-row alphanumeric LED display</td></tr>
+    <tr><td>Scroll mode</td><td>Automatic or manual (user-selectable)</td></tr>
+  </table>
+
+  <div class="subsection-title">4.2 Navigation Keys</div>
+  <table class="compact">
+    <tr><th>Key</th><th>Function</th></tr>
+    <tr><td>INC</td><td>Increment value / scroll forward</td></tr>
+    <tr><td>DEC</td><td>Decrement value / scroll backward</td></tr>
+    <tr><td>ENT</td><td>Enter / next parameter</td></tr>
+  </table>
+  <table class="compact" style="margin-top:4px;">
+    <tr><th>Key Combination</th><th>Function</th></tr>
+    <tr><td>INC + DEC</td><td>Enter edit mode for parameter configuration</td></tr>
+  </table>
+
+  <div class="subsection-title">4.3 Status LEDs</div>
+  <table class="compact">
+    <tr><th>LED</th><th>Indication</th></tr>
+    <tr><td>RYB</td><td>Phase On Display Indicator (Red (R Phase) / Yellow (Y Phase) / Blue (B Phase) / White (Total))</td></tr>
+    <tr><td>Grid</td><td>Grid Parameter on Display</td></tr>
+    <tr><td>Solar</td><td>Solar Parameter on Display</td></tr>
+    <tr><td>G Load</td><td>Load connected to Grid</td></tr>
+    <tr><td>S Load</td><td>Load connected to Solar</td></tr>
+    <tr><td>Comm.</td><td>RS-485 communication active</td></tr>
+  </table>
+</div>
+
+<!-- ============ 5. ENVIRONMENTAL ============ -->
+<div class="section">
+  <div class="section-title">5. Environmental Specifications</div>
+  <table>
+    <tr><th style="width:35%">Parameter</th><th>Specification</th></tr>
+    <tr><td>Operating temperature</td><td>&minus;20 &deg;C to +70 &deg;C</td></tr>
+    <tr><td>Storage temperature</td><td>&minus;20 &deg;C to +70 &deg;C</td></tr>
+    <tr><td>Damp heat (cyclic)</td><td>55 &deg;C, 95% RH, 48 hours &mdash; per IEC 60068-2-30</td></tr>
+    <tr><td>Damp heat (static)</td><td>40 &deg;C, 93% RH, 48 hours &mdash; per IEC 60068-2-78</td></tr>
+    <tr><td>Vibration</td><td>5&ndash;8 Hz: &plusmn;7.5 mm displacement; 8&ndash;500 Hz: 2g &mdash; per IEC 60068-2-6 (10 sweeps/axis)</td></tr>
+    <tr><td>Shock</td><td>15g for 11 ms, three shocks per axis &mdash; per IEC 60068-2-27</td></tr>
+  </table>
+</div>
+
+<!-- ============ 6. EMC ============ -->
+<div class="section">
+  <div class="section-title">6. EMC Specifications</div>
+  <table>
+    <tr><th style="width:35%">Test</th><th style="width:25%">Standard</th><th>Level</th></tr>
+    <tr><td>Surge immunity (voltage inputs)</td><td>IEC 61000-4-5</td><td>9 kV, 1.2/50 &micro;s</td></tr>
+    <tr><td>Surge immunity (RS-485)</td><td>IEC 61000-4-5</td><td>9 kV, 1.2/50 &micro;s</td></tr>
+    <tr><td>ESD</td><td>IEC 61000-4-2</td><td>8 kV air discharge; 8 kV contact discharge</td></tr>
+    <tr><td>Electrical fast transient</td><td>IEC 61000-4-4</td><td>&plusmn;1 kV at 5 kHz</td></tr>
+    <tr><td>Magnetic field immunity</td><td>IEC 61000-4-8</td><td>30 A/m at 50 Hz</td></tr>
+    <tr><td>Conducted immunity</td><td>IEC 61000-4-6</td><td>10 V, 150 kHz &ndash; 80 MHz (80% AM, 1 kHz)</td></tr>
+  </table>
+</div>
+
+<!-- ============ 7. TERMINAL DESCRIPTION ============ -->
+<div class="section">
+  <div class="section-title">7. Terminal / Connection Description</div>
+
+  <div class="subsection-title">7.1 Grid Voltage Inputs</div>
+  <table class="compact">
+    <tr><th style="width:15%">Pin #</th><th style="width:30%">Terminal</th><th>Function</th></tr>
+    <tr><td>33</td><td>R</td><td>Grid voltage &mdash; R phase</td></tr>
+    <tr><td>32</td><td>Y</td><td>Grid voltage &mdash; Y phase</td></tr>
+    <tr><td>31</td><td>B</td><td>Grid voltage &mdash; B phase</td></tr>
+    <tr><td>30</td><td>N</td><td>Grid voltage &mdash; Neutral</td></tr>
+  </table>
+
+  <div class="subsection-title">7.2 Solar Voltage Inputs</div>
+  <table class="compact">
+    <tr><th style="width:15%">Pin #</th><th style="width:30%">Terminal</th><th>Function</th></tr>
+    <tr><td>37</td><td>R</td><td>Solar voltage &mdash; R phase</td></tr>
+    <tr><td>36</td><td>Y</td><td>Solar voltage &mdash; Y phase</td></tr>
+    <tr><td>35</td><td>B</td><td>Solar voltage &mdash; B phase</td></tr>
+    <tr><td>34</td><td>N</td><td>Solar voltage &mdash; Neutral</td></tr>
+  </table>
+
+  <div class="subsection-title">7.3 Grid Current Inputs (via external CT)</div>
+  <table class="compact">
+    <tr><th style="width:15%">Pin #</th><th style="width:30%">Terminal</th><th>Function</th></tr>
+    <tr><td>46</td><td>R</td><td>Grid current &mdash; R phase CT secondary</td></tr>
+    <tr><td>47</td><td>Y</td><td>Grid current &mdash; Y phase CT secondary</td></tr>
+    <tr><td>48</td><td>B</td><td>Grid current &mdash; B phase CT secondary</td></tr>
+    <tr><td>49</td><td>COM</td><td>Grid current &mdash; CT common return</td></tr>
+  </table>
+
+  <div class="subsection-title">7.4 Solar Current Inputs (via external CT)</div>
+  <table class="compact">
+    <tr><th style="width:15%">Pin #</th><th style="width:30%">Terminal</th><th>Function</th></tr>
+    <tr><td>50</td><td>R</td><td>Solar current &mdash; R phase CT secondary</td></tr>
+    <tr><td>51</td><td>Y</td><td>Solar current &mdash; Y phase CT secondary</td></tr>
+    <tr><td>52</td><td>B</td><td>Solar current &mdash; B phase CT secondary</td></tr>
+    <tr><td>53</td><td>COM</td><td>Solar current &mdash; CT common return</td></tr>
+  </table>
+
+  <div class="subsection-title">7.5 Potential-Free Digital Inputs</div>
+  <table class="compact">
+    <tr><th style="width:15%">Pin #</th><th style="width:30%">Terminal</th><th>Function</th></tr>
+    <tr><td>45</td><td>DIN 1</td><td>Digital input 1</td></tr>
+    <tr><td>44</td><td>DIN 2</td><td>Digital input 2</td></tr>
+    <tr><td>43</td><td>DIN 3</td><td>Digital input 3</td></tr>
+    <tr><td>42</td><td>DIN 4</td><td>Digital input 4</td></tr>
+    <tr><td>41</td><td>DIN 5</td><td>Digital input 5</td></tr>
+    <tr><td>40</td><td>DIN 6</td><td>Digital input 6</td></tr>
+    <tr><td>39</td><td>DIN 7</td><td>Digital input 7</td></tr>
+    <tr><td>38</td><td>DIN 8</td><td>Digital input 8</td></tr>
+    <tr><td>6</td><td>DIN COM</td><td>Digital input common (isolated DC output)</td></tr>
+  </table>
+
+  <div class="subsection-title">7.6 Relay Outputs</div>
+  <p style="font-size:8.8pt; margin-bottom:4px;">Each relay has three terminals: COM (common), NO (normally open), NC (normally closed).</p>
+  <table class="compact">
+    <tr><th style="width:15%">Pin #</th><th style="width:30%">Terminal</th><th>Function</th></tr>
+    <tr><td>24</td><td>NO 1</td><td>Output 1 &mdash; Normally Open</td></tr>
+    <tr><td>23</td><td>NC 1</td><td>Output 1 &mdash; Normally Closed</td></tr>
+    <tr><td>22</td><td>COM 1</td><td>Output 1 &mdash; Common</td></tr>
+    <tr><td>21</td><td>NO 2</td><td>Output 2 &mdash; Normally Open</td></tr>
+    <tr><td>20</td><td>NC 2</td><td>Output 2 &mdash; Normally Closed</td></tr>
+    <tr><td>19</td><td>COM 2</td><td>Output 2 &mdash; Common</td></tr>
+    <tr><td>18</td><td>NO 3</td><td>Output 3 &mdash; Normally Open</td></tr>
+    <tr><td>17</td><td>NC 3</td><td>Output 3 &mdash; Normally Closed</td></tr>
+    <tr><td>16</td><td>COM 3</td><td>Output 3 &mdash; Common</td></tr>
+    <tr><td>15</td><td>NO 4</td><td>Output 4 &mdash; Normally Open</td></tr>
+    <tr><td>14</td><td>NC 4</td><td>Output 4 &mdash; Normally Closed</td></tr>
+    <tr><td>13</td><td>COM 4</td><td>Output 4 &mdash; Common</td></tr>
+    <tr><td>12</td><td>NO 5</td><td>Output 5 &mdash; Normally Open</td></tr>
+    <tr><td>11</td><td>NC 5</td><td>Output 5 &mdash; Normally Closed</td></tr>
+    <tr><td>10</td><td>COM 5</td><td>Output 5 &mdash; Common</td></tr>
+    <tr><td>9</td><td>NO 6</td><td>Output 6 &mdash; Normally Open</td></tr>
+    <tr><td>8</td><td>NC 6</td><td>Output 6 &mdash; Normally Closed</td></tr>
+    <tr><td>7</td><td>COM 6</td><td>Output 6 &mdash; Common</td></tr>
+  </table>
+
+  <div class="subsection-title">7.7 Fan Current Measurement</div>
+  <table class="compact">
+    <tr><th style="width:15%">Pin #</th><th style="width:30%">Terminal</th><th>Function</th></tr>
+    <tr><td>29</td><td>FAN 1</td><td>Fan 1 current input</td></tr>
+    <tr><td>28</td><td>FAN 2</td><td>Fan 2 current input</td></tr>
+    <tr><td>27</td><td>FAN COM</td><td>Fan current common return</td></tr>
+  </table>
+
+  <div class="subsection-title">7.8 RS-485 Communication</div>
+  <table class="compact">
+    <tr><th style="width:15%">Pin #</th><th style="width:30%">Terminal</th><th>Function</th></tr>
+    <tr><td>26</td><td>RS485 &minus;</td><td>RS-485 Data &minus; (B)</td></tr>
+    <tr><td>25</td><td>RS485 +</td><td>RS-485 Data + (A)</td></tr>
+  </table>
+
+  <div class="subsection-title">7.9 Auxiliary Power Supply</div>
+  <table class="compact">
+    <tr><th style="width:15%">Pin #</th><th style="width:30%">Terminal</th><th>Function</th></tr>
+    <tr><td>1</td><td>48VDC +</td><td>DC positive input</td></tr>
+    <tr><td>2</td><td>48VDC &minus;</td><td>DC negative input (reverse polarity protected)</td></tr>
+    <tr><td>3</td><td>AC L</td><td>240 V AC line terminal</td></tr>
+    <tr><td>4</td><td>AC N</td><td>240 V AC neutral terminal</td></tr>
+    <tr><td>5</td><td>EARTH</td><td>Protective earth</td></tr>
+  </table>
+</div>
+
+<!-- ============ FOOTER ============ -->
+<div class="footer">
+  <span>SOCO-T1 Product Datasheet &mdash; Version v0.4 &mdash; MRM Procom Pvt. Ltd.</span>
+</div>
+
+</body>
+</html>
