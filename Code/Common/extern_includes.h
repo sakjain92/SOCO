@@ -14,6 +14,8 @@ extern void StartCheckCTPolarity(void);
 extern  void RefreshLcd(void);
 extern void CheckAutoScroll(void);
 extern void DisplayDisabled(void);
+extern void DisplayAllOn(void);
+extern void DisplayAllOff(void);
 extern void ReSetDisplayParameter(void);
 extern void CalPF(float Error, float * CalGainBufferPointer, float * CalBetaBufferPointer, uint8_t * CalIntDelayPointer);
 extern void EepromWrite(uint16_t DataLocation,uint16_t NoOfBytes,uint8_t DeviceAddress,uint8_t *DataArray );

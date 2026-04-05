@@ -1083,10 +1083,27 @@ void Process1SecOver(void)
     EditParaPassStatus = 0;
     EditPassCount = 0;
   }
-  if((ParaBlockIndex==0)&&
+
+  if (g_testingStatus.TestingModeEnabled && FlagDirectCalibration==0)
+  {
+    // Toggle display between all-on and all-off every 1 second
+    // to visually indicate test mode. Skip during calibration so
+    // the calibration display screens are not overwritten.
+    //
+    static bool testDisplayOn = false;
+    testDisplayOn = !testDisplayOn;
+    if (testDisplayOn)
+    {
+        DisplayAllOn();
+    }
+    else
+    {
+        DisplayAllOff();
+    }
+  }
+  else if((ParaBlockIndex==0)&&
      (FlagDirectCalibration==0)&&
-     (pwrDlyFlag)&&
-     (!g_testingStatus.TestingModeEnabled))
+     (pwrDlyFlag))
   {
     UpdateDisplayIndex();
     DisplayUpdate();

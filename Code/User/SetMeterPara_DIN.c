@@ -31,6 +31,21 @@ void SetMeterParameters(void)
   EepromRead(PRODUCT_INFO_LOC, sizeof(struct ProductInfo), EXT_EEPROM,
              (uint8_t *)&g_ProductInfo);
   g_VersionNumber = VERSION_NO;
+
+  // Auto-enable test mode on uncalibrated/untested units so the
+  // factory testing script can immediately drive outputs and calibrate
+  // without a separate Modbus write to enter test mode.
+  //
+#ifdef MODEL_RELEASED
+  if (!g_ProductInfo.FunctionallyTestedFlag || !g_ProductInfo.CalibratedFlag)
+  {
+      g_testingStatus.TestingModeEnabled = true;
+  }
+  else
+#endif
+  {
+      g_testingStatus.TestingModeEnabled = false;
+  }
 #ifdef MODEL_RS485
   InitUart(CopySetPara[PARA_BAUD_RATE],CopySetPara[PARA_PARITY],CopySetPara[PARA_STOP_BIT]);
 #endif
