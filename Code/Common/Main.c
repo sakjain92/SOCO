@@ -1084,11 +1084,13 @@ void Process1SecOver(void)
     EditPassCount = 0;
   }
 
-  if (g_testingStatus.TestingModeEnabled && FlagDirectCalibration==0)
+  if (g_testingStatus.TestingModeEnabled && FlagDirectCalibration==0 && pwrDlyFlag)
   {
     // Toggle display between all-on and all-off every 1 second
     // to visually indicate test mode. Skip during calibration so
     // the calibration display screens are not overwritten.
+    // Also, enable toggling of display sometime after VERSION has been seen
+    // on display.
     //
     static bool testDisplayOn = false;
     testDisplayOn = !testDisplayOn;
@@ -1102,6 +1104,7 @@ void Process1SecOver(void)
     }
   }
   else if((ParaBlockIndex==0)&&
+     !g_testingStatus.TestingModeEnabled &&
      (FlagDirectCalibration==0)&&
      (pwrDlyFlag))
   {
