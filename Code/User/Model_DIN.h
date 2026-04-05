@@ -3,7 +3,7 @@
 // 3 digit version number
 // Shown on display as X.YY
 //
-#define VERSION_NO  211
+#define VERSION_NO  213
 
 #define MODEL_COMM_PROCOM
 #define MODEL_DATA_SAVE  
@@ -533,6 +533,17 @@
 // UNDONE: Add FOTA and few error detection flags also (e.g. voltage without current or current without voltage or feedback wire open or contact weld)
 // UNDONE: If we send software to EMS, we have to add some protection against them making products without us
 // Let's put code in test mode till calibration is completed
+// UNDONE: Insulation/surge requirement on CTs?
+// UNDONE: Need to send PDI report of SOCO and Panel to Jio (Also change SOCO to SOCO-J1 model name in Jio drawing)
+// UNDONE: Add two fuses if possible in Panel BOM (48+ and Neutral to SOCO)
+// UNDONE: We can change LDO of temperature sensor to 3.3V and zener diode for power supply accordingly as we don't need 5V for temperature sensor specifically (LM335 can operate at 3.3V also)
+// This helps ensure everything works properly even if transformer can't output 5V exactly since relays also pickup at 70% of 5V = 3.5V So we have 1.5V of headroom on transformer output
+// UNDONE: Changes in panel drawing: 
+// a) Remove extra connectors of EMS (RS232, Output, 24V)
+// b) Wiring chart (Change PE to SPD Earth)
+// c) 48V+/- on analog input is reversed in EMS
+// d) 2.5mmsq for earthing of SOCO & EMS?
+// UNDONE: We should check for swell/dip in Aux power supply also with all 6 relays on
 //
 // Tested/Calibrated: Implementation read/write. Implement state machine for calibration.
 // Earthing?
@@ -546,4 +557,5 @@
 // 2) During calibration first check if the product was tested
 // 3) During calibration check serial number matches with internal serial number
 // 4) 
+//
 //

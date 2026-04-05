@@ -139,10 +139,10 @@ static void InitPort(void)
   // PA0: MOSI: Output, Push Pull
   // PA1: SCK: Output, Push Pull
   // PA2: OE: Output, Push Pull
-  // PA3: FAN_1_Current: Analog (Channel 3)
+  // PA3: FAN_2_Current: Analog (Channel 3)
   // PA4: DC_PWR_IN: Analog (Channel 4)
   // PA5: AC_PWR_IN: Analog (Channel 5)
-  // PA6: FAN_2_Current: Analog (Channel 6)
+  // PA6: FAN_1_Current: Analog (Channel 6)
   // PA7: A_TEMP: Analog (Channel 7)
   // PA8: PFC4: Input, No pull up/pull down
   // PA9: SCL: Alternate, Open Drain, Pull Up, Alternate Function: 4 (I2C2_SCL)
@@ -366,8 +366,8 @@ static void SetAdc(void)
 
   // 1st Sequence: DC_PWR_IN: 4
   // 2nd Sequence AC_PWR_IN: 5
-  // 3rd Sequence: FAN_1_Current: 3
-  // 4th Sequence: FAN_2_Current: 6
+  // 3rd Sequence: FAN_2_Current: 3
+  // 4th Sequence: FAN_1_Current: 6
   // 5th Sequence: A_TEMP: 7
   // 6th Sequence: VREFINT: 17
   //

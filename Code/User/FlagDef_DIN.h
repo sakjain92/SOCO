@@ -487,8 +487,8 @@ extern char _product_info_fits_in_eeprom[
 
 #define   ADC_DC_PWR            0
 #define   ADC_AC_PWR            1
-#define   ADC_FAN_1             2
-#define   ADC_FAN_2             3
+#define   ADC_FAN_2             2
+#define   ADC_FAN_1             3
 #define   ADC_A_TEMP            4
 #define   ADC_VREFINT           5
 
