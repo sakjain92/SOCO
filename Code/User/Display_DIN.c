@@ -1037,38 +1037,20 @@ void DisplayDisabled(void)
   //UpdateDisplay=1;
 };
 
-// Turn ON all segments on the display and all standalone indicator LEDs
+// Turn ON all segments on the display
 //
 void DisplayAllOn(void)
 {
   for (uint8_t i=0;i<15;i++)BufferToDisplay[i]=0xFFFF;
   UpdateDisplay=1;
-  SWITCH_ON_LED1;
-  SWITCH_ON_LED2;
-  SWITCH_ON_LED3;
-  SWITCH_ON_LED4;
-  SWITCH_ON_LED5;
-  SWITCH_ON_LED6;
-  SWITCH_ON_LED7;
-  SWITCH_ON_LED8;
-  SWITCH_ON_LED9;
 }
 
-// Turn OFF all segments on the display and all standalone indicator LEDs
+// Turn OFF all segments on the display
 //
 void DisplayAllOff(void)
 {
   for (uint8_t i=0;i<15;i++)BufferToDisplay[i]=0;
   UpdateDisplay=1;
-  SWITCH_OFF_LED1;
-  SWITCH_OFF_LED2;
-  SWITCH_OFF_LED3;
-  SWITCH_OFF_LED4;
-  SWITCH_OFF_LED5;
-  SWITCH_OFF_LED6;
-  SWITCH_OFF_LED7;
-  SWITCH_OFF_LED8;
-  SWITCH_OFF_LED9;
 }
 
 // UNDONE: This is not working
