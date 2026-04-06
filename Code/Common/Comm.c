@@ -1178,7 +1178,12 @@ void ModBusCommunication(void)
                 }
                 else if ((Start_Add == 45000) && g_testingStatus.TestingModeEnabled)
                 {
-                    NVIC_SystemReset();
+                    memcpy(Mod_TransmitFrame.Data_Array, &RecieveArray[2], 4);
+                    SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received,4);
+                    // Restart by watchdog: Allow delay for modbus response
+                    // to be sent
+                    //
+                    while(1);
                 }
                 else if ((Start_Add >= 60000 && Start_Add < 60000 + sizeof(g_LedStatus)) &&
                          g_testingStatus.TestingModeEnabled)
