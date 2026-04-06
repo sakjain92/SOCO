@@ -1,4 +1,4 @@
-#define MODEL_RELEASED
+//#define MODEL_RELEASED
 
 // 3 digit version number
 // Shown on display as X.YY
