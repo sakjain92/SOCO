@@ -87,13 +87,33 @@ void ParaLocUpdate(uint16_t WriteAddress)
 
 
 void MeterInit(void)
-{ 
-  
-  NewMeterInit();  
-  StoredDataVerification(); 
+{
+
+  NewMeterInit();
+  StoredDataVerification();
   SetMeterParameters();
 
-  
+  // Auto-enable test mode on uncalibrated/untested units so the
+  // factory testing script can immediately drive outputs and calibrate
+  // without a separate Modbus write to enter test mode.
+  //
+  // This must live in MeterInit() (one-shot at boot), not in
+  // SetMeterParameters(), because SetMeterParameters() is also called
+  // from UpdateEditSettings() and ParaSettingUpdate() after any
+  // parameter write. Touching TestingModeEnabled there would silently
+  // kick the factory script out of test mode whenever it writes a
+  // parameter.
+  //
+#ifdef MODEL_RELEASED
+  if (!g_ProductInfo.FunctionallyTestedFlag || !g_ProductInfo.CalibratedFlag)
+  {
+      g_testingStatus.TestingModeEnabled = true;
+  }
+  else
+#endif
+  {
+      g_testingStatus.TestingModeEnabled = false;
+  }
 }
   
 void StoredDataVerification(void)
