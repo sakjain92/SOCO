@@ -942,7 +942,7 @@ void SetVersionDisplay(void)
 }
 
 
-// UNDONE: This doesn't show up on the screen due to while(1)
+// UNDONE: Check this shows up screen
 //
 void DisplayImproperSettings(void)
 {
@@ -952,8 +952,6 @@ void DisplayImproperSettings(void)
   FlagDirectCalibration=0;
   SwPressed=0;
   UpdateDisplay=1;
-  while(1)RESET_WATCH_DOG;
-
 }
 
 void DisplayDoneCal(void)

@@ -221,10 +221,15 @@ void ParaSettingUpdate(void)
  
 
 
-
+// UNDONE: This is dangerous. If we ever hit this, the controller will be
+// bricked. We need FOTA over modbus to always work. Atleast provide a provision
+// for the board to go into bootloader mode and provide provision for boot
+// loader to reset EEPROM to default setting on such an error.
+// But make sure to give an error to user in such a failure case also
+// so that it can be found during testing
+//
 void InitilisationError(void)
 {  
-  
   while(1)
   {
       RESET_WATCH_DOG;

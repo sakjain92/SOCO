@@ -119,6 +119,7 @@ void EepromRead(uint16_t DataLocation, uint16_t NoOfBytes, uint8_t DeviceAddress
   {
     uint8_t toRead = NoOfBytes > EEPROM_PAGE_LENGTH ? EEPROM_PAGE_LENGTH : NoOfBytes;
     I2CRead(DataLocation,toRead,DeviceAddress,DataArray);
+    RESET_WATCH_DOG;
     DataLocation += toRead;
     NoOfBytes -= toRead;
     DataArray += toRead;
@@ -255,6 +256,7 @@ void EepromWrite(uint16_t DataLocation,uint16_t NoOfBytes,uint8_t DeviceAddress,
     uint8_t toWrite = NoOfBytes > pageRemaining ? pageRemaining : NoOfBytes;
     I2CWrite(DataLocation,toWrite,DeviceAddress,DataArray);
     CheckEpromFree(EXT_EEPROM);
+    RESET_WATCH_DOG;
     DataLocation += toWrite;
     NoOfBytes -= toWrite;
     DataArray += toWrite;

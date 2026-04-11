@@ -544,6 +544,12 @@
 // c) 48V+/- on analog input is reversed in EMS
 // d) 2.5mmsq for earthing of SOCO & EMS?
 // UNDONE: We should check for swell/dip in Aux power supply also with all 6 relays on
+// UNDONE: Mention in drawing that customer needs to use bimetallic lugs for aluminium wires incoming
+// UNDONE: 12V- on EMS connected to G1, 48V on ananlog input 1 of EMS, add two more inputs from EMS to terminal, LAN cable to LAN3 (and LAN of PoE), Check earthing point of RS485
+// UNDONE: Panel testing, 1KW as load divided between solar & grid (3KW load max total), LAN detection in Jio, Some extra connection on terminal block
+// UNDONE: Jio needs acdb controller & panel testing data (PDF), PDI report per batch (packaging & label data & pictures), Give report and assembly process will be discussed tomorrow Modbus table of EMS from us.
+// UNDONE: Add tracking between components in panel and corresponding panel serial number. Get something similar from Zetworks
+// UNDONE: Citel says 85VDC MOV between 48+/48- to E is good enough for DC
 //
 // Tested/Calibrated: Implementation read/write. Implement state machine for calibration.
 // Earthing?
@@ -559,3 +565,14 @@
 // 4) 
 //
 //
+// TODO: Change panel drawing as per comments from Phani
+// TODO: Get PO
+// TODO: Share PDI report on SOCO and ACDB panel with Jio (mahesh)
+// TODO: GIve EMS modbus table
+// TODO: Give Mahesh Factory details
+// TODO: DS440S-320 (Part number change)
+// TODO: decide about 100k impact on design
+// TODO: Relays pads will be changed for OEN 26
+// TODO: Add 60VAC MOV in 48VDC from -ive to Earth also. We can just keep common mode (175VAC) MOV in 48VDC supply to deal with the case of accidental power supply of AC to DC
+// TODO: Add fast contactor coil protection logic as add-on in the controller to bind Jio (Something like thermal memory to keep track of estimated heating of the coil based on coil impedence and the voltage)
+// TODO: Y-cap for DI power supply and RS485 power supply?
