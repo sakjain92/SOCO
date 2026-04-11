@@ -1,4 +1,4 @@
-//#define MODEL_RELEASED
+#define MODEL_RELEASED
 
 // 3 digit version number
 // Shown on display as X.YY
@@ -576,3 +576,4 @@
 // TODO: Add 60VAC MOV in 48VDC from -ive to Earth also. We can just keep common mode (175VAC) MOV in 48VDC supply to deal with the case of accidental power supply of AC to DC
 // TODO: Add fast contactor coil protection logic as add-on in the controller to bind Jio (Something like thermal memory to keep track of estimated heating of the coil based on coil impedence and the voltage)
 // TODO: Y-cap for DI power supply and RS485 power supply?
+// TODO: Modbus needs to be tested more
