@@ -85,6 +85,7 @@ extern uint8_t ReceiveLength;
 extern uint32_t StartDelayCount;
 extern uint8_t pwrDlyFlag,EditPassCount;
 extern uint32_t FlagDirectCalibration, ModbusAdvanceFlagDirectCalibration;
+extern uint32_t g_ScratchPad;
 extern uint8_t CalibrationGapCounter;
 extern uint8_t EditParaPassStatus;
 extern struct STORE StorageBuffer;

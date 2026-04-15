@@ -1003,6 +1003,20 @@ void ModBusCommunication(void)
                   SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received,4);
                   break;
               }
+              else if((Start_Add == 50014) && (NoOfBytes == 2))
+              {
+                  // Write scratch pad. Temporary 32-bit value held in RAM;
+                  // resets to 0 on power-on reset.
+                  //
+                  g_ScratchPad =
+                      ((uint32_t)RecieveArray[10]) +
+                      ((uint32_t)RecieveArray[9]<<8) +
+                      ((uint32_t)RecieveArray[8]<<16)+
+                      ((uint32_t)RecieveArray[7]<<24);
+                  memcpy(Mod_TransmitFrame.Data_Array, &RecieveArray[2], 4);
+                  SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received,4);
+                  break;
+              }
               else  ///// Illegal Data Address //////
               {
 

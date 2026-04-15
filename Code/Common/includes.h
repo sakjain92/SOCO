@@ -129,6 +129,10 @@ uint8_t PowerFailCounter,ScrollChangeCounter;
 uint8_t  Tc20ms,KWhLedOnCounter,UpdateDisplay;
 uint8_t FreqFlag,CycleCounter;
 uint32_t FlagDirectCalibration, ModbusAdvanceFlagDirectCalibration;
+// Temporary 32-bit scratch register exposed over Modbus. Zero on POR via BSS
+// init; see Modbus register 50015.
+//
+uint32_t g_ScratchPad;
 uint8_t CalibrationGapCounter,DisplayDebarCounter;
 uint8_t OperatingSatatus,PowerUpCounter=0,SecondSourceActive,GenratorOnCounter;
 uint8_t RecieveArray[MAX_BYTE_TO_RECIEVE];
