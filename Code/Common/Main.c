@@ -1113,27 +1113,8 @@ void Process1SecOver(void)
      (FlagDirectCalibration==0)&&
      (pwrDlyFlag))
   {
-    // For PDI, when testing after calibration, we need to show on display which
-    // input is turned on
-    //
-    bool inputDisplayed = false;
-    if (g_testingStatus.TestingModeEnabled && g_ProductInfo.CalibratedFlag)
-    {
-        for (uint8_t i = 0; i < NUMBER_OF_INPUTS; i++)
-        {
-            if (g_DigInputs.Inputs[i])
-            {
-                DisplayInputX(i + 1);
-                inputDisplayed = true;
-                break;
-            }
-        }
-    }
-    if (!inputDisplayed)
-    {
-        UpdateDisplayIndex();
-        DisplayUpdate();
-    }
+    UpdateDisplayIndex();
+    DisplayUpdate();
   }
   if(DisplayDebarCounter>0)DisplayDebarCounter--;
  

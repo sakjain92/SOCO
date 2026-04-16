@@ -666,6 +666,9 @@ struct DigInputs
 };
 
 COMPILE_ASSERT(sizeof(struct DigInputs) == NUMBER_OF_INPUTS);
+// DisplayHexByte() packs inputs into one byte for hex display
+//
+COMPILE_ASSERT(NUMBER_OF_INPUTS <= 8);
 
 // All power supply on/off status
 // DEVNOTE: This is sent over modbus. Keep them in order.
@@ -779,6 +782,9 @@ struct DigOutputs
     };
 };
 COMPILE_ASSERT(sizeof(struct DigOutputs) == NUMBER_OF_RELAYS);
+// DisplayHexByte() packs outputs into one byte for hex display
+//
+COMPILE_ASSERT(NUMBER_OF_RELAYS <= 8);
 
 // Defines various LED status
 //

@@ -321,14 +321,36 @@ void DisplayUpdate(void)
                          (uint8_t *)Screen[DisplayIndex][ScreenIndex].IconStringArray,Screen[DisplayIndex][ScreenIndex].LedType);
            ScreenIndex++;
            break;
-     
-      
+
+      case DATA_TYPE_DIG_INPUT_HEX:
+      {
+           uint8_t packed = 0;
+           for (uint8_t i = 0; i < NUMBER_OF_INPUTS; i++)
+           {
+               if (g_DigInputs.Inputs[i]) packed |= (1 << i);
+           }
+           DisplayHexByte(packed);
+           ScreenIndex++;
+           break;
+      }
+      case DATA_TYPE_DIG_OUTPUT_HEX:
+      {
+           uint8_t packed = 0;
+           for (uint8_t i = 0; i < NUMBER_OF_RELAYS; i++)
+           {
+               if (g_DigOutputs.Relays[i]) packed |= (1 << i);
+           }
+           DisplayHexByte(packed);
+           ScreenIndex++;
+           break;
+      }
+
     }
-  }  
-  
+  }
+
   UpdateDisplay=1;
-  
-  
+
+
 }
 
 
@@ -807,6 +829,17 @@ void DisplayString(uint8_t DV_Row,uint8_t DV_Digit, uint8_t *DV_String,uint8_t L
    }
 }
 
+void DisplayHexByte(uint8_t value)
+{
+    uint8_t hi = (value >> 4) & 0x0F;
+    uint8_t lo = value & 0x0F;
+    uint16_t *ptr = BufferToDisplay + 10;
+
+    ptr[DIGIT_4] |= CHAR_ALFA_14_SEG[0];
+    ptr[DIGIT_3] |= CHAR_ALFA_14_SEG['X' - 0x30];
+    ptr[DIGIT_2] |= CHAR_ALFA_14_SEG[hi <= 9 ? hi : hi + 7];
+    ptr[DIGIT_1] |= CHAR_ALFA_14_SEG[lo <= 9 ? lo : lo + 7];
+}
 
 void CheckAutoScroll(void)
 {

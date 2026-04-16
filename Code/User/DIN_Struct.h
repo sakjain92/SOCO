@@ -12,8 +12,10 @@ extern struct STORE StorageBuffer;
 
 
 
-#define DATA_TYPE_VARIABLE   0
-#define DATA_TYPE_STRING     1
+#define DATA_TYPE_VARIABLE       0
+#define DATA_TYPE_STRING         1
+#define DATA_TYPE_DIG_INPUT_HEX  2
+#define DATA_TYPE_DIG_OUTPUT_HEX 3
 
 /*********************************************************************
                   Decimal Place
@@ -169,6 +171,8 @@ const uint8_t StrOldImpLdHr[]="OFLdHr";
 
 const uint8_t StrFan1Current[]="FAN  1";
 const uint8_t StrFan2Current[]="FAN  2";
+const uint8_t StrDigIn[]="DI  In";
+const uint8_t StrDigOut[]="DO Out";
 
 const uint8_t StrInterr[]="  INTR";
 const uint8_t StrOldInterr[]="O INTR";
@@ -833,6 +837,27 @@ const struct object Screen[][3]=
       { DATA_TYPE_STRING,       0,                              0,      0,              DIGIT_2,         StrHZ,         LED_SOLAR_B     },
       { DATA_TYPE_VARIABLE,     &InstantPara.FrequencyBSolar,   4,      DIS_VAL_FREQ,   DIGIT_3,         0,             LED_SOLAR_B     },
       { 0xff,                   0,                              0,      0,              DIGIT_3,         0,             LED_OFF         }
+  },
+
+  // SCREEN 110: Digital Input Label
+  {
+      { DATA_TYPE_STRING,           0,                              0,      0,              DIGIT_6,         StrDigIn,      LED_OFF         },
+      { 0xff,                       0,                              0,      0,              0,               0,             LED_OFF         }
+  },
+  // SCREEN 111: Digital Input Value (hex)
+  {
+      { DATA_TYPE_DIG_INPUT_HEX,    0,                              0,      0,              0,               0,             LED_OFF         },
+      { 0xff,                       0,                              0,      0,              0,               0,             0               }
+  },
+  // SCREEN 112: Digital Output Label
+  {
+      { DATA_TYPE_STRING,           0,                              0,      0,              DIGIT_6,         StrDigOut,     LED_OFF         },
+      { 0xff,                       0,                              0,      0,              0,               0,             LED_OFF         }
+  },
+  // SCREEN 113: Digital Output Value (hex)
+  {
+      { DATA_TYPE_DIG_OUTPUT_HEX,   0,                              0,      0,              0,               0,             LED_OFF         },
+      { 0xff,                       0,                              0,      0,              0,               0,             0               }
   },
 
 };
