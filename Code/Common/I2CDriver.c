@@ -3,23 +3,27 @@
 
 
 
-void I2CRead(uint16_t DataLocation, uint8_t NoOfBytes, uint8_t DeviceAddress, uint8_t *DataArray );
-void I2CWrite(uint16_t DataLocation,uint8_t NoOfBytes,uint8_t DeviceAddress,uint8_t *DataArray );
+void I2CRead(uint32_t DataLocation, uint8_t NoOfBytes, uint8_t DeviceAddress, uint8_t *DataArray );
+void I2CWrite(uint32_t DataLocation,uint8_t NoOfBytes,uint8_t DeviceAddress,uint8_t *DataArray );
 void CheckEpromFree(uint8_t DeviceAddress);
 
 
 // UNDONE: Unconditional while loops should be avoided in this codebase everywhere
 //
-void I2CRead(uint16_t DataLocation, uint8_t NoOfBytes, uint8_t DeviceAddress, uint8_t *DataArray )
+// Supports EEPROMs up to 2Mbit (256KB): bits 17:16 of the address are
+// encoded into bits 2:1 of the slave-address byte (the chip's hardware
+// block-select pins). For smaller EEPROMs (<=256Kbit) the upper bits are
+// always zero, so the slave address remains unchanged.
+//
+void I2CRead(uint32_t DataLocation, uint8_t NoOfBytes, uint8_t DeviceAddress, uint8_t *DataArray )
 {
-  
+
   uint16_t TempVariable;
   uint32_t counter = 0;
-  //TempVariable  = DataLocation & 0xFFFF0000;
   TempVariable  = DataLocation & 0xFFFF;
   I2C2->CR1 |= I2C_CR1_PE;                     //PE enable
 
-  I2C2->CR2 = (uint8_t)DeviceAddress;
+  I2C2->CR2 = (uint8_t)(DeviceAddress | ((DataLocation >> 16) & 0x3) << 1);
   I2C2->CR2 &=~I2C_CR2_RD_WRN;               //Direction
   I2C2->CR2 |=  I2C_CR2_START | (2 << 16);                //Generate Start and no of bytes to transmit(2)
   counter = 0;
@@ -113,7 +117,7 @@ void I2CRead(uint16_t DataLocation, uint8_t NoOfBytes, uint8_t DeviceAddress, ui
   I2C2->CR1 &=~I2C_CR1_PE;
 }
 
-void EepromRead(uint16_t DataLocation, uint16_t NoOfBytes, uint8_t DeviceAddress, uint8_t *DataArray)
+void EepromRead(uint32_t DataLocation, uint16_t NoOfBytes, uint8_t DeviceAddress, uint8_t *DataArray)
 {
   while (NoOfBytes)
   {
@@ -127,17 +131,17 @@ void EepromRead(uint16_t DataLocation, uint16_t NoOfBytes, uint8_t DeviceAddress
 }
 
 
-void I2CWrite(uint16_t DataLocation,uint8_t NoOfBytes,uint8_t DeviceAddress,uint8_t *DataArray )
+void I2CWrite(uint32_t DataLocation,uint8_t NoOfBytes,uint8_t DeviceAddress,uint8_t *DataArray )
 {
   uint16_t TempVariable;
   uint32_t TempBytes;
   uint32_t counter = 0;
   TempVariable  = DataLocation & 0xFFFF;
   TempBytes = (uint32_t)(NoOfBytes + 2) << 16;
-  
+
   I2C2->CR1 |= I2C_CR1_PE;                     //PE enable
 
-  I2C2->CR2 = (uint8_t)DeviceAddress;
+  I2C2->CR2 = (uint8_t)(DeviceAddress | ((DataLocation >> 16) & 0x3) << 1);
   I2C2->CR2 &=~ I2C_CR2_RD_WRN;               //Direction
   I2C2->CR2 |= TempBytes;
   I2C2->CR2 |= I2C_CR2_START;                //Generate Start
@@ -247,7 +251,7 @@ void CheckEpromFree(uint8_t DeviceAddress)
 }
 
   
-void EepromWrite(uint16_t DataLocation,uint16_t NoOfBytes,uint8_t DeviceAddress,uint8_t *DataArray )
+void EepromWrite(uint32_t DataLocation,uint16_t NoOfBytes,uint8_t DeviceAddress,uint8_t *DataArray )
 {
   while (NoOfBytes)
   {
