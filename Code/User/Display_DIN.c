@@ -139,7 +139,7 @@ void SetVersionDisplay(void);
 void ConvertToBCB(int32_t Data);
 void DisplayInterruption(uint32_t Data,uint8_t ScrIndex, uint8_t DisIndex );
 void DisplayTemperature(float TempFloat,uint8_t ScrIndex, uint8_t DisIndex );
-
+void DisplayHexByte(uint8_t value);
 uint8_t ResolveDisplayDecimal;  
 
 extern const uint16_t CHAR_NEU_14_SEG[];

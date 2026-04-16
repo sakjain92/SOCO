@@ -137,8 +137,12 @@ void ProcessFreq(void)
   }
   else
   {
-  //  IntTimerCount.TimerNewValue=3750;
-    IntTimerCount.TimerNewValue=(uint16_t)((5000*3750.0)/(Frequency));
+    // Too high frequency can cause interrupts to fire too fast
+    //
+    float newFrequency = Frequency;
+    if (newFrequency > MAX_FREQ_ALLOWED * 100) newFrequency = MAX_FREQ_ALLOWED * 100;
+    if (newFrequency < MIN_FREQ_ALLOWED * 100) newFrequency = MIN_FREQ_ALLOWED * 100;
+    IntTimerCount.TimerNewValue = (uint32_t)((5000*3750.0)/newFrequency);
   }
 }
 
@@ -1123,7 +1127,7 @@ void Process1SecOver(void)
   //
   if(FlagDirectCalibration==0 &&
       ParaBlockIndex==0 &&
-      (!g_testingStatus.TestingModeEnabled))
+      (!g_testingStatus.TestingModeEnabled || g_ProductInfo.CalibratedFlag))
   {
       CheckAutoScroll();
   }

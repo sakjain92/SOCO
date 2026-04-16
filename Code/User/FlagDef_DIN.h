@@ -178,6 +178,9 @@ extern char _product_info_fits_in_eeprom[
 // (Currently doesn't matter as FREQ_LIMIT_VOL < MIN_VOL_LIMIT)
 #define FREQ_LIMIT_VOL         10.0f
 
+#define MAX_FREQ_ALLOWED    65
+#define MIN_FREQ_ALLOWED    45
+
 // Minimum voltage to maintain 0.5% accuracy is about 33VAC. Taking some margin
 // UNDONE: Figure out the correct minimum value for Currents as per metering
 // standard for 0.5 class metering.
