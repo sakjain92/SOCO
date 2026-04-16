@@ -728,6 +728,16 @@ struct VoltageHealth
     bool SolarYPhaseOverVoltage;
     bool SolarBPhaseUnderVoltage;
     bool SolarBPhaseOverVoltage;
+    // Phase loss = voltage below MIN_VOL_LIMIT (clamped to 0 by Metrology).
+    // Kept distinct from UnderVoltage so Modbus consumers can tell a missing
+    // phase apart from a low-but-present phase.
+    //
+    bool GridRPhaseLoss;
+    bool GridYPhaseLoss;
+    bool GridBPhaseLoss;
+    bool SolarRPhaseLoss;
+    bool SolarYPhaseLoss;
+    bool SolarBPhaseLoss;
 };
 
 // Reasons why load is not on grid or solar (true = condition active)

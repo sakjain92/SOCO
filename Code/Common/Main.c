@@ -650,30 +650,51 @@ COMPILE_ASSERT(STUCK_SECONDS > DRIVE_GAP_SECONDS);
 
     // ---- Voltage health status flags (exposed over modbus) ----
     //
+    // Under-voltage is only flagged when the phase is present (voltage > 0)
+    // but below the set limit. Phase loss (voltage clamped to 0 by Metrology
+    // below MIN_VOL_LIMIT) is reported separately and must not trip the
+    // under-voltage flag.
+    //
     g_voltageHealth.GridRPhaseUnderVoltage =
+        (InstantPara.VolR > 0) &&
         (InstantPara.VolR < CopySetPara[PARA_MAINS_UNDER_VOLT]);
     g_voltageHealth.GridRPhaseOverVoltage =
         (InstantPara.VolR > CopySetPara[PARA_MAINS_OVER_VOLT]);
     g_voltageHealth.GridYPhaseUnderVoltage =
+        (InstantPara.VolY > 0) &&
         (InstantPara.VolY < CopySetPara[PARA_MAINS_UNDER_VOLT]);
     g_voltageHealth.GridYPhaseOverVoltage =
         (InstantPara.VolY > CopySetPara[PARA_MAINS_OVER_VOLT]);
     g_voltageHealth.GridBPhaseUnderVoltage =
+        (InstantPara.VolB > 0) &&
         (InstantPara.VolB < CopySetPara[PARA_MAINS_UNDER_VOLT]);
     g_voltageHealth.GridBPhaseOverVoltage =
         (InstantPara.VolB > CopySetPara[PARA_MAINS_OVER_VOLT]);
     g_voltageHealth.SolarRPhaseUnderVoltage =
+        (InstantPara.VolRSolar > 0) &&
         (InstantPara.VolRSolar < CopySetPara[PARA_SOLAR_UNDER_VOLT]);
     g_voltageHealth.SolarRPhaseOverVoltage =
         (InstantPara.VolRSolar > CopySetPara[PARA_SOLAR_OVER_VOLT]);
     g_voltageHealth.SolarYPhaseUnderVoltage =
+        (InstantPara.VolYSolar > 0) &&
         (InstantPara.VolYSolar < CopySetPara[PARA_SOLAR_UNDER_VOLT]);
     g_voltageHealth.SolarYPhaseOverVoltage =
         (InstantPara.VolYSolar > CopySetPara[PARA_SOLAR_OVER_VOLT]);
     g_voltageHealth.SolarBPhaseUnderVoltage =
+        (InstantPara.VolBSolar > 0) &&
         (InstantPara.VolBSolar < CopySetPara[PARA_SOLAR_UNDER_VOLT]);
     g_voltageHealth.SolarBPhaseOverVoltage =
         (InstantPara.VolBSolar > CopySetPara[PARA_SOLAR_OVER_VOLT]);
+
+    // Phase loss: Metrology clamps any phase voltage below MIN_VOL_LIMIT to
+    // exactly 0, so a zero reading indicates a missing / lost phase.
+    //
+    g_voltageHealth.GridRPhaseLoss  = (InstantPara.VolR      == 0);
+    g_voltageHealth.GridYPhaseLoss  = (InstantPara.VolY      == 0);
+    g_voltageHealth.GridBPhaseLoss  = (InstantPara.VolB      == 0);
+    g_voltageHealth.SolarRPhaseLoss = (InstantPara.VolRSolar == 0);
+    g_voltageHealth.SolarYPhaseLoss = (InstantPara.VolYSolar == 0);
+    g_voltageHealth.SolarBPhaseLoss = (InstantPara.VolBSolar == 0);
 
     // ---- Phase 2: Contactor decision logic ----
     //
