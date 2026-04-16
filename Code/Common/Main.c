@@ -1084,13 +1084,19 @@ void Process1SecOver(void)
     EditPassCount = 0;
   }
 
-  if (g_testingStatus.TestingModeEnabled && FlagDirectCalibration==0 && pwrDlyFlag)
+  // Don't need to turn display on/off when testing after calibration again
+  // as we need PDI inspector to check SOCO display
+  //
+  if (g_testingStatus.TestingModeEnabled && FlagDirectCalibration==0 && pwrDlyFlag
+      && !g_ProductInfo.CalibratedFlag)
   {
     // Toggle display between all-on and all-off every 1 second
     // to visually indicate test mode. Skip during calibration so
     // the calibration display screens are not overwritten.
     // Also, enable toggling of display sometime after VERSION has been seen
     // on display.
+    // On calibrated devices, fall through to normal display so parameters
+    // are visible during test mode.
     //
     static bool testDisplayOn = false;
     testDisplayOn = !testDisplayOn;
@@ -1104,7 +1110,6 @@ void Process1SecOver(void)
     }
   }
   else if((ParaBlockIndex==0)&&
-     !g_testingStatus.TestingModeEnabled &&
      (FlagDirectCalibration==0)&&
      (pwrDlyFlag))
   {
@@ -1118,7 +1123,7 @@ void Process1SecOver(void)
   //
   if(FlagDirectCalibration==0 &&
       ParaBlockIndex==0 &&
-      !g_testingStatus.TestingModeEnabled)
+      (!g_testingStatus.TestingModeEnabled))
   {
       CheckAutoScroll();
   }
