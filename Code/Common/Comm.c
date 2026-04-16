@@ -96,9 +96,12 @@ Ret: None
 */
 void ProtectionReset(void)
 {
-#ifdef MODEL_RELEASED   
+#ifdef MODEL_RELEASED
   Delay1Msec12Mhz(100);
-  if(PROTECTION_BIT_LOW)NVIC_SystemReset();
+  if (!g_testingStatus.TestingModeEnabled && PROTECTION_BIT_LOW)
+  {
+      NVIC_SystemReset();
+  }
 #endif
 } 
 
