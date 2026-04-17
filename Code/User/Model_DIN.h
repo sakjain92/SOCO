@@ -1,5 +1,12 @@
 #define MODEL_RELEASED
 
+// Seeds unit-gain defaults into the calibration flash page in the built hex.
+// Enable for a fresh never-calibrated board (first-ever flashing) so it boots
+// with valid defaults. Leave disabled for development rebuilds so reflashing
+// doesn't erase the existing field-calibration page.
+//
+#define SEED_CALIBRATION_DEFAULTS
+
 // 3 digit version number
 // Shown on display as X.YY
 //
@@ -171,7 +178,7 @@
 // 130) We should send firmware version over Modbus
 // 131) Make a manual/datasheet (Similar to Ace/REX)
 // 132) IMPORTANT: In 230V power supply, our IC currently is max 700V drain mosfet. This needs to handle clamping voltage of MOV + inductor voltage. Should we try for 1500V?
-// Servo has a high voltage power supply available. Also, common mode surge noise has to be considered in power supply (230V and 48V. Note 48V is positively earthed). One solution is
+// Servo has a high voltage power supply available. Also, common mode surge noise has to be considered in power supply (230V and 48V. Note 48V is positively earthed). One solution is
 // using StackFET configuration via using external mosfet, like that used in Servo PSU
 // 133) Check that 200mm * 250mm pcb will be able to be manufactured in the SMD room properly and in our shop floor
 // 134) We should measure 5V from 48V to check if 48V is available or not
@@ -238,10 +245,10 @@
 // 221) Do we need EMI/EMC on power supply?
 // 222) Check that if only one phase voltage is added, it's shown accurately even though the calibration happens in 3 phase. Same, check when 0 phase angle between R/Y/B voltage & current, is there any issue (This will happen on solar side)
 // 223) Check the voltage section is safe from surges (use of op-amp is correct)
-// 224) Make sure the PCB is not touching the body from edges (if it's touching then bare part should only be touching of PCB, no tracks)
-// 225) Make sure the contact points of body with PCB is not affected by powder coating
-// 226) Make sure that non-powder coating area doesn't rust in body
-// 227) Make sure that even if screws get rusted, no track is impacted
+// 224) Make sure the PCB is not touching the body from edges (if it's touching then bare part should only be touching of PCB, no tracks)
+// 225) Make sure the contact points of body with PCB is not affected by powder coating
+// 226) Make sure that non-powder coating area doesn't rust in body
+// 227) Make sure that even if screws get rusted, no track is impacted
 // 228) Check if supports needed in between PCB
 // 229) Should we add RC filter on digitial input section also near the MCU pin (incase the external input is oscillating)? Might not be needed as we already have RC filter before optocoupler
 // 230) Remove single ended current measuring circuit & corresponding all zero ohm resistors. Hopefully this will make layout easier. Make sure voltage pins on MCU and current pins on MCU are away
