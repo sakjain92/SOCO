@@ -701,18 +701,6 @@ void Metrology(void)
   }
   else InstantPara.AngleBPhase=0;
   
-  // UNDONE: Is this neccessary?
-  //
-  if(fabs(InstantPara.PowerFactorR)>0.9985)InstantPara.ReactPowerR=0;
-  if(fabs(InstantPara.PowerFactorY)>0.9985)InstantPara.ReactPowerY=0;
-  if(fabs(InstantPara.PowerFactorB)>0.9985)InstantPara.ReactPowerB=0;
-  InstantPara.TotalReactPower=InstantPara.ReactPowerR+InstantPara.ReactPowerY+InstantPara.ReactPowerB;
-
-  if(fabs(InstantPara.PowerFactorRSolar)>0.9985)InstantPara.ReactPowerRSolar=0;
-  if(fabs(InstantPara.PowerFactorYSolar)>0.9985)InstantPara.ReactPowerYSolar=0;
-  if(fabs(InstantPara.PowerFactorBSolar)>0.9985)InstantPara.ReactPowerBSolar=0;
-  InstantPara.TotalReactPowerSolar=InstantPara.ReactPowerRSolar+InstantPara.ReactPowerYSolar+InstantPara.ReactPowerBSolar;
-
   /*
   if((InstantPara.TotalReactPower<1)&&(InstantPara.TotalPowerFactor!=1))
   {
