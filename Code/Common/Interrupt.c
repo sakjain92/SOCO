@@ -524,6 +524,10 @@ void ProcessMainInterrupt(void)
   IntDataSum.VolYBPhPh += TempGainMult*TempGainMult;
   
   // Neutral Current
+  // UNDONE: NEUTRAL CURRENT calculation is broken as we do phase shift in current
+  // below. Check how to compensate for different phase angles between
+  // currents to compute neutral current
+  //
   IntNeuCurrent=0;
   IntNeuCurrent +=IntCurRPhase;
   IntNeuCurrent +=IntCurYPhase;
@@ -533,44 +537,107 @@ void ProcessMainInterrupt(void)
   
 // Phase compensation: y[n] = A*(x[n-int_D] + B*x[n-int_D-1])
   // The integer part of the delay (int_D) selects which stored samples to use.
-  // The fractional part is handled by the IIR coefficients A (ALFA) and B (BETA).
-  // History is maintained as a 4-deep shift register per channel.
+  // The fractional part is handled by the FIR coefficients A (ALFA) and B (BETA).
+  // History is maintained as a 4-deep shift register per channel for both
+  // voltage and current. Sign of PX_INT_DELAY selects which signal the
+  // correction is applied to:
+  //   >= 0: delay on voltage, int_D = PX_INT_DELAY         (0..3 samples).
+  //    < 0: delay on current, int_D = -PX_INT_DELAY - 1    (0..3 samples).
+  // Only one channel per phase is filtered per sample; the other passes
+  // through unchanged. Both history registers always shift so either branch
+  // can be selected at any time without waking-up artefacts.
   //
-  float VCur,VPrev,IntVolRPhaseOrig,IntVolYPhaseOrig,IntVolBPhaseOrig;
+  float VCur,VPrev,ICur,IPrev;
+  float IntVolRPhaseOrig,IntVolYPhaseOrig,IntVolBPhaseOrig;
+  float IntCurRPhaseOrig,IntCurYPhaseOrig,IntCurBPhaseOrig;
 
   IntVolRPhaseOrig=IntVolRPhase;
-  if(WorkingCopyGain.PR_INT_DELAY==0)      {VCur=IntVolRPhase;    VPrev=IntRPrevSample;}
-  else if(WorkingCopyGain.PR_INT_DELAY==1) {VCur=IntRPrevSample;  VPrev=IntRPrev2Sample;}
-  else if(WorkingCopyGain.PR_INT_DELAY==2) {VCur=IntRPrev2Sample; VPrev=IntRPrev3Sample;}
-  else                                     {VCur=IntRPrev3Sample; VPrev=IntRPrev4Sample;}
-  IntVolRPhase=WorkingCopyGain.PR_ALFA*(VCur+WorkingCopyGain.PR_BETA*VPrev);
+  IntCurRPhaseOrig=IntCurRPhase;
+  if(WorkingCopyGain.PR_INT_DELAY>=0)
+  {
+    int8_t d=WorkingCopyGain.PR_INT_DELAY;
+    if(d==0)      {VCur=IntVolRPhase;    VPrev=IntRPrevSample;}
+    else if(d==1) {VCur=IntRPrevSample;  VPrev=IntRPrev2Sample;}
+    else if(d==2) {VCur=IntRPrev2Sample; VPrev=IntRPrev3Sample;}
+    else          {VCur=IntRPrev3Sample; VPrev=IntRPrev4Sample;}
+    IntVolRPhase=WorkingCopyGain.PR_ALFA*(VCur+WorkingCopyGain.PR_BETA*VPrev);
+  }
+  else
+  {
+    int8_t d=-WorkingCopyGain.PR_INT_DELAY-1;
+    if(d==0)      {ICur=IntCurRPhase;       IPrev=IntCurRPrevSample;}
+    else if(d==1) {ICur=IntCurRPrevSample;  IPrev=IntCurRPrev2Sample;}
+    else if(d==2) {ICur=IntCurRPrev2Sample; IPrev=IntCurRPrev3Sample;}
+    else          {ICur=IntCurRPrev3Sample; IPrev=IntCurRPrev4Sample;}
+    IntCurRPhase=WorkingCopyGain.PR_ALFA*(ICur+WorkingCopyGain.PR_BETA*IPrev);
+  }
   IntRPrev4Sample=IntRPrev3Sample;
   IntRPrev3Sample=IntRPrev2Sample;
   IntRPrev2Sample=IntRPrevSample;
   IntRPrevSample=IntVolRPhaseOrig;
+  IntCurRPrev4Sample=IntCurRPrev3Sample;
+  IntCurRPrev3Sample=IntCurRPrev2Sample;
+  IntCurRPrev2Sample=IntCurRPrevSample;
+  IntCurRPrevSample=IntCurRPhaseOrig;
 
   IntVolYPhaseOrig=IntVolYPhase;
-  if(WorkingCopyGain.PY_INT_DELAY==0)      {VCur=IntVolYPhase;    VPrev=IntYPrevSample;}
-  else if(WorkingCopyGain.PY_INT_DELAY==1) {VCur=IntYPrevSample;  VPrev=IntYPrev2Sample;}
-  else if(WorkingCopyGain.PY_INT_DELAY==2) {VCur=IntYPrev2Sample; VPrev=IntYPrev3Sample;}
-  else                                     {VCur=IntYPrev3Sample; VPrev=IntYPrev4Sample;}
-  IntVolYPhase=WorkingCopyGain.PY_ALFA*(VCur+WorkingCopyGain.PY_BETA*VPrev);
+  IntCurYPhaseOrig=IntCurYPhase;
+  if(WorkingCopyGain.PY_INT_DELAY>=0)
+  {
+    int8_t d=WorkingCopyGain.PY_INT_DELAY;
+    if(d==0)      {VCur=IntVolYPhase;    VPrev=IntYPrevSample;}
+    else if(d==1) {VCur=IntYPrevSample;  VPrev=IntYPrev2Sample;}
+    else if(d==2) {VCur=IntYPrev2Sample; VPrev=IntYPrev3Sample;}
+    else          {VCur=IntYPrev3Sample; VPrev=IntYPrev4Sample;}
+    IntVolYPhase=WorkingCopyGain.PY_ALFA*(VCur+WorkingCopyGain.PY_BETA*VPrev);
+  }
+  else
+  {
+    int8_t d=-WorkingCopyGain.PY_INT_DELAY-1;
+    if(d==0)      {ICur=IntCurYPhase;       IPrev=IntCurYPrevSample;}
+    else if(d==1) {ICur=IntCurYPrevSample;  IPrev=IntCurYPrev2Sample;}
+    else if(d==2) {ICur=IntCurYPrev2Sample; IPrev=IntCurYPrev3Sample;}
+    else          {ICur=IntCurYPrev3Sample; IPrev=IntCurYPrev4Sample;}
+    IntCurYPhase=WorkingCopyGain.PY_ALFA*(ICur+WorkingCopyGain.PY_BETA*IPrev);
+  }
   IntYPrev4Sample=IntYPrev3Sample;
   IntYPrev3Sample=IntYPrev2Sample;
   IntYPrev2Sample=IntYPrevSample;
   IntYPrevSample=IntVolYPhaseOrig;
+  IntCurYPrev4Sample=IntCurYPrev3Sample;
+  IntCurYPrev3Sample=IntCurYPrev2Sample;
+  IntCurYPrev2Sample=IntCurYPrevSample;
+  IntCurYPrevSample=IntCurYPhaseOrig;
 
   IntVolBPhaseOrig=IntVolBPhase;
-  if(WorkingCopyGain.PB_INT_DELAY==0)      {VCur=IntVolBPhase;    VPrev=IntBPrevSample;}
-  else if(WorkingCopyGain.PB_INT_DELAY==1) {VCur=IntBPrevSample;  VPrev=IntBPrev2Sample;}
-  else if(WorkingCopyGain.PB_INT_DELAY==2) {VCur=IntBPrev2Sample; VPrev=IntBPrev3Sample;}
-  else                                     {VCur=IntBPrev3Sample; VPrev=IntBPrev4Sample;}
-  IntVolBPhase=WorkingCopyGain.PB_ALFA*(VCur+WorkingCopyGain.PB_BETA*VPrev);
+  IntCurBPhaseOrig=IntCurBPhase;
+  if(WorkingCopyGain.PB_INT_DELAY>=0)
+  {
+    int8_t d=WorkingCopyGain.PB_INT_DELAY;
+    if(d==0)      {VCur=IntVolBPhase;    VPrev=IntBPrevSample;}
+    else if(d==1) {VCur=IntBPrevSample;  VPrev=IntBPrev2Sample;}
+    else if(d==2) {VCur=IntBPrev2Sample; VPrev=IntBPrev3Sample;}
+    else          {VCur=IntBPrev3Sample; VPrev=IntBPrev4Sample;}
+    IntVolBPhase=WorkingCopyGain.PB_ALFA*(VCur+WorkingCopyGain.PB_BETA*VPrev);
+  }
+  else
+  {
+    int8_t d=-WorkingCopyGain.PB_INT_DELAY-1;
+    if(d==0)      {ICur=IntCurBPhase;       IPrev=IntCurBPrevSample;}
+    else if(d==1) {ICur=IntCurBPrevSample;  IPrev=IntCurBPrev2Sample;}
+    else if(d==2) {ICur=IntCurBPrev2Sample; IPrev=IntCurBPrev3Sample;}
+    else          {ICur=IntCurBPrev3Sample; IPrev=IntCurBPrev4Sample;}
+    IntCurBPhase=WorkingCopyGain.PB_ALFA*(ICur+WorkingCopyGain.PB_BETA*IPrev);
+  }
   IntBPrev4Sample=IntBPrev3Sample;
   IntBPrev3Sample=IntBPrev2Sample;
   IntBPrev2Sample=IntBPrevSample;
   IntBPrevSample=IntVolBPhaseOrig;
- 
+  IntCurBPrev4Sample=IntCurBPrev3Sample;
+  IntCurBPrev3Sample=IntCurBPrev2Sample;
+  IntCurBPrev2Sample=IntCurBPrevSample;
+  IntCurBPrevSample=IntCurBPhaseOrig;
+
   IntDataSum.RPhasePower +=IntVolRPhase*IntCurRPhase;
   IntDataSum.YPhasePower +=IntVolYPhase*IntCurYPhase;
   IntDataSum.BPhasePower +=IntVolBPhase*IntCurBPhase;
@@ -607,39 +674,94 @@ void ProcessMainInterrupt(void)
   IntDataSum.CurNeutralSolar +=IntNeuSolarCurrent*IntNeuSolarCurrent;
 
   float IntVolRSolarPhaseOrig,IntVolYSolarPhaseOrig,IntVolBSolarPhaseOrig;
+  float IntCurRSolarPhaseOrig,IntCurYSolarPhaseOrig,IntCurBSolarPhaseOrig;
 
   IntVolRSolarPhaseOrig=IntVolRSolarPhase;
-  if(WorkingCopyGain.PR_SOLAR_INT_DELAY==0)      {VCur=IntVolRSolarPhase;    VPrev=IntRSolarPrevSample;}
-  else if(WorkingCopyGain.PR_SOLAR_INT_DELAY==1) {VCur=IntRSolarPrevSample;  VPrev=IntRSolarPrev2Sample;}
-  else if(WorkingCopyGain.PR_SOLAR_INT_DELAY==2) {VCur=IntRSolarPrev2Sample; VPrev=IntRSolarPrev3Sample;}
-  else                                           {VCur=IntRSolarPrev3Sample; VPrev=IntRSolarPrev4Sample;}
-  IntVolRSolarPhase=WorkingCopyGain.PR_SOLAR_ALFA*(VCur+WorkingCopyGain.PR_SOLAR_BETA*VPrev);
+  IntCurRSolarPhaseOrig=IntCurRSolarPhase;
+  if(WorkingCopyGain.PR_SOLAR_INT_DELAY>=0)
+  {
+    int8_t d=WorkingCopyGain.PR_SOLAR_INT_DELAY;
+    if(d==0)      {VCur=IntVolRSolarPhase;    VPrev=IntRSolarPrevSample;}
+    else if(d==1) {VCur=IntRSolarPrevSample;  VPrev=IntRSolarPrev2Sample;}
+    else if(d==2) {VCur=IntRSolarPrev2Sample; VPrev=IntRSolarPrev3Sample;}
+    else          {VCur=IntRSolarPrev3Sample; VPrev=IntRSolarPrev4Sample;}
+    IntVolRSolarPhase=WorkingCopyGain.PR_SOLAR_ALFA*(VCur+WorkingCopyGain.PR_SOLAR_BETA*VPrev);
+  }
+  else
+  {
+    int8_t d=-WorkingCopyGain.PR_SOLAR_INT_DELAY-1;
+    if(d==0)      {ICur=IntCurRSolarPhase;       IPrev=IntCurRSolarPrevSample;}
+    else if(d==1) {ICur=IntCurRSolarPrevSample;  IPrev=IntCurRSolarPrev2Sample;}
+    else if(d==2) {ICur=IntCurRSolarPrev2Sample; IPrev=IntCurRSolarPrev3Sample;}
+    else          {ICur=IntCurRSolarPrev3Sample; IPrev=IntCurRSolarPrev4Sample;}
+    IntCurRSolarPhase=WorkingCopyGain.PR_SOLAR_ALFA*(ICur+WorkingCopyGain.PR_SOLAR_BETA*IPrev);
+  }
   IntRSolarPrev4Sample=IntRSolarPrev3Sample;
   IntRSolarPrev3Sample=IntRSolarPrev2Sample;
   IntRSolarPrev2Sample=IntRSolarPrevSample;
   IntRSolarPrevSample=IntVolRSolarPhaseOrig;
+  IntCurRSolarPrev4Sample=IntCurRSolarPrev3Sample;
+  IntCurRSolarPrev3Sample=IntCurRSolarPrev2Sample;
+  IntCurRSolarPrev2Sample=IntCurRSolarPrevSample;
+  IntCurRSolarPrevSample=IntCurRSolarPhaseOrig;
 
   IntVolYSolarPhaseOrig=IntVolYSolarPhase;
-  if(WorkingCopyGain.PY_SOLAR_INT_DELAY==0)      {VCur=IntVolYSolarPhase;    VPrev=IntYSolarPrevSample;}
-  else if(WorkingCopyGain.PY_SOLAR_INT_DELAY==1) {VCur=IntYSolarPrevSample;  VPrev=IntYSolarPrev2Sample;}
-  else if(WorkingCopyGain.PY_SOLAR_INT_DELAY==2) {VCur=IntYSolarPrev2Sample; VPrev=IntYSolarPrev3Sample;}
-  else                                           {VCur=IntYSolarPrev3Sample; VPrev=IntYSolarPrev4Sample;}
-  IntVolYSolarPhase=WorkingCopyGain.PY_SOLAR_ALFA*(VCur+WorkingCopyGain.PY_SOLAR_BETA*VPrev);
+  IntCurYSolarPhaseOrig=IntCurYSolarPhase;
+  if(WorkingCopyGain.PY_SOLAR_INT_DELAY>=0)
+  {
+    int8_t d=WorkingCopyGain.PY_SOLAR_INT_DELAY;
+    if(d==0)      {VCur=IntVolYSolarPhase;    VPrev=IntYSolarPrevSample;}
+    else if(d==1) {VCur=IntYSolarPrevSample;  VPrev=IntYSolarPrev2Sample;}
+    else if(d==2) {VCur=IntYSolarPrev2Sample; VPrev=IntYSolarPrev3Sample;}
+    else          {VCur=IntYSolarPrev3Sample; VPrev=IntYSolarPrev4Sample;}
+    IntVolYSolarPhase=WorkingCopyGain.PY_SOLAR_ALFA*(VCur+WorkingCopyGain.PY_SOLAR_BETA*VPrev);
+  }
+  else
+  {
+    int8_t d=-WorkingCopyGain.PY_SOLAR_INT_DELAY-1;
+    if(d==0)      {ICur=IntCurYSolarPhase;       IPrev=IntCurYSolarPrevSample;}
+    else if(d==1) {ICur=IntCurYSolarPrevSample;  IPrev=IntCurYSolarPrev2Sample;}
+    else if(d==2) {ICur=IntCurYSolarPrev2Sample; IPrev=IntCurYSolarPrev3Sample;}
+    else          {ICur=IntCurYSolarPrev3Sample; IPrev=IntCurYSolarPrev4Sample;}
+    IntCurYSolarPhase=WorkingCopyGain.PY_SOLAR_ALFA*(ICur+WorkingCopyGain.PY_SOLAR_BETA*IPrev);
+  }
   IntYSolarPrev4Sample=IntYSolarPrev3Sample;
   IntYSolarPrev3Sample=IntYSolarPrev2Sample;
   IntYSolarPrev2Sample=IntYSolarPrevSample;
   IntYSolarPrevSample=IntVolYSolarPhaseOrig;
+  IntCurYSolarPrev4Sample=IntCurYSolarPrev3Sample;
+  IntCurYSolarPrev3Sample=IntCurYSolarPrev2Sample;
+  IntCurYSolarPrev2Sample=IntCurYSolarPrevSample;
+  IntCurYSolarPrevSample=IntCurYSolarPhaseOrig;
 
   IntVolBSolarPhaseOrig=IntVolBSolarPhase;
-  if(WorkingCopyGain.PB_SOLAR_INT_DELAY==0)      {VCur=IntVolBSolarPhase;    VPrev=IntBSolarPrevSample;}
-  else if(WorkingCopyGain.PB_SOLAR_INT_DELAY==1) {VCur=IntBSolarPrevSample;  VPrev=IntBSolarPrev2Sample;}
-  else if(WorkingCopyGain.PB_SOLAR_INT_DELAY==2) {VCur=IntBSolarPrev2Sample; VPrev=IntBSolarPrev3Sample;}
-  else                                           {VCur=IntBSolarPrev3Sample; VPrev=IntBSolarPrev4Sample;}
-  IntVolBSolarPhase=WorkingCopyGain.PB_SOLAR_ALFA*(VCur+WorkingCopyGain.PB_SOLAR_BETA*VPrev);
+  IntCurBSolarPhaseOrig=IntCurBSolarPhase;
+  if(WorkingCopyGain.PB_SOLAR_INT_DELAY>=0)
+  {
+    int8_t d=WorkingCopyGain.PB_SOLAR_INT_DELAY;
+    if(d==0)      {VCur=IntVolBSolarPhase;    VPrev=IntBSolarPrevSample;}
+    else if(d==1) {VCur=IntBSolarPrevSample;  VPrev=IntBSolarPrev2Sample;}
+    else if(d==2) {VCur=IntBSolarPrev2Sample; VPrev=IntBSolarPrev3Sample;}
+    else          {VCur=IntBSolarPrev3Sample; VPrev=IntBSolarPrev4Sample;}
+    IntVolBSolarPhase=WorkingCopyGain.PB_SOLAR_ALFA*(VCur+WorkingCopyGain.PB_SOLAR_BETA*VPrev);
+  }
+  else
+  {
+    int8_t d=-WorkingCopyGain.PB_SOLAR_INT_DELAY-1;
+    if(d==0)      {ICur=IntCurBSolarPhase;       IPrev=IntCurBSolarPrevSample;}
+    else if(d==1) {ICur=IntCurBSolarPrevSample;  IPrev=IntCurBSolarPrev2Sample;}
+    else if(d==2) {ICur=IntCurBSolarPrev2Sample; IPrev=IntCurBSolarPrev3Sample;}
+    else          {ICur=IntCurBSolarPrev3Sample; IPrev=IntCurBSolarPrev4Sample;}
+    IntCurBSolarPhase=WorkingCopyGain.PB_SOLAR_ALFA*(ICur+WorkingCopyGain.PB_SOLAR_BETA*IPrev);
+  }
   IntBSolarPrev4Sample=IntBSolarPrev3Sample;
   IntBSolarPrev3Sample=IntBSolarPrev2Sample;
   IntBSolarPrev2Sample=IntBSolarPrevSample;
   IntBSolarPrevSample=IntVolBSolarPhaseOrig;
+  IntCurBSolarPrev4Sample=IntCurBSolarPrev3Sample;
+  IntCurBSolarPrev3Sample=IntCurBSolarPrev2Sample;
+  IntCurBSolarPrev2Sample=IntCurBSolarPrevSample;
+  IntCurBSolarPrevSample=IntCurBSolarPhaseOrig;
 
   IntDataSum.RSolarPhasePower +=IntVolRSolarPhase*IntCurRSolarPhase;
   IntDataSum.YSolarPhasePower +=IntVolYSolarPhase*IntCurYSolarPhase;

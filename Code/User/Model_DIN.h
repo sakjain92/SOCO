@@ -10,7 +10,7 @@
 // 3 digit version number
 // Shown on display as X.YY
 //
-#define VERSION_NO  213
+#define VERSION_NO  215
 
 #define MODEL_COMM_PROCOM
 #define MODEL_DATA_SAVE  
@@ -584,3 +584,11 @@
 // TODO: Add fast contactor coil protection logic as add-on in the controller to bind Jio (Something like thermal memory to keep track of estimated heating of the coil based on coil impedence and the voltage)
 // TODO: Y-cap for DI power supply and RS485 power supply?
 // TODO: Modbus needs to be tested more
+// TODO: Do thermal imaging to see which area is getting heated up
+// TODO: Check power consumption in each device during functional test
+// TODO: No void inside panel and outside panel during packaging to avoid damage of 6k panel lot during transportation
+// TODO: Get trasportation vibration testing done (Also get the final panel tested by Phani. He has lots of experience that will be useful. Send test report of SOCO also to him. Get SOCO tested till failure)
+// TODO: Give FOTA, FOTA simulator and reactive/active/apparanet power calculation every 500ms as extra feature over modbus
+// TODO: Give a python script to read all parameters and display interactively or a modbus poll format
+// TODO: Check why large error on PF in Grid Y phase in uncalibrated software
+// TODO: In test after calibration, check all parameters again to make sure calibration was proper

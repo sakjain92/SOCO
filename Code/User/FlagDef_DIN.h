@@ -149,9 +149,9 @@ extern char _product_info_fits_in_eeprom[
 // An equivalent schenider model: https://download.schneider-electric.com/files?p_Doc_Ref=BRU19338&p_enDocType=Instruction+sheet
 //
 
-#define   VOLTAGE_COEFF            2.69740E-04f
+#define   VOLTAGE_COEFF            2.85607E-04f
 #define   PH_VOLTAGE_COEFF         (VOLTAGE_COEFF)
-#define   FUND_VOL_COEFF           3.3717E-04f
+#define   FUND_VOL_COEFF           3.5701E-04f
 
 #define   CURRENT_COEFF            1.0115E-04f
 #define   NEU_CURRENT_COEFF        (CURRENT_COEFF)
@@ -159,9 +159,9 @@ extern char _product_info_fits_in_eeprom[
 #define   FUND_CURRENT_COEFF       1.2644E-04f
 
 
-#define   POWER_COEFF_3P4W         2.728484E-08f
+#define   POWER_COEFF_3P4W         2.888983E-08f
 
-#define  FUND_POWER_COEFF          4.2633E-08f
+#define  FUND_POWER_COEFF          4.5140E-08f
 
 #define  FAN_CURRENT_COEFF         1.1653E-05f
 
@@ -300,16 +300,16 @@ extern char _product_info_fits_in_eeprom[
 #define        CURRENT_TOLRERANCE                    0.3f   // UNDONE: This was 0.1 earlier but in our board at lower end of calibration needed to increase error range
                                                             // We should use SDADC to get better accuracy
 #define        VOLTAGE_TOLERANCE                     0.1f
-#define        POWER_TOLERANCE                       0.4f   // UNDONE: This should be made less but Grid Y phase has unusually large phase error
+#define        POWER_TOLERANCE                       0.5f   // UNDONE: This should be made less but Grid Y phase has unusually large phase error
 
 // PH_ERROR is stored as (P_measured - P_expected)/P_expected - 0.001.
-// CalPF() converts PH_ERROR to a fractional-sample delay D.
-// PH_ERROR_D_ZERO: upper bound; values above this give D < 0 (invalid).
-// PH_ERROR_D_MAX:  lower bound; values below this give D >= 4 (exceeds 4
-//                  previous-sample buffer used in phase correction).
+// CalPF() converts PH_ERROR to a fractional-sample delay D, applied to
+// voltage (Error <= 0) or current (Error > 0). Magnitude maps to a
+// delay of 0..~4 samples. Either extreme exceeds the 4-deep shift
+// register the FIR uses.
 //
-#define        PH_ERROR_D_ZERO                       (0.0f)
-#define        PH_ERROR_D_MAX                        (-0.735f)
+#define        PH_ERROR_MIN                          (-0.735f)
+#define        PH_ERROR_MAX                          (+0.735f)
 
 #define        CAL_FAN_CUR_SETTING                   0.1f
 #define        FAN_CUR_TOLERANCE                     0.3f   // UNDONE: Check why this is also needed to be high

@@ -19,7 +19,7 @@ void RefreshLcd(void);
 void CheckAutoScroll(void);
 void DisplayDisabled(void);
 void ReSetDisplayParameter(void);
-void CalPF(float Error, float * CalGainBufferPointer, float * CalBetaBufferPointer, uint8_t * CalIntDelayPointer);
+void CalPF(float Error, float * CalGainBufferPointer, float * CalBetaBufferPointer, int8_t * CalIntDelayPointer);
 void EepromWrite(uint32_t DataLocation,uint16_t NoOfBytes,uint8_t DeviceAddress,uint8_t *DataArray );
 void EepromRead(uint32_t DataLocation,uint16_t NoOfBytes,uint8_t DeviceAddress,uint8_t *DataArray );
 void CheckEpromFree(uint8_t DeviceAddress);
@@ -93,8 +93,8 @@ float BufferBetaR[51],BufferBetaY[51],BufferBetaB[51];
 float BufferAlfaRSolar[51],BufferAlfaYSolar[51],BufferAlfaBSolar[51];
 float BufferBetaRSolar[51],BufferBetaYSolar[51],BufferBetaBSolar[51];
 // Integer sample delay lookup tables, indexed same as BufferAlfa/Beta
-uint8_t BufferIntDelayR[51],BufferIntDelayY[51],BufferIntDelayB[51];
-uint8_t BufferIntDelayRSolar[51],BufferIntDelayYSolar[51],BufferIntDelayBSolar[51];
+int8_t BufferIntDelayR[51],BufferIntDelayY[51],BufferIntDelayB[51];
+int8_t BufferIntDelayRSolar[51],BufferIntDelayYSolar[51],BufferIntDelayBSolar[51];
 double EnergyOverflowLimit;
 uint64_t SumWattPerPulseTick;
 uint32_t WattPerPulseTick,IntWattPerPulseTick;
@@ -110,6 +110,18 @@ float IntRSolarPrevSample,IntYSolarPrevSample,IntBSolarPrevSample;
 float IntRSolarPrev2Sample,IntYSolarPrev2Sample,IntBSolarPrev2Sample;
 float IntRSolarPrev3Sample,IntYSolarPrev3Sample,IntBSolarPrev3Sample;
 float IntRSolarPrev4Sample,IntYSolarPrev4Sample,IntBSolarPrev4Sample;
+// Current-channel shift register, mirrors the voltage one above. Used
+// only when PX_INT_DELAY < 0 (delay applied to I instead of V, to absorb
+// CT phase errors where displayed PF > actual PF at calibration time).
+//
+float IntCurRPrevSample,IntCurYPrevSample,IntCurBPrevSample;
+float IntCurRPrev2Sample,IntCurYPrev2Sample,IntCurBPrev2Sample;
+float IntCurRPrev3Sample,IntCurYPrev3Sample,IntCurBPrev3Sample;
+float IntCurRPrev4Sample,IntCurYPrev4Sample,IntCurBPrev4Sample;
+float IntCurRSolarPrevSample,IntCurYSolarPrevSample,IntCurBSolarPrevSample;
+float IntCurRSolarPrev2Sample,IntCurYSolarPrev2Sample,IntCurBSolarPrev2Sample;
+float IntCurRSolarPrev3Sample,IntCurYSolarPrev3Sample,IntCurBSolarPrev3Sample;
+float IntCurRSolarPrev4Sample,IntCurYSolarPrev4Sample,IntCurBSolarPrev4Sample;
 uint16_t CopySetPara[MAX_PARAM_LIMIT+1],DataSaveCounter;
 uint16_t AdcDataInArray[24],SampleCounter;
 int16_t SdAdcDataInArray[12];

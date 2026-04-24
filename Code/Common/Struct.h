@@ -542,14 +542,22 @@ struct GAIN_WC
   float FAN1_GAIN;
   float FAN2_GAIN;
 
-  // Integer sample delay for phase correction (0-3). The fractional part is
-  // handled by the IIR filter via PR_ALFA/PR_BETA above.
-  uint8_t PR_INT_DELAY;
-  uint8_t PY_INT_DELAY;
-  uint8_t PB_INT_DELAY;
-  uint8_t PR_SOLAR_INT_DELAY;
-  uint8_t PY_SOLAR_INT_DELAY;
-  uint8_t PB_SOLAR_INT_DELAY;
+  // Integer sample delay for phase correction. Sign selects which signal
+  // the correction is applied to; magnitude selects the integer tap.
+  //   >= 0: delay applied to voltage, integer part = value (0..3 samples).
+  //    < 0: delay applied to current, integer part = |value| - 1 (0..3
+  //         samples). The bias of 1 avoids an encoding collision at 0.
+  // In both cases the fractional part is handled by PR_ALFA/PR_BETA.
+  // CT phase errors that drive displayed PF > actual PF at cal time fall
+  // into the negative branch; CT phase errors that drive displayed PF <
+  // actual PF fall into the non-negative branch (the historical path).
+  //
+  int8_t PR_INT_DELAY;
+  int8_t PY_INT_DELAY;
+  int8_t PB_INT_DELAY;
+  int8_t PR_SOLAR_INT_DELAY;
+  int8_t PY_SOLAR_INT_DELAY;
+  int8_t PB_SOLAR_INT_DELAY;
 };
 
   

@@ -192,18 +192,18 @@ bool DirectCalibration(void)
       TempFloat=(CalPowBSolar-CAL_PF_POWER_SETTING_LOW)/CAL_PF_POWER_SETTING_LOW;
       CalBuffer.IB_SOLAR_LOW_PH_ERROR=TempFloat-0.001;
 
-      if (CalBuffer.IR_LOW_PH_ERROR>PH_ERROR_D_ZERO ||
-          CalBuffer.IR_LOW_PH_ERROR<PH_ERROR_D_MAX ||
-          CalBuffer.IY_LOW_PH_ERROR>PH_ERROR_D_ZERO ||
-          CalBuffer.IY_LOW_PH_ERROR<PH_ERROR_D_MAX ||
-          CalBuffer.IB_LOW_PH_ERROR>PH_ERROR_D_ZERO ||
-          CalBuffer.IB_LOW_PH_ERROR<PH_ERROR_D_MAX ||
-          CalBuffer.IR_SOLAR_LOW_PH_ERROR>PH_ERROR_D_ZERO ||
-          CalBuffer.IR_SOLAR_LOW_PH_ERROR<PH_ERROR_D_MAX ||
-          CalBuffer.IY_SOLAR_LOW_PH_ERROR>PH_ERROR_D_ZERO ||
-          CalBuffer.IY_SOLAR_LOW_PH_ERROR<PH_ERROR_D_MAX ||
-          CalBuffer.IB_SOLAR_LOW_PH_ERROR>PH_ERROR_D_ZERO ||
-          CalBuffer.IB_SOLAR_LOW_PH_ERROR<PH_ERROR_D_MAX)
+      if (CalBuffer.IR_LOW_PH_ERROR>PH_ERROR_MAX ||
+          CalBuffer.IR_LOW_PH_ERROR<PH_ERROR_MIN ||
+          CalBuffer.IY_LOW_PH_ERROR>PH_ERROR_MAX ||
+          CalBuffer.IY_LOW_PH_ERROR<PH_ERROR_MIN ||
+          CalBuffer.IB_LOW_PH_ERROR>PH_ERROR_MAX ||
+          CalBuffer.IB_LOW_PH_ERROR<PH_ERROR_MIN ||
+          CalBuffer.IR_SOLAR_LOW_PH_ERROR>PH_ERROR_MAX ||
+          CalBuffer.IR_SOLAR_LOW_PH_ERROR<PH_ERROR_MIN ||
+          CalBuffer.IY_SOLAR_LOW_PH_ERROR>PH_ERROR_MAX ||
+          CalBuffer.IY_SOLAR_LOW_PH_ERROR<PH_ERROR_MIN ||
+          CalBuffer.IB_SOLAR_LOW_PH_ERROR>PH_ERROR_MAX ||
+          CalBuffer.IB_SOLAR_LOW_PH_ERROR<PH_ERROR_MIN)
       {
           FlagDirectCalibration = CALIBRATE_ERROR;
       }
@@ -298,18 +298,18 @@ bool DirectCalibration(void)
       TempFloat=(CalPowBSolar-CAL_PF_POWER_SETTING_MID)/CAL_PF_POWER_SETTING_MID;
       CalBuffer.IB_SOLAR_MID_PH_ERROR=TempFloat-0.001;
 
-      if (CalBuffer.IR_MID_PH_ERROR>PH_ERROR_D_ZERO ||
-          CalBuffer.IR_MID_PH_ERROR<PH_ERROR_D_MAX ||
-          CalBuffer.IY_MID_PH_ERROR>PH_ERROR_D_ZERO ||
-          CalBuffer.IY_MID_PH_ERROR<PH_ERROR_D_MAX ||
-          CalBuffer.IB_MID_PH_ERROR>PH_ERROR_D_ZERO ||
-          CalBuffer.IB_MID_PH_ERROR<PH_ERROR_D_MAX ||
-          CalBuffer.IR_SOLAR_MID_PH_ERROR>PH_ERROR_D_ZERO ||
-          CalBuffer.IR_SOLAR_MID_PH_ERROR<PH_ERROR_D_MAX ||
-          CalBuffer.IY_SOLAR_MID_PH_ERROR>PH_ERROR_D_ZERO ||
-          CalBuffer.IY_SOLAR_MID_PH_ERROR<PH_ERROR_D_MAX ||
-          CalBuffer.IB_SOLAR_MID_PH_ERROR>PH_ERROR_D_ZERO ||
-          CalBuffer.IB_SOLAR_MID_PH_ERROR<PH_ERROR_D_MAX)
+      if (CalBuffer.IR_MID_PH_ERROR>PH_ERROR_MAX ||
+          CalBuffer.IR_MID_PH_ERROR<PH_ERROR_MIN ||
+          CalBuffer.IY_MID_PH_ERROR>PH_ERROR_MAX ||
+          CalBuffer.IY_MID_PH_ERROR<PH_ERROR_MIN ||
+          CalBuffer.IB_MID_PH_ERROR>PH_ERROR_MAX ||
+          CalBuffer.IB_MID_PH_ERROR<PH_ERROR_MIN ||
+          CalBuffer.IR_SOLAR_MID_PH_ERROR>PH_ERROR_MAX ||
+          CalBuffer.IR_SOLAR_MID_PH_ERROR<PH_ERROR_MIN ||
+          CalBuffer.IY_SOLAR_MID_PH_ERROR>PH_ERROR_MAX ||
+          CalBuffer.IY_SOLAR_MID_PH_ERROR<PH_ERROR_MIN ||
+          CalBuffer.IB_SOLAR_MID_PH_ERROR>PH_ERROR_MAX ||
+          CalBuffer.IB_SOLAR_MID_PH_ERROR<PH_ERROR_MIN)
       {
           FlagDirectCalibration = CALIBRATE_ERROR;
       }
@@ -408,18 +408,18 @@ bool DirectCalibration(void)
       TempFloat=(CalPowBSolar-CAL_PF_POWER_SETTING_HIGH)/CAL_PF_POWER_SETTING_HIGH;
       CalBuffer.IB_SOLAR_HIGH_PH_ERROR=TempFloat-0.001;
 
-      if (CalBuffer.IR_HIGH_PH_ERROR>PH_ERROR_D_ZERO ||
-          CalBuffer.IR_HIGH_PH_ERROR<PH_ERROR_D_MAX ||
-          CalBuffer.IY_HIGH_PH_ERROR>PH_ERROR_D_ZERO ||
-          CalBuffer.IY_HIGH_PH_ERROR<PH_ERROR_D_MAX ||
-          CalBuffer.IB_HIGH_PH_ERROR>PH_ERROR_D_ZERO ||
-          CalBuffer.IB_HIGH_PH_ERROR<PH_ERROR_D_MAX ||
-          CalBuffer.IR_SOLAR_HIGH_PH_ERROR>PH_ERROR_D_ZERO ||
-          CalBuffer.IR_SOLAR_HIGH_PH_ERROR<PH_ERROR_D_MAX ||
-          CalBuffer.IY_SOLAR_HIGH_PH_ERROR>PH_ERROR_D_ZERO ||
-          CalBuffer.IY_SOLAR_HIGH_PH_ERROR<PH_ERROR_D_MAX ||
-          CalBuffer.IB_SOLAR_HIGH_PH_ERROR>PH_ERROR_D_ZERO ||
-          CalBuffer.IB_SOLAR_HIGH_PH_ERROR<PH_ERROR_D_MAX)
+      if (CalBuffer.IR_HIGH_PH_ERROR>PH_ERROR_MAX ||
+          CalBuffer.IR_HIGH_PH_ERROR<PH_ERROR_MIN ||
+          CalBuffer.IY_HIGH_PH_ERROR>PH_ERROR_MAX ||
+          CalBuffer.IY_HIGH_PH_ERROR<PH_ERROR_MIN ||
+          CalBuffer.IB_HIGH_PH_ERROR>PH_ERROR_MAX ||
+          CalBuffer.IB_HIGH_PH_ERROR<PH_ERROR_MIN ||
+          CalBuffer.IR_SOLAR_HIGH_PH_ERROR>PH_ERROR_MAX ||
+          CalBuffer.IR_SOLAR_HIGH_PH_ERROR<PH_ERROR_MIN ||
+          CalBuffer.IY_SOLAR_HIGH_PH_ERROR>PH_ERROR_MAX ||
+          CalBuffer.IY_SOLAR_HIGH_PH_ERROR<PH_ERROR_MIN ||
+          CalBuffer.IB_SOLAR_HIGH_PH_ERROR>PH_ERROR_MAX ||
+          CalBuffer.IB_SOLAR_HIGH_PH_ERROR<PH_ERROR_MIN)
       {
           FlagDirectCalibration = CALIBRATE_ERROR;
       }
@@ -571,30 +571,36 @@ Inp: Error, gain pointer, value pointer
 Ret: None
 */  
 float W,PhasenRadian,D,B,A;
-void CalPF(float Error, float * CalGainBufferPointer, float * CalBetaBufferPointer, uint8_t * CalIntDelayPointer)
+void CalPF(float Error, float * CalGainBufferPointer, float * CalBetaBufferPointer, int8_t * CalIntDelayPointer)
 {
-    // Phase correction: converts PH_ERROR to IIR filter coefficients A, B and
-    // an integer sample delay.
+    // Phase correction: converts PH_ERROR to an integer sample delay +
+    // fractional FIR coefficients (A, B).
     //
-    // D = total fractional-sample delay needed.  For D >= 1, the integer part
-    // is stored in *CalIntDelayPointer and only the fractional part (< 1) is
-    // fed into the IIR formula, keeping the discriminant positive for all
-    // valid inputs.
+    // Sign of Error selects which signal the correction is applied to:
+    //   Error <= 0: delay applied to voltage; *CalIntDelayPointer in 0..3.
+    //   Error >  0: delay applied to current; *CalIntDelayPointer in -1..-4
+    //               (bias of 1 so 0 unambiguously means V-side). Sign of
+    //               Error is flipped before computing D so the same FIR
+    //               coefficients can be reused on the other channel.
     //
-    // Valid input range: PH_ERROR_D_MAX <= Error <= PH_ERROR_D_ZERO
-    // (enforced by bounds check in DirectCalibration before values are stored).
+    // Valid input range: PH_ERROR_MIN <= Error <= PH_ERROR_MAX (enforced
+    // by the bounds check in DirectCalibration before values are stored).
     //
+    bool delayOnI = (Error > 0.0f);
+    if (delayOnI) Error = -Error;
+
     W=(3.14159265f)/32;  // 2*freq*PI/sampling freq
     PhasenRadian=acos(0.5f*(1+Error))-(3.14159265f/3);
     D=PhasenRadian/W;
 
-    *CalIntDelayPointer=(uint8_t)D;
-    float fracD = D - (float)(*CalIntDelayPointer);
+    uint8_t intD = (uint8_t)D;
+    float fracD = D - (float)intD;
 
     B=-((1-2*fracD)*cos(W)-sqrt(((1-2*fracD)*(1-2*fracD)*cos(W)*cos(W))+(4*fracD*(1-fracD))))/(2*(1-fracD));
     A=1/(sqrt(((cos(W)+B)*(cos(W)+B))+sin(W)*sin(W)));
     *CalGainBufferPointer=A;
     *CalBetaBufferPointer=B;
+    *CalIntDelayPointer = delayOnI ? -(int8_t)(intD + 1) : (int8_t)intD;
 }
    
 /*
