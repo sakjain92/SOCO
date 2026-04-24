@@ -105,7 +105,11 @@ void MeterInit(void)
   // parameter.
   //
 #ifdef MODEL_RELEASED
-  if (!g_ProductInfo.FunctionallyTestedFlag || !g_ProductInfo.CalibratedFlag)
+  bool serialNumberWritten =
+      (g_ProductInfo.SerialNumber[0] != 0) || (g_ProductInfo.SerialNumber[1] != 0);
+  if (!serialNumberWritten ||
+      !g_ProductInfo.FunctionallyTestedFlag ||
+      !g_ProductInfo.CalibratedFlag)
   {
       g_testingStatus.TestingModeEnabled = true;
   }
