@@ -42,11 +42,6 @@ const uint8_t   DisEneType1[]="RESO";
 const uint8_t   DisEneType2[]="COUNT";
 const uint8_t   *DisEneType[]={DisEneType1,DisEneType2};
 
-const uint8_t   DisLittleEndian[]=" LIT";
-const uint8_t   DisBigEndian[]=" BIG";
-const uint8_t   *DisEndTyp[]={DisBigEndian,DisLittleEndian};
-
-
 const uint8_t DIS_ENTER[]="ENTR";
 const uint8_t DIS_CUR_PASS[]="C PASS";
 const uint8_t DIS_PASS[]="PASS";
@@ -74,7 +69,6 @@ const uint8_t DIS_SEL_PT_SECONDARY[]="PTSR";
 const uint8_t DIS_SEL_CT_PRIMARY[]="CTPR";
 const uint8_t DIS_SEL_CT_SECONDARY[]="CTSR";
 const uint8_t DIS_SEL_KVA[]=" KVA";
-const uint8_t DIS_SEL_END[]="ENDI";
 const uint8_t DIS_SEL_TYPE[]="TYPE";
 const uint8_t DIS_SEL_SYSTEM[]=" SYS";
 const uint8_t DIS_SEL_CONF[]="CONF";
@@ -136,8 +130,8 @@ struct EditStart
 const struct EditStart StartSelectingBlock[12]=
 {
   {(uint8_t*)0,                    0,   0,       0,                       0},// Should always be first Line.
-  {(uint8_t*)DIS_EDIT,             0,   24,       EditSystemParameter,    1},
-  {(uint8_t*)DIS_VIEW,             0,   24,       ViewSystemParameter,    0},
+  {(uint8_t*)DIS_EDIT,             0,   23,       EditSystemParameter,    1},
+  {(uint8_t*)DIS_VIEW,             0,   23,       ViewSystemParameter,    0},
 #ifdef MODEL_DIS_OLD_DATA
   {(uint8_t*)DIS_OLD,             0,   16,       ViewOldData,            0},
 #endif
@@ -460,8 +454,8 @@ const struct Parameter EditParameters[MAX_PARAM_LIMIT]=
 
     },
     
-     {    
-    
+     {
+
          PARA_STOP_BIT,                          // VariableIndex
          DIS_SEL_STOP,                          //*DesArrayTop
          0,                                        //MinValue
@@ -473,20 +467,6 @@ const struct Parameter EditParameters[MAX_PARAM_LIMIT]=
          0,                                       //DataWithDecUnit
          0,                                      //Default Value
     },
-    
-    {
-
-       PARA_ENDIAN,                          // VariableIndex
-       DIS_SEL_END,                          //*DesArrayTop
-       0,                                        //MinValue
-       1,                                      // Max value
-       1,                                       //StepValue
-       EDIT_ENDIAN_TYPE,                      //DecimalPosition
-       16,                                      //ParaMeterLength
-        0,                                      //DisableType
-       0,                                       //DataWithDecUnit
-       0,                                      //Default Value
-  },
   };
 
 

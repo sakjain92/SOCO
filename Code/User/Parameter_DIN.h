@@ -32,7 +32,6 @@
 #define     PARA_BAUD_RATE             21
 #define     PARA_PARITY                22
 #define     PARA_STOP_BIT              23
-#define     PARA_ENDIAN                24
 
 
 
@@ -57,8 +56,7 @@ These all shall be array of strings. The array shall end with a null string
 #define EDIT_DEC_BAUD_RATE            14
 #define EDIT_DEC_PARITY               15
 #define EDIT_DEC_STOP_BIT             16
-#define EDIT_ENDIAN_TYPE              17
-#define EDIT_DEC_ON_OFF               18
+#define EDIT_DEC_ON_OFF               17
 
 
 

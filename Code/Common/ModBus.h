@@ -994,7 +994,6 @@ const struct ModBusParameter BlockAll[]=
  { (uint8_t *)&CopySetPara[PARA_BAUD_RATE]              ,          DATA_TYPE_16,     1       ,       1      },
  { (uint8_t *)&CopySetPara[PARA_PARITY]                 ,          DATA_TYPE_16,     1       ,       1      },
  { (uint8_t *)&CopySetPara[PARA_STOP_BIT]               ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_ENDIAN]                 ,          DATA_TYPE_16,     1       ,       1      },
 #else
  { (uint8_t *)&CopySetPara[PARA_MAINS_UNDER_VOLT]       ,          DATA_TYPE_16,     1       ,       1      },
  { (uint8_t *)&CopySetPara[PARA_MAINS_OVER_VOLT]        ,          DATA_TYPE_16,     1       ,       1      },
@@ -1020,7 +1019,6 @@ const struct ModBusParameter BlockAll[]=
  { (uint8_t *)&CopySetPara[PARA_BAUD_RATE]              ,          DATA_TYPE_16,     1       ,       1      },
  { (uint8_t *)&CopySetPara[PARA_PARITY]                 ,          DATA_TYPE_16,     1       ,       1      },
  { (uint8_t *)&CopySetPara[PARA_STOP_BIT]               ,          DATA_TYPE_16,     1       ,       1      },
- { (uint8_t *)&CopySetPara[PARA_ENDIAN]                 ,          DATA_TYPE_16,     1       ,       1      },
 #endif
 
  ////////////////////////     INTERNAL TESTING (base 50000)  /////////

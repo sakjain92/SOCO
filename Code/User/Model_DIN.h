@@ -592,3 +592,15 @@
 // TODO: Give a python script to read all parameters and display interactively or a modbus poll format
 // TODO: Check why large error on PF in Grid Y phase in uncalibrated software
 // TODO: In test after calibration, check all parameters again to make sure calibration was proper
+// TODO: Get type test report. Buy 10kV+ surge generator from Prima/Lisun (Check specifications fully)
+// TODO: Remove battery & 32kHz crystal from BOM
+// TODO: Review full BOM
+// TODO: Fix transformer
+// TODO: In installation guide, mention that we need all 6 mounting screws. Also mention that proper spacing to be maintained between each wire connected on terminal
+// TODO: For future SOCO, reduce size keeping mounting holes same. Make metallic body plastic also.
+// TODO: in installation guide of SOCO, we should mention proper connections on terminals to avoid arcing during surge
+// TODO: remove LED9 from BOM and it's resistor, along with battery & 32khz crystal
+// TODO: Run dips & interrupts, flicker, Conducted emissions, Raditated emissions, conducted suseptibility, radiated susceptibility tests, harmonics, surge at higher counts
+// TODO: Test SOCO software version in testing jig
+// TODO: Neutral current & Phase-to-Phase voltage needs to be checked as depends on inter-phase calibration
+// TODO: CT wire length might need to be reduced on confirmation of all Panel builders

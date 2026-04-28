@@ -756,28 +756,14 @@ void ModBusCommunication(void)
                   
                   if(BlockAll[ArrayIndex+d].lookup)
                   {
-                    if(CopySetPara[PARA_ENDIAN]==0)
-                    {
-                      Mod_TransmitFrame.Data_Array[DataArrLoc+8] = *((uint8_t *)&TempDataTransfer);
-                      Mod_TransmitFrame.Data_Array[DataArrLoc+7] = *((uint8_t *)&TempDataTransfer+1);
-                      Mod_TransmitFrame.Data_Array[DataArrLoc+6] = *((uint8_t *)&TempDataTransfer+2);
-                      Mod_TransmitFrame.Data_Array[DataArrLoc+5] = *((uint8_t *)&TempDataTransfer+3);
-                      Mod_TransmitFrame.Data_Array[DataArrLoc+4] = *((uint8_t *)&TempDataTransfer+4);
-                      Mod_TransmitFrame.Data_Array[DataArrLoc+3] = *((uint8_t *)&TempDataTransfer+5);
-                      Mod_TransmitFrame.Data_Array[DataArrLoc+2] = *((uint8_t *)&TempDataTransfer+6);
-                      Mod_TransmitFrame.Data_Array[DataArrLoc+1] = *((uint8_t *)&TempDataTransfer+7);
-                    }
-                    else
-                     {
-                       Mod_TransmitFrame.Data_Array[DataArrLoc+2] = *((uint8_t *)&TempDataTransfer);
-                       Mod_TransmitFrame.Data_Array[DataArrLoc+1] = *((uint8_t *)&TempDataTransfer+1);
-                       Mod_TransmitFrame.Data_Array[DataArrLoc+4] = *((uint8_t *)&TempDataTransfer+2);
-                       Mod_TransmitFrame.Data_Array[DataArrLoc+3] = *((uint8_t *)&TempDataTransfer+3);
-                       Mod_TransmitFrame.Data_Array[DataArrLoc+6] = *((uint8_t *)&TempDataTransfer+4);
-                       Mod_TransmitFrame.Data_Array[DataArrLoc+5] = *((uint8_t *)&TempDataTransfer+5);
-                       Mod_TransmitFrame.Data_Array[DataArrLoc+8] = *((uint8_t *)&TempDataTransfer+6);
-                       Mod_TransmitFrame.Data_Array[DataArrLoc+7] = *((uint8_t *)&TempDataTransfer+7);
-                     }
+                    Mod_TransmitFrame.Data_Array[DataArrLoc+8] = *((uint8_t *)&TempDataTransfer);
+                    Mod_TransmitFrame.Data_Array[DataArrLoc+7] = *((uint8_t *)&TempDataTransfer+1);
+                    Mod_TransmitFrame.Data_Array[DataArrLoc+6] = *((uint8_t *)&TempDataTransfer+2);
+                    Mod_TransmitFrame.Data_Array[DataArrLoc+5] = *((uint8_t *)&TempDataTransfer+3);
+                    Mod_TransmitFrame.Data_Array[DataArrLoc+4] = *((uint8_t *)&TempDataTransfer+4);
+                    Mod_TransmitFrame.Data_Array[DataArrLoc+3] = *((uint8_t *)&TempDataTransfer+5);
+                    Mod_TransmitFrame.Data_Array[DataArrLoc+2] = *((uint8_t *)&TempDataTransfer+6);
+                    Mod_TransmitFrame.Data_Array[DataArrLoc+1] = *((uint8_t *)&TempDataTransfer+7);
                   }
                   else
                   {
@@ -833,21 +819,10 @@ void ModBusCommunication(void)
                     
                     if(BlockAll[ArrayIndex+d].lookup)
                     {
-                      if(CopySetPara[PARA_ENDIAN]==0)
-                      {
-                        Mod_TransmitFrame.Data_Array[DataArrLoc+4] = *((uint8_t *)&TempDataTransfer);
-                        Mod_TransmitFrame.Data_Array[DataArrLoc+3] = *((uint8_t *)&TempDataTransfer+1);
-                        Mod_TransmitFrame.Data_Array[DataArrLoc+2] = *((uint8_t *)&TempDataTransfer+2);
-                        Mod_TransmitFrame.Data_Array[DataArrLoc+1] = *((uint8_t *)&TempDataTransfer+3);
-                      }
-                      else
-                      {
-                        Mod_TransmitFrame.Data_Array[DataArrLoc+2] = *((uint8_t *)&TempDataTransfer);
-                        Mod_TransmitFrame.Data_Array[DataArrLoc+1] = *((uint8_t *)&TempDataTransfer+1);
-                        Mod_TransmitFrame.Data_Array[DataArrLoc+4] = *((uint8_t *)&TempDataTransfer+2);
-                        Mod_TransmitFrame.Data_Array[DataArrLoc+3] = *((uint8_t *)&TempDataTransfer+3);
-                          
-                       }
+                      Mod_TransmitFrame.Data_Array[DataArrLoc+4] = *((uint8_t *)&TempDataTransfer);
+                      Mod_TransmitFrame.Data_Array[DataArrLoc+3] = *((uint8_t *)&TempDataTransfer+1);
+                      Mod_TransmitFrame.Data_Array[DataArrLoc+2] = *((uint8_t *)&TempDataTransfer+2);
+                      Mod_TransmitFrame.Data_Array[DataArrLoc+1] = *((uint8_t *)&TempDataTransfer+3);
                     }
                     else
                     {

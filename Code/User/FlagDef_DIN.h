@@ -96,7 +96,7 @@ extern char _product_info_fits_in_eeprom[
 
 
 
-#define MAX_PARAM_LIMIT  25
+#define MAX_PARAM_LIMIT  24
 #define POWER_FAIL_SENSE_VALUE    2503
 
 
