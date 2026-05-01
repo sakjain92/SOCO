@@ -277,6 +277,9 @@ extern char _product_info_fits_in_eeprom[
 #define         CALIBRATE_DIS_L_PF      27
 #define         CALIBRATE_L_PF          28
 
+#define         CALIBRATE_DIS_FAN       29
+#define         CALIBRATE_FAN           30
+
 #define         CALIBRATE_END           127
 #define         CALIBRATE_ERROR         126
 

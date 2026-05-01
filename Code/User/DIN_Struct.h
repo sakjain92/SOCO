@@ -123,6 +123,8 @@ const uint8_t DIS_SET[]=" SET";
 const uint8_t DIS_SETHIGHPF[]="S HPF";
 const uint8_t DIS_SETMIDPF[]="S MPF";
 const uint8_t DIS_SETLOWPF[]="S LPF";
+const uint8_t DIS_SETFAN[]="S FAN";
+const uint8_t DIS_CALFAN[]="C FAN";
 const uint8_t DIS_LOW[]=" LOW";
 const uint8_t DIS_VI[]="VI";
 

@@ -955,7 +955,22 @@ void DisplayCalLowVI(void)
   for (uint8_t i=0;i<16;i++)BufferToDisplay[i]=0;
   DisplayString(ROW_TOP,DIGIT_5,(uint8_t *)DIS_CALLOWVI,0);
   UpdateDisplay=1;
-  DisplayScrollCounter=10; 
+  DisplayScrollCounter=10;
+}
+
+void DisplaySetFan(void)
+{
+    for (uint8_t i=0;i<16;i++)BufferToDisplay[i]=0;
+    DisplayString(ROW_TOP,DIGIT_5,(uint8_t *)DIS_SETFAN,0);
+    UpdateDisplay=1;
+}
+
+void DisplayCalFan(void)
+{
+  for (uint8_t i=0;i<16;i++)BufferToDisplay[i]=0;
+  DisplayString(ROW_TOP,DIGIT_5,(uint8_t *)DIS_CALFAN,0);
+  UpdateDisplay=1;
+  DisplayScrollCounter=10;
 }
 
 void SetInitialDisplay(void)

@@ -31,6 +31,8 @@ extern  void DisplaySetLowPF(void);
 extern  void DisplayCalHighPF(void);
 extern  void DisplayCalMidPF(void);
 extern  void DisplayCalLowPF(void);
+extern  void DisplaySetFan(void);
+extern  void DisplayCalFan(void);
 extern  void DisplayInputX(uint8_t idx);
 extern  void DisplayOutputX(uint8_t idx);
 extern void DisplayDoneCal(void);

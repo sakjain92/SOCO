@@ -33,6 +33,8 @@ void DisplaySetLowPF(void);
 void DisplayCalHighPF(void);
 void DisplayCalMidPF(void);
 void DisplayCalLowPF(void);
+void DisplaySetFan(void);
+void DisplayCalFan(void);
 void InitUart(uint8_t baud,uint8_t parity1,uint8_t Stopbit1);
 void ClearCalAccumulatedData(void);
 void DisplayUpdate(void);

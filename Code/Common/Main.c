@@ -1269,6 +1269,7 @@ void StartCalibration(void)
    }
    else if ((ModbusAdvanceFlagDirectCalibration) && (FlagDirectCalibration==0))
    {
+       SetDefaultCalCoeff();
        FlagDirectCalibration = CALIBRATE_DIS_H_VI;
    }
 
@@ -1366,8 +1367,8 @@ void StartCalibration(void)
      WorkingCopyGain.PB_SOLAR_BETA=0;
      WorkingCopyGain.PB_SOLAR_INT_DELAY=0;
 
-     WorkingCopyGain.FAN1_GAIN=1.0;
-     WorkingCopyGain.FAN2_GAIN=1.0;
+     WorkingCopyGain.FAN1_GAIN=CalibrationCoeff.FAN1_GAIN;
+     WorkingCopyGain.FAN2_GAIN=CalibrationCoeff.FAN2_GAIN;
    }
    if(FlagDirectCalibration == CALIBRATE_H_VI)
    {
@@ -1657,7 +1658,7 @@ void StartCalibration(void)
    {
      CalibrationGapCounter++;
      if(CalibrationGapCounter<CAL_ACC_DELAY);
-     
+
      else if(CalibrationGapCounter<(NO_OF_CAL_ACCUMULATION_POW+CAL_ACC_DELAY))AccumulateDataForCalibration();
      else
      {
@@ -1665,6 +1666,34 @@ void StartCalibration(void)
         {
             return;
         }
+        DisplaySetFan();
+        FlagDirectCalibration = CALIBRATE_DIS_FAN;
+     }
+   }
+
+   if(advanceStateMachineInput && (FlagDirectCalibration == CALIBRATE_DIS_FAN))
+   {
+     DisplayCalFan();
+     FlagDirectCalibration=CALIBRATE_FAN;
+     ResetCalSys();
+     WorkingCopyGain.FAN1_GAIN=1.0f;
+     WorkingCopyGain.FAN2_GAIN=1.0f;
+   }
+
+   if(FlagDirectCalibration == CALIBRATE_FAN)
+   {
+     CalibrationGapCounter++;
+     if(CalibrationGapCounter<CAL_ACC_DELAY);
+
+     else if(CalibrationGapCounter<(NO_OF_CAL_ACCUMULATION_VI+CAL_ACC_DELAY))AccumulateDataForCalibration();
+     else
+     {
+        if (!DirectCalibration())
+        {
+            return;
+        }
+        WorkingCopyGain.FAN1_GAIN=CalibrationCoeff.FAN1_GAIN;
+        WorkingCopyGain.FAN2_GAIN=CalibrationCoeff.FAN2_GAIN;
         FlagDirectCalibration = CALIBRATE_END;
      }
    }
