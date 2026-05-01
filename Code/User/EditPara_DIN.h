@@ -115,8 +115,6 @@ const uint8_t   DisOnOff0[]=" OFF";
 const uint8_t   DisOnOff1[]="  ON";
 const uint8_t   *DisOnOff[]={DisOnOff0,DisOnOff1};
 
-#define EDIT_DEC_ON_OFF              18
-
 struct EditStart
 {
   uint8_t  *FirstLine;
