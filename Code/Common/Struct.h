@@ -438,58 +438,70 @@ struct HARMONICS
 
 struct PH_COEFF_STRUCT
 {
-float     VR_240_GAIN;             
+float     VR_240_GAIN;
 float     VY_240_GAIN;
-float     VB_240_GAIN;     
+float     VB_240_GAIN;
 
-float     IR_HIGH_GAIN;     // future for high accuracy meters
+float     IR_XHIGH_GAIN;
+float     IR_HIGH_GAIN;
 float     IR_MID_GAIN;
 float     IR_LOW_GAIN;
 
-float     IY_HIGH_GAIN;  
+float     IY_XHIGH_GAIN;
+float     IY_HIGH_GAIN;
 float     IY_MID_GAIN;
-float     IY_LOW_GAIN; 
+float     IY_LOW_GAIN;
 
-float     IB_HIGH_GAIN; 
+float     IB_XHIGH_GAIN;
+float     IB_HIGH_GAIN;
 float     IB_MID_GAIN;
-float     IB_LOW_GAIN;  
+float     IB_LOW_GAIN;
 
+float     IR_XHIGH_PH_ERROR;
 float     IR_HIGH_PH_ERROR;
 float     IR_MID_PH_ERROR;
 float     IR_LOW_PH_ERROR;
 
+float     IY_XHIGH_PH_ERROR;
 float     IY_HIGH_PH_ERROR;
 float     IY_MID_PH_ERROR;
 float     IY_LOW_PH_ERROR;
 
+float     IB_XHIGH_PH_ERROR;
 float     IB_HIGH_PH_ERROR;
 float     IB_MID_PH_ERROR;
 float     IB_LOW_PH_ERROR;
 
-float     VR_SOLAR_240_GAIN;             
+float     VR_SOLAR_240_GAIN;
 float     VY_SOLAR_240_GAIN;
-float     VB_SOLAR_240_GAIN;  
+float     VB_SOLAR_240_GAIN;
 
-float     IR_SOLAR_HIGH_GAIN;     // future for high accuracy meters
+float     IR_SOLAR_XHIGH_GAIN;
+float     IR_SOLAR_HIGH_GAIN;
 float     IR_SOLAR_MID_GAIN;
 float     IR_SOLAR_LOW_GAIN;
 
-float     IY_SOLAR_HIGH_GAIN;  
+float     IY_SOLAR_XHIGH_GAIN;
+float     IY_SOLAR_HIGH_GAIN;
 float     IY_SOLAR_MID_GAIN;
-float     IY_SOLAR_LOW_GAIN; 
+float     IY_SOLAR_LOW_GAIN;
 
-float     IB_SOLAR_HIGH_GAIN; 
+float     IB_SOLAR_XHIGH_GAIN;
+float     IB_SOLAR_HIGH_GAIN;
 float     IB_SOLAR_MID_GAIN;
-float     IB_SOLAR_LOW_GAIN;  
+float     IB_SOLAR_LOW_GAIN;
 
+float     IR_SOLAR_XHIGH_PH_ERROR;
 float     IR_SOLAR_HIGH_PH_ERROR;
 float     IR_SOLAR_MID_PH_ERROR;
 float     IR_SOLAR_LOW_PH_ERROR;
 
+float     IY_SOLAR_XHIGH_PH_ERROR;
 float     IY_SOLAR_HIGH_PH_ERROR;
 float     IY_SOLAR_MID_PH_ERROR;
 float     IY_SOLAR_LOW_PH_ERROR;
 
+float     IB_SOLAR_XHIGH_PH_ERROR;
 float     IB_SOLAR_HIGH_PH_ERROR;
 float     IB_SOLAR_MID_PH_ERROR;
 float     IB_SOLAR_LOW_PH_ERROR;
@@ -499,8 +511,8 @@ float     FAN2_GAIN;
 
 float     unused[12];
 
-uint16_t     INIT_DATA1;          
-uint16_t     INIT_DATA2  ; 
+uint16_t     INIT_DATA1;
+uint16_t     INIT_DATA2  ;
 
 } ;
 

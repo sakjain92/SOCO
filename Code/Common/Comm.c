@@ -152,6 +152,9 @@ bool DirectCalibration(void)
    // UNDONE: Should the guard rails be on average or instant parameters
    //
    if(
+      (InstantPara.VolR >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolR<VOLTAGE_HIGHER_LIMIT) &&
+      (InstantPara.VolY >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolY<VOLTAGE_HIGHER_LIMIT)&&
+      (InstantPara.VolB >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolB<VOLTAGE_HIGHER_LIMIT) &&
       (InstantPara.CurrentR >I_L_LOWER_LIMIT) && (InstantPara.CurrentR<I_L_UPPER_LIMIT)&&
       (InstantPara.CurrentY >I_L_LOWER_LIMIT)&& (InstantPara.CurrentY<I_L_UPPER_LIMIT)&&
       (InstantPara.CurrentB >I_L_LOWER_LIMIT) && (InstantPara.CurrentB<I_L_UPPER_LIMIT)&&
@@ -159,6 +162,9 @@ bool DirectCalibration(void)
       (InstantPara.TotalPowerY<PF_POWER_L_UPPER_LIMIT)&&(InstantPara.TotalPowerY>PF_POWER_L_LOWER_LIMIT)&&
       (InstantPara.TotalPowerB<PF_POWER_L_UPPER_LIMIT)&&(InstantPara.TotalPowerB>PF_POWER_L_LOWER_LIMIT)&&
 
+      (InstantPara.VolRSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolRSolar<VOLTAGE_HIGHER_LIMIT) &&
+      (InstantPara.VolYSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolYSolar<VOLTAGE_HIGHER_LIMIT)&&
+      (InstantPara.VolBSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolBSolar<VOLTAGE_HIGHER_LIMIT) &&
       (InstantPara.CurrentRSolar >I_L_LOWER_LIMIT) && (InstantPara.CurrentRSolar<I_L_UPPER_LIMIT)&&
       (InstantPara.CurrentYSolar >I_L_LOWER_LIMIT)&& (InstantPara.CurrentYSolar<I_L_UPPER_LIMIT)&&
       (InstantPara.CurrentBSolar >I_L_LOWER_LIMIT) && (InstantPara.CurrentBSolar<I_L_UPPER_LIMIT)&&
@@ -218,6 +224,9 @@ bool DirectCalibration(void)
  if(FlagDirectCalibration==CALIBRATE_L_VI)
  {
    if(
+      (InstantPara.VolR >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolR<VOLTAGE_HIGHER_LIMIT) &&
+      (InstantPara.VolY >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolY<VOLTAGE_HIGHER_LIMIT)&&
+      (InstantPara.VolB >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolB<VOLTAGE_HIGHER_LIMIT) &&
       (InstantPara.CurrentR >I_L_LOWER_LIMIT) && (InstantPara.CurrentR<I_L_UPPER_LIMIT)&&
       (InstantPara.CurrentY >I_L_LOWER_LIMIT)&& (InstantPara.CurrentY<I_L_UPPER_LIMIT)&&
       (InstantPara.CurrentB >I_L_LOWER_LIMIT) && (InstantPara.CurrentB<I_L_UPPER_LIMIT)&&
@@ -225,6 +234,9 @@ bool DirectCalibration(void)
       (InstantPara.TotalPowerY<PF_POWER_L_UPPER_LIMIT)&&(InstantPara.TotalPowerY>PF_POWER_L_LOWER_LIMIT)&&
       (InstantPara.TotalPowerB<PF_POWER_L_UPPER_LIMIT)&&(InstantPara.TotalPowerB>PF_POWER_L_LOWER_LIMIT)&&
 
+      (InstantPara.VolRSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolRSolar<VOLTAGE_HIGHER_LIMIT) &&
+      (InstantPara.VolYSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolYSolar<VOLTAGE_HIGHER_LIMIT)&&
+      (InstantPara.VolBSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolBSolar<VOLTAGE_HIGHER_LIMIT) &&
       (InstantPara.CurrentRSolar >I_L_LOWER_LIMIT) && (InstantPara.CurrentRSolar<I_L_UPPER_LIMIT)&&
       (InstantPara.CurrentYSolar >I_L_LOWER_LIMIT)&& (InstantPara.CurrentYSolar<I_L_UPPER_LIMIT)&&
       (InstantPara.CurrentBSolar >I_L_LOWER_LIMIT) && (InstantPara.CurrentBSolar<I_L_UPPER_LIMIT)&&
@@ -258,6 +270,9 @@ bool DirectCalibration(void)
  else if(FlagDirectCalibration==CALIBRATE_M_PF)
  {
    if(
+      (InstantPara.VolR >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolR<VOLTAGE_HIGHER_LIMIT) &&
+      (InstantPara.VolY >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolY<VOLTAGE_HIGHER_LIMIT)&&
+      (InstantPara.VolB >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolB<VOLTAGE_HIGHER_LIMIT) &&
       (InstantPara.CurrentR >I_M_LOWER_LIMIT) && (InstantPara.CurrentR<I_M_UPPER_LIMIT)&&
       (InstantPara.CurrentY >I_M_LOWER_LIMIT)&& (InstantPara.CurrentY<I_M_UPPER_LIMIT)&&
       (InstantPara.CurrentB >I_M_LOWER_LIMIT) && (InstantPara.CurrentB<I_M_UPPER_LIMIT)&&
@@ -265,6 +280,9 @@ bool DirectCalibration(void)
       (InstantPara.TotalPowerY<PF_POWER_M_UPPER_LIMIT)&&(InstantPara.TotalPowerY>PF_POWER_M_LOWER_LIMIT)&&
       (InstantPara.TotalPowerB<PF_POWER_M_UPPER_LIMIT)&&(InstantPara.TotalPowerB>PF_POWER_M_LOWER_LIMIT)&&
 
+      (InstantPara.VolRSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolRSolar<VOLTAGE_HIGHER_LIMIT) &&
+      (InstantPara.VolYSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolYSolar<VOLTAGE_HIGHER_LIMIT)&&
+      (InstantPara.VolBSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolBSolar<VOLTAGE_HIGHER_LIMIT) &&
       (InstantPara.CurrentRSolar >I_M_LOWER_LIMIT) && (InstantPara.CurrentRSolar<I_M_UPPER_LIMIT)&&
       (InstantPara.CurrentYSolar >I_M_LOWER_LIMIT)&& (InstantPara.CurrentYSolar<I_M_UPPER_LIMIT)&&
       (InstantPara.CurrentBSolar >I_M_LOWER_LIMIT) && (InstantPara.CurrentBSolar<I_M_UPPER_LIMIT)&&
@@ -323,6 +341,9 @@ bool DirectCalibration(void)
  else if(FlagDirectCalibration==CALIBRATE_M_VI)
  {
    if(
+      (InstantPara.VolR >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolR<VOLTAGE_HIGHER_LIMIT) &&
+      (InstantPara.VolY >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolY<VOLTAGE_HIGHER_LIMIT)&&
+      (InstantPara.VolB >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolB<VOLTAGE_HIGHER_LIMIT) &&
       (InstantPara.CurrentR >I_M_LOWER_LIMIT) && (InstantPara.CurrentR<I_M_UPPER_LIMIT)&&
       (InstantPara.CurrentY >I_M_LOWER_LIMIT)&& (InstantPara.CurrentY<I_M_UPPER_LIMIT)&&
       (InstantPara.CurrentB >I_M_LOWER_LIMIT) && (InstantPara.CurrentB<I_M_UPPER_LIMIT)&&
@@ -330,6 +351,9 @@ bool DirectCalibration(void)
       (InstantPara.TotalPowerY<PF_POWER_M_UPPER_LIMIT)&&(InstantPara.TotalPowerY>PF_POWER_M_LOWER_LIMIT)&&
       (InstantPara.TotalPowerB<PF_POWER_M_UPPER_LIMIT)&&(InstantPara.TotalPowerB>PF_POWER_M_LOWER_LIMIT)&&
 
+      (InstantPara.VolRSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolRSolar<VOLTAGE_HIGHER_LIMIT) &&
+      (InstantPara.VolYSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolYSolar<VOLTAGE_HIGHER_LIMIT)&&
+      (InstantPara.VolBSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolBSolar<VOLTAGE_HIGHER_LIMIT) &&
       (InstantPara.CurrentRSolar >I_M_LOWER_LIMIT) && (InstantPara.CurrentRSolar<I_M_UPPER_LIMIT)&&
       (InstantPara.CurrentYSolar >I_M_LOWER_LIMIT)&& (InstantPara.CurrentYSolar<I_M_UPPER_LIMIT)&&
       (InstantPara.CurrentBSolar >I_M_LOWER_LIMIT) && (InstantPara.CurrentBSolar<I_M_UPPER_LIMIT)&&
@@ -430,6 +454,133 @@ bool DirectCalibration(void)
    }
  }
 
+  else if(FlagDirectCalibration==CALIBRATE_XH_PF)
+  {
+    if(
+      (InstantPara.VolR >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolR<VOLTAGE_HIGHER_LIMIT) &&
+      (InstantPara.VolY >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolY<VOLTAGE_HIGHER_LIMIT)&&
+      (InstantPara.VolB >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolB<VOLTAGE_HIGHER_LIMIT) &&
+      (InstantPara.CurrentR >I_XH_LOWER_LIMIT) && (InstantPara.CurrentR<I_XH_UPPER_LIMIT)&&
+      (InstantPara.CurrentY >I_XH_LOWER_LIMIT)&& (InstantPara.CurrentY<I_XH_UPPER_LIMIT)&&
+      (InstantPara.CurrentB >I_XH_LOWER_LIMIT) && (InstantPara.CurrentB<I_XH_UPPER_LIMIT)&&
+      (InstantPara.TotalPowerR<PF_POWER_XH_UPPER_LIMIT)&&(InstantPara.TotalPowerR>PF_POWER_XH_LOWER_LIMIT)&&
+      (InstantPara.TotalPowerY<PF_POWER_XH_UPPER_LIMIT)&&(InstantPara.TotalPowerY>PF_POWER_XH_LOWER_LIMIT)&&
+      (InstantPara.TotalPowerB<PF_POWER_XH_UPPER_LIMIT)&&(InstantPara.TotalPowerB>PF_POWER_XH_LOWER_LIMIT)&&
+
+      (InstantPara.VolRSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolRSolar<VOLTAGE_HIGHER_LIMIT) &&
+      (InstantPara.VolYSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolYSolar<VOLTAGE_HIGHER_LIMIT)&&
+      (InstantPara.VolBSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolBSolar<VOLTAGE_HIGHER_LIMIT) &&
+      (InstantPara.CurrentRSolar >I_XH_LOWER_LIMIT) && (InstantPara.CurrentRSolar<I_XH_UPPER_LIMIT)&&
+      (InstantPara.CurrentYSolar >I_XH_LOWER_LIMIT)&& (InstantPara.CurrentYSolar<I_XH_UPPER_LIMIT)&&
+      (InstantPara.CurrentBSolar >I_XH_LOWER_LIMIT) && (InstantPara.CurrentBSolar<I_XH_UPPER_LIMIT)&&
+      (InstantPara.TotalPowerRSolar<PF_POWER_XH_UPPER_LIMIT)&&(InstantPara.TotalPowerRSolar>PF_POWER_XH_LOWER_LIMIT)&&
+      (InstantPara.TotalPowerYSolar<PF_POWER_XH_UPPER_LIMIT)&&(InstantPara.TotalPowerYSolar>PF_POWER_XH_LOWER_LIMIT)&&
+      (InstantPara.TotalPowerBSolar<PF_POWER_XH_UPPER_LIMIT)&&(InstantPara.TotalPowerBSolar>PF_POWER_XH_LOWER_LIMIT)
+    )
+   {
+
+      ProtectionReset();
+      __disable_interrupt();
+      __no_operation();
+      RESET_WATCH_DOG;
+      SaveFlashData();
+
+      TempFloat=(CalPowR-CAL_PF_POWER_SETTING_XHIGH)/CAL_PF_POWER_SETTING_XHIGH;
+      CalBuffer.IR_XHIGH_PH_ERROR=TempFloat-0.001;
+
+      TempFloat=(CalPowY-CAL_PF_POWER_SETTING_XHIGH)/CAL_PF_POWER_SETTING_XHIGH;
+      CalBuffer.IY_XHIGH_PH_ERROR=TempFloat-0.001;
+
+      TempFloat=(CalPowB-CAL_PF_POWER_SETTING_XHIGH)/CAL_PF_POWER_SETTING_XHIGH;
+      CalBuffer.IB_XHIGH_PH_ERROR=TempFloat-0.001;
+
+      TempFloat=(CalPowRSolar-CAL_PF_POWER_SETTING_XHIGH)/CAL_PF_POWER_SETTING_XHIGH;
+      CalBuffer.IR_SOLAR_XHIGH_PH_ERROR=TempFloat-0.001;
+
+      TempFloat=(CalPowYSolar-CAL_PF_POWER_SETTING_XHIGH)/CAL_PF_POWER_SETTING_XHIGH;
+      CalBuffer.IY_SOLAR_XHIGH_PH_ERROR=TempFloat-0.001;
+
+      TempFloat=(CalPowBSolar-CAL_PF_POWER_SETTING_XHIGH)/CAL_PF_POWER_SETTING_XHIGH;
+      CalBuffer.IB_SOLAR_XHIGH_PH_ERROR=TempFloat-0.001;
+
+      if (CalBuffer.IR_XHIGH_PH_ERROR>PH_ERROR_MAX ||
+          CalBuffer.IR_XHIGH_PH_ERROR<PH_ERROR_MIN ||
+          CalBuffer.IY_XHIGH_PH_ERROR>PH_ERROR_MAX ||
+          CalBuffer.IY_XHIGH_PH_ERROR<PH_ERROR_MIN ||
+          CalBuffer.IB_XHIGH_PH_ERROR>PH_ERROR_MAX ||
+          CalBuffer.IB_XHIGH_PH_ERROR<PH_ERROR_MIN ||
+          CalBuffer.IR_SOLAR_XHIGH_PH_ERROR>PH_ERROR_MAX ||
+          CalBuffer.IR_SOLAR_XHIGH_PH_ERROR<PH_ERROR_MIN ||
+          CalBuffer.IY_SOLAR_XHIGH_PH_ERROR>PH_ERROR_MAX ||
+          CalBuffer.IY_SOLAR_XHIGH_PH_ERROR<PH_ERROR_MIN ||
+          CalBuffer.IB_SOLAR_XHIGH_PH_ERROR>PH_ERROR_MAX ||
+          CalBuffer.IB_SOLAR_XHIGH_PH_ERROR<PH_ERROR_MIN)
+      {
+          FlagDirectCalibration = CALIBRATE_ERROR;
+      }
+   }
+   else
+   {
+       FlagDirectCalibration = CALIBRATE_ERROR;
+   }
+  }
+
+  else if(FlagDirectCalibration==CALIBRATE_XH_VI)
+  {
+    if(
+      (InstantPara.VolR >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolR<VOLTAGE_HIGHER_LIMIT) &&
+      (InstantPara.VolY >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolY<VOLTAGE_HIGHER_LIMIT)&&
+      (InstantPara.VolB >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolB<VOLTAGE_HIGHER_LIMIT) &&
+      (InstantPara.CurrentR >I_XH_LOWER_LIMIT) && (InstantPara.CurrentR<I_XH_UPPER_LIMIT)&&
+      (InstantPara.CurrentY >I_XH_LOWER_LIMIT)&& (InstantPara.CurrentY<I_XH_UPPER_LIMIT)&&
+      (InstantPara.CurrentB >I_XH_LOWER_LIMIT) && (InstantPara.CurrentB<I_XH_UPPER_LIMIT)&&
+      (InstantPara.TotalPowerR<PF_POWER_XH_UPPER_LIMIT)&&(InstantPara.TotalPowerR>PF_POWER_XH_LOWER_LIMIT)&&
+      (InstantPara.TotalPowerY<PF_POWER_XH_UPPER_LIMIT)&&(InstantPara.TotalPowerY>PF_POWER_XH_LOWER_LIMIT)&&
+      (InstantPara.TotalPowerB<PF_POWER_XH_UPPER_LIMIT)&&(InstantPara.TotalPowerB>PF_POWER_XH_LOWER_LIMIT) &&
+
+      (InstantPara.VolRSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolRSolar<VOLTAGE_HIGHER_LIMIT) &&
+      (InstantPara.VolYSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolYSolar<VOLTAGE_HIGHER_LIMIT)&&
+      (InstantPara.VolBSolar >VOLTAGE_LOWER_LIMIT) && (InstantPara.VolBSolar<VOLTAGE_HIGHER_LIMIT) &&
+      (InstantPara.CurrentRSolar >I_XH_LOWER_LIMIT) && (InstantPara.CurrentRSolar<I_XH_UPPER_LIMIT)&&
+      (InstantPara.CurrentYSolar >I_XH_LOWER_LIMIT)&& (InstantPara.CurrentYSolar<I_XH_UPPER_LIMIT)&&
+      (InstantPara.CurrentBSolar >I_XH_LOWER_LIMIT) && (InstantPara.CurrentBSolar<I_XH_UPPER_LIMIT)&&
+      (InstantPara.TotalPowerRSolar<PF_POWER_XH_UPPER_LIMIT)&&(InstantPara.TotalPowerRSolar>PF_POWER_XH_LOWER_LIMIT)&&
+      (InstantPara.TotalPowerYSolar<PF_POWER_XH_UPPER_LIMIT)&&(InstantPara.TotalPowerYSolar>PF_POWER_XH_LOWER_LIMIT)&&
+      (InstantPara.TotalPowerBSolar<PF_POWER_XH_UPPER_LIMIT)&&(InstantPara.TotalPowerBSolar>PF_POWER_XH_LOWER_LIMIT)
+    )
+
+   {
+
+      ProtectionReset();
+      __disable_interrupt();
+      __no_operation();
+      RESET_WATCH_DOG;
+      SaveFlashData();
+
+      // Voltage gain is calibrated once at the highest current point (best
+      // SNR) and reused for the remaining V/I/PF cal steps which all run at
+      // V = 240 V.
+      //
+      CalBuffer.VR_240_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_VOLTAGE_SETTING_HIGH)/CalVolR);
+      CalBuffer.VY_240_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_VOLTAGE_SETTING_HIGH)/CalVolY);
+      CalBuffer.VB_240_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_VOLTAGE_SETTING_HIGH)/CalVolB);
+      CalBuffer.IR_XHIGH_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_XHIGH)/CalCurR);
+      CalBuffer.IY_XHIGH_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_XHIGH)/CalCurY);
+      CalBuffer.IB_XHIGH_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_XHIGH)/CalCurB);
+
+      CalBuffer.VR_SOLAR_240_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_VOLTAGE_SETTING_HIGH)/CalVolRSolar);
+      CalBuffer.VY_SOLAR_240_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_VOLTAGE_SETTING_HIGH)/CalVolYSolar);
+      CalBuffer.VB_SOLAR_240_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_VOLTAGE_SETTING_HIGH)/CalVolBSolar);
+      CalBuffer.IR_SOLAR_XHIGH_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_XHIGH)/CalCurRSolar);
+      CalBuffer.IY_SOLAR_XHIGH_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_XHIGH)/CalCurYSolar);
+      CalBuffer.IB_SOLAR_XHIGH_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_XHIGH)/CalCurBSolar);
+   }
+   else
+   {
+       FlagDirectCalibration = CALIBRATE_ERROR;
+   }
+  }
+
   else if(FlagDirectCalibration==CALIBRATE_H_VI)
   {
     if(
@@ -461,16 +612,10 @@ bool DirectCalibration(void)
       __no_operation();
       RESET_WATCH_DOG;
       SaveFlashData();
-      CalBuffer.VR_240_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_VOLTAGE_SETTING_HIGH)/CalVolR);
-      CalBuffer.VY_240_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_VOLTAGE_SETTING_HIGH)/CalVolY);
-      CalBuffer.VB_240_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_VOLTAGE_SETTING_HIGH)/CalVolB);
       CalBuffer.IR_HIGH_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_HIGH)/CalCurR);
       CalBuffer.IY_HIGH_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_HIGH)/CalCurY);
       CalBuffer.IB_HIGH_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_HIGH)/CalCurB);
 
-      CalBuffer.VR_SOLAR_240_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_VOLTAGE_SETTING_HIGH)/CalVolRSolar);
-      CalBuffer.VY_SOLAR_240_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_VOLTAGE_SETTING_HIGH)/CalVolYSolar);
-      CalBuffer.VB_SOLAR_240_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_VOLTAGE_SETTING_HIGH)/CalVolBSolar);
       CalBuffer.IR_SOLAR_HIGH_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_HIGH)/CalCurRSolar);
       CalBuffer.IY_SOLAR_HIGH_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_HIGH)/CalCurYSolar);
       CalBuffer.IB_SOLAR_HIGH_GAIN=((NO_OF_CAL_ACCUMULATION_VI*CAL_CURRENT_SETTING_HIGH)/CalCurBSolar);

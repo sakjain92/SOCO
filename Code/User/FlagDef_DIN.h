@@ -262,41 +262,95 @@ extern char _product_info_fits_in_eeprom[
 #define         CALIBRATE_IN_8          15
 
 #define         CALIBRATE_VOL_CUR_START 16
-#define         CALIBRATE_DIS_H_VI      17
-#define         CALIBRATE_H_VI          18
-#define         CALIBRATE_DIS_H_PF      19
-#define         CALIBRATE_H_PF          20
 
-#define         CALIBRATE_DIS_M_VI      21
-#define         CALIBRATE_M_VI          22
-#define         CALIBRATE_DIS_M_PF      23
-#define         CALIBRATE_M_PF          24
+#define         CALIBRATE_DIS_XH_VI     17
+#define         CALIBRATE_XH_VI         18
+#define         CALIBRATE_DIS_XH_PF     19
+#define         CALIBRATE_XH_PF         20
 
-#define         CALIBRATE_DIS_L_VI      25
-#define         CALIBRATE_L_VI          26
-#define         CALIBRATE_DIS_L_PF      27
-#define         CALIBRATE_L_PF          28
+#define         CALIBRATE_DIS_H_VI      21
+#define         CALIBRATE_H_VI          22
+#define         CALIBRATE_DIS_H_PF      23
+#define         CALIBRATE_H_PF          24
 
-#define         CALIBRATE_DIS_FAN       29
-#define         CALIBRATE_FAN           30
+#define         CALIBRATE_DIS_M_VI      25
+#define         CALIBRATE_M_VI          26
+#define         CALIBRATE_DIS_M_PF      27
+#define         CALIBRATE_M_PF          28
+
+#define         CALIBRATE_DIS_L_VI      29
+#define         CALIBRATE_L_VI          30
+#define         CALIBRATE_DIS_L_PF      31
+#define         CALIBRATE_L_PF          32
+
+#define         CALIBRATE_DIS_FAN       33
+#define         CALIBRATE_FAN           34
 
 #define         CALIBRATE_END           127
 #define         CALIBRATE_ERROR         126
 
-// The ratio between CUR_HIGH_CAL_POINT/CUR_MID_CAL_POINT should be 5:1
-// The ratio between CUR_MID_CAL_POINT/CUR_LOW_CAL_POINT should be 10:1
-// UNDONE: Calibrating at 0.4 as below that in current hardware we are getting too much noise
-// Note: The CUR_LOW_CAL_POINT determines the Least count for Phase Error Correction
-// so keep it as small as possible
+// Calibration current knots: XHIGH = rated primary current, HIGH/MID/LOW
+// span the typical operating range. Ratios are non-uniform.
 //
-#define        CUR_HIGH_CAL_POINT                    20.0
-#define        CUR_MID_CAL_POINT                     4.0
-#define        CUR_LOW_CAL_POINT                     0.4
+// Phase-error correction at runtime uses a piecewise-linear interpolation
+// table indexed at three different step granularities -- finer at low
+// current (where signal-to-noise is poor) and coarser at high current.
+// Each segment's step size must divide its span exactly.
+//   [LOW,  MID]:  step = CUR_LOW_STEP   = 0.4 A -> 9  slots + 1
+//   [MID,  HIGH]: step = CUR_HIGH_STEP  = 1.0 A -> 16 slots
+//   [HIGH, XHIGH]: step = CUR_XHIGH_STEP = 4.0 A -> 20 slots
+// Total table = 46 slots, fits in the 50-element BufferBetaR[] etc.
+//
+#define        CUR_XHIGH_CAL_POINT                   100.0f
+#define        CUR_HIGH_CAL_POINT                    20.0f
+#define        CUR_MID_CAL_POINT                     4.0f
+#define        CUR_LOW_CAL_POINT                     0.4f
+
+#define        CUR_XHIGH_STEP                        4.0f
+#define        CUR_HIGH_STEP                         1.0f
+#define        CUR_LOW_STEP                          0.4f
+
+// Each step must divide its span exactly: the runtime float-to-uint8_t cast
+// in FillCurrentGainArray() would silently truncate any non-integer ratio
+// and drop a slot from the phase-error lookup. Floats are scaled by 1000
+// to integer to avoid IEEE-754 inexactness for values like 0.4f.
+//
+extern char _xhigh_step_divides_span_exactly[
+    (((int)(CUR_XHIGH_CAL_POINT * 1000) - (int)(CUR_HIGH_CAL_POINT * 1000))
+      % (int)(CUR_XHIGH_STEP * 1000) == 0) ? 1 : -1];
+extern char _high_step_divides_span_exactly[
+    (((int)(CUR_HIGH_CAL_POINT * 1000) - (int)(CUR_MID_CAL_POINT * 1000))
+      % (int)(CUR_HIGH_STEP * 1000) == 0) ? 1 : -1];
+extern char _low_step_divides_span_exactly[
+    (((int)(CUR_MID_CAL_POINT * 1000) - (int)(CUR_LOW_CAL_POINT * 1000))
+      % (int)(CUR_LOW_STEP * 1000) == 0) ? 1 : -1];
+
+// Cal points must be ordered XHIGH > HIGH > MID > LOW > 0 so that segment
+// spans are positive and PhaseBufferIndex() branches cover the input range.
+//
+extern char _cal_points_strictly_decreasing[
+    ((int)(CUR_XHIGH_CAL_POINT * 1000) > (int)(CUR_HIGH_CAL_POINT * 1000) &&
+     (int)(CUR_HIGH_CAL_POINT  * 1000) > (int)(CUR_MID_CAL_POINT  * 1000) &&
+     (int)(CUR_MID_CAL_POINT   * 1000) > (int)(CUR_LOW_CAL_POINT  * 1000) &&
+     (int)(CUR_LOW_CAL_POINT   * 1000) > 0) ? 1 : -1];
+
+// Phase-error lookup occupies StepXHigh + StepHigh + (StepLow + 1) slots
+// in BufferBetaR[]/BufferAlfaR[]/BufferIntDelayR[]. CalPF() in
+// FillCurrentGainArray() initializes the first 50 slots; PhaseBufferIndex()
+// must never return an index >= 50 or it would read uninitialized output.
+//
+extern char _phase_lookup_max_index_below_calpf_count[
+    ((((int)(CUR_XHIGH_CAL_POINT * 1000) - (int)(CUR_HIGH_CAL_POINT * 1000)) / (int)(CUR_XHIGH_STEP * 1000)) +
+     (((int)(CUR_HIGH_CAL_POINT  * 1000) - (int)(CUR_MID_CAL_POINT  * 1000)) / (int)(CUR_HIGH_STEP  * 1000)) +
+     (((int)(CUR_MID_CAL_POINT   * 1000) - (int)(CUR_LOW_CAL_POINT  * 1000)) / (int)(CUR_LOW_STEP   * 1000))
+     < 50) ? 1 : -1];
+
 #define        NO_OF_CAL_ACCUMULATION_VI             4
 #define        NO_OF_CAL_ACCUMULATION_POW            10
 #define        CAL_ACC_DELAY                         8
 
 #define        CAL_VOLTAGE_SETTING_HIGH              240.0f
+#define        CAL_CURRENT_SETTING_XHIGH             CUR_XHIGH_CAL_POINT
 #define        CAL_CURRENT_SETTING_HIGH              CUR_HIGH_CAL_POINT
 #define        CAL_CURRENT_SETTING_MID               CUR_MID_CAL_POINT
 #define        CAL_CURRENT_SETTING_LOW               CUR_LOW_CAL_POINT
@@ -317,6 +371,9 @@ extern char _product_info_fits_in_eeprom[
 #define        CAL_FAN_CUR_SETTING                   0.1f
 #define        FAN_CUR_TOLERANCE                     0.3f   // UNDONE: Check why this is also needed to be high
 
+#define         CAL_UPF_POWER_SETTING_XHIGH    ( NO_OF_CAL_ACCUMULATION_POW*CAL_VOLTAGE_SETTING_HIGH*CAL_CURRENT_SETTING_XHIGH)
+#define         CAL_PF_POWER_SETTING_XHIGH     (CAL_UPF_POWER_SETTING_XHIGH/2)
+
 #define         CAL_UPF_POWER_SETTING_HIGH     ( NO_OF_CAL_ACCUMULATION_POW*CAL_VOLTAGE_SETTING_HIGH*CAL_CURRENT_SETTING_HIGH)
 #define         CAL_PF_POWER_SETTING_HIGH      (CAL_UPF_POWER_SETTING_HIGH/2)
 
@@ -329,6 +386,9 @@ extern char _product_info_fits_in_eeprom[
 #define         VOLTAGE_HIGHER_LIMIT          (CAL_VOLTAGE_SETTING_HIGH*(1+VOLTAGE_TOLERANCE))
 #define         VOLTAGE_LOWER_LIMIT           (CAL_VOLTAGE_SETTING_HIGH*(1-VOLTAGE_TOLERANCE))
 
+#define         I_XH_UPPER_LIMIT              (CAL_CURRENT_SETTING_XHIGH*(1+CURRENT_TOLRERANCE))
+#define         I_XH_LOWER_LIMIT              (CAL_CURRENT_SETTING_XHIGH*(1-CURRENT_TOLRERANCE))
+
 #define         I_H_UPPER_LIMIT               (CAL_CURRENT_SETTING_HIGH*(1+CURRENT_TOLRERANCE))
 #define         I_H_LOWER_LIMIT               (CAL_CURRENT_SETTING_HIGH*(1-CURRENT_TOLRERANCE))
 
@@ -337,6 +397,11 @@ extern char _product_info_fits_in_eeprom[
 
 #define         I_L_UPPER_LIMIT                (CAL_CURRENT_SETTING_LOW*(1+CURRENT_TOLRERANCE))
 #define         I_L_LOWER_LIMIT               (CAL_CURRENT_SETTING_LOW*(1-CURRENT_TOLRERANCE))
+
+#define         UPF_POWER_XH_UPPER_LIMIT       (CAL_VOLTAGE_SETTING_HIGH*CAL_CURRENT_SETTING_XHIGH*(1+POWER_TOLERANCE))
+#define         UPF_POWER_XH_LOWER_LIMIT       (CAL_VOLTAGE_SETTING_HIGH*CAL_CURRENT_SETTING_XHIGH*(1-POWER_TOLERANCE))
+#define         PF_POWER_XH_UPPER_LIMIT        (UPF_POWER_XH_UPPER_LIMIT*0.5)
+#define         PF_POWER_XH_LOWER_LIMIT        (UPF_POWER_XH_LOWER_LIMIT *0.5)
 
 #define         UPF_POWER_H_UPPER_LIMIT        (CAL_VOLTAGE_SETTING_HIGH*CAL_CURRENT_SETTING_HIGH*(1+POWER_TOLERANCE))
 #define         UPF_POWER_H_LOWER_LIMIT        (CAL_VOLTAGE_SETTING_HIGH*CAL_CURRENT_SETTING_HIGH*(1-POWER_TOLERANCE))

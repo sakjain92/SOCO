@@ -871,6 +871,26 @@ void CheckAutoScroll(void)
   }
 }
 
+void DisplaySetXHighPF(void)
+{
+    for (uint8_t i=0;i<16;i++)BufferToDisplay[i]=0;
+    DisplayString(ROW_TOP,DIGIT_5,(uint8_t *)DIS_SETXHIGHPF,0);
+    UpdateDisplay=1;
+}
+void DisplayCalXHighPF(void)
+{
+  for (uint8_t i=0;i<16;i++)BufferToDisplay[i]=0;
+  DisplayString(ROW_TOP,DIGIT_5,(uint8_t *)DIS_XHIGHCALPF,0);
+  UpdateDisplay=1;
+  DisplayScrollCounter=10;
+}
+void DisplayCalXHighVI(void)
+{
+  for (uint8_t i=0;i<16;i++)BufferToDisplay[i]=0;
+  DisplayString(ROW_TOP,DIGIT_5,(uint8_t *)DIS_CALXHIGHVI,0);
+  UpdateDisplay=1;
+  DisplayScrollCounter=10;
+}
 void DisplaySetHighPF(void)
 {
     for (uint8_t i=0;i<16;i++)BufferToDisplay[i]=0;
@@ -882,7 +902,7 @@ void DisplayCalHighPF(void)
   for (uint8_t i=0;i<16;i++)BufferToDisplay[i]=0;
   DisplayString(ROW_TOP,DIGIT_5,(uint8_t *)DIS_HIGHCALPF,0);
   UpdateDisplay=1;
-  DisplayScrollCounter=10; 
+  DisplayScrollCounter=10;
 
 }
 void DisplaySetMidPF(void)

@@ -22,12 +22,15 @@ extern void EepromWrite(uint32_t DataLocation,uint16_t NoOfBytes,uint8_t DeviceA
 extern void EepromRead(uint32_t DataLocation,uint16_t NoOfBytes,uint8_t DeviceAddress,uint8_t *DataArray );
 extern void CheckEpromFree(uint8_t DeviceAddress);
 extern  void DisplayString(uint8_t DV_Row,uint8_t DV_Digit, uint8_t *DV_String,uint8_t LED_Type);
+extern  void DisplayCalXHighVI(void);
 extern  void DisplayCalHighVI(void);
 extern  void DisplayCalMidVI(void);
 extern  void DisplayCalLowVI(void);
+extern  void DisplaySetXHighPF(void);
 extern  void DisplaySetHighPF(void);
 extern  void DisplaySetMidPF(void);
 extern  void DisplaySetLowPF(void);
+extern  void DisplayCalXHighPF(void);
 extern  void DisplayCalHighPF(void);
 extern  void DisplayCalMidPF(void);
 extern  void DisplayCalLowPF(void);
