@@ -415,6 +415,12 @@ COMPILE_ASSERT(STUCK_SECONDS > DRIVE_GAP_SECONDS);
 
     enum { IDX_R = 0, IDX_Y, IDX_B, IDX_SOLAR, IDX_LOAD_GRID, IDX_SOLAR_NE, NUM_CONTACTORS };
 
+    // Voltage-health state. HEALTHY → trips into UNDER_VOLTAGE or
+    // OVER_VOLTAGE on its own trip threshold; each unhealthy state
+    // recovers via its own reset threshold independently.
+    //
+    enum HealthState { HS_HEALTHY, HS_UNDER_VOLTAGE, HS_OVER_VOLTAGE };
+
     struct Contactor
     {
         // Configuration (set once)
@@ -434,7 +440,7 @@ COMPILE_ASSERT(STUCK_SECONDS > DRIVE_GAP_SECONDS);
 
         // Runtime state
         //
-        bool isHealthy;
+        enum HealthState health;
         uint16_t healthTimer;
         bool wantOn;
         bool acknowledgedOn;   // Feedback-confirmed state (lags feedback by settleTimer)
@@ -464,7 +470,7 @@ COMPILE_ASSERT(STUCK_SECONDS > DRIVE_GAP_SECONDS);
             .feedback            = &g_DigInputs.MainsRPhaseContactorOn,
             .alarmStuckOpen      = &g_Alarms.MainsRPhaseContactorStuckOpen,
             .alarmStuckClosed    = &g_Alarms.MainsRPhaseContactorStuckClosed,
-            .isHealthy           = true,
+            .health              = HS_HEALTHY,
             .wantOn              = true,
             .settleTimer         = SETTLE_SECONDS,
             .stuckTimer          = STUCK_SECONDS,
@@ -484,7 +490,7 @@ COMPILE_ASSERT(STUCK_SECONDS > DRIVE_GAP_SECONDS);
             .feedback            = &g_DigInputs.MainsYPhaseContactorOn,
             .alarmStuckOpen      = &g_Alarms.MainsYPhaseContactorStuckOpen,
             .alarmStuckClosed    = &g_Alarms.MainsYPhaseContactorStuckClosed,
-            .isHealthy           = true,
+            .health              = HS_HEALTHY,
             .wantOn              = true,
             .settleTimer         = SETTLE_SECONDS,
             .stuckTimer          = STUCK_SECONDS,
@@ -504,7 +510,7 @@ COMPILE_ASSERT(STUCK_SECONDS > DRIVE_GAP_SECONDS);
             .feedback            = &g_DigInputs.MainsBPhaseContactorOn,
             .alarmStuckOpen      = &g_Alarms.MainsBPhaseContactorStuckOpen,
             .alarmStuckClosed    = &g_Alarms.MainsBPhaseContactorStuckClosed,
-            .isHealthy           = true,
+            .health              = HS_HEALTHY,
             .wantOn              = true,
             .settleTimer         = SETTLE_SECONDS,
             .stuckTimer          = STUCK_SECONDS,
@@ -524,7 +530,7 @@ COMPILE_ASSERT(STUCK_SECONDS > DRIVE_GAP_SECONDS);
             .feedback            = &g_DigInputs.LoadOnSolarContactorOn,
             .alarmStuckOpen      = &g_Alarms.LoadOnSolarContactorStuckOpen,
             .alarmStuckClosed    = &g_Alarms.LoadOnSolarContactorStuckClosed,
-            .isHealthy           = false,
+            .health              = HS_UNDER_VOLTAGE,
             .wantOn              = false,
             .settleTimer         = SETTLE_SECONDS,
             .stuckTimer          = STUCK_SECONDS,
@@ -544,7 +550,7 @@ COMPILE_ASSERT(STUCK_SECONDS > DRIVE_GAP_SECONDS);
             .feedback            = &g_DigInputs.LoadOnGridContactorOn,
             .alarmStuckOpen      = &g_Alarms.LoadOnGridContactorStuckOpen,
             .alarmStuckClosed    = &g_Alarms.LoadOnGridContactorStuckClosed,
-            .isHealthy           = true,
+            .health              = HS_HEALTHY,
             .wantOn              = true,
             .settleTimer         = SETTLE_SECONDS,
             .stuckTimer          = STUCK_SECONDS,
@@ -565,7 +571,7 @@ COMPILE_ASSERT(STUCK_SECONDS > DRIVE_GAP_SECONDS);
             .feedback            = &g_DigInputs.SolarNeutralEarthContactorOn,
             .alarmStuckOpen      = &g_Alarms.SolarNeutralEarthContactorStuckOpen,
             .alarmStuckClosed    = &g_Alarms.SolarNeutralEarthContactorStuckClosed,
-            .isHealthy           = false,
+            .health              = HS_UNDER_VOLTAGE,
             .wantOn              = false,
             .settleTimer         = SETTLE_SECONDS,
             .stuckTimer          = STUCK_SECONDS,
@@ -588,63 +594,93 @@ COMPILE_ASSERT(STUCK_SECONDS > DRIVE_GAP_SECONDS);
 
     // ---- Phase 1: Voltage health check with hysteresis ----
     //
+    // Three-state machine. Each unhealthy state recovers via its own
+    // reset threshold only — clearing UV doesn't require voltage to
+    // also be below the OV reset, so an artificial UV (e.g. solar
+    // forced UV during grid mode) recovers cleanly when voltage is
+    // anywhere within trip range, without needing the tighter inner
+    // band a real trip would.
+    //
     // DEVNOTE: Data in CopySetPara[] can change at any point of time
     //
     for (uint8_t i = 0; i < NUM_CONTACTORS; i++)
     {
-        if (c[i].isHealthy)
+        switch (c[i].health)
         {
-            bool unhealthy =
-                (*c[i].voltage > CopySetPara[c[i].overVoltParam]) ||
-                (*c[i].voltage < CopySetPara[c[i].underVoltParam]);
-
-            if (unhealthy)
+            case HS_HEALTHY:
             {
-                if (c[i].healthTimer)
-                    c[i].healthTimer--;
-                if (!c[i].healthTimer)
+                bool over  = (*c[i].voltage > CopySetPara[c[i].overVoltParam]);
+                bool under = (*c[i].voltage < CopySetPara[c[i].underVoltParam]);
+
+                if (over || under)
                 {
-                    c[i].isHealthy = false;
-                    c[i].healthTimer = CopySetPara[c[i].returnDelayParam];
+                    if (c[i].healthTimer)
+                        c[i].healthTimer--;
+                    if (!c[i].healthTimer)
+                    {
+                        c[i].health = over ? HS_OVER_VOLTAGE : HS_UNDER_VOLTAGE;
+                        c[i].healthTimer = CopySetPara[c[i].returnDelayParam];
+                    }
                 }
-            }
-            else
-            {
-                c[i].healthTimer = CopySetPara[c[i].failDelayParam];
-            }
-        }
-        else
-        {
-            bool healthy =
-                (*c[i].voltage <= CopySetPara[c[i].overVoltResetParam]) &&
-                (*c[i].voltage >= CopySetPara[c[i].underVoltResetParam]);
-
-            if (healthy)
-            {
-                if (c[i].healthTimer)
-                    c[i].healthTimer--;
-                if (!c[i].healthTimer)
+                else
                 {
-                    c[i].isHealthy = true;
                     c[i].healthTimer = CopySetPara[c[i].failDelayParam];
                 }
+                break;
             }
-            else
+
+            case HS_UNDER_VOLTAGE:
             {
-                c[i].healthTimer = CopySetPara[c[i].returnDelayParam];
+                if (*c[i].voltage >= CopySetPara[c[i].underVoltResetParam])
+                {
+                    if (c[i].healthTimer)
+                        c[i].healthTimer--;
+                    if (!c[i].healthTimer)
+                    {
+                        c[i].health = HS_HEALTHY;
+                        c[i].healthTimer = CopySetPara[c[i].failDelayParam];
+                    }
+                }
+                else
+                {
+                    c[i].healthTimer = CopySetPara[c[i].returnDelayParam];
+                }
+                break;
+            }
+
+            case HS_OVER_VOLTAGE:
+            {
+                if (*c[i].voltage <= CopySetPara[c[i].overVoltResetParam])
+                {
+                    if (c[i].healthTimer)
+                        c[i].healthTimer--;
+                    if (!c[i].healthTimer)
+                    {
+                        c[i].health = HS_HEALTHY;
+                        c[i].healthTimer = CopySetPara[c[i].failDelayParam];
+                    }
+                }
+                else
+                {
+                    c[i].healthTimer = CopySetPara[c[i].returnDelayParam];
+                }
+                break;
             }
         }
     }
 
     // Solar voltage readings are invalid while any mains phase contactor
-    // is acknowledged on (grid backfeed contaminates solar measurement)
+    // is acknowledged on (grid backfeed contaminates solar measurement).
+    // Force UV (not OV) so that on grid leave, recovery is gated only
+    // on the under-voltage reset threshold — solar reaches HEALTHY as
+    // soon as voltage is anywhere in trip range for returnDelay seconds.
     //
     if (c[IDX_R].acknowledgedOn || c[IDX_Y].acknowledgedOn ||
         c[IDX_B].acknowledgedOn)
     {
-        c[IDX_SOLAR].isHealthy = false;
+        c[IDX_SOLAR].health = HS_UNDER_VOLTAGE;
         c[IDX_SOLAR].healthTimer = CopySetPara[c[IDX_SOLAR].returnDelayParam];
-        c[IDX_SOLAR_NE].isHealthy = false;
+        c[IDX_SOLAR_NE].health = HS_UNDER_VOLTAGE;
         c[IDX_SOLAR_NE].healthTimer = CopySetPara[c[IDX_SOLAR_NE].returnDelayParam];
     }
 
@@ -707,13 +743,15 @@ COMPILE_ASSERT(STUCK_SECONDS > DRIVE_GAP_SECONDS);
     // available. For now, not doing this optimization as it will require
     // turning off K5 but remembering that it is stuck.
     //
-    c[IDX_R].wantOn = c[IDX_R].isHealthy &&
+    c[IDX_R].wantOn = (c[IDX_R].health == HS_HEALTHY) &&
                       !c[IDX_SOLAR_NE].acknowledgedOn &&
                       (g_DisableLoadOnGridSeconds == 0);
-    c[IDX_Y].wantOn = c[IDX_R].isHealthy && c[IDX_Y].isHealthy &&
+    c[IDX_Y].wantOn = (c[IDX_R].health == HS_HEALTHY) &&
+                      (c[IDX_Y].health == HS_HEALTHY) &&
                       !c[IDX_SOLAR_NE].acknowledgedOn &&
                       (g_DisableLoadOnGridSeconds == 0);
-    c[IDX_B].wantOn = c[IDX_R].isHealthy && c[IDX_B].isHealthy &&
+    c[IDX_B].wantOn = (c[IDX_R].health == HS_HEALTHY) &&
+                      (c[IDX_B].health == HS_HEALTHY) &&
                       !c[IDX_SOLAR_NE].acknowledgedOn &&
                       (g_DisableLoadOnGridSeconds == 0);
 
@@ -725,8 +763,8 @@ COMPILE_ASSERT(STUCK_SECONDS > DRIVE_GAP_SECONDS);
     // as always off (i.e. never block solar on account of DG).
     //
     c[IDX_SOLAR].wantOn =
-        c[IDX_SOLAR].isHealthy &&
-        (!c[IDX_LOAD_GRID].isHealthy || g_DisableLoadOnGridSeconds) &&
+        (c[IDX_SOLAR].health == HS_HEALTHY) &&
+        ((c[IDX_LOAD_GRID].health != HS_HEALTHY) || g_DisableLoadOnGridSeconds) &&
         (CopySetPara[PARA_DG_DETECT_DISABLED] || g_DigInputs.DGOff) &&
         !c[IDX_R].acknowledgedOn &&
         !c[IDX_Y].acknowledgedOn &&
@@ -736,7 +774,7 @@ COMPILE_ASSERT(STUCK_SECONDS > DRIVE_GAP_SECONDS);
 
     // Load on Grid: on when grid healthy AND solar confirmed off
     //
-    c[IDX_LOAD_GRID].wantOn = c[IDX_LOAD_GRID].isHealthy &&
+    c[IDX_LOAD_GRID].wantOn = (c[IDX_LOAD_GRID].health == HS_HEALTHY) &&
                               (g_DisableLoadOnGridSeconds == 0) &&
                               !c[IDX_SOLAR].acknowledgedOn;
 
@@ -776,7 +814,7 @@ COMPILE_ASSERT(STUCK_SECONDS > DRIVE_GAP_SECONDS);
 
     g_LoadStatus.LoadOnGridDisabledGridRPhaseUnhealthy =
         !g_LoadStatus.LoadOnGrid &&
-        !c[IDX_R].isHealthy;
+        (c[IDX_R].health != HS_HEALTHY);
 
     g_LoadStatus.LoadOnGridDisabledSolarHealthy =
         !g_LoadStatus.LoadOnGrid &&
@@ -790,13 +828,13 @@ COMPILE_ASSERT(STUCK_SECONDS > DRIVE_GAP_SECONDS);
         (g_DisableLoadOnSolarSeconds > 0);
 
     // Only report solar unhealthy when we can actually measure solar
-    // voltage (no mains phase contactor on). Otherwise, isHealthy is
-    // forced false by the grid-backfeed override above and does not
-    // reflect actual solar voltage state.
+    // voltage (no mains phase contactor on). Otherwise, solar health is
+    // forced to UNDER_VOLTAGE by the grid-backfeed override above and
+    // does not reflect actual solar voltage state.
     //
     g_LoadStatus.LoadOnSolarDisabledSolarRPhaseUnhealthy =
         !g_LoadStatus.LoadOnSolar &&
-        !c[IDX_SOLAR].isHealthy &&
+        (c[IDX_SOLAR].health != HS_HEALTHY) &&
         !c[IDX_R].acknowledgedOn &&
         !c[IDX_Y].acknowledgedOn &&
         !c[IDX_B].acknowledgedOn;
