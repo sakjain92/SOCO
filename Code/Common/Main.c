@@ -104,6 +104,8 @@ void ProcessFreq(void)
 {
   // UNDONE: We don't read frequency currently hence delete this code
   // and read values at constant 3.2kHz frequency only
+  // UNDONE: Solar frequency is not used to set the frequency of the
+  // interrupt handler it seems
   //
   float Frequency=0;
   if(FreqSampleFlag==1)
@@ -1428,6 +1430,15 @@ void StartCalibration(void)
         WorkingCopyGain.VR_GAIN=CalibrationCoeff.VR_240_GAIN;
         WorkingCopyGain.VY_GAIN=CalibrationCoeff.VY_240_GAIN;
         WorkingCopyGain.VB_GAIN=CalibrationCoeff.VB_240_GAIN;
+        WorkingCopyGain.PR_ALFA=1;
+        WorkingCopyGain.PR_BETA=0;
+        WorkingCopyGain.PR_INT_DELAY=0;
+        WorkingCopyGain.PY_ALFA=1;
+        WorkingCopyGain.PY_BETA=0;
+        WorkingCopyGain.PY_INT_DELAY=0;
+        WorkingCopyGain.PB_ALFA=1;
+        WorkingCopyGain.PB_BETA=0;
+        WorkingCopyGain.PB_INT_DELAY=0;
 
         WorkingCopyGain.IR_SOLAR_GAIN=CalibrationCoeff.IR_SOLAR_XHIGH_GAIN;
         WorkingCopyGain.IY_SOLAR_GAIN=CalibrationCoeff.IY_SOLAR_XHIGH_GAIN;
@@ -1435,6 +1446,18 @@ void StartCalibration(void)
         WorkingCopyGain.VR_SOLAR_GAIN=CalibrationCoeff.VR_SOLAR_240_GAIN;
         WorkingCopyGain.VY_SOLAR_GAIN=CalibrationCoeff.VY_SOLAR_240_GAIN;
         WorkingCopyGain.VB_SOLAR_GAIN=CalibrationCoeff.VB_SOLAR_240_GAIN;
+        WorkingCopyGain.PR_SOLAR_ALFA=1;
+        WorkingCopyGain.PR_SOLAR_BETA=0;
+        WorkingCopyGain.PR_SOLAR_INT_DELAY=0;
+        WorkingCopyGain.PY_SOLAR_ALFA=1;
+        WorkingCopyGain.PY_SOLAR_BETA=0;
+        WorkingCopyGain.PY_SOLAR_INT_DELAY=0;
+        WorkingCopyGain.PB_SOLAR_ALFA=1;
+        WorkingCopyGain.PB_SOLAR_BETA=0;
+        WorkingCopyGain.PB_SOLAR_INT_DELAY=0;
+
+        WorkingCopyGain.FAN1_GAIN=CalibrationCoeff.FAN1_GAIN;
+        WorkingCopyGain.FAN2_GAIN=CalibrationCoeff.FAN2_GAIN;
      }
    }
 

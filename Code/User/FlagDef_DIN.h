@@ -301,38 +301,51 @@ extern char _product_info_fits_in_eeprom[
 //   [HIGH, XHIGH]: step = CUR_XHIGH_STEP = 4.0 A -> 20 slots
 // Total table = 46 slots, fits in the 50-element BufferBetaR[] etc.
 //
-#define        CUR_XHIGH_CAL_POINT                   100.0f
-#define        CUR_HIGH_CAL_POINT                    20.0f
-#define        CUR_MID_CAL_POINT                     4.0f
-#define        CUR_LOW_CAL_POINT                     0.4f
+// The integer (deci-amp, *_X10) macros are the source of truth so the
+// compile-time assertions below are pure integer-constant expressions.
+// Casting a float through (int) is not an integer constant expression in
+// C99, so building the assertions on the float macros is non-portable.
+//
+#define        CUR_XHIGH_CAL_POINT_X10               1000
+#define        CUR_HIGH_CAL_POINT_X10                200
+#define        CUR_MID_CAL_POINT_X10                 40
+#define        CUR_LOW_CAL_POINT_X10                 4
 
-#define        CUR_XHIGH_STEP                        4.0f
-#define        CUR_HIGH_STEP                         1.0f
-#define        CUR_LOW_STEP                          0.4f
+#define        CUR_XHIGH_STEP_X10                    40
+#define        CUR_HIGH_STEP_X10                     10
+#define        CUR_LOW_STEP_X10                      4
+
+#define        CUR_XHIGH_CAL_POINT                   ((float)CUR_XHIGH_CAL_POINT_X10 / 10.0f)
+#define        CUR_HIGH_CAL_POINT                    ((float)CUR_HIGH_CAL_POINT_X10  / 10.0f)
+#define        CUR_MID_CAL_POINT                     ((float)CUR_MID_CAL_POINT_X10   / 10.0f)
+#define        CUR_LOW_CAL_POINT                     ((float)CUR_LOW_CAL_POINT_X10   / 10.0f)
+
+#define        CUR_XHIGH_STEP                        ((float)CUR_XHIGH_STEP_X10 / 10.0f)
+#define        CUR_HIGH_STEP                         ((float)CUR_HIGH_STEP_X10  / 10.0f)
+#define        CUR_LOW_STEP                          ((float)CUR_LOW_STEP_X10   / 10.0f)
 
 // Each step must divide its span exactly: the runtime float-to-uint8_t cast
 // in FillCurrentGainArray() would silently truncate any non-integer ratio
-// and drop a slot from the phase-error lookup. Floats are scaled by 1000
-// to integer to avoid IEEE-754 inexactness for values like 0.4f.
+// and drop a slot from the phase-error lookup.
 //
 extern char _xhigh_step_divides_span_exactly[
-    (((int)(CUR_XHIGH_CAL_POINT * 1000) - (int)(CUR_HIGH_CAL_POINT * 1000))
-      % (int)(CUR_XHIGH_STEP * 1000) == 0) ? 1 : -1];
+    ((CUR_XHIGH_CAL_POINT_X10 - CUR_HIGH_CAL_POINT_X10)
+      % CUR_XHIGH_STEP_X10 == 0) ? 1 : -1];
 extern char _high_step_divides_span_exactly[
-    (((int)(CUR_HIGH_CAL_POINT * 1000) - (int)(CUR_MID_CAL_POINT * 1000))
-      % (int)(CUR_HIGH_STEP * 1000) == 0) ? 1 : -1];
+    ((CUR_HIGH_CAL_POINT_X10 - CUR_MID_CAL_POINT_X10)
+      % CUR_HIGH_STEP_X10 == 0) ? 1 : -1];
 extern char _low_step_divides_span_exactly[
-    (((int)(CUR_MID_CAL_POINT * 1000) - (int)(CUR_LOW_CAL_POINT * 1000))
-      % (int)(CUR_LOW_STEP * 1000) == 0) ? 1 : -1];
+    ((CUR_MID_CAL_POINT_X10 - CUR_LOW_CAL_POINT_X10)
+      % CUR_LOW_STEP_X10 == 0) ? 1 : -1];
 
 // Cal points must be ordered XHIGH > HIGH > MID > LOW > 0 so that segment
 // spans are positive and PhaseBufferIndex() branches cover the input range.
 //
 extern char _cal_points_strictly_decreasing[
-    ((int)(CUR_XHIGH_CAL_POINT * 1000) > (int)(CUR_HIGH_CAL_POINT * 1000) &&
-     (int)(CUR_HIGH_CAL_POINT  * 1000) > (int)(CUR_MID_CAL_POINT  * 1000) &&
-     (int)(CUR_MID_CAL_POINT   * 1000) > (int)(CUR_LOW_CAL_POINT  * 1000) &&
-     (int)(CUR_LOW_CAL_POINT   * 1000) > 0) ? 1 : -1];
+    (CUR_XHIGH_CAL_POINT_X10 > CUR_HIGH_CAL_POINT_X10 &&
+     CUR_HIGH_CAL_POINT_X10  > CUR_MID_CAL_POINT_X10  &&
+     CUR_MID_CAL_POINT_X10   > CUR_LOW_CAL_POINT_X10  &&
+     CUR_LOW_CAL_POINT_X10   > 0) ? 1 : -1];
 
 // Phase-error lookup occupies StepXHigh + StepHigh + (StepLow + 1) slots
 // in BufferBetaR[]/BufferAlfaR[]/BufferIntDelayR[]. CalPF() in
@@ -340,9 +353,9 @@ extern char _cal_points_strictly_decreasing[
 // must never return an index >= 50 or it would read uninitialized output.
 //
 extern char _phase_lookup_max_index_below_calpf_count[
-    ((((int)(CUR_XHIGH_CAL_POINT * 1000) - (int)(CUR_HIGH_CAL_POINT * 1000)) / (int)(CUR_XHIGH_STEP * 1000)) +
-     (((int)(CUR_HIGH_CAL_POINT  * 1000) - (int)(CUR_MID_CAL_POINT  * 1000)) / (int)(CUR_HIGH_STEP  * 1000)) +
-     (((int)(CUR_MID_CAL_POINT   * 1000) - (int)(CUR_LOW_CAL_POINT  * 1000)) / (int)(CUR_LOW_STEP   * 1000))
+    (((CUR_XHIGH_CAL_POINT_X10 - CUR_HIGH_CAL_POINT_X10) / CUR_XHIGH_STEP_X10) +
+     ((CUR_HIGH_CAL_POINT_X10  - CUR_MID_CAL_POINT_X10)  / CUR_HIGH_STEP_X10) +
+     ((CUR_MID_CAL_POINT_X10   - CUR_LOW_CAL_POINT_X10)  / CUR_LOW_STEP_X10)
      < 50) ? 1 : -1];
 
 #define        NO_OF_CAL_ACCUMULATION_VI             4
