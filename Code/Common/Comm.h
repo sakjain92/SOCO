@@ -28,6 +28,7 @@
 uint16_t ModBusCRCCalculation(uint8_t * str,uint8_t length);
 void SendData_UART(uint8_t Add, uint8_t Func,  uint8_t Send_Length);
 void CalPF(float Error, float * CalGainBufferPointer, float * CalBetaBufferPointer, int8_t * CalIntDelayPointer);
+void CalPhaseLag(float SignedPhaseRad, float * CalGainBufferPointer, float * CalBetaBufferPointer, int8_t * CalIntDelayPointer);
 bool DirectCalibration(void);
 void ModbusUpdateParameter(uint16_t Address,uint16_t NoOfBytes);
 void CheckPasswordEdit(uint16_t Address,uint16_t NoOfBytes);
@@ -36,7 +37,9 @@ void CheckPasswordEdit(uint16_t Address,uint16_t NoOfBytes);
 
 uint8_t Add_Received=0xFF,Fun_Received,CRC_Received_Low,CRC_Received_High;
 float CalVolR,CalVolY,CalVolB,CalCurR,CalCurY,CalCurB;
+float CalVolRY,CalVolYB,CalVolBR;
 float CalVolRSolar,CalVolYSolar,CalVolBSolar,CalCurRSolar,CalCurYSolar,CalCurBSolar;
+float CalVolRYSolar,CalVolYBSolar,CalVolBRSolar;
 float CalPowR,CalPowY,CalPowB;
 float CalPowRSolar,CalPowYSolar,CalPowBSolar;
 float CalFan1Current, CalFan2Current;

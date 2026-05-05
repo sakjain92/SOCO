@@ -1410,6 +1410,18 @@ void StartCalibration(void)
 
      WorkingCopyGain.FAN1_GAIN=CalibrationCoeff.FAN1_GAIN;
      WorkingCopyGain.FAN2_GAIN=CalibrationCoeff.FAN2_GAIN;
+
+     // Identity grid V_LL phase-shift FIR so V_RY/YB/BR are measured
+     // uncorrected during the upcoming XH_PF step (which computes new
+     // PH_ERROR values from the calibrated V_LL RMS via the sin formula).
+     // Loaded back from flash at XH_PF success.
+     //
+     WorkingCopyGain.VLL_RY_ALFA = 1.0f; WorkingCopyGain.VLL_RY_BETA = 0.0f; WorkingCopyGain.VLL_RY_INT_DELAY = 0;
+     WorkingCopyGain.VLL_YB_ALFA = 1.0f; WorkingCopyGain.VLL_YB_BETA = 0.0f; WorkingCopyGain.VLL_YB_INT_DELAY = 0;
+     WorkingCopyGain.VLL_BR_ALFA = 1.0f; WorkingCopyGain.VLL_BR_BETA = 0.0f; WorkingCopyGain.VLL_BR_INT_DELAY = 0;
+     WorkingCopyGain.VLL_RY_SOLAR_ALFA = 1.0f; WorkingCopyGain.VLL_RY_SOLAR_BETA = 0.0f; WorkingCopyGain.VLL_RY_SOLAR_INT_DELAY = 0;
+     WorkingCopyGain.VLL_YB_SOLAR_ALFA = 1.0f; WorkingCopyGain.VLL_YB_SOLAR_BETA = 0.0f; WorkingCopyGain.VLL_YB_SOLAR_INT_DELAY = 0;
+     WorkingCopyGain.VLL_BR_SOLAR_ALFA = 1.0f; WorkingCopyGain.VLL_BR_SOLAR_BETA = 0.0f; WorkingCopyGain.VLL_BR_SOLAR_INT_DELAY = 0;
    }
    if(FlagDirectCalibration == CALIBRATE_XH_VI)
    {
@@ -1479,6 +1491,12 @@ void StartCalibration(void)
         {
             return;
         }
+        CalPhaseLag(CalibrationCoeff.VLL_RY_PH_ERROR, &WorkingCopyGain.VLL_RY_ALFA, &WorkingCopyGain.VLL_RY_BETA, &WorkingCopyGain.VLL_RY_INT_DELAY);
+        CalPhaseLag(CalibrationCoeff.VLL_YB_PH_ERROR, &WorkingCopyGain.VLL_YB_ALFA, &WorkingCopyGain.VLL_YB_BETA, &WorkingCopyGain.VLL_YB_INT_DELAY);
+        CalPhaseLag(CalibrationCoeff.VLL_BR_PH_ERROR, &WorkingCopyGain.VLL_BR_ALFA, &WorkingCopyGain.VLL_BR_BETA, &WorkingCopyGain.VLL_BR_INT_DELAY);
+        CalPhaseLag(CalibrationCoeff.VLL_RY_SOLAR_PH_ERROR, &WorkingCopyGain.VLL_RY_SOLAR_ALFA, &WorkingCopyGain.VLL_RY_SOLAR_BETA, &WorkingCopyGain.VLL_RY_SOLAR_INT_DELAY);
+        CalPhaseLag(CalibrationCoeff.VLL_YB_SOLAR_PH_ERROR, &WorkingCopyGain.VLL_YB_SOLAR_ALFA, &WorkingCopyGain.VLL_YB_SOLAR_BETA, &WorkingCopyGain.VLL_YB_SOLAR_INT_DELAY);
+        CalPhaseLag(CalibrationCoeff.VLL_BR_SOLAR_PH_ERROR, &WorkingCopyGain.VLL_BR_SOLAR_ALFA, &WorkingCopyGain.VLL_BR_SOLAR_BETA, &WorkingCopyGain.VLL_BR_SOLAR_INT_DELAY);
         DisplaySetHighPF();
         FlagDirectCalibration=CALIBRATE_DIS_H_VI;
      }
@@ -1943,15 +1961,26 @@ void SetWorkingGainBuffer(void)
 {
   uint8_t TempChar;
   float Slope,Offset;
+  static bool initialized = false;
 
-  WorkingCopyGain.VR_GAIN=CalibrationCoeff.VR_240_GAIN;
-  WorkingCopyGain.VY_GAIN=CalibrationCoeff.VY_240_GAIN;
-  WorkingCopyGain.VB_GAIN=CalibrationCoeff.VB_240_GAIN;
-  WorkingCopyGain.VR_SOLAR_GAIN=CalibrationCoeff.VR_SOLAR_240_GAIN;
-  WorkingCopyGain.VY_SOLAR_GAIN=CalibrationCoeff.VY_SOLAR_240_GAIN;
-  WorkingCopyGain.VB_SOLAR_GAIN=CalibrationCoeff.VB_SOLAR_240_GAIN;
-  WorkingCopyGain.FAN1_GAIN=CalibrationCoeff.FAN1_GAIN;
-  WorkingCopyGain.FAN2_GAIN=CalibrationCoeff.FAN2_GAIN;
+  if (!initialized)
+  {
+    WorkingCopyGain.VR_GAIN=CalibrationCoeff.VR_240_GAIN;
+    WorkingCopyGain.VY_GAIN=CalibrationCoeff.VY_240_GAIN;
+    WorkingCopyGain.VB_GAIN=CalibrationCoeff.VB_240_GAIN;
+    CalPhaseLag(CalibrationCoeff.VLL_RY_PH_ERROR, &WorkingCopyGain.VLL_RY_ALFA, &WorkingCopyGain.VLL_RY_BETA, &WorkingCopyGain.VLL_RY_INT_DELAY);
+    CalPhaseLag(CalibrationCoeff.VLL_YB_PH_ERROR, &WorkingCopyGain.VLL_YB_ALFA, &WorkingCopyGain.VLL_YB_BETA, &WorkingCopyGain.VLL_YB_INT_DELAY);
+    CalPhaseLag(CalibrationCoeff.VLL_BR_PH_ERROR, &WorkingCopyGain.VLL_BR_ALFA, &WorkingCopyGain.VLL_BR_BETA, &WorkingCopyGain.VLL_BR_INT_DELAY);
+    WorkingCopyGain.VR_SOLAR_GAIN=CalibrationCoeff.VR_SOLAR_240_GAIN;
+    WorkingCopyGain.VY_SOLAR_GAIN=CalibrationCoeff.VY_SOLAR_240_GAIN;
+    WorkingCopyGain.VB_SOLAR_GAIN=CalibrationCoeff.VB_SOLAR_240_GAIN;
+    CalPhaseLag(CalibrationCoeff.VLL_RY_SOLAR_PH_ERROR, &WorkingCopyGain.VLL_RY_SOLAR_ALFA, &WorkingCopyGain.VLL_RY_SOLAR_BETA, &WorkingCopyGain.VLL_RY_SOLAR_INT_DELAY);
+    CalPhaseLag(CalibrationCoeff.VLL_YB_SOLAR_PH_ERROR, &WorkingCopyGain.VLL_YB_SOLAR_ALFA, &WorkingCopyGain.VLL_YB_SOLAR_BETA, &WorkingCopyGain.VLL_YB_SOLAR_INT_DELAY);
+    CalPhaseLag(CalibrationCoeff.VLL_BR_SOLAR_PH_ERROR, &WorkingCopyGain.VLL_BR_SOLAR_ALFA, &WorkingCopyGain.VLL_BR_SOLAR_BETA, &WorkingCopyGain.VLL_BR_SOLAR_INT_DELAY);
+    WorkingCopyGain.FAN1_GAIN=CalibrationCoeff.FAN1_GAIN;
+    WorkingCopyGain.FAN2_GAIN=CalibrationCoeff.FAN2_GAIN;
+    initialized = true;
+  }
 
   if(InstantPara.CurrentR>=CUR_HIGH_CAL_POINT)
   {

@@ -87,6 +87,19 @@ const struct PH_COEFF_STRUCT CalibrationCoeff @ "FLASH_COEFF_SECTION"=
   1.0f,  // FAN1, FAN2
   1.0f,
 
+  // VLL_RY_PH_ERROR, VLL_YB_PH_ERROR, VLL_BR_PH_ERROR (signed radians).
+  // Default 0 = no correction; populated by CALIBRATE_XH_PF.
+  //
+  0.0f,
+  0.0f,
+  0.0f,
+
+  // VLL_RY_SOLAR_PH_ERROR, VLL_YB_SOLAR_PH_ERROR, VLL_BR_SOLAR_PH_ERROR.
+  //
+  0.0f,
+  0.0f,
+  0.0f,
+
   // unused[12]
   //
   0.0f,

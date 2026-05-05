@@ -18,6 +18,7 @@ extern void DisplayAllOn(void);
 extern void DisplayAllOff(void);
 extern void ReSetDisplayParameter(void);
 extern void CalPF(float Error, float * CalGainBufferPointer, float * CalBetaBufferPointer, int8_t * CalIntDelayPointer);
+extern void CalPhaseLag(float SignedPhaseRad, float * CalGainBufferPointer, float * CalBetaBufferPointer, int8_t * CalIntDelayPointer);
 extern void EepromWrite(uint32_t DataLocation,uint16_t NoOfBytes,uint8_t DeviceAddress,uint8_t *DataArray );
 extern void EepromRead(uint32_t DataLocation,uint16_t NoOfBytes,uint8_t DeviceAddress,uint8_t *DataArray );
 extern void CheckEpromFree(uint8_t DeviceAddress);

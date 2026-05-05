@@ -509,6 +509,29 @@ float     IB_SOLAR_LOW_PH_ERROR;
 float     FAN1_GAIN;
 float     FAN2_GAIN;
 
+// Inter-phase voltage phase-shift error for grid mains line-line voltage.
+// Signed phase deviation (radians) of the actual phase difference from the
+// ideal 120deg, measured during CALIBRATE_XH_PF via the sin identity
+// RMS(V_LL) = 2*240*|sin(phi/2)|. Sign encodes which channel of the pair
+// gets the runtime delay (positive => first letter of pair, negative =>
+// second letter). Bound: |error| <= ~10.8deg (5% V_LL tolerance).
+//
+// At runtime, FillCurrentGainArray()-equivalent path converts each PH_ERROR
+// into ALFA / BETA / INT_DELAY in WorkingCopyGain via the same fractional-
+// delay FIR coefficients used by PR_/PY_/PB_. Applied only to V_LL
+// accumulator; per-phase RMS, V*I power, FFT, PR_/PY_/PB_ are untouched.
+//
+float     VLL_RY_PH_ERROR;
+float     VLL_YB_PH_ERROR;
+float     VLL_BR_PH_ERROR;
+
+// Same as VLL_*_PH_ERROR above but for solar line-line voltages. Computed
+// at CALIBRATE_XH_PF from CalVolRYSolar / CalVolYBSolar / CalVolBRSolar.
+//
+float     VLL_RY_SOLAR_PH_ERROR;
+float     VLL_YB_SOLAR_PH_ERROR;
+float     VLL_BR_SOLAR_PH_ERROR;
+
 float     unused[12];
 
 uint16_t     INIT_DATA1;
@@ -553,6 +576,43 @@ struct GAIN_WC
 
   float FAN1_GAIN;
   float FAN2_GAIN;
+
+  // Inter-phase voltage phase-shift FIR for grid mains line-line voltage.
+  // Same 2-tap fractional-delay structure as PR_ALFA / PR_BETA / PR_INT_DELAY:
+  //   y[n] = ALFA * ( x[n - int_d] + BETA * x[n - int_d - 1] )
+  // INT_DELAY sign selects which channel of the pair gets the delay:
+  //   >= 0 : delay applied to first letter of pair (R for V_RY pair, Y for
+  //          V_YB pair, B for V_BR pair). int_d magnitude in 0..3.
+  //   <  0 : delay applied to second letter (Y / B / R). int_d magnitude
+  //          = |value| - 1, in 0..3 (bias of 1 disambiguates the 0 case).
+  //
+  float VLL_RY_ALFA;
+  float VLL_YB_ALFA;
+  float VLL_BR_ALFA;
+
+  float VLL_RY_BETA;
+  float VLL_YB_BETA;
+  float VLL_BR_BETA;
+
+  int8_t VLL_RY_INT_DELAY;
+  int8_t VLL_YB_INT_DELAY;
+  int8_t VLL_BR_INT_DELAY;
+
+  // Solar V_LL phase-shift FIR. Same structure as the grid VLL_*_ALFA /
+  // VLL_*_BETA / VLL_*_INT_DELAY block above, applied only to the solar
+  // V_LL accumulator (VolRYSolarPhPh / VolYBSolarPhPh / VolBRSolarPhPh).
+  //
+  float VLL_RY_SOLAR_ALFA;
+  float VLL_YB_SOLAR_ALFA;
+  float VLL_BR_SOLAR_ALFA;
+
+  float VLL_RY_SOLAR_BETA;
+  float VLL_YB_SOLAR_BETA;
+  float VLL_BR_SOLAR_BETA;
+
+  int8_t VLL_RY_SOLAR_INT_DELAY;
+  int8_t VLL_YB_SOLAR_INT_DELAY;
+  int8_t VLL_BR_SOLAR_INT_DELAY;
 
   // Integer sample delay for phase correction. Sign selects which signal
   // the correction is applied to; magnitude selects the integer tap.

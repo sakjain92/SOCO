@@ -399,6 +399,15 @@ extern char _phase_lookup_max_index_below_calpf_count[
 #define         VOLTAGE_HIGHER_LIMIT          (CAL_VOLTAGE_SETTING_HIGH*(1+VOLTAGE_TOLERANCE))
 #define         VOLTAGE_LOWER_LIMIT           (CAL_VOLTAGE_SETTING_HIGH*(1-VOLTAGE_TOLERANCE))
 
+// V_LL phase-cal tolerance: 5% deviation from sqrt(3)*240 = 415.69 V at
+// the source's ideal 120deg phase shift. Corresponds to roughly +/- 1.92
+// samples of inter-phase delay error - well inside the 4-sample FIR budget.
+//
+#define         V_LL_TOLERANCE                0.05f
+#define         V_LL_IDEAL                    (CAL_VOLTAGE_SETTING_HIGH*1.7320508075688772f)
+#define         V_LL_HIGHER_LIMIT             (V_LL_IDEAL*(1+V_LL_TOLERANCE))
+#define         V_LL_LOWER_LIMIT              (V_LL_IDEAL*(1-V_LL_TOLERANCE))
+
 #define         I_XH_UPPER_LIMIT              (CAL_CURRENT_SETTING_XHIGH*(1+CURRENT_TOLRERANCE))
 #define         I_XH_LOWER_LIMIT              (CAL_CURRENT_SETTING_XHIGH*(1-CURRENT_TOLRERANCE))
 

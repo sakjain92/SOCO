@@ -37,6 +37,22 @@ struct SAMPLE   BSolarVolSample;
 struct SAMPLE   Fan1CurrentSample;
 struct SAMPLE   Fan2CurrentSample;
 
+// Grid V_R / V_Y / V_B history (post-IIR samples) used only for the
+// line-line voltage accumulator's per-pair phase-shift FIR. Slot [0] =
+// current ISR sample, slots [1..4] = older samples. Updated every ISR;
+// per-phase RMS, V*I power, FFT and PR_/PY_/PB_ all continue to use the
+// raw IntVolRPhase / IntVolYPhase / IntVolBPhase locals.
+//
+static float VR_Hist[5];
+static float VY_Hist[5];
+static float VB_Hist[5];
+
+// Same for solar V_R / V_Y / V_B (post-IIR) feeding the solar V_LL FIR.
+//
+static float VR_Solar_Hist[5];
+static float VY_Solar_Hist[5];
+static float VB_Solar_Hist[5];
+
 extern volatile uint16_t TimeOutCommTx;
 
 uint16_t OneSecCounter;
@@ -515,13 +531,112 @@ void ProcessMainInterrupt(void)
   IntDataSum.VolRPhase += IntVolRPhase*IntVolRPhase;
   IntDataSum.VolYPhase += IntVolYPhase*IntVolYPhase;
   IntDataSum.VolBPhase += IntVolBPhase*IntVolBPhase;
-  
-  TempGainMult=(IntVolRPhase-IntVolYPhase);
-  IntDataSum.VolRYPhPh += TempGainMult*TempGainMult;
-  TempGainMult=(IntVolBPhase-IntVolRPhase);
-  IntDataSum.VolBRPhPh += TempGainMult*TempGainMult;
-  TempGainMult=(IntVolBPhase-IntVolYPhase);
-  IntDataSum.VolYBPhPh += TempGainMult*TempGainMult;
+
+  // Push raw post-IIR voltage samples to per-channel history. The
+  // line-line accumulators below use FIR-corrected samples for V_LL only;
+  // every other consumer of IntVolRPhase / IntVolYPhase / IntVolBPhase
+  // (per-phase RMS just above, V*I power, FFT, PR_/PY_/PB_) keeps using
+  // the raw locals.
+  //
+  VR_Hist[4] = VR_Hist[3]; VR_Hist[3] = VR_Hist[2];
+  VR_Hist[2] = VR_Hist[1]; VR_Hist[1] = VR_Hist[0];
+  VR_Hist[0] = IntVolRPhase;
+  VY_Hist[4] = VY_Hist[3]; VY_Hist[3] = VY_Hist[2];
+  VY_Hist[2] = VY_Hist[1]; VY_Hist[1] = VY_Hist[0];
+  VY_Hist[0] = IntVolYPhase;
+  VB_Hist[4] = VB_Hist[3]; VB_Hist[3] = VB_Hist[2];
+  VB_Hist[2] = VB_Hist[1]; VB_Hist[1] = VB_Hist[0];
+  VB_Hist[0] = IntVolBPhase;
+
+  // Line-line voltage accumulators with per-pair phase-shift FIR. Same
+  // 2-tap fractional-delay structure as PR_/PY_/PB_:
+  //   y[n] = ALFA * (x[n - int_d] + BETA * x[n - int_d - 1])
+  // INT_DELAY sign selects which channel of the pair gets the delay (>=0
+  // -> first letter; <0 -> second letter). The unaffected channel uses its
+  // current sample directly.
+  //
+  {
+      float Cur, Prev;
+      float A, B;
+
+      // V_RY = V_R - V_Y. INT_DELAY >= 0 -> delay R, < 0 -> delay Y.
+      //
+      if (WorkingCopyGain.VLL_RY_INT_DELAY >= 0)
+      {
+          int8_t d = WorkingCopyGain.VLL_RY_INT_DELAY;
+          if      (d == 0) { Cur = VR_Hist[0]; Prev = VR_Hist[1]; }
+          else if (d == 1) { Cur = VR_Hist[1]; Prev = VR_Hist[2]; }
+          else if (d == 2) { Cur = VR_Hist[2]; Prev = VR_Hist[3]; }
+          else             { Cur = VR_Hist[3]; Prev = VR_Hist[4]; }
+          A = WorkingCopyGain.VLL_RY_ALFA * (Cur + WorkingCopyGain.VLL_RY_BETA * Prev);
+          B = VY_Hist[0];
+      }
+      else
+      {
+          int8_t d = -WorkingCopyGain.VLL_RY_INT_DELAY - 1;
+          if      (d == 0) { Cur = VY_Hist[0]; Prev = VY_Hist[1]; }
+          else if (d == 1) { Cur = VY_Hist[1]; Prev = VY_Hist[2]; }
+          else if (d == 2) { Cur = VY_Hist[2]; Prev = VY_Hist[3]; }
+          else             { Cur = VY_Hist[3]; Prev = VY_Hist[4]; }
+          A = VR_Hist[0];
+          B = WorkingCopyGain.VLL_RY_ALFA * (Cur + WorkingCopyGain.VLL_RY_BETA * Prev);
+      }
+      TempGainMult = A - B;
+      IntDataSum.VolRYPhPh += TempGainMult * TempGainMult;
+
+      // V_BR = V_B - V_R. INT_DELAY >= 0 -> delay B, < 0 -> delay R.
+      //
+      if (WorkingCopyGain.VLL_BR_INT_DELAY >= 0)
+      {
+          int8_t d = WorkingCopyGain.VLL_BR_INT_DELAY;
+          if      (d == 0) { Cur = VB_Hist[0]; Prev = VB_Hist[1]; }
+          else if (d == 1) { Cur = VB_Hist[1]; Prev = VB_Hist[2]; }
+          else if (d == 2) { Cur = VB_Hist[2]; Prev = VB_Hist[3]; }
+          else             { Cur = VB_Hist[3]; Prev = VB_Hist[4]; }
+          A = WorkingCopyGain.VLL_BR_ALFA * (Cur + WorkingCopyGain.VLL_BR_BETA * Prev);
+          B = VR_Hist[0];
+      }
+      else
+      {
+          int8_t d = -WorkingCopyGain.VLL_BR_INT_DELAY - 1;
+          if      (d == 0) { Cur = VR_Hist[0]; Prev = VR_Hist[1]; }
+          else if (d == 1) { Cur = VR_Hist[1]; Prev = VR_Hist[2]; }
+          else if (d == 2) { Cur = VR_Hist[2]; Prev = VR_Hist[3]; }
+          else             { Cur = VR_Hist[3]; Prev = VR_Hist[4]; }
+          A = VB_Hist[0];
+          B = WorkingCopyGain.VLL_BR_ALFA * (Cur + WorkingCopyGain.VLL_BR_BETA * Prev);
+      }
+      TempGainMult = A - B;
+      IntDataSum.VolBRPhPh += TempGainMult * TempGainMult;
+
+      // V_YB stored as |V_B - V_Y|^2 in this codebase (RMS is symmetric so
+      // the sign of the subtraction is irrelevant for the magnitude). The
+      // FIR sign convention is on the (Y, B) pair: INT_DELAY >= 0 -> delay
+      // Y, < 0 -> delay B.
+      //
+      if (WorkingCopyGain.VLL_YB_INT_DELAY >= 0)
+      {
+          int8_t d = WorkingCopyGain.VLL_YB_INT_DELAY;
+          if      (d == 0) { Cur = VY_Hist[0]; Prev = VY_Hist[1]; }
+          else if (d == 1) { Cur = VY_Hist[1]; Prev = VY_Hist[2]; }
+          else if (d == 2) { Cur = VY_Hist[2]; Prev = VY_Hist[3]; }
+          else             { Cur = VY_Hist[3]; Prev = VY_Hist[4]; }
+          A = WorkingCopyGain.VLL_YB_ALFA * (Cur + WorkingCopyGain.VLL_YB_BETA * Prev);
+          B = VB_Hist[0];
+      }
+      else
+      {
+          int8_t d = -WorkingCopyGain.VLL_YB_INT_DELAY - 1;
+          if      (d == 0) { Cur = VB_Hist[0]; Prev = VB_Hist[1]; }
+          else if (d == 1) { Cur = VB_Hist[1]; Prev = VB_Hist[2]; }
+          else if (d == 2) { Cur = VB_Hist[2]; Prev = VB_Hist[3]; }
+          else             { Cur = VB_Hist[3]; Prev = VB_Hist[4]; }
+          A = VY_Hist[0];
+          B = WorkingCopyGain.VLL_YB_ALFA * (Cur + WorkingCopyGain.VLL_YB_BETA * Prev);
+      }
+      TempGainMult = A - B;
+      IntDataSum.VolYBPhPh += TempGainMult * TempGainMult;
+  }
   
   // Neutral Current
   // UNDONE: NEUTRAL CURRENT calculation is broken as we do phase shift in current
@@ -659,12 +774,104 @@ void ProcessMainInterrupt(void)
   IntDataSum.VolYSolarPhase += IntVolYSolarPhase*IntVolYSolarPhase;
   IntDataSum.VolBSolarPhase += IntVolBSolarPhase*IntVolBSolarPhase;
 
-  TempGainMult=(IntVolRSolarPhase-IntVolYSolarPhase);
-  IntDataSum.VolRYSolarPhPh += TempGainMult*TempGainMult;
-  TempGainMult=(IntVolBSolarPhase-IntVolRSolarPhase);
-  IntDataSum.VolBRSolarPhPh += TempGainMult*TempGainMult;
-  TempGainMult=(IntVolBSolarPhase-IntVolYSolarPhase);
-  IntDataSum.VolYBSolarPhPh += TempGainMult*TempGainMult;
+  // Push raw post-IIR solar voltage samples to per-channel history. Same
+  // structure as the grid VR_Hist / VY_Hist / VB_Hist above; consumed only
+  // by the solar V_LL accumulator's per-pair phase-shift FIR below.
+  //
+  VR_Solar_Hist[4] = VR_Solar_Hist[3]; VR_Solar_Hist[3] = VR_Solar_Hist[2];
+  VR_Solar_Hist[2] = VR_Solar_Hist[1]; VR_Solar_Hist[1] = VR_Solar_Hist[0];
+  VR_Solar_Hist[0] = IntVolRSolarPhase;
+  VY_Solar_Hist[4] = VY_Solar_Hist[3]; VY_Solar_Hist[3] = VY_Solar_Hist[2];
+  VY_Solar_Hist[2] = VY_Solar_Hist[1]; VY_Solar_Hist[1] = VY_Solar_Hist[0];
+  VY_Solar_Hist[0] = IntVolYSolarPhase;
+  VB_Solar_Hist[4] = VB_Solar_Hist[3]; VB_Solar_Hist[3] = VB_Solar_Hist[2];
+  VB_Solar_Hist[2] = VB_Solar_Hist[1]; VB_Solar_Hist[1] = VB_Solar_Hist[0];
+  VB_Solar_Hist[0] = IntVolBSolarPhase;
+
+  // Solar line-line voltage accumulators with per-pair phase-shift FIR.
+  // Same 2-tap fractional-delay structure as the grid V_LL block above.
+  //
+  {
+      float Cur, Prev;
+      float A, B;
+
+      // V_RY_SOLAR = V_R - V_Y. INT_DELAY >= 0 -> delay R, < 0 -> delay Y.
+      //
+      if (WorkingCopyGain.VLL_RY_SOLAR_INT_DELAY >= 0)
+      {
+          int8_t d = WorkingCopyGain.VLL_RY_SOLAR_INT_DELAY;
+          if      (d == 0) { Cur = VR_Solar_Hist[0]; Prev = VR_Solar_Hist[1]; }
+          else if (d == 1) { Cur = VR_Solar_Hist[1]; Prev = VR_Solar_Hist[2]; }
+          else if (d == 2) { Cur = VR_Solar_Hist[2]; Prev = VR_Solar_Hist[3]; }
+          else             { Cur = VR_Solar_Hist[3]; Prev = VR_Solar_Hist[4]; }
+          A = WorkingCopyGain.VLL_RY_SOLAR_ALFA * (Cur + WorkingCopyGain.VLL_RY_SOLAR_BETA * Prev);
+          B = VY_Solar_Hist[0];
+      }
+      else
+      {
+          int8_t d = -WorkingCopyGain.VLL_RY_SOLAR_INT_DELAY - 1;
+          if      (d == 0) { Cur = VY_Solar_Hist[0]; Prev = VY_Solar_Hist[1]; }
+          else if (d == 1) { Cur = VY_Solar_Hist[1]; Prev = VY_Solar_Hist[2]; }
+          else if (d == 2) { Cur = VY_Solar_Hist[2]; Prev = VY_Solar_Hist[3]; }
+          else             { Cur = VY_Solar_Hist[3]; Prev = VY_Solar_Hist[4]; }
+          A = VR_Solar_Hist[0];
+          B = WorkingCopyGain.VLL_RY_SOLAR_ALFA * (Cur + WorkingCopyGain.VLL_RY_SOLAR_BETA * Prev);
+      }
+      TempGainMult = A - B;
+      IntDataSum.VolRYSolarPhPh += TempGainMult * TempGainMult;
+
+      // V_BR_SOLAR = V_B - V_R. INT_DELAY >= 0 -> delay B, < 0 -> delay R.
+      //
+      if (WorkingCopyGain.VLL_BR_SOLAR_INT_DELAY >= 0)
+      {
+          int8_t d = WorkingCopyGain.VLL_BR_SOLAR_INT_DELAY;
+          if      (d == 0) { Cur = VB_Solar_Hist[0]; Prev = VB_Solar_Hist[1]; }
+          else if (d == 1) { Cur = VB_Solar_Hist[1]; Prev = VB_Solar_Hist[2]; }
+          else if (d == 2) { Cur = VB_Solar_Hist[2]; Prev = VB_Solar_Hist[3]; }
+          else             { Cur = VB_Solar_Hist[3]; Prev = VB_Solar_Hist[4]; }
+          A = WorkingCopyGain.VLL_BR_SOLAR_ALFA * (Cur + WorkingCopyGain.VLL_BR_SOLAR_BETA * Prev);
+          B = VR_Solar_Hist[0];
+      }
+      else
+      {
+          int8_t d = -WorkingCopyGain.VLL_BR_SOLAR_INT_DELAY - 1;
+          if      (d == 0) { Cur = VR_Solar_Hist[0]; Prev = VR_Solar_Hist[1]; }
+          else if (d == 1) { Cur = VR_Solar_Hist[1]; Prev = VR_Solar_Hist[2]; }
+          else if (d == 2) { Cur = VR_Solar_Hist[2]; Prev = VR_Solar_Hist[3]; }
+          else             { Cur = VR_Solar_Hist[3]; Prev = VR_Solar_Hist[4]; }
+          A = VB_Solar_Hist[0];
+          B = WorkingCopyGain.VLL_BR_SOLAR_ALFA * (Cur + WorkingCopyGain.VLL_BR_SOLAR_BETA * Prev);
+      }
+      TempGainMult = A - B;
+      IntDataSum.VolBRSolarPhPh += TempGainMult * TempGainMult;
+
+      // V_YB_SOLAR stored as |V_B - V_Y|^2 (RMS is symmetric). FIR sign
+      // convention is on the (Y, B) pair: INT_DELAY >= 0 -> delay Y, < 0
+      // -> delay B.
+      //
+      if (WorkingCopyGain.VLL_YB_SOLAR_INT_DELAY >= 0)
+      {
+          int8_t d = WorkingCopyGain.VLL_YB_SOLAR_INT_DELAY;
+          if      (d == 0) { Cur = VY_Solar_Hist[0]; Prev = VY_Solar_Hist[1]; }
+          else if (d == 1) { Cur = VY_Solar_Hist[1]; Prev = VY_Solar_Hist[2]; }
+          else if (d == 2) { Cur = VY_Solar_Hist[2]; Prev = VY_Solar_Hist[3]; }
+          else             { Cur = VY_Solar_Hist[3]; Prev = VY_Solar_Hist[4]; }
+          A = WorkingCopyGain.VLL_YB_SOLAR_ALFA * (Cur + WorkingCopyGain.VLL_YB_SOLAR_BETA * Prev);
+          B = VB_Solar_Hist[0];
+      }
+      else
+      {
+          int8_t d = -WorkingCopyGain.VLL_YB_SOLAR_INT_DELAY - 1;
+          if      (d == 0) { Cur = VB_Solar_Hist[0]; Prev = VB_Solar_Hist[1]; }
+          else if (d == 1) { Cur = VB_Solar_Hist[1]; Prev = VB_Solar_Hist[2]; }
+          else if (d == 2) { Cur = VB_Solar_Hist[2]; Prev = VB_Solar_Hist[3]; }
+          else             { Cur = VB_Solar_Hist[3]; Prev = VB_Solar_Hist[4]; }
+          A = VY_Solar_Hist[0];
+          B = WorkingCopyGain.VLL_YB_SOLAR_ALFA * (Cur + WorkingCopyGain.VLL_YB_SOLAR_BETA * Prev);
+      }
+      TempGainMult = A - B;
+      IntDataSum.VolYBSolarPhPh += TempGainMult * TempGainMult;
+  }
 
   IntNeuSolarCurrent=0;
   IntNeuSolarCurrent +=IntCurRSolarPhase;

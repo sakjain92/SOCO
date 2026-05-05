@@ -518,6 +518,106 @@ bool DirectCalibration(void)
       {
           FlagDirectCalibration = CALIBRATE_ERROR;
       }
+
+      // Grid V_LL phase calibration. By this point V_R / V_Y / V_B gains
+      // are applied (loaded at end of XH_VI) so InstantPara.VolR/Y/B are
+      // in calibrated volts at ~240V and InstantPara.VolRY/YB/BR are in
+      // calibrated volts at ~sqrt(3)*240 = 415.69V. PR_/PY_/PB_ are still
+      // at identity, so V_LL is not biased by per-phase phase correction.
+      //
+      // Two equal-amplitude sinusoids with phase shift phi produce a
+      // difference whose RMS is 2*A*|sin(phi/2)|. With A = 240V:
+      //   phi      = 2 * arcsin(V_LL / 480)
+      //   PH_ERROR = phi - 2*pi/3            (signed deviation from 120deg)
+      //
+      // PH_ERROR sign encodes which channel of the pair will be delayed at
+      // runtime (positive => first letter, negative => second letter), via
+      // the same FIR coefficients used by PR_/PY_/PB_; the conversion to
+      // ALFA / BETA / INT_DELAY happens at SetWorkingGainBuffer() time via
+      // CalPhaseLag().
+      //
+      // Saturation gate: V_LL must be within VOLTAGE_TOLERANCE-style band
+      // V_LL_LOWER_LIMIT..V_LL_HIGHER_LIMIT (+/- 5%). Equivalent to
+      // |PH_ERROR| <~ 10.8deg, well inside the 4-sample FIR budget.
+      //
+      {
+          // Phase voltages are 120 degree apart
+          //
+          const float IDEAL_PHI = 2.0f * 3.14159265f / 3.0f;
+          const float TWO_A     = 2.0f * CAL_VOLTAGE_SETTING_HIGH;
+
+          float vRY = CalVolRY / NO_OF_CAL_ACCUMULATION_POW;
+          float vYB = CalVolYB / NO_OF_CAL_ACCUMULATION_POW;
+          float vBR = CalVolBR / NO_OF_CAL_ACCUMULATION_POW;
+
+          if (vRY > V_LL_HIGHER_LIMIT || vRY < V_LL_LOWER_LIMIT ||
+              vYB > V_LL_HIGHER_LIMIT || vYB < V_LL_LOWER_LIMIT ||
+              vBR > V_LL_HIGHER_LIMIT || vBR < V_LL_LOWER_LIMIT)
+          {
+              FlagDirectCalibration = CALIBRATE_ERROR;
+          }
+          else
+          {
+              float r;
+
+              r = vRY / TWO_A;
+              if (r > 1.0f) r = 1.0f;
+              if (r < 0.0f) r = 0.0f;
+              CalBuffer.VLL_RY_PH_ERROR = 2.0f * asinf(r) - IDEAL_PHI;
+
+              r = vYB / TWO_A;
+              if (r > 1.0f) r = 1.0f;
+              if (r < 0.0f) r = 0.0f;
+              CalBuffer.VLL_YB_PH_ERROR = 2.0f * asinf(r) - IDEAL_PHI;
+
+              r = vBR / TWO_A;
+              if (r > 1.0f) r = 1.0f;
+              if (r < 0.0f) r = 0.0f;
+              CalBuffer.VLL_BR_PH_ERROR = 2.0f * asinf(r) - IDEAL_PHI;
+          }
+      }
+
+      // Solar V_LL phase calibration. Same math as the grid block above:
+      // the solar V_R/V_Y/V_B gains are already applied (loaded at end of
+      // XH_VI) so InstantPara.VolR/Y/BSolar are at ~240V and
+      // InstantPara.VolRY/YB/BRSolar are at ~sqrt(3)*240. The solar
+      // PR_/PY_/PB_SOLAR FIRs are still at identity here, so V_LL is not
+      // biased by the per-phase phase correction.
+      //
+      {
+          const float IDEAL_PHI = 2.0f * 3.14159265f / 3.0f;
+          const float TWO_A     = 2.0f * CAL_VOLTAGE_SETTING_HIGH;
+
+          float vRY = CalVolRYSolar / NO_OF_CAL_ACCUMULATION_POW;
+          float vYB = CalVolYBSolar / NO_OF_CAL_ACCUMULATION_POW;
+          float vBR = CalVolBRSolar / NO_OF_CAL_ACCUMULATION_POW;
+
+          if (vRY > V_LL_HIGHER_LIMIT || vRY < V_LL_LOWER_LIMIT ||
+              vYB > V_LL_HIGHER_LIMIT || vYB < V_LL_LOWER_LIMIT ||
+              vBR > V_LL_HIGHER_LIMIT || vBR < V_LL_LOWER_LIMIT)
+          {
+              FlagDirectCalibration = CALIBRATE_ERROR;
+          }
+          else
+          {
+              float r;
+
+              r = vRY / TWO_A;
+              if (r > 1.0f) r = 1.0f;
+              if (r < 0.0f) r = 0.0f;
+              CalBuffer.VLL_RY_SOLAR_PH_ERROR = 2.0f * asinf(r) - IDEAL_PHI;
+
+              r = vYB / TWO_A;
+              if (r > 1.0f) r = 1.0f;
+              if (r < 0.0f) r = 0.0f;
+              CalBuffer.VLL_YB_SOLAR_PH_ERROR = 2.0f * asinf(r) - IDEAL_PHI;
+
+              r = vBR / TWO_A;
+              if (r > 1.0f) r = 1.0f;
+              if (r < 0.0f) r = 0.0f;
+              CalBuffer.VLL_BR_SOLAR_PH_ERROR = 2.0f * asinf(r) - IDEAL_PHI;
+          }
+      }
    }
    else
    {
@@ -675,6 +775,9 @@ void AccumulateDataForCalibration(void)
    CalVolR+=InstantPara.VolR;
    CalVolY+=InstantPara.VolY;
    CalVolB+=InstantPara.VolB;
+   CalVolRY+=InstantPara.VolRY;
+   CalVolYB+=InstantPara.VolYB;
+   CalVolBR+=InstantPara.VolBR;
    CalCurR+=InstantPara.CurrentR;
    CalCurY+=InstantPara.CurrentY;
    CalCurB+=InstantPara.CurrentB;
@@ -685,6 +788,9 @@ void AccumulateDataForCalibration(void)
    CalVolRSolar+=InstantPara.VolRSolar;
    CalVolYSolar+=InstantPara.VolYSolar;
    CalVolBSolar+=InstantPara.VolBSolar;
+   CalVolRYSolar+=InstantPara.VolRYSolar;
+   CalVolYBSolar+=InstantPara.VolYBSolar;
+   CalVolBRSolar+=InstantPara.VolBRSolar;
    CalCurRSolar+=InstantPara.CurrentRSolar;
    CalCurYSolar+=InstantPara.CurrentYSolar;
    CalCurBSolar+=InstantPara.CurrentBSolar;
@@ -706,6 +812,9 @@ void ClearCalAccumulatedData(void)
    CalVolR=0;
    CalVolY=0;
    CalVolB=0;
+   CalVolRY=0;
+   CalVolYB=0;
+   CalVolBR=0;
    CalCurR=0;
    CalCurY=0;
    CalCurB=0;
@@ -716,6 +825,9 @@ void ClearCalAccumulatedData(void)
    CalVolRSolar=0;
    CalVolYSolar=0;
    CalVolBSolar=0;
+   CalVolRYSolar=0;
+   CalVolYBSolar=0;
+   CalVolBRSolar=0;
    CalCurRSolar=0;
    CalCurYSolar=0;
    CalCurBSolar=0;
@@ -763,6 +875,57 @@ void CalPF(float Error, float * CalGainBufferPointer, float * CalBetaBufferPoint
     *CalGainBufferPointer=A;
     *CalBetaBufferPointer=B;
     *CalIntDelayPointer = delayOnI ? -(int8_t)(intD + 1) : (int8_t)intD;
+}
+
+/*
+Inf: Compute V_LL phase-shift FIR coefficients (ALFA, BETA, INT_DELAY)
+     from a signed phase-error in radians, mirroring the CalPF() math.
+Inp: SignedPhaseRad: deviation of measured V_LL phase from ideal 120 deg.
+                     Positive => delay applied to first letter of the V_LL
+                     pair (R for V_RY, Y for V_YB, B for V_BR). Negative =>
+                     delay applied to second letter (Y / B / R).
+     CalGainBufferPointer / CalBetaBufferPointer / CalIntDelayPointer:
+                     output ALFA, BETA, INT_DELAY for the FIR
+                     y[n] = ALFA * (x[n - int_d] + BETA * x[n - int_d - 1])
+                     applied at runtime in the V_LL accumulator.
+Ret: None. Falls back to identity FIR (ALFA=1, BETA=0, INT_DELAY=0) if the
+     requested delay exceeds the 4-sample FIR budget.
+*/
+void CalPhaseLag(float SignedPhaseRad, float * CalGainBufferPointer, float * CalBetaBufferPointer, int8_t * CalIntDelayPointer)
+{
+    // 2 * pi * f / fs at fundamental: 2*pi*50/3200 = pi/32.
+    //
+    const float W = 3.14159265f / 32.0f;
+
+    bool  delayOnSecond = (SignedPhaseRad < 0.0f);
+    float mag = delayOnSecond ? -SignedPhaseRad : SignedPhaseRad;
+    float D   = mag / W;       // total fractional sample delay in [0, ...]
+
+    // Saturation: outside the 4-sample FIR budget fall back to identity
+    // FIR. The cal-time V_LL_*_LIMIT gate should already have caught this
+    // (4 samples ~= 22.5 deg vs the 5% V_LL band ~= 10.8 deg), so this is
+    // pure defence-in-depth for corrupt flash values.
+    //
+    if (D >= 4.0f)
+    {
+        *CalGainBufferPointer = 1.0f;
+        *CalBetaBufferPointer = 0.0f;
+        *CalIntDelayPointer   = 0;
+        return;
+    }
+
+    uint8_t intD  = (uint8_t)D;
+    float   fracD = D - (float)intD;
+
+    // Same 2-tap fractional-delay FIR as CalPF(): chosen so the filter has
+    // unit magnitude at W and a phase delay of (intD + fracD) samples.
+    //
+    float B = -((1.0f - 2.0f*fracD)*cosf(W) - sqrtf((1.0f - 2.0f*fracD)*(1.0f - 2.0f*fracD)*cosf(W)*cosf(W) + 4.0f*fracD*(1.0f - fracD))) / (2.0f*(1.0f - fracD));
+    float A = 1.0f / sqrtf((cosf(W) + B)*(cosf(W) + B) + sinf(W)*sinf(W));
+
+    *CalGainBufferPointer = A;
+    *CalBetaBufferPointer = B;
+    *CalIntDelayPointer   = delayOnSecond ? -(int8_t)(intD + 1) : (int8_t)intD;
 }
    
 /*
