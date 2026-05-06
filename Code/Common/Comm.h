@@ -29,6 +29,11 @@ uint16_t ModBusCRCCalculation(uint8_t * str,uint8_t length);
 void SendData_UART(uint8_t Add, uint8_t Func,  uint8_t Send_Length);
 void CalPF(float Error, float * CalGainBufferPointer, float * CalBetaBufferPointer, int8_t * CalIntDelayPointer);
 void CalPhaseLag(float SignedPhaseRad, float * CalGainBufferPointer, float * CalBetaBufferPointer, int8_t * CalIntDelayPointer);
+void DeriveNeutralFir(float VllRyPhErr, float VllBrPhErr,
+                      float IrXhPhErr, float IyXhPhErr, float IbXhPhErr,
+                      float * AlfaR, float * BetaR, int8_t * IntDelayR,
+                      float * AlfaY, float * BetaY, int8_t * IntDelayY,
+                      float * AlfaB, float * BetaB, int8_t * IntDelayB);
 bool DirectCalibration(void);
 void ModbusUpdateParameter(uint16_t Address,uint16_t NoOfBytes);
 void CheckPasswordEdit(uint16_t Address,uint16_t NoOfBytes);

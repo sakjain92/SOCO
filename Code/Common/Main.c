@@ -1422,6 +1422,17 @@ void StartCalibration(void)
      WorkingCopyGain.VLL_RY_SOLAR_ALFA = 1.0f; WorkingCopyGain.VLL_RY_SOLAR_BETA = 0.0f; WorkingCopyGain.VLL_RY_SOLAR_INT_DELAY = 0;
      WorkingCopyGain.VLL_YB_SOLAR_ALFA = 1.0f; WorkingCopyGain.VLL_YB_SOLAR_BETA = 0.0f; WorkingCopyGain.VLL_YB_SOLAR_INT_DELAY = 0;
      WorkingCopyGain.VLL_BR_SOLAR_ALFA = 1.0f; WorkingCopyGain.VLL_BR_SOLAR_BETA = 0.0f; WorkingCopyGain.VLL_BR_SOLAR_INT_DELAY = 0;
+
+     // Identity per-channel I_N FIR. The I_N FIR is derived at boot from
+     // V_LL + per-phase PF cal data (DeriveNeutralFir), so during cal we
+     // run uncorrected. Reloaded at next reboot from refreshed flash.
+     //
+     WorkingCopyGain.I_N_R_ALFA = 1.0f; WorkingCopyGain.I_N_R_BETA = 0.0f; WorkingCopyGain.I_N_R_INT_DELAY = 0;
+     WorkingCopyGain.I_N_Y_ALFA = 1.0f; WorkingCopyGain.I_N_Y_BETA = 0.0f; WorkingCopyGain.I_N_Y_INT_DELAY = 0;
+     WorkingCopyGain.I_N_B_ALFA = 1.0f; WorkingCopyGain.I_N_B_BETA = 0.0f; WorkingCopyGain.I_N_B_INT_DELAY = 0;
+     WorkingCopyGain.I_N_R_SOLAR_ALFA = 1.0f; WorkingCopyGain.I_N_R_SOLAR_BETA = 0.0f; WorkingCopyGain.I_N_R_SOLAR_INT_DELAY = 0;
+     WorkingCopyGain.I_N_Y_SOLAR_ALFA = 1.0f; WorkingCopyGain.I_N_Y_SOLAR_BETA = 0.0f; WorkingCopyGain.I_N_Y_SOLAR_INT_DELAY = 0;
+     WorkingCopyGain.I_N_B_SOLAR_ALFA = 1.0f; WorkingCopyGain.I_N_B_SOLAR_BETA = 0.0f; WorkingCopyGain.I_N_B_SOLAR_INT_DELAY = 0;
    }
    if(FlagDirectCalibration == CALIBRATE_XH_VI)
    {
@@ -1497,6 +1508,20 @@ void StartCalibration(void)
         CalPhaseLag(CalibrationCoeff.VLL_RY_SOLAR_PH_ERROR, &WorkingCopyGain.VLL_RY_SOLAR_ALFA, &WorkingCopyGain.VLL_RY_SOLAR_BETA, &WorkingCopyGain.VLL_RY_SOLAR_INT_DELAY);
         CalPhaseLag(CalibrationCoeff.VLL_YB_SOLAR_PH_ERROR, &WorkingCopyGain.VLL_YB_SOLAR_ALFA, &WorkingCopyGain.VLL_YB_SOLAR_BETA, &WorkingCopyGain.VLL_YB_SOLAR_INT_DELAY);
         CalPhaseLag(CalibrationCoeff.VLL_BR_SOLAR_PH_ERROR, &WorkingCopyGain.VLL_BR_SOLAR_ALFA, &WorkingCopyGain.VLL_BR_SOLAR_BETA, &WorkingCopyGain.VLL_BR_SOLAR_INT_DELAY);
+        // I_N FIR is derived from VLL_*_PH_ERROR + I*_XHIGH_PH_ERROR which
+        // are all freshly stored above; refresh the working copy now so
+        // I_N stays correct without a reboot.
+        //
+        DeriveNeutralFir(CalibrationCoeff.VLL_RY_PH_ERROR, CalibrationCoeff.VLL_BR_PH_ERROR,
+                         CalibrationCoeff.IR_XHIGH_PH_ERROR, CalibrationCoeff.IY_XHIGH_PH_ERROR, CalibrationCoeff.IB_XHIGH_PH_ERROR,
+                         &WorkingCopyGain.I_N_R_ALFA, &WorkingCopyGain.I_N_R_BETA, &WorkingCopyGain.I_N_R_INT_DELAY,
+                         &WorkingCopyGain.I_N_Y_ALFA, &WorkingCopyGain.I_N_Y_BETA, &WorkingCopyGain.I_N_Y_INT_DELAY,
+                         &WorkingCopyGain.I_N_B_ALFA, &WorkingCopyGain.I_N_B_BETA, &WorkingCopyGain.I_N_B_INT_DELAY);
+        DeriveNeutralFir(CalibrationCoeff.VLL_RY_SOLAR_PH_ERROR, CalibrationCoeff.VLL_BR_SOLAR_PH_ERROR,
+                         CalibrationCoeff.IR_SOLAR_XHIGH_PH_ERROR, CalibrationCoeff.IY_SOLAR_XHIGH_PH_ERROR, CalibrationCoeff.IB_SOLAR_XHIGH_PH_ERROR,
+                         &WorkingCopyGain.I_N_R_SOLAR_ALFA, &WorkingCopyGain.I_N_R_SOLAR_BETA, &WorkingCopyGain.I_N_R_SOLAR_INT_DELAY,
+                         &WorkingCopyGain.I_N_Y_SOLAR_ALFA, &WorkingCopyGain.I_N_Y_SOLAR_BETA, &WorkingCopyGain.I_N_Y_SOLAR_INT_DELAY,
+                         &WorkingCopyGain.I_N_B_SOLAR_ALFA, &WorkingCopyGain.I_N_B_SOLAR_BETA, &WorkingCopyGain.I_N_B_SOLAR_INT_DELAY);
         DisplaySetHighPF();
         FlagDirectCalibration=CALIBRATE_DIS_H_VI;
      }
@@ -1979,6 +2004,21 @@ void SetWorkingGainBuffer(void)
     CalPhaseLag(CalibrationCoeff.VLL_BR_SOLAR_PH_ERROR, &WorkingCopyGain.VLL_BR_SOLAR_ALFA, &WorkingCopyGain.VLL_BR_SOLAR_BETA, &WorkingCopyGain.VLL_BR_SOLAR_INT_DELAY);
     WorkingCopyGain.FAN1_GAIN=CalibrationCoeff.FAN1_GAIN;
     WorkingCopyGain.FAN2_GAIN=CalibrationCoeff.FAN2_GAIN;
+
+    // Derive per-channel I_N FIR from existing V_LL + per-phase PF cal
+    // data. No dedicated I_N cal step; see DeriveNeutralFir() in Comm.c
+    // for the telescoping math.
+    //
+    DeriveNeutralFir(CalibrationCoeff.VLL_RY_PH_ERROR, CalibrationCoeff.VLL_BR_PH_ERROR,
+                     CalibrationCoeff.IR_XHIGH_PH_ERROR, CalibrationCoeff.IY_XHIGH_PH_ERROR, CalibrationCoeff.IB_XHIGH_PH_ERROR,
+                     &WorkingCopyGain.I_N_R_ALFA, &WorkingCopyGain.I_N_R_BETA, &WorkingCopyGain.I_N_R_INT_DELAY,
+                     &WorkingCopyGain.I_N_Y_ALFA, &WorkingCopyGain.I_N_Y_BETA, &WorkingCopyGain.I_N_Y_INT_DELAY,
+                     &WorkingCopyGain.I_N_B_ALFA, &WorkingCopyGain.I_N_B_BETA, &WorkingCopyGain.I_N_B_INT_DELAY);
+    DeriveNeutralFir(CalibrationCoeff.VLL_RY_SOLAR_PH_ERROR, CalibrationCoeff.VLL_BR_SOLAR_PH_ERROR,
+                     CalibrationCoeff.IR_SOLAR_XHIGH_PH_ERROR, CalibrationCoeff.IY_SOLAR_XHIGH_PH_ERROR, CalibrationCoeff.IB_SOLAR_XHIGH_PH_ERROR,
+                     &WorkingCopyGain.I_N_R_SOLAR_ALFA, &WorkingCopyGain.I_N_R_SOLAR_BETA, &WorkingCopyGain.I_N_R_SOLAR_INT_DELAY,
+                     &WorkingCopyGain.I_N_Y_SOLAR_ALFA, &WorkingCopyGain.I_N_Y_SOLAR_BETA, &WorkingCopyGain.I_N_Y_SOLAR_INT_DELAY,
+                     &WorkingCopyGain.I_N_B_SOLAR_ALFA, &WorkingCopyGain.I_N_B_SOLAR_BETA, &WorkingCopyGain.I_N_B_SOLAR_INT_DELAY);
     initialized = true;
   }
 

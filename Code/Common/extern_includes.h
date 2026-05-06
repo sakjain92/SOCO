@@ -19,6 +19,11 @@ extern void DisplayAllOff(void);
 extern void ReSetDisplayParameter(void);
 extern void CalPF(float Error, float * CalGainBufferPointer, float * CalBetaBufferPointer, int8_t * CalIntDelayPointer);
 extern void CalPhaseLag(float SignedPhaseRad, float * CalGainBufferPointer, float * CalBetaBufferPointer, int8_t * CalIntDelayPointer);
+extern void DeriveNeutralFir(float VllRyPhErr, float VllBrPhErr,
+                             float IrXhPhErr, float IyXhPhErr, float IbXhPhErr,
+                             float * AlfaR, float * BetaR, int8_t * IntDelayR,
+                             float * AlfaY, float * BetaY, int8_t * IntDelayY,
+                             float * AlfaB, float * BetaB, int8_t * IntDelayB);
 extern void EepromWrite(uint32_t DataLocation,uint16_t NoOfBytes,uint8_t DeviceAddress,uint8_t *DataArray );
 extern void EepromRead(uint32_t DataLocation,uint16_t NoOfBytes,uint8_t DeviceAddress,uint8_t *DataArray );
 extern void CheckEpromFree(uint8_t DeviceAddress);

@@ -927,7 +927,117 @@ void CalPhaseLag(float SignedPhaseRad, float * CalGainBufferPointer, float * Cal
     *CalBetaBufferPointer = B;
     *CalIntDelayPointer   = delayOnSecond ? -(int8_t)(intD + 1) : (int8_t)intD;
 }
-   
+
+/*
+Inf: Derive 3 per-channel I_N FIR coefficients (ALFA/BETA/INT_DELAY) from
+     existing V_LL and per-phase PF calibration data. No dedicated I_N
+     cal step is required.
+
+     The 6 V/I channels each have a fixed RC-filter / SDADC-slot delay
+     (call them delta_VR, delta_VY, delta_VB, delta_IR, delta_IY, delta_IB,
+     all in radians at 50 Hz). When a balanced 3-phase source is connected,
+     these per-channel delays cause:
+       - the measured V_R-V_Y angle to deviate from 120 deg by exactly
+         (delta_VY - delta_VR), captured by V_LL cal as VllRyPhErr.
+       - the measured V_R<->I_R angle (at PF=0.5 cal) to deviate from
+         60 deg by exactly (delta_IR - delta_VR), call this eps_R.
+
+     The I-channel inter-channel skew telescopes through V:
+        delta_IY - delta_IR  =  (delta_IY - delta_VY)
+                              + (delta_VY - delta_VR)
+                              + (delta_VR - delta_IR)
+                             =  eps_Y - eps_R + VllRyPhErr        (PH_ILL_RY)
+        delta_IR - delta_IB  =  eps_R - eps_B + VllBrPhErr        (PH_ILL_BR)
+
+     eps_X is recovered from the flash form
+        I*_XHIGH_PH_ERROR = 2*cos(60 deg + eps_X) - 1
+     via eps_X = acos((1 + flash) / 2) - pi/3 (signed). Argument clamped
+     to [-1, +1] for safety against corrupt flash values.
+
+     We then convert pair errors to 3 non-negative per-channel delays.
+     Treating I_R as numeric reference, the relative I-channel delays are:
+        rel_R = 0
+        rel_Y = delta_IY - delta_IR =  PH_ILL_RY
+        rel_B = delta_IB - delta_IR = -PH_ILL_BR
+     Pick tau = max(0, rel_Y, rel_B) and apply
+        d_R = tau,   d_Y = tau - rel_Y,   d_B = tau - rel_B
+     so all three channels end up with the same total post-FIR delay -
+     namely, the largest pre-FIR delay among the three (the most-lagging
+     channel becomes the alignment target, and the others are delayed to
+     catch up). FIR can only delay, never advance, so all d_X are
+     non-negative by construction.
+
+     CalPhaseLag() handles each d_X: it falls back to identity FIR
+     internally if d_X exceeds the 4-sample (~22.5 deg) budget, which
+     guards against pathological flash values where (VllRyPhErr +
+     |eps_Y - eps_R|) might saturate.
+
+Inp: VllRyPhErr   - VLL_RY_PH_ERROR from flash (signed radians)
+     VllBrPhErr   - VLL_BR_PH_ERROR from flash (signed radians)
+     IrXhPhErr    - IR_XHIGH_PH_ERROR from flash (TempFloat form)
+     IyXhPhErr    - IY_XHIGH_PH_ERROR from flash (TempFloat form)
+     IbXhPhErr    - IB_XHIGH_PH_ERROR from flash (TempFloat form)
+     AlfaR/BetaR/IntDelayR - output FIR coefficients for I_R channel
+     AlfaY/BetaY/IntDelayY - output FIR coefficients for I_Y channel
+     AlfaB/BetaB/IntDelayB - output FIR coefficients for I_B channel
+Ret: None.
+*/
+void DeriveNeutralFir(float VllRyPhErr, float VllBrPhErr,
+                      float IrXhPhErr, float IyXhPhErr, float IbXhPhErr,
+                      float * AlfaR, float * BetaR, int8_t * IntDelayR,
+                      float * AlfaY, float * BetaY, int8_t * IntDelayY,
+                      float * AlfaB, float * BetaB, int8_t * IntDelayB)
+{
+    const float PI_OVER_3 = 3.14159265f / 3.0f;
+
+    // Step 1: recover signed eps per phase from the flash form.
+    // flash = 2*cos(60 deg + eps) - 1  =>  eps = acos((1+flash)/2) - pi/3.
+    // Clamp argument to acos's domain [-1, +1] in case of corrupt flash.
+    //
+    float r_R = (1.0f + IrXhPhErr) * 0.5f;
+    float r_Y = (1.0f + IyXhPhErr) * 0.5f;
+    float r_B = (1.0f + IbXhPhErr) * 0.5f;
+    if (r_R >  1.0f) r_R =  1.0f;
+    if (r_R < -1.0f) r_R = -1.0f;
+    if (r_Y >  1.0f) r_Y =  1.0f;
+    if (r_Y < -1.0f) r_Y = -1.0f;
+    if (r_B >  1.0f) r_B =  1.0f;
+    if (r_B < -1.0f) r_B = -1.0f;
+
+    float eps_R = acosf(r_R) - PI_OVER_3;
+    float eps_Y = acosf(r_Y) - PI_OVER_3;
+    float eps_B = acosf(r_B) - PI_OVER_3;
+
+    // Step 2: telescope to inter-channel I skew.
+    //
+    float PH_ILL_RY = VllRyPhErr + eps_Y - eps_R;     // delta_IY - delta_IR
+    float PH_ILL_BR = VllBrPhErr + eps_R - eps_B;     // delta_IR - delta_IB
+
+    // Step 3: pick the most-delayed channel as alignment target and derive
+    // 3 non-negative per-channel delays.
+    //
+    float rel_Y = PH_ILL_RY;       // delta_IY - delta_IR
+    float rel_B = -PH_ILL_BR;      // delta_IB - delta_IR
+
+    float tau = 0.0f;
+    if (rel_Y > tau) tau = rel_Y;
+    if (rel_B > tau) tau = rel_B;
+
+    float d_R = tau;
+    float d_Y = tau - rel_Y;
+    float d_B = tau - rel_B;
+
+    // Step 4: convert to FIR coefficients. CalPhaseLag with positive input
+    // takes the "delay first letter" branch (delayOnSecond=false), which
+    // for our purposes simply means INT_DELAY is non-negative (0..3) and
+    // selects the integer-sample tap directly. Saturation fallback to
+    // identity FIR is built into CalPhaseLag.
+    //
+    CalPhaseLag(d_R, AlfaR, BetaR, IntDelayR);
+    CalPhaseLag(d_Y, AlfaY, BetaY, IntDelayY);
+    CalPhaseLag(d_B, AlfaB, BetaB, IntDelayB);
+}
+
 /*
 Inf: Modbus communication API
 Inp: None

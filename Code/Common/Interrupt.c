@@ -53,6 +53,22 @@ static float VR_Solar_Hist[5];
 static float VY_Solar_Hist[5];
 static float VB_Solar_Hist[5];
 
+// Grid I_R / I_Y / I_B history (post-IIR, post-gain, pre per-phase PF
+// FIR) used only by the I_N accumulator's per-channel phase-alignment
+// FIR. Slot [0] = current ISR sample, slots [1..4] = older samples.
+// Per-phase RMS, V*I power, FFT and PR_/PY_/PB_ all continue to use the
+// raw IntCurRPhase / IntCurYPhase / IntCurBPhase locals.
+//
+static float IR_Hist[5];
+static float IY_Hist[5];
+static float IB_Hist[5];
+
+// Same for solar I_R / I_Y / I_B feeding the solar I_N FIR.
+//
+static float IR_Solar_Hist[5];
+static float IY_Solar_Hist[5];
+static float IB_Solar_Hist[5];
+
 extern volatile uint16_t TimeOutCommTx;
 
 uint16_t OneSecCounter;
@@ -638,15 +654,58 @@ void ProcessMainInterrupt(void)
       IntDataSum.VolYBPhPh += TempGainMult * TempGainMult;
   }
   
-  // Neutral Current
-  // UNDONE: NEUTRAL CURRENT calculation is broken as we do phase shift in current
-  // below. Check how to compensate for different phase angles between
-  // currents to compute neutral current
+  // Neutral current with per-channel phase-alignment FIR.
   //
-  IntNeuCurrent=0;
-  IntNeuCurrent +=IntCurRPhase;
-  IntNeuCurrent +=IntCurYPhase;
-  IntNeuCurrent +=IntCurBPhase;
+  // Each I channel has its own RC-filter / SDADC-slot delay, so even at
+  // perfectly balanced load I_R + I_Y + I_B doesn't sum to zero. We delay
+  // each channel by a calibrated amount so the three currents end up with
+  // the same total channel delay (and remain exactly 120 deg apart) before
+  // summing. FIR coefficients are derived once at boot from V_LL +
+  // per-phase PF cal data; see DeriveNeutralFir() in Comm.c. INT_DELAY is
+  // always >= 0 (FIR is delay-only) so no sign branching.
+  //
+  // Position: post-IIR, post per-channel I_GAIN, BEFORE the per-phase PF
+  // FIR (which would otherwise overwrite the I locals). Histories are
+  // pushed every cycle so the FIR taps are always coherent.
+  //
+  IR_Hist[4] = IR_Hist[3]; IR_Hist[3] = IR_Hist[2];
+  IR_Hist[2] = IR_Hist[1]; IR_Hist[1] = IR_Hist[0];
+  IR_Hist[0] = IntCurRPhase;
+  IY_Hist[4] = IY_Hist[3]; IY_Hist[3] = IY_Hist[2];
+  IY_Hist[2] = IY_Hist[1]; IY_Hist[1] = IY_Hist[0];
+  IY_Hist[0] = IntCurYPhase;
+  IB_Hist[4] = IB_Hist[3]; IB_Hist[3] = IB_Hist[2];
+  IB_Hist[2] = IB_Hist[1]; IB_Hist[1] = IB_Hist[0];
+  IB_Hist[0] = IntCurBPhase;
+
+  {
+      float Cur, Prev;
+      float Ir_Aligned, Iy_Aligned, Ib_Aligned;
+      int8_t d;
+
+      d = WorkingCopyGain.I_N_R_INT_DELAY;
+      if      (d == 0) { Cur = IR_Hist[0]; Prev = IR_Hist[1]; }
+      else if (d == 1) { Cur = IR_Hist[1]; Prev = IR_Hist[2]; }
+      else if (d == 2) { Cur = IR_Hist[2]; Prev = IR_Hist[3]; }
+      else             { Cur = IR_Hist[3]; Prev = IR_Hist[4]; }
+      Ir_Aligned = WorkingCopyGain.I_N_R_ALFA * (Cur + WorkingCopyGain.I_N_R_BETA * Prev);
+
+      d = WorkingCopyGain.I_N_Y_INT_DELAY;
+      if      (d == 0) { Cur = IY_Hist[0]; Prev = IY_Hist[1]; }
+      else if (d == 1) { Cur = IY_Hist[1]; Prev = IY_Hist[2]; }
+      else if (d == 2) { Cur = IY_Hist[2]; Prev = IY_Hist[3]; }
+      else             { Cur = IY_Hist[3]; Prev = IY_Hist[4]; }
+      Iy_Aligned = WorkingCopyGain.I_N_Y_ALFA * (Cur + WorkingCopyGain.I_N_Y_BETA * Prev);
+
+      d = WorkingCopyGain.I_N_B_INT_DELAY;
+      if      (d == 0) { Cur = IB_Hist[0]; Prev = IB_Hist[1]; }
+      else if (d == 1) { Cur = IB_Hist[1]; Prev = IB_Hist[2]; }
+      else if (d == 2) { Cur = IB_Hist[2]; Prev = IB_Hist[3]; }
+      else             { Cur = IB_Hist[3]; Prev = IB_Hist[4]; }
+      Ib_Aligned = WorkingCopyGain.I_N_B_ALFA * (Cur + WorkingCopyGain.I_N_B_BETA * Prev);
+
+      IntNeuCurrent = Ir_Aligned + Iy_Aligned + Ib_Aligned;
+  }
 
   IntDataSum.CurNeutral +=IntNeuCurrent*IntNeuCurrent;
   
@@ -873,11 +932,48 @@ void ProcessMainInterrupt(void)
       IntDataSum.VolYBSolarPhPh += TempGainMult * TempGainMult;
   }
 
-  IntNeuSolarCurrent=0;
-  IntNeuSolarCurrent +=IntCurRSolarPhase;
-  IntNeuSolarCurrent +=IntCurYSolarPhase;
-  IntNeuSolarCurrent +=IntCurBSolarPhase;
-  
+  // Solar neutral current with per-channel phase-alignment FIR. Same
+  // structure as the grid I_N block above.
+  //
+  IR_Solar_Hist[4] = IR_Solar_Hist[3]; IR_Solar_Hist[3] = IR_Solar_Hist[2];
+  IR_Solar_Hist[2] = IR_Solar_Hist[1]; IR_Solar_Hist[1] = IR_Solar_Hist[0];
+  IR_Solar_Hist[0] = IntCurRSolarPhase;
+  IY_Solar_Hist[4] = IY_Solar_Hist[3]; IY_Solar_Hist[3] = IY_Solar_Hist[2];
+  IY_Solar_Hist[2] = IY_Solar_Hist[1]; IY_Solar_Hist[1] = IY_Solar_Hist[0];
+  IY_Solar_Hist[0] = IntCurYSolarPhase;
+  IB_Solar_Hist[4] = IB_Solar_Hist[3]; IB_Solar_Hist[3] = IB_Solar_Hist[2];
+  IB_Solar_Hist[2] = IB_Solar_Hist[1]; IB_Solar_Hist[1] = IB_Solar_Hist[0];
+  IB_Solar_Hist[0] = IntCurBSolarPhase;
+
+  {
+      float Cur, Prev;
+      float Ir_Aligned, Iy_Aligned, Ib_Aligned;
+      int8_t d;
+
+      d = WorkingCopyGain.I_N_R_SOLAR_INT_DELAY;
+      if      (d == 0) { Cur = IR_Solar_Hist[0]; Prev = IR_Solar_Hist[1]; }
+      else if (d == 1) { Cur = IR_Solar_Hist[1]; Prev = IR_Solar_Hist[2]; }
+      else if (d == 2) { Cur = IR_Solar_Hist[2]; Prev = IR_Solar_Hist[3]; }
+      else             { Cur = IR_Solar_Hist[3]; Prev = IR_Solar_Hist[4]; }
+      Ir_Aligned = WorkingCopyGain.I_N_R_SOLAR_ALFA * (Cur + WorkingCopyGain.I_N_R_SOLAR_BETA * Prev);
+
+      d = WorkingCopyGain.I_N_Y_SOLAR_INT_DELAY;
+      if      (d == 0) { Cur = IY_Solar_Hist[0]; Prev = IY_Solar_Hist[1]; }
+      else if (d == 1) { Cur = IY_Solar_Hist[1]; Prev = IY_Solar_Hist[2]; }
+      else if (d == 2) { Cur = IY_Solar_Hist[2]; Prev = IY_Solar_Hist[3]; }
+      else             { Cur = IY_Solar_Hist[3]; Prev = IY_Solar_Hist[4]; }
+      Iy_Aligned = WorkingCopyGain.I_N_Y_SOLAR_ALFA * (Cur + WorkingCopyGain.I_N_Y_SOLAR_BETA * Prev);
+
+      d = WorkingCopyGain.I_N_B_SOLAR_INT_DELAY;
+      if      (d == 0) { Cur = IB_Solar_Hist[0]; Prev = IB_Solar_Hist[1]; }
+      else if (d == 1) { Cur = IB_Solar_Hist[1]; Prev = IB_Solar_Hist[2]; }
+      else if (d == 2) { Cur = IB_Solar_Hist[2]; Prev = IB_Solar_Hist[3]; }
+      else             { Cur = IB_Solar_Hist[3]; Prev = IB_Solar_Hist[4]; }
+      Ib_Aligned = WorkingCopyGain.I_N_B_SOLAR_ALFA * (Cur + WorkingCopyGain.I_N_B_SOLAR_BETA * Prev);
+
+      IntNeuSolarCurrent = Ir_Aligned + Iy_Aligned + Ib_Aligned;
+  }
+
   IntDataSum.CurNeutralSolar +=IntNeuSolarCurrent*IntNeuSolarCurrent;
 
   float IntVolRSolarPhaseOrig,IntVolYSolarPhaseOrig,IntVolBSolarPhaseOrig;

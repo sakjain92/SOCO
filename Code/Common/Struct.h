@@ -614,6 +614,42 @@ struct GAIN_WC
   int8_t VLL_YB_SOLAR_INT_DELAY;
   int8_t VLL_BR_SOLAR_INT_DELAY;
 
+  // Per-channel I_N (neutral current) phase-alignment FIR. Used ONLY by
+  // the I_N accumulator in the ISR; per-phase RMS, V*I power, FFT and the
+  // per-phase PF FIR are untouched. Coefficients derived at boot from the
+  // existing V_LL and per-phase PF cal data via DeriveNeutralFir() - no
+  // dedicated cal step. INT_DELAY is always >= 0 (FIR is delay-only) so
+  // there is no first-letter/second-letter sign convention; INT_DELAY in
+  // 0..3 selects the integer-sample tap and ALFA/BETA carry the
+  // fractional part. Identity (ALFA=1, BETA=0, INT_DELAY=0) when the
+  // computed delay exceeds the 4-sample (~22.5 deg) FIR budget.
+  //
+  float I_N_R_ALFA;
+  float I_N_Y_ALFA;
+  float I_N_B_ALFA;
+
+  float I_N_R_BETA;
+  float I_N_Y_BETA;
+  float I_N_B_BETA;
+
+  int8_t I_N_R_INT_DELAY;
+  int8_t I_N_Y_INT_DELAY;
+  int8_t I_N_B_INT_DELAY;
+
+  // Same per-channel I_N FIR for solar.
+  //
+  float I_N_R_SOLAR_ALFA;
+  float I_N_Y_SOLAR_ALFA;
+  float I_N_B_SOLAR_ALFA;
+
+  float I_N_R_SOLAR_BETA;
+  float I_N_Y_SOLAR_BETA;
+  float I_N_B_SOLAR_BETA;
+
+  int8_t I_N_R_SOLAR_INT_DELAY;
+  int8_t I_N_Y_SOLAR_INT_DELAY;
+  int8_t I_N_B_SOLAR_INT_DELAY;
+
   // Integer sample delay for phase correction. Sign selects which signal
   // the correction is applied to; magnitude selects the integer tap.
   //   >= 0: delay applied to voltage, integer part = value (0..3 samples).
