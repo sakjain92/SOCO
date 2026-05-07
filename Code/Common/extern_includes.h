@@ -59,6 +59,7 @@ extern void UpdateEditSettings(void);
 extern void InitWatchDog(void);
 extern uint16_t CRCCalculation(uint16_t * str,uint8_t length);
 extern  void MeterInit(void);
+extern bool IsUnitFactoryComplete(void);
 extern void SetInitialDisplay(void);
 extern void SetVersionDisplay(void);
 extern void DisplayCheckEnd(void);

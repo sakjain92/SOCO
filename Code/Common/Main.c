@@ -1149,19 +1149,22 @@ void Process1SecOver(void)
     EditPassCount = 0;
   }
 
-  // Don't need to turn display on/off when testing after calibration again
-  // as we need PDI inspector to check SOCO display
+  // Blink whenever test mode is active and any factory step is still
+  // pending (calibration, serial number, or functional test flag).
+  // A fully completed unit (IsUnitFactoryComplete() == true) shows
+  // normal parameter values so PDI inspector can read the display.
+  // Mirroring the boot-time test-mode predicate here ensures a reset
+  // between two factory steps still gives a visible indication that
+  // the unit has not yet exited test mode.
   //
   if (g_testingStatus.TestingModeEnabled && FlagDirectCalibration==0 && pwrDlyFlag
-      && !g_ProductInfo.CalibratedFlag)
+      && !IsUnitFactoryComplete())
   {
     // Toggle display between all-on and all-off every 1 second
     // to visually indicate test mode. Skip during calibration so
     // the calibration display screens are not overwritten.
     // Also, enable toggling of display sometime after VERSION has been seen
     // on display.
-    // On calibrated devices, fall through to normal display so parameters
-    // are visible during test mode.
     //
     static bool testDisplayOn = false;
     testDisplayOn = !testDisplayOn;
@@ -1188,7 +1191,7 @@ void Process1SecOver(void)
   //
   if(FlagDirectCalibration==0 &&
       ParaBlockIndex==0 &&
-      (!g_testingStatus.TestingModeEnabled || g_ProductInfo.CalibratedFlag))
+      IsUnitFactoryComplete())
   {
       CheckAutoScroll();
   }

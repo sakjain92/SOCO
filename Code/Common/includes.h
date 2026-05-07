@@ -60,6 +60,7 @@ void DisplayImproperSettings(void);
 void UpdateEditSettings(void);
 uint16_t CRCCalculation(uint16_t * str,uint8_t length);
 void MeterInit(void);
+bool IsUnitFactoryComplete(void);
 void SetInitialDisplay(void);
 void SetVersionDisplay(void);
 void DisplayCheckEnd(void);

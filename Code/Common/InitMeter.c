@@ -67,8 +67,7 @@ void NewMeterInit(void)
       FLASH_OB_Lock();
       
     }
-#endif   
-    
+#endif
   }
 }
 
@@ -83,6 +82,23 @@ void ParaLocUpdate(uint16_t WriteAddress)
     if(k>64)k=k-64;
     else k=0;
   }
+}
+
+
+// True until all three factory steps (calibration, serial number,
+// functional test) have been recorded in g_ProductInfo. Used both at
+// boot to decide whether to re-enter test mode and at runtime to drive
+// the test-mode display blink. Both predicates must agree; otherwise a
+// reset between two factory steps leaves the unit silently in test
+// mode with no visual indicator.
+//
+bool IsUnitFactoryComplete(void)
+{
+  bool serialNumberWritten =
+      (g_ProductInfo.SerialNumber[0] != 0) || (g_ProductInfo.SerialNumber[1] != 0);
+  return serialNumberWritten &&
+         g_ProductInfo.FunctionallyTestedFlag &&
+         g_ProductInfo.CalibratedFlag;
 }
 
 
@@ -105,11 +121,7 @@ void MeterInit(void)
   // parameter.
   //
 #ifdef MODEL_RELEASED
-  bool serialNumberWritten =
-      (g_ProductInfo.SerialNumber[0] != 0) || (g_ProductInfo.SerialNumber[1] != 0);
-  if (!serialNumberWritten ||
-      !g_ProductInfo.FunctionallyTestedFlag ||
-      !g_ProductInfo.CalibratedFlag)
+  if (!IsUnitFactoryComplete())
   {
       g_testingStatus.TestingModeEnabled = true;
   }
