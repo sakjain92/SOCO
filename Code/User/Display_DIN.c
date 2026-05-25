@@ -1016,9 +1016,6 @@ void DisplayImproperSettings(void)
 {
   for (uint8_t i=0;i<16;i++)BufferToDisplay[i]=0;
   DisplayString(ROW_TOP,DIGIT_6,(uint8_t *)DIS_CHECK_IN,0);
-  CalibrationGapCounter=0;
-  FlagDirectCalibration=0;
-  SwPressed=0;
   UpdateDisplay=1;
 }
 
