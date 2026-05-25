@@ -15,6 +15,7 @@ extern uint16_t LoadExportOrGenerator;
 extern float PTPrimary, CTPrimary,PTSecondary,CTSecondary;
 extern float ModbusDummyFloatRegister;
 extern uint16_t SwPressed;
+extern uint32_t SwIncPressCounter, SwDecPressCounter, SwNextPressCounter;
 
 #define CT_RATIO       2
 #define PT_RATIO       3
@@ -43,7 +44,7 @@ extern uint16_t SwPressed;
 #define InstPara_LoadOnSolarDisableSec 1
 #define InstPara_FanTemp        3
 // MAX_PARAM_LIMIT is here
-#define InstPara_InternalTesting 8
+#define InstPara_InternalTesting 11
 
 #define DATA_TYPE_16            2
 #define DATA_TYPE_32            4
@@ -1031,6 +1032,9 @@ const struct ModBusParameter BlockAll[]=
   { (uint8_t *)&g_ProductInfo.CalibratedFlag,              DATA_TYPE_32,     1       ,       1      },
   { (uint8_t *)&FlagDirectCalibration,                     DATA_TYPE_32,     1       ,       1      },
   { (uint8_t *)&g_ScratchPad,                              DATA_TYPE_32,     1       ,       1      },
+  { (uint8_t *)&SwIncPressCounter,                         DATA_TYPE_32,     1       ,       1      },
+  { (uint8_t *)&SwDecPressCounter,                         DATA_TYPE_32,     1       ,       1      },
+  { (uint8_t *)&SwNextPressCounter,                        DATA_TYPE_32,     1       ,       1      },
 };
 
 // DEVNOTE: Digital inputs are read using read input status

@@ -151,6 +151,7 @@ uint32_t FlagDirectCalibration, ModbusAdvanceFlagDirectCalibration;
 // init; see Modbus register 50015.
 //
 uint32_t g_ScratchPad;
+uint32_t SwIncPressCounter, SwDecPressCounter, SwNextPressCounter;
 uint8_t CalibrationGapCounter,DisplayDebarCounter;
 uint8_t OperatingSatatus,PowerUpCounter=0,SecondSourceActive,GenratorOnCounter;
 uint8_t RecieveArray[MAX_BYTE_TO_RECIEVE];

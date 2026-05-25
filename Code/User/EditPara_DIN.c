@@ -37,10 +37,17 @@ uint8_t SubParaIndex,ChkPassRow;
 
 void CheckKey(void)
 {
-        
+  static uint16_t SwPrevForCounter;
+  if (SwPressed == 0) SwPrevForCounter = 0;
+
   if(SwFlag & SW_NEW_VALUE_FLAG)
   {
     SwFlag=SwFlag & ~SW_NEW_VALUE_FLAG;
+    uint16_t newlyPressed = SwPressed & ~SwPrevForCounter;
+    if (newlyPressed & KEY_INC)  SwIncPressCounter++;
+    if (newlyPressed & KEY_DEC)  SwDecPressCounter++;
+    if (newlyPressed & KEY_NEXT) SwNextPressCounter++;
+    SwPrevForCounter = SwPressed;
     if(ParaBlockIndex )
     {
       KeyPressedCounter=60;
