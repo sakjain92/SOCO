@@ -350,6 +350,7 @@
                     <state>$PROJ_DIR$\..\Code\Common</state>
                     <state>$PROJ_DIR$\..\Code\System</state>
                     <state>$PROJ_DIR$\..\Code\User</state>
+                    <state>$PROJ_DIR$\..\Code\Bootloader</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>
@@ -2117,6 +2118,21 @@
             <data />
         </settings>
     </configuration>
+    <group>
+        <name>Bootloader</name>
+        <file>
+            <name>$PROJ_DIR$\..\Code\Bootloader\boot_defs.h</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Code\Bootloader\boot_main.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Code\Bootloader\boot_vectors.s</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Code\Bootloader\bootloader.h</name>
+        </file>
+    </group>
     <group>
         <name>Common</name>
         <group>
