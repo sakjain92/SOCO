@@ -156,7 +156,7 @@ uint8_t CalibrationGapCounter,DisplayDebarCounter;
 uint8_t OperatingSatatus,PowerUpCounter=0,SecondSourceActive,GenratorOnCounter;
 uint8_t RecieveArray[MAX_BYTE_TO_RECIEVE];
 uint16_t TimerCounter,NoOfBytes;
-uint8_t ReceiveLength;
+volatile uint8_t ReceiveLength;
 uint16_t LoadExportOrGenerator;
 uint8_t  StepXHigh,StepHigh,StepLow,ScrollSaveCounter=61;
 uint8_t  RCurPrevStatus,YCurPrevStatus,BCurPrevStatus;

@@ -93,7 +93,7 @@ extern void ProcessMainInterrupt(void);
 extern void Metrology(void);
 extern uint8_t RecieveArray[MAX_BYTE_TO_RECIEVE],ScrollChangeCounter,DisplayScrollCounter;
 extern uint16_t TimerCounter,NoOfBytes;
-extern uint8_t ReceiveLength;
+extern volatile uint8_t ReceiveLength;
 extern uint32_t StartDelayCount;
 extern uint8_t pwrDlyFlag,EditPassCount;
 extern uint32_t FlagDirectCalibration, ModbusAdvanceFlagDirectCalibration;

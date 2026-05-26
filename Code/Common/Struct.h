@@ -682,21 +682,20 @@ struct Field
   uint8_t Data_Array[250];
 };
 
-struct Object 
+struct Object
 {
-  unsigned Start        : 1;
-  unsigned Error        : 1;
-  unsigned End_Frame    : 1;
-  unsigned ParityError  : 1;
-  unsigned transfercomplete     : 1;
-  unsigned FaultEventCheck      : 3;
-  unsigned SettingError         : 1;
-  unsigned FrameRecieved        : 1;
-  unsigned USBCommunication     : 1;
-  unsigned USBPending           : 1;
-  unsigned DoubleData           :1;
-  unsigned TransmissionFailed   :1;
-  
+  volatile uint8_t Start;
+  volatile uint8_t Error;
+  volatile uint8_t End_Frame;
+  volatile uint8_t ParityError;
+  volatile uint8_t transfercomplete;
+  volatile uint8_t FaultEventCheck;
+  volatile uint8_t SettingError;
+  volatile uint8_t FrameRecieved;
+  volatile uint8_t USBCommunication;
+  volatile uint8_t USBPending;
+  volatile uint8_t DoubleData;
+  volatile uint8_t TransmissionFailed;
 };
 #if (defined MODBUS_MAP_PROCOM)
 struct ModBusParameter

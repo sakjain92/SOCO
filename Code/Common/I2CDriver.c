@@ -30,7 +30,7 @@ void I2CRead(uint32_t DataLocation, uint8_t NoOfBytes, uint8_t DeviceAddress, ui
   while(I2C2->CR2 & I2C_CR2_START)
   {
     counter++;
-    if (counter > 100000)
+    if (counter > 10000)
     {
         break;
     }
@@ -42,7 +42,7 @@ void I2CRead(uint32_t DataLocation, uint8_t NoOfBytes, uint8_t DeviceAddress, ui
   while(!(I2C2->ISR & I2C_ISR_TXE))
   {
     counter++;
-    if (counter > 100000)
+    if (counter > 10000)
     {
         break;
     }
@@ -53,7 +53,7 @@ void I2CRead(uint32_t DataLocation, uint8_t NoOfBytes, uint8_t DeviceAddress, ui
   while(!(I2C2->ISR & I2C_ISR_TXE))
   {
     counter++;
-    if (counter > 100000)
+    if (counter > 10000)
     {
         break;
     }
@@ -68,7 +68,7 @@ void I2CRead(uint32_t DataLocation, uint8_t NoOfBytes, uint8_t DeviceAddress, ui
   while(I2C2->CR2 & I2C_CR2_START)
   {
     counter++;
-    if (counter > 100000)
+    if (counter > 10000)
     {
         break;
     }
@@ -80,7 +80,7 @@ void I2CRead(uint32_t DataLocation, uint8_t NoOfBytes, uint8_t DeviceAddress, ui
     while(!(I2C2->ISR & I2C_ISR_RXNE))
     {
       counter++;
-      if (counter > 100000)
+      if (counter > 10000)
       {
           break;
       }
@@ -95,7 +95,7 @@ void I2CRead(uint32_t DataLocation, uint8_t NoOfBytes, uint8_t DeviceAddress, ui
   while(!(I2C2->ISR & I2C_ISR_STOPF))
   {
     counter++;
-    if (counter > 100000)
+    if (counter > 10000)
     {
       break;
     }
@@ -108,7 +108,7 @@ void I2CRead(uint32_t DataLocation, uint8_t NoOfBytes, uint8_t DeviceAddress, ui
   while(I2C2->ISR & I2C_ISR_BUSY)
   {
     counter++;
-    if (counter > 100000)
+    if (counter > 10000)
     {
       break;
     }
@@ -149,7 +149,7 @@ void I2CWrite(uint32_t DataLocation,uint8_t NoOfBytes,uint8_t DeviceAddress,uint
   while(I2C2->CR2 & I2C_CR2_START)
   {
     counter++;
-    if (counter > 100000)
+    if (counter > 10000)
     {
       break;
     }
@@ -160,7 +160,7 @@ void I2CWrite(uint32_t DataLocation,uint8_t NoOfBytes,uint8_t DeviceAddress,uint
   while(!(I2C2->ISR & I2C_ISR_TXE))
   {
     counter++;
-    if (counter > 100000)
+    if (counter > 10000)
     {
       break;
     }
@@ -171,7 +171,7 @@ void I2CWrite(uint32_t DataLocation,uint8_t NoOfBytes,uint8_t DeviceAddress,uint
   while(!(I2C2->ISR & I2C_ISR_TXE))
   {
     counter++;
-    if (counter > 100000)
+    if (counter > 10000)
     {
       break;
     }
@@ -184,7 +184,7 @@ void I2CWrite(uint32_t DataLocation,uint8_t NoOfBytes,uint8_t DeviceAddress,uint
     while(!(I2C2->ISR & I2C_ISR_TXE))
     {
       counter++;
-      if (counter > 100000)
+      if (counter > 10000)
       {
         break;
       }
@@ -197,7 +197,7 @@ void I2CWrite(uint32_t DataLocation,uint8_t NoOfBytes,uint8_t DeviceAddress,uint
   while(!(I2C2->ISR & I2C_ISR_STOPF))
   {
     counter++;
-    if (counter > 100000)
+    if (counter > 10000)
     {
       break;
     }
@@ -211,7 +211,7 @@ void I2CWrite(uint32_t DataLocation,uint8_t NoOfBytes,uint8_t DeviceAddress,uint
   while(I2C2->ISR & I2C_ISR_BUSY)
   {
     counter++;
-    if (counter > 100000)
+    if (counter > 10000)
     {
       break;
     }
@@ -234,14 +234,14 @@ void CheckEpromFree(uint8_t DeviceAddress)
     while(I2C2->CR2 & I2C_CR2_START)
     {
         counter++;
-        if (counter > 100000)
+        if (counter > 10000)
         {
             break;
         }
     }
 
     Temp++;
-    if (Temp > 100000)
+    if (Temp > 10000)
     {
         break;
     }
