@@ -11,6 +11,10 @@
 
 #include "Comm.h"
 
+// This struct keeps track of FIRMWARE Over-The-Air Upgrade feature
+//
+struct FotaState g_fota = {0};
+
 // Table containing start address on modbus table & number of entries in the
 // modbus table
 // Note: The address should be monotonically increasing with any missing
@@ -83,6 +87,9 @@ struct ModbusTableSection_t ModbusTableSections[] =
     },
     {
         30000, MAX_PARAM_LIMIT
+    },
+    {
+        40000, InstPara_FotaStatus
     },
     {
         50000, InstPara_InternalTesting
@@ -1321,6 +1328,70 @@ void ModBusCommunication(void)
                 ModbusUpdateParameter(Start_Add/2,NoOfBytes);
                 break;
               }
+              else if (Start_Add == 40000 && NoOfBytes == 2)
+              {
+                  uint32_t value =
+                      ((uint32_t)RecieveArray[10]) +
+                      ((uint32_t)RecieveArray[9]<<8) +
+                      ((uint32_t)RecieveArray[8]<<16)+
+                      ((uint32_t)RecieveArray[7]<<24);
+
+                  if (value == 1)
+                  {
+                      memset(&g_fota, 0, sizeof(g_fota));
+                      g_fota.runningCrc = 0xFFFF;
+                      g_fota.status = FOTA_STATUS_READY;
+                  }
+                  else if (value == 2)
+                  {
+                      if (g_fota.status != FOTA_STATUS_READY ||
+                          g_fota.chunksReceived != g_fota.totalRecords ||
+                          g_fota.runningCrc != g_fota.expectedCrc)
+                      {
+                          memset(&g_fota, 0, sizeof(g_fota));
+                          Fun_Received |= 0x80;
+                          Mod_TransmitFrame.Data_Array[0] = 0x04;
+                          SendData_UART((uint8_t)CopySetPara[PARA_DEVICE_ID],
+                                        Fun_Received, 1);
+                          Fun_Received &=~ 0x80;
+                          break;
+                      }
+
+                      // Build the flash info in RAM, then program to flash.
+                      // upgradePending is at the end of the struct so it
+                      // is written last — a reset mid-write leaves it 0xFF
+                      // (erased) and the bootloader ignores the partial write.
+                      //
+                      struct FotaFlashInfo info = {0};
+                      info.firmwareSize = g_fota.firmwareSize;
+                      info.prngSeed = g_fota.prngSeed;
+                      info.upgradePending = 0x01;
+
+                      FLASH_Unlock();
+                      FLASH_ErasePage((uint32_t)&g_fotaFlashInfo);
+                      uint16_t *src = (uint16_t *)&info;
+                      uint32_t base = (uint32_t)&g_fotaFlashInfo;
+                      for (uint16_t i = 0;
+                           i < sizeof(struct FotaFlashInfo) / 2;
+                           i++)
+                      {
+                          FLASH_ProgramHalfWord(base + i * 2, src[i]);
+                      }
+                      FLASH_Lock();
+
+                      memcpy(Mod_TransmitFrame.Data_Array, &RecieveArray[2], 4);
+                      SendData_UART(CopySetPara[PARA_DEVICE_ID],
+                                    Fun_Received, 4);
+                      // Restart by watchdog: allow delay for modbus
+                      // response to be sent
+                      //
+                      while(1);
+                  }
+
+                  memcpy(Mod_TransmitFrame.Data_Array, &RecieveArray[2], 4);
+                  SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received, 4);
+                  break;
+              }
               else if((Start_Add == 50002) && (NoOfBytes == 4))
               {
                   // Write serial number (lower 32 bits at 50003, upper 32 bits
@@ -1634,7 +1705,102 @@ void ModBusCommunication(void)
                 SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received,4);
                 break;
             }
-       ///// Exception Response for Illegal Function //////    
+            case 0x15: /* Write File Record -- FOTA firmware chunks */
+            {
+                // Frame: [addr][0x15][dataLen][refType][fileHi][fileLo]
+                //        [recHi][recLo][lenHi][lenLo][data...][crcLo][crcHi]
+                uint8_t dataLen   = RecieveArray[2];
+                uint8_t refType   = RecieveArray[3];
+                uint16_t fileNo   = ((uint16_t)RecieveArray[4] << 8) | RecieveArray[5];
+                uint16_t recordNo = ((uint16_t)RecieveArray[6] << 8) | RecieveArray[7];
+                uint16_t recLen   = ((uint16_t)RecieveArray[8] << 8) | RecieveArray[9];
+
+                // Some hardcoded values defined in FOTA flowchart
+                // Also, we need records to arrive sequentially
+                //
+                if (refType != 0x06 || fileNo != 1 || recLen != 100 ||
+                    dataLen != 207 || g_fota.status != FOTA_STATUS_READY ||
+                    recordNo >= FOTA_MAX_CHUNKS ||
+                    recordNo != g_fota.chunksReceived)
+                {
+                    Fun_Received |= 0x80;
+                    Mod_TransmitFrame.Data_Array[0] = 0x02;
+                    SendData_UART((uint8_t)CopySetPara[PARA_DEVICE_ID], Fun_Received, 1);
+                    Fun_Received &=~ 0x80;
+                    break;
+                }
+
+                // Record data starts at RecieveArray[10], 200 bytes total.
+                // Record 0: [header 6 bytes][encrypted firmware 194 bytes]
+                // Record N: [encrypted firmware 200 bytes]
+                //
+                uint8_t *recordData  = &RecieveArray[10];
+                uint8_t *fwData;
+                uint16_t fwBytes;
+
+                if (recordNo == 0)
+                {
+                    // Parse header (little-endian)
+                    g_fota.totalRecords = *(uint16_t *)&recordData[0];
+                    g_fota.version      = *(uint16_t *)&recordData[2];
+                    g_fota.expectedCrc  = *(uint16_t *)&recordData[4];
+
+                    if (g_fota.totalRecords == 0 ||
+                        g_fota.totalRecords > FOTA_MAX_CHUNKS)
+                    {
+			memset(&g_fota, 0, sizeof(g_fota));
+                        Fun_Received |= 0x80;
+                        Mod_TransmitFrame.Data_Array[0] = 0x02;
+                        SendData_UART((uint8_t)CopySetPara[PARA_DEVICE_ID],
+                                      Fun_Received, 1);
+                        Fun_Received &=~ 0x80;
+                        break;
+                    }
+
+                    g_fota.firmwareSize = (uint32_t)g_fota.totalRecords
+                                          * FOTA_CHUNK_SIZE - FOTA_HEADER_SIZE;
+                    g_fota.prngSeed = FOTA_SECRET_KEY
+                                      ^ (g_fota.version * FOTA_SEED_MIXER);
+                    g_fota.prngState = g_fota.prngSeed;
+
+                    fwData  = &recordData[FOTA_HEADER_SIZE];
+                    fwBytes = FOTA_CHUNK_SIZE - FOTA_HEADER_SIZE;
+                }
+                else
+                {
+                    fwData  = recordData;
+                    fwBytes = FOTA_CHUNK_SIZE;
+                }
+
+                // Decrypt each word and feed to running CRC.
+                // Only the decrypted value is used for CRC; the encrypted
+                // data goes to EEPROM untouched.
+                //
+                uint16_t numWords = fwBytes / 2;
+                for (uint16_t w = 0; w < numWords; w++)
+                {
+                    g_fota.prngState = g_fota.prngState * FOTA_PRNG_MUL
+                                       + FOTA_PRNG_INC;
+                    uint16_t decrypted = *(uint16_t *)&fwData[w * 2]
+                                         ^ g_fota.prngState;
+                    g_fota.runningCrc = CRCCalculationSeeded(
+                                            &decrypted, 1, g_fota.runningCrc);
+                }
+
+                // Write encrypted firmware (no header) to EEPROM
+                uint32_t eepromAddr = FOTA_STAGING_START + g_fota.bytesWritten;
+                EepromWrite(eepromAddr, fwBytes, EXT_EEPROM, fwData);
+                g_fota.chunksReceived++;
+                g_fota.bytesWritten += fwBytes;
+
+                // Echo entire request as response (Modbus 0x15 spec)
+                uint8_t echoLen = ReceiveLength - 4;
+                memcpy(Mod_TransmitFrame.Data_Array, &RecieveArray[2], echoLen);
+                SendData_UART((uint8_t)CopySetPara[PARA_DEVICE_ID],
+                              Fun_Received, echoLen);
+                break;
+            }
+       ///// Exception Response for Illegal Function //////
           default:
           {
             if((Fun_Received != 0x03))

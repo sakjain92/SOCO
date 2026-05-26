@@ -16,6 +16,7 @@ extern float PTPrimary, CTPrimary,PTSecondary,CTSecondary;
 extern float ModbusDummyFloatRegister;
 extern uint16_t SwPressed;
 extern uint32_t SwIncPressCounter, SwDecPressCounter, SwNextPressCounter;
+extern struct FotaState g_fota;
 
 #define CT_RATIO       2
 #define PT_RATIO       3
@@ -44,6 +45,7 @@ extern uint32_t SwIncPressCounter, SwDecPressCounter, SwNextPressCounter;
 #define InstPara_LoadOnSolarDisableSec 1
 #define InstPara_FanTemp        3
 // MAX_PARAM_LIMIT is here
+#define InstPara_FotaStatus     1
 #define InstPara_InternalTesting 11
 
 #define DATA_TYPE_16            2
@@ -1021,6 +1023,10 @@ const struct ModBusParameter BlockAll[]=
  { (uint8_t *)&CopySetPara[PARA_PARITY]                 ,          DATA_TYPE_16,     1       ,       1      },
  { (uint8_t *)&CopySetPara[PARA_STOP_BIT]               ,          DATA_TYPE_16,     1       ,       1      },
 #endif
+
+ ////////////////////////     FOTA STATUS (base 40000)  /////////
+ //
+  { (uint8_t *)&g_fota.status,                            DATA_TYPE_32,     1       ,       1      },
 
  ////////////////////////     INTERNAL TESTING (base 50000)  /////////
  //

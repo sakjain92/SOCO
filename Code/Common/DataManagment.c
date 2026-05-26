@@ -19,24 +19,45 @@
 
 COMPILE_ASSERT(sizeof(StorageBuffer) <= MAX_DATA_SAVE_SIZE);
 
-uint16_t CRCCalculation(uint16_t * str,uint8_t length)
+/*
+Inf: CRC-16 with caller-supplied initial value. Can be called repeatedly
+     to compute a running CRC across multiple buffers by passing the
+     previous return value as the seed for the next call.
+Inp: str    - pointer to uint16_t data array
+     length - number of uint16_t words to process
+     seed   - initial CRC value (use 0xFFFF for the first call)
+Ret: Updated CRC-16 value
+*/
+uint16_t CRCCalculationSeeded(uint16_t *str, uint8_t length, uint16_t seed)
 {
-  uint8_t i,j;
-  uint16_t check_sum=0xffff;
-  for (i=0; i<length; i++)
+  uint8_t i, j;
+  uint16_t check_sum = seed;
+  for (i = 0; i < length; i++)
   {
     check_sum ^= (uint16_t)str[i];
-    for (j=0; j<8; j++)
+    for (j = 0; j < 8; j++)
     {
       if (check_sum & 1)
       {
         check_sum >>= 1;
-         check_sum ^= 0xA001;
+        check_sum ^= 0xA001;
       }
       else check_sum >>= 1;
     }
   }
   return check_sum;
+}
+
+/*
+Inf: CRC-16 over a single buffer, starting from the standard initial
+     value of 0xFFFF. Wrapper around CRCCalculationSeeded().
+Inp: str    - pointer to uint16_t data array
+     length - number of uint16_t words to process
+Ret: CRC-16 value
+*/
+uint16_t CRCCalculation(uint16_t *str, uint8_t length)
+{
+  return CRCCalculationSeeded(str, length, 0xFFFF);
 }
 #ifdef MODEL_DATA_SAVE
 void  SaveOldData(void)

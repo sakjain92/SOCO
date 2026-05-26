@@ -17,9 +17,18 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 **************************************/
 #define     NO_OF_SAMPLES                3200
 
+// Board must have 1Mbit (128KB) or larger external EEPROM
 #define     EEPROM_PAGE_LENGTH          64
 #define     EXT_EEPROM                  0xA0
-#define     MAX_NUM_PAGES               512
+#define     EEPROM_SIZE                 (128UL * 1024)
+// We keep all metadata in first 32KB of the EEPROM and then rest of firmware
+// for FOTA after it. This way, if only 32KB of EEPROM is put on hardware
+// everything will work except FOTA
+//
+#define     METADATA_EEPROM_SIZE 	(32UL * 1024)
+#define     MAX_METADATA_NUM_PAGES      (METADATA_EEPROM_SIZE / EEPROM_PAGE_LENGTH)
+
+// ---- Metadata region: first 32KB (0x0000 - 0x7FFF) ----
 
 #define  MAX_DATA_SAVE_SIZE             512
 #define  NUM_DATA_PAGES                 40
@@ -36,13 +45,34 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 #define  PRODUCT_INFO_LOC              (SCROLL_LOCK_LOC+EEPROM_PAGE_LENGTH)
 #define  PRODUCT_INFO_SIZE             EEPROM_PAGE_LENGTH
 
-#define  EEPROM_END                     (PRODUCT_INFO_LOC + PRODUCT_INFO_SIZE - 1)
+#define  EEPROM_METADATA_END           (PRODUCT_INFO_LOC + PRODUCT_INFO_SIZE - 1)
 
 // Using inline assert since COMPILE_ASSERT macro (from Struct.h) is not
 // available here due to include ordering.
 //
 extern char _product_info_fits_in_eeprom[
-    (EEPROM_END < EEPROM_PAGE_LENGTH * MAX_NUM_PAGES) ? 1 : -1];
+    (EEPROM_METADATA_END < EEPROM_PAGE_LENGTH * MAX_METADATA_NUM_PAGES) ? 1 : -1];
+
+// ---- FOTA staging region: 32KB to 128KB ----
+
+#define  FOTA_STAGING_START             METADATA_EEPROM_SIZE
+#define  FOTA_MAX_FW_SIZE               (EEPROM_SIZE - FOTA_STAGING_START)  // 96KB
+#define  FOTA_CHUNK_SIZE                200
+#define  FOTA_MAX_CHUNKS                ((FOTA_MAX_FW_SIZE) / FOTA_CHUNK_SIZE)
+
+// File header: [totalRecords:2][version:2][crc:2] all little-endian
+#define  FOTA_HEADER_SIZE               6
+
+// XOR PRNG encryption (16-bit LCG, full period 2^16).
+// The PRNG step is: state = (uint16_t)(state * MUL + INC).
+// On ARM the multiply promotes to 32-bit; only the lower 16 bits matter.
+// The bootloader and build script must use the same constants and truncation.
+//
+#define  FOTA_SECRET_KEY                0x4A7B
+#define  FOTA_SEED_MIXER                0x9E37
+#define  FOTA_PRNG_MUL                  25173u
+#define  FOTA_PRNG_INC                  13849u
+
 
 #define  DATA_SAVE_DEBAR_TIME          5
 #define  DATA_SAVE_DURATION           (30+DATA_SAVE_DEBAR_TIME) // External EEPROM Data Saved every 30 Sec

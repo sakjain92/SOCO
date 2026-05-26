@@ -968,4 +968,41 @@ struct TestingStatus
     };
 };
 
+// FOTA = Firmware Over-The-Air upgrade
+//
+#define FOTA_STATUS_IDLE     0
+#define FOTA_STATUS_READY    1
+
+struct FotaState
+{
+    uint32_t status;          // FOTA_STATUS_*
+    uint32_t chunksReceived;  // next expected record number
+    uint32_t bytesWritten;    // total firmware bytes written to EEPROM
+    uint32_t firmwareSize;    // totalRecords * CHUNK_SIZE - HEADER_SIZE
+    uint16_t totalRecords;    // from file header
+    uint16_t version;         // from file header
+    uint16_t expectedCrc;     // CRC-16 of plaintext firmware, from header
+    uint16_t runningCrc;      // running CRC-16 computed over decrypted chunks
+    uint16_t prngSeed;        // initial seed, passed to FotaFlashInfo
+    uint16_t prngState;       // current PRNG state (advances per word)
+};
+
+// Written to a dedicated flash page (page 62) when upgrade is triggered.
+// Bootloader reads this to know what to decrypt and flash.
+//
+// WARNING: Do not reorder or resize existing fields — the bootloader reads
+// this struct directly from flash. Use the reserved[] area for new fields.
+//
+#pragma pack(push, 1)
+struct FotaFlashInfo
+{
+    uint32_t firmwareSize;    // offset 0,  4 bytes
+    uint16_t prngSeed;        // offset 4,  2 bytes
+    uint8_t  reserved[121];   // offset 6,  121 bytes — for future use
+    uint8_t  upgradePending;  // offset 127, 1 byte — written last
+};
+#pragma pack(pop)
+
+COMPILE_ASSERT(sizeof(struct FotaFlashInfo) == 128);
+
 #endif
