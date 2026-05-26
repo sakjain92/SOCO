@@ -1962,22 +1962,129 @@ void FillCurrentGainArray(void)
   for(i=0;i<50;i++)CalPF(BufferBetaBSolar[i],&BufferAlfaBSolar[i],&BufferBetaBSolar[i],&BufferIntDelayBSolar[i]);
 
 }
-  
-// Maps a measured current value to a phase-error lookup buffer index.
-// Buffer layout (decreasing current order, populated in FillCurrentGainArray):
-//   slot [0,                            StepXHigh)            : XHIGH segment, CUR_XHIGH_STEP granularity
-//   slot [StepXHigh,                    StepXHigh+StepHigh)   : HIGH  segment, CUR_HIGH_STEP  granularity
-//   slot [StepXHigh+StepHigh,           StepXHigh+StepHigh+StepLow] : LOW segment, CUR_LOW_STEP  granularity
-// Returns 0 for currents at or above XHIGH (saturated to highest knot)
-// and the last LOW-segment slot for currents below the starting current.
-//
-static uint8_t PhaseBufferIndex(float I)
+
+/*
+Inf: Map calibrated current to phase-error lookup buffer index.
+     The phase-error table was built in FillCurrentGainArray() using physical
+     current values and step sizes, so the index must be computed from the
+     calibrated (physical) current. No feedback loop exists here because the
+     phase-error FIR only affects power, not the current RMS measurement.
+Inp: I_cal - calibrated current in physical amps (InstantPara.CurrentX)
+Ret: Buffer index [0 .. StepXHigh+StepHigh+StepLow]
+*/
+static uint8_t PhaseBufferIndex(float I_cal)
 {
-  if (I >= CUR_XHIGH_CAL_POINT) return 0;
-  if (I >= CUR_HIGH_CAL_POINT)  return (uint8_t)((CUR_XHIGH_CAL_POINT - I) / CUR_XHIGH_STEP);
-  if (I >= CUR_MID_CAL_POINT)   return StepXHigh + (uint8_t)((CUR_HIGH_CAL_POINT - I) / CUR_HIGH_STEP);
-  if (I >= CUR_LOW_CAL_POINT)   return StepXHigh + StepHigh + (uint8_t)((CUR_MID_CAL_POINT - I) / CUR_LOW_STEP);
+  if (I_cal >= CUR_XHIGH_CAL_POINT)
+    return 0;
+  if (I_cal >= CUR_HIGH_CAL_POINT)
+    return (uint8_t)((CUR_XHIGH_CAL_POINT - I_cal) / CUR_XHIGH_STEP);
+  if (I_cal >= CUR_MID_CAL_POINT)
+    return StepXHigh + (uint8_t)((CUR_HIGH_CAL_POINT - I_cal) / CUR_HIGH_STEP);
+  if (I_cal >= CUR_LOW_CAL_POINT)
+    return StepXHigh + StepHigh + (uint8_t)((CUR_MID_CAL_POINT - I_cal) / CUR_LOW_STEP);
   return StepXHigh + StepHigh + StepLow;
+}
+
+/*
+Inf: Piecewise-linear interpolation of current gain across four cal points.
+
+     Problem: The ISR computes I_measured = CurrentGain * I_raw, and this
+     function picks the next CurrentGain based on I_measured. That creates a
+     positive feedback loop: G_new = Offset + Slope * G_old * I_raw. At high
+     currents the loop gain (Slope * I_raw) can reach 0.1-0.5, amplifying
+     measurement noise by 1/(1 - loop_gain).
+
+     Fix: We divide out the working gain to get I_raw = I_measured / CurrentGain.
+     I_raw is gain-independent (the gain cancels perfectly), so using it for
+     interpolation breaks the feedback loop. To keep band selection correct
+     (thresholds are in physical amps), we use I_cal for the if-checks.
+
+     To keep the interpolation correct (the original Slope/Offset were designed
+     for physical amps, not raw), we convert the calibration anchor points to
+     raw-domain equivalents: R = CUR_CAL_POINT / G_at_that_point. This way the
+     interpolation line passes through (R_high, G_high) and (R_xhigh, G_xhigh)
+     in raw space, giving exact results at all calibration knots.
+
+Inp: I_cal        - calibrated current in physical amps (InstantPara.CurrentX)
+     CurrentGain  - working gain currently applied by the ISR for this phase
+     G_xh, G_h, G_m, G_l - calibration gains at XHIGH, HIGH, MID, LOW points
+Ret: Interpolated gain for the current operating point
+*/
+static float InterpolateCurrentGain(float I_cal, float CurrentGain,
+                                    float G_xh, float G_h, float G_m, float G_l)
+{
+  // Guard against corrupted calibration data (erased flash = 0.0 or NaN).
+  // With invalid gains the raw-domain anchor division would produce inf/NaN.
+  // Fall back to 1.0 (uncalibrated) so the meter stays alive.
+  // Note: use !(x > 0) instead of (x <= 0) because IEEE 754 NaN fails all
+  // ordered comparisons — (NaN <= 0) is false and would slip through.
+  //
+  if (!(G_xh > 0.0f) || !(G_h > 0.0f) || !(G_m > 0.0f) || !(G_l > 0.0f))
+    return 1.0f;
+
+  if (I_cal >= CUR_XHIGH_CAL_POINT)
+    return G_xh;
+
+  // I_raw = I_cal / CurrentGain = CURRENT_COEFF * RMS(raw_ADC).
+  // Gain cancels perfectly, so I_raw depends only on the ADC hardware.
+  //
+  float I_raw = (CurrentGain > 0.0f) ? I_cal / CurrentGain : 0.0f;
+
+  float R_hi, R_lo, Slope, Offset;
+
+  if (I_cal >= CUR_HIGH_CAL_POINT)
+  {
+    // Convert anchor points from physical amps to raw-domain equivalents.
+    // At calibration, physical current was CUR_XHIGH_CAL_POINT with gain G_xh,
+    // so the raw ADC reading at that point was CUR_XHIGH_CAL_POINT / G_xh.
+    //
+    R_hi   = CUR_XHIGH_CAL_POINT / G_xh;
+    R_lo   = CUR_HIGH_CAL_POINT  / G_h;
+    if (R_hi <= R_lo) return G_xh;
+    Slope  = (G_xh - G_h) / (R_hi - R_lo);
+    Offset = G_xh - R_hi * Slope;
+    return Offset + Slope * I_raw;
+  }
+  if (I_cal >= CUR_MID_CAL_POINT)
+  {
+    R_hi   = CUR_HIGH_CAL_POINT / G_h;
+    R_lo   = CUR_MID_CAL_POINT  / G_m;
+    if (R_hi <= R_lo) return G_h;
+    Slope  = (G_h - G_m) / (R_hi - R_lo);
+    Offset = G_h - R_hi * Slope;
+    return Offset + Slope * I_raw;
+  }
+  if (I_cal >= CUR_LOW_CAL_POINT)
+  {
+    R_hi   = CUR_MID_CAL_POINT / G_m;
+    R_lo   = CUR_LOW_CAL_POINT / G_l;
+    if (R_hi <= R_lo) return G_m;
+    Slope  = (G_m - G_l) / (R_hi - R_lo);
+    Offset = G_m - R_hi * Slope;
+    return Offset + Slope * I_raw;
+  }
+  return G_l;
+}
+
+/*
+Inf: Look up phase-error FIR coefficients for a given current level.
+     Phase error is a physical phenomenon (depends on actual current magnitude)
+     and the phase-error FIR does not feed back into the current RMS measurement
+     (it only affects power), so there is no feedback loop to break here.
+     We use the calibrated current directly.
+Inp: I_cal      - calibrated current in physical amps (InstantPara.CurrentX)
+     BuffAlfa, BuffBeta, BuffIntDelay - pre-computed phase-error tables
+     outAlfa, outBeta, outIntDelay   - destination for selected coefficients
+Ret: None (writes through output pointers)
+*/
+static void SetPhaseError(float I_cal,
+                          float *BuffAlfa, float *BuffBeta, int8_t *BuffIntDelay,
+                          float *outAlfa, float *outBeta, int8_t *outIntDelay)
+{
+  uint8_t idx = PhaseBufferIndex(I_cal);
+  *outAlfa     = BuffAlfa[idx];
+  *outBeta     = BuffBeta[idx];
+  *outIntDelay = BuffIntDelay[idx];
 }
 
 /*
@@ -1987,8 +2094,6 @@ Ret: None
 */
 void SetWorkingGainBuffer(void)
 {
-  uint8_t TempChar;
-  float Slope,Offset;
   static bool initialized = false;
 
   if (!initialized)
@@ -2025,182 +2130,47 @@ void SetWorkingGainBuffer(void)
     initialized = true;
   }
 
-  if(InstantPara.CurrentR>=CUR_HIGH_CAL_POINT)
-  {
-    if(InstantPara.CurrentR>=CUR_XHIGH_CAL_POINT)WorkingCopyGain.IR_GAIN=CalibrationCoeff.IR_XHIGH_GAIN;
-    else
-    {
-      Slope=(CalibrationCoeff.IR_XHIGH_GAIN-CalibrationCoeff.IR_HIGH_GAIN)/(CUR_XHIGH_CAL_POINT-CUR_HIGH_CAL_POINT);
-      Offset=CalibrationCoeff.IR_XHIGH_GAIN-CUR_XHIGH_CAL_POINT*Slope;
-      WorkingCopyGain.IR_GAIN=Offset+Slope*InstantPara.CurrentR;
-    }
-  }
-  else if(InstantPara.CurrentR>=CUR_MID_CAL_POINT)
-  {
-    Slope=(CalibrationCoeff.IR_HIGH_GAIN-CalibrationCoeff.IR_MID_GAIN)/(CUR_HIGH_CAL_POINT-CUR_MID_CAL_POINT);
-    Offset=CalibrationCoeff.IR_HIGH_GAIN-CUR_HIGH_CAL_POINT*Slope;
-    WorkingCopyGain.IR_GAIN=Offset+Slope*InstantPara.CurrentR;
-  }
-  else if(InstantPara.CurrentR>=CUR_LOW_CAL_POINT)
-  {
-    Slope=(CalibrationCoeff.IR_MID_GAIN-CalibrationCoeff.IR_LOW_GAIN)/(CUR_MID_CAL_POINT-CUR_LOW_CAL_POINT);
-    Offset=CalibrationCoeff.IR_MID_GAIN-CUR_MID_CAL_POINT*Slope;
-    WorkingCopyGain.IR_GAIN=Offset+Slope*InstantPara.CurrentR;
-  }
-  else WorkingCopyGain.IR_GAIN=CalibrationCoeff.IR_LOW_GAIN;
- 
-  if(InstantPara.CurrentY>=CUR_HIGH_CAL_POINT)
-  {
-    if(InstantPara.CurrentY>=CUR_XHIGH_CAL_POINT)WorkingCopyGain.IY_GAIN=CalibrationCoeff.IY_XHIGH_GAIN;
-    else
-    {
-      Slope=(CalibrationCoeff.IY_XHIGH_GAIN-CalibrationCoeff.IY_HIGH_GAIN)/(CUR_XHIGH_CAL_POINT-CUR_HIGH_CAL_POINT);
-      Offset=CalibrationCoeff.IY_XHIGH_GAIN-CUR_XHIGH_CAL_POINT*Slope;
-      WorkingCopyGain.IY_GAIN=Offset+Slope*InstantPara.CurrentY;
-    }
-  }
-  else if(InstantPara.CurrentY>=CUR_MID_CAL_POINT)
-  {
-    Slope=(CalibrationCoeff.IY_HIGH_GAIN-CalibrationCoeff.IY_MID_GAIN)/(CUR_HIGH_CAL_POINT-CUR_MID_CAL_POINT);
-    Offset=CalibrationCoeff.IY_HIGH_GAIN-CUR_HIGH_CAL_POINT*Slope;
-    WorkingCopyGain.IY_GAIN=Offset+Slope*InstantPara.CurrentY;
-  }
-  else if(InstantPara.CurrentY>=CUR_LOW_CAL_POINT)
-  {
-    Slope=(CalibrationCoeff.IY_MID_GAIN-CalibrationCoeff.IY_LOW_GAIN)/(CUR_MID_CAL_POINT-CUR_LOW_CAL_POINT);
-    Offset=CalibrationCoeff.IY_MID_GAIN-CUR_MID_CAL_POINT*Slope;
-    WorkingCopyGain.IY_GAIN=Offset+Slope*InstantPara.CurrentY;
-  }
-  else WorkingCopyGain.IY_GAIN=CalibrationCoeff.IY_LOW_GAIN;
-  if(InstantPara.CurrentB>=CUR_HIGH_CAL_POINT)
-  {
-    if(InstantPara.CurrentB>=CUR_XHIGH_CAL_POINT)WorkingCopyGain.IB_GAIN=CalibrationCoeff.IB_XHIGH_GAIN;
-    else
-    {
-      Slope=(CalibrationCoeff.IB_XHIGH_GAIN-CalibrationCoeff.IB_HIGH_GAIN)/(CUR_XHIGH_CAL_POINT-CUR_HIGH_CAL_POINT);
-      Offset=CalibrationCoeff.IB_XHIGH_GAIN-CUR_XHIGH_CAL_POINT*Slope;
-      WorkingCopyGain.IB_GAIN=Offset+Slope*InstantPara.CurrentB;
-    }
-  }
-  else if(InstantPara.CurrentB>=CUR_MID_CAL_POINT)
-  {
-    Slope=(CalibrationCoeff.IB_HIGH_GAIN-CalibrationCoeff.IB_MID_GAIN)/(CUR_HIGH_CAL_POINT-CUR_MID_CAL_POINT);
-    Offset=CalibrationCoeff.IB_HIGH_GAIN-CUR_HIGH_CAL_POINT*Slope;
-    WorkingCopyGain.IB_GAIN=Offset+Slope*InstantPara.CurrentB;
-  }
-  else if(InstantPara.CurrentB>=CUR_LOW_CAL_POINT)
-  {
-    Slope=(CalibrationCoeff.IB_MID_GAIN-CalibrationCoeff.IB_LOW_GAIN)/(CUR_MID_CAL_POINT-CUR_LOW_CAL_POINT);
-    Offset=CalibrationCoeff.IB_MID_GAIN-CUR_MID_CAL_POINT*Slope;
-    WorkingCopyGain.IB_GAIN=Offset+Slope*InstantPara.CurrentB;
-  }
-  else WorkingCopyGain.IB_GAIN=CalibrationCoeff.IB_LOW_GAIN;
-
-  // Solar
-  if(InstantPara.CurrentRSolar>=CUR_HIGH_CAL_POINT)
-  {
-    if(InstantPara.CurrentRSolar>=CUR_XHIGH_CAL_POINT)WorkingCopyGain.IR_SOLAR_GAIN=CalibrationCoeff.IR_SOLAR_XHIGH_GAIN;
-    else
-    {
-      Slope=(CalibrationCoeff.IR_SOLAR_XHIGH_GAIN-CalibrationCoeff.IR_SOLAR_HIGH_GAIN)/(CUR_XHIGH_CAL_POINT-CUR_HIGH_CAL_POINT);
-      Offset=CalibrationCoeff.IR_SOLAR_XHIGH_GAIN-CUR_XHIGH_CAL_POINT*Slope;
-      WorkingCopyGain.IR_SOLAR_GAIN=Offset+Slope*InstantPara.CurrentRSolar;
-    }
-  }
-  else if(InstantPara.CurrentRSolar>=CUR_MID_CAL_POINT)
-  {
-    Slope=(CalibrationCoeff.IR_SOLAR_HIGH_GAIN-CalibrationCoeff.IR_SOLAR_MID_GAIN)/(CUR_HIGH_CAL_POINT-CUR_MID_CAL_POINT);
-    Offset=CalibrationCoeff.IR_SOLAR_HIGH_GAIN-CUR_HIGH_CAL_POINT*Slope;
-    WorkingCopyGain.IR_SOLAR_GAIN=Offset+Slope*InstantPara.CurrentRSolar;
-  }
-  else if(InstantPara.CurrentRSolar>=CUR_LOW_CAL_POINT)
-  {
-    Slope=(CalibrationCoeff.IR_SOLAR_MID_GAIN-CalibrationCoeff.IR_SOLAR_LOW_GAIN)/(CUR_MID_CAL_POINT-CUR_LOW_CAL_POINT);
-    Offset=CalibrationCoeff.IR_SOLAR_MID_GAIN-CUR_MID_CAL_POINT*Slope;
-    WorkingCopyGain.IR_SOLAR_GAIN=Offset+Slope*InstantPara.CurrentRSolar;
-  }
-  else WorkingCopyGain.IR_SOLAR_GAIN=CalibrationCoeff.IR_SOLAR_LOW_GAIN;
-
-  if(InstantPara.CurrentYSolar>=CUR_HIGH_CAL_POINT)
-  {
-    if(InstantPara.CurrentYSolar>=CUR_XHIGH_CAL_POINT)WorkingCopyGain.IY_SOLAR_GAIN=CalibrationCoeff.IY_SOLAR_XHIGH_GAIN;
-    else
-    {
-      Slope=(CalibrationCoeff.IY_SOLAR_XHIGH_GAIN-CalibrationCoeff.IY_SOLAR_HIGH_GAIN)/(CUR_XHIGH_CAL_POINT-CUR_HIGH_CAL_POINT);
-      Offset=CalibrationCoeff.IY_SOLAR_XHIGH_GAIN-CUR_XHIGH_CAL_POINT*Slope;
-      WorkingCopyGain.IY_SOLAR_GAIN=Offset+Slope*InstantPara.CurrentYSolar;
-    }
-  }
-  else if(InstantPara.CurrentYSolar>=CUR_MID_CAL_POINT)
-  {
-    Slope=(CalibrationCoeff.IY_SOLAR_HIGH_GAIN-CalibrationCoeff.IY_SOLAR_MID_GAIN)/(CUR_HIGH_CAL_POINT-CUR_MID_CAL_POINT);
-    Offset=CalibrationCoeff.IY_SOLAR_HIGH_GAIN-CUR_HIGH_CAL_POINT*Slope;
-    WorkingCopyGain.IY_SOLAR_GAIN=Offset+Slope*InstantPara.CurrentYSolar;
-  }
-  else if(InstantPara.CurrentYSolar>=CUR_LOW_CAL_POINT)
-  {
-    Slope=(CalibrationCoeff.IY_SOLAR_MID_GAIN-CalibrationCoeff.IY_SOLAR_LOW_GAIN)/(CUR_MID_CAL_POINT-CUR_LOW_CAL_POINT);
-    Offset=CalibrationCoeff.IY_SOLAR_MID_GAIN-CUR_MID_CAL_POINT*Slope;
-    WorkingCopyGain.IY_SOLAR_GAIN=Offset+Slope*InstantPara.CurrentYSolar;
-  }
-  else WorkingCopyGain.IY_SOLAR_GAIN=CalibrationCoeff.IY_SOLAR_LOW_GAIN;
-
-  if(InstantPara.CurrentBSolar>=CUR_HIGH_CAL_POINT)
-  {
-    if(InstantPara.CurrentBSolar>=CUR_XHIGH_CAL_POINT)WorkingCopyGain.IB_SOLAR_GAIN=CalibrationCoeff.IB_SOLAR_XHIGH_GAIN;
-    else
-    {
-      Slope=(CalibrationCoeff.IB_SOLAR_XHIGH_GAIN-CalibrationCoeff.IB_SOLAR_HIGH_GAIN)/(CUR_XHIGH_CAL_POINT-CUR_HIGH_CAL_POINT);
-      Offset=CalibrationCoeff.IB_SOLAR_XHIGH_GAIN-CUR_XHIGH_CAL_POINT*Slope;
-      WorkingCopyGain.IB_SOLAR_GAIN=Offset+Slope*InstantPara.CurrentBSolar;
-    }
-  }
-  else if(InstantPara.CurrentBSolar>=CUR_MID_CAL_POINT)
-  {
-    Slope=(CalibrationCoeff.IB_SOLAR_HIGH_GAIN-CalibrationCoeff.IB_SOLAR_MID_GAIN)/(CUR_HIGH_CAL_POINT-CUR_MID_CAL_POINT);
-    Offset=CalibrationCoeff.IB_SOLAR_HIGH_GAIN-CUR_HIGH_CAL_POINT*Slope;
-    WorkingCopyGain.IB_SOLAR_GAIN=Offset+Slope*InstantPara.CurrentBSolar;
-  }
-  else if(InstantPara.CurrentBSolar>=CUR_LOW_CAL_POINT)
-  {
-    Slope=(CalibrationCoeff.IB_SOLAR_MID_GAIN-CalibrationCoeff.IB_SOLAR_LOW_GAIN)/(CUR_MID_CAL_POINT-CUR_LOW_CAL_POINT);
-    Offset=CalibrationCoeff.IB_SOLAR_MID_GAIN-CUR_MID_CAL_POINT*Slope;
-    WorkingCopyGain.IB_SOLAR_GAIN=Offset+Slope*InstantPara.CurrentBSolar;
-  }
-  else WorkingCopyGain.IB_SOLAR_GAIN=CalibrationCoeff.IB_SOLAR_LOW_GAIN;
-
-    
-  TempChar=PhaseBufferIndex(InstantPara.CurrentR);
-  WorkingCopyGain.PR_ALFA=BufferAlfaR[TempChar];
-  WorkingCopyGain.PR_BETA=BufferBetaR[TempChar];
-  WorkingCopyGain.PR_INT_DELAY=BufferIntDelayR[TempChar];
-
-  TempChar=PhaseBufferIndex(InstantPara.CurrentY);
-  WorkingCopyGain.PY_ALFA=BufferAlfaY[TempChar];
-  WorkingCopyGain.PY_BETA=BufferBetaY[TempChar];
-  WorkingCopyGain.PY_INT_DELAY=BufferIntDelayY[TempChar];
-
-  TempChar=PhaseBufferIndex(InstantPara.CurrentB);
-  WorkingCopyGain.PB_ALFA=BufferAlfaB[TempChar];
-  WorkingCopyGain.PB_BETA=BufferBetaB[TempChar];
-  WorkingCopyGain.PB_INT_DELAY=BufferIntDelayB[TempChar];
-
-  // Solar
+  // Grid current gains — pass calibrated current + working gain.
+  // InterpolateCurrentGain divides out the gain internally to get I_raw
+  // for feedback-free interpolation.
   //
-  TempChar=PhaseBufferIndex(InstantPara.CurrentRSolar);
-  WorkingCopyGain.PR_SOLAR_ALFA=BufferAlfaRSolar[TempChar];
-  WorkingCopyGain.PR_SOLAR_BETA=BufferBetaRSolar[TempChar];
-  WorkingCopyGain.PR_SOLAR_INT_DELAY=BufferIntDelayRSolar[TempChar];
+  WorkingCopyGain.IR_GAIN = InterpolateCurrentGain(InstantPara.CurrentR, WorkingCopyGain.IR_GAIN,
+      CalibrationCoeff.IR_XHIGH_GAIN, CalibrationCoeff.IR_HIGH_GAIN,
+      CalibrationCoeff.IR_MID_GAIN,   CalibrationCoeff.IR_LOW_GAIN);
+  WorkingCopyGain.IY_GAIN = InterpolateCurrentGain(InstantPara.CurrentY, WorkingCopyGain.IY_GAIN,
+      CalibrationCoeff.IY_XHIGH_GAIN, CalibrationCoeff.IY_HIGH_GAIN,
+      CalibrationCoeff.IY_MID_GAIN,   CalibrationCoeff.IY_LOW_GAIN);
+  WorkingCopyGain.IB_GAIN = InterpolateCurrentGain(InstantPara.CurrentB, WorkingCopyGain.IB_GAIN,
+      CalibrationCoeff.IB_XHIGH_GAIN, CalibrationCoeff.IB_HIGH_GAIN,
+      CalibrationCoeff.IB_MID_GAIN,   CalibrationCoeff.IB_LOW_GAIN);
 
-  TempChar=PhaseBufferIndex(InstantPara.CurrentYSolar);
-  WorkingCopyGain.PY_SOLAR_ALFA=BufferAlfaYSolar[TempChar];
-  WorkingCopyGain.PY_SOLAR_BETA=BufferBetaYSolar[TempChar];
-  WorkingCopyGain.PY_SOLAR_INT_DELAY=BufferIntDelayYSolar[TempChar];
+  // Solar current gains
+  WorkingCopyGain.IR_SOLAR_GAIN = InterpolateCurrentGain(InstantPara.CurrentRSolar, WorkingCopyGain.IR_SOLAR_GAIN,
+      CalibrationCoeff.IR_SOLAR_XHIGH_GAIN, CalibrationCoeff.IR_SOLAR_HIGH_GAIN,
+      CalibrationCoeff.IR_SOLAR_MID_GAIN,   CalibrationCoeff.IR_SOLAR_LOW_GAIN);
+  WorkingCopyGain.IY_SOLAR_GAIN = InterpolateCurrentGain(InstantPara.CurrentYSolar, WorkingCopyGain.IY_SOLAR_GAIN,
+      CalibrationCoeff.IY_SOLAR_XHIGH_GAIN, CalibrationCoeff.IY_SOLAR_HIGH_GAIN,
+      CalibrationCoeff.IY_SOLAR_MID_GAIN,   CalibrationCoeff.IY_SOLAR_LOW_GAIN);
+  WorkingCopyGain.IB_SOLAR_GAIN = InterpolateCurrentGain(InstantPara.CurrentBSolar, WorkingCopyGain.IB_SOLAR_GAIN,
+      CalibrationCoeff.IB_SOLAR_XHIGH_GAIN, CalibrationCoeff.IB_SOLAR_HIGH_GAIN,
+      CalibrationCoeff.IB_SOLAR_MID_GAIN,   CalibrationCoeff.IB_SOLAR_LOW_GAIN);
 
-  TempChar=PhaseBufferIndex(InstantPara.CurrentBSolar);
-  WorkingCopyGain.PB_SOLAR_ALFA=BufferAlfaBSolar[TempChar];
-  WorkingCopyGain.PB_SOLAR_BETA=BufferBetaBSolar[TempChar];
-  WorkingCopyGain.PB_SOLAR_INT_DELAY=BufferIntDelayBSolar[TempChar];
+  // Phase error — uses calibrated current directly (no feedback loop in this
+  // path because the phase-error FIR only affects power, not current RMS).
+  //
+  SetPhaseError(InstantPara.CurrentR, BufferAlfaR, BufferBetaR, BufferIntDelayR,
+      &WorkingCopyGain.PR_ALFA, &WorkingCopyGain.PR_BETA, &WorkingCopyGain.PR_INT_DELAY);
+  SetPhaseError(InstantPara.CurrentY, BufferAlfaY, BufferBetaY, BufferIntDelayY,
+      &WorkingCopyGain.PY_ALFA, &WorkingCopyGain.PY_BETA, &WorkingCopyGain.PY_INT_DELAY);
+  SetPhaseError(InstantPara.CurrentB, BufferAlfaB, BufferBetaB, BufferIntDelayB,
+      &WorkingCopyGain.PB_ALFA, &WorkingCopyGain.PB_BETA, &WorkingCopyGain.PB_INT_DELAY);
+
+  SetPhaseError(InstantPara.CurrentRSolar, BufferAlfaRSolar, BufferBetaRSolar, BufferIntDelayRSolar,
+      &WorkingCopyGain.PR_SOLAR_ALFA, &WorkingCopyGain.PR_SOLAR_BETA, &WorkingCopyGain.PR_SOLAR_INT_DELAY);
+  SetPhaseError(InstantPara.CurrentYSolar, BufferAlfaYSolar, BufferBetaYSolar, BufferIntDelayYSolar,
+      &WorkingCopyGain.PY_SOLAR_ALFA, &WorkingCopyGain.PY_SOLAR_BETA, &WorkingCopyGain.PY_SOLAR_INT_DELAY);
+  SetPhaseError(InstantPara.CurrentBSolar, BufferAlfaBSolar, BufferBetaBSolar, BufferIntDelayBSolar,
+      &WorkingCopyGain.PB_SOLAR_ALFA, &WorkingCopyGain.PB_SOLAR_BETA, &WorkingCopyGain.PB_SOLAR_INT_DELAY);
 }
   /*
 Inf: Save Data in Eeprom
