@@ -1,7 +1,7 @@
 
 #include "stm32f37x.h"
 static void SetSysClock(void);
-#define VECT_TAB_OFFSET  0x0  
+#define VECT_TAB_OFFSET  0x2000
 
 void SystemInit (void)
 { 

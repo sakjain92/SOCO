@@ -3,6 +3,13 @@
 #include <stdio.h>
 #include "Struct.h"
 
+// FOTA upgrade metadata — page 62 (0x0801F000).
+// All zeros = no upgrade pending. Application writes here when
+// triggering an upgrade; bootloader erases after flashing.
+//
+#pragma section = "FOTA_FLASH_SECTION"
+const struct FotaFlashInfo g_fotaFlashInfo @ "FOTA_FLASH_SECTION" = {0};
+
 #pragma section = "FLASH_COEFF_SECTION"
 
 #ifdef SEED_CALIBRATION_DEFAULTS

@@ -165,7 +165,7 @@ void USART2_IRQHandler(void)
     
     if(ReceiveLength>=(MAX_BYTE_TO_RECIEVE-2))
     {
-     Dummy = USART2->RDR;
+      Dummy = USART2->RDR;
     }
     else 
     {

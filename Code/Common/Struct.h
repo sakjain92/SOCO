@@ -3,6 +3,7 @@
 
 #include "stm32f37x.h"
 #include <stdbool.h>
+#include "bootloader.h"
 #include "FlagDef_DIN.h"
 
 #define RUNNING_MODE_IMPORT  0
@@ -967,5 +968,27 @@ struct TestingStatus
         };
     };
 };
+
+// FOTA = Firmware Over-The-Air upgrade
+//
+#define FOTA_STATUS_IDLE     0
+#define FOTA_STATUS_READY    1
+#define FOTA_STATUS_ERROR    127
+
+struct FotaState
+{
+    uint32_t status;          // FOTA_STATUS_*
+    uint32_t chunksReceived;  // next expected record number
+    uint32_t bytesWritten;    // total firmware bytes written to EEPROM
+    uint32_t firmwareSize;    // totalRecords * CHUNK_SIZE - HEADER_SIZE
+    uint16_t totalRecords;    // from file header
+    uint16_t version;         // from file header
+    uint16_t expectedCrc;     // CRC-16 of plaintext firmware, from header
+    uint16_t runningCrc;      // running CRC-16 computed over decrypted chunks
+    uint16_t prngSeed;        // initial seed, passed to FotaFlashInfo
+    uint16_t prngState;       // current PRNG state (advances per word)
+};
+
+COMPILE_ASSERT(sizeof(struct FotaFlashInfo) == 128);
 
 #endif

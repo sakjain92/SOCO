@@ -57,7 +57,8 @@ extern void CheckKey(void);
 extern void DisplayImproperSettings(void);
 extern void UpdateEditSettings(void);
 extern void InitWatchDog(void);
-extern uint16_t CRCCalculation(uint16_t * str,uint8_t length);
+extern uint16_t CRCCalculationSeeded(uint16_t *str, uint8_t length, uint16_t seed);
+extern uint16_t CRCCalculation(uint16_t *str, uint8_t length);
 extern  void MeterInit(void);
 extern bool IsUnitFactoryComplete(void);
 extern void SetInitialDisplay(void);
@@ -72,6 +73,7 @@ extern void Process1SecInterrupt(void);
 extern void ProcessFreqCapture(void);
 
 
+extern const struct FotaFlashInfo g_fotaFlashInfo;
 extern const struct PH_COEFF_STRUCT CalibrationCoeff;
 extern struct PH_COEFF_STRUCT CalBuffer;
 extern struct INST_PARA InstantPara;

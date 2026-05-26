@@ -20,7 +20,7 @@ void NewMeterInit(void)
   {
     ProtectionReset(); 
     for(i=0;i<64;i++)LcdEpromBuffer[i]=0; 
-    for(i=0;i<MAX_NUM_PAGES;i++) 
+    for(i=0;i<MAX_METADATA_NUM_PAGES;i++) 
     {
       EepromWrite(i*64,64,EXT_EEPROM,LcdEpromBuffer );
       RESET_WATCH_DOG;
