@@ -169,7 +169,8 @@ void USART2_IRQHandler(void)
     }
     else 
     {
-      RecieveArray[ReceiveLength] = USART2->RDR;
+      uint8_t data = USART2->RDR;
+      RecieveArray[ReceiveLength] = data;
       ReceiveLength++;
     }
   }
