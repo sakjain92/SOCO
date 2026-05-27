@@ -36,6 +36,7 @@
 
 /*
 Inf: Turn on all front-panel LEDs to signal bootloader activity.
+     LEDs are active-low — BRR drives the pin low which lights the LED.
 Inp: None
 Ret: None
 */
@@ -50,6 +51,27 @@ static void Boot_LedsAllOn(void)
     GPIOE->BRR  = (1u << 2);   /* LED7 */
     GPIOE->BRR  = (1u << 1);   /* LED8 */
     GPIOC->BRR  = (1u << 1);   /* LED9 */
+}
+
+/*
+Inf: Turn off all front-panel LEDs. BSRR drives the pin high which
+     turns off the LED. Called when the bootloader's upgrade flow
+     fails, so an operator sees the LEDs go dark before the device
+     resets — a visual cue that the FOTA attempt did not complete.
+Inp: None
+Ret: None
+*/
+static void Boot_LedsAllOff(void)
+{
+    GPIOF->BSRR = (1u << 10);  /* LED1 off */
+    GPIOC->BSRR = (1u << 0);   /* LED2 off */
+    GPIOE->BSRR = (1u << 6);   /* LED3 off */
+    GPIOE->BSRR = (1u << 5);   /* LED4 off */
+    GPIOE->BSRR = (1u << 4);   /* LED5 off */
+    GPIOE->BSRR = (1u << 3);   /* LED6 off */
+    GPIOE->BSRR = (1u << 2);   /* LED7 off */
+    GPIOE->BSRR = (1u << 1);   /* LED8 off */
+    GPIOC->BSRR = (1u << 1);   /* LED9 off */
 }
 
 /* ------------------------------------------------------------------ */
@@ -348,6 +370,54 @@ static uint16_t Boot_Crc16(const uint16_t *data, uint32_t nWords, uint16_t seed)
 }
 
 /* ------------------------------------------------------------------ */
+/* Failure path: signal the operator, then reset                       */
+/* ------------------------------------------------------------------ */
+
+/*
+Inf: Approximate millisecond busy-wait that keeps the IWDG fed.
+     HCLK is 12 MHz (set by Boot_SetSysClock). The inner volatile loop
+     runs ~3000 iterations per millisecond; actual elapsed time may be
+     slightly longer than the requested `ms` due to memory-access
+     overhead, which is acceptable for a "wait a few seconds before
+     reset" pause. The outer loop feeds the IWDG every iteration so
+     we never approach the ~3-second watchdog timeout regardless of
+     the requested duration.
+Inp: ms - approximate number of milliseconds to wait
+Ret: None
+*/
+static void Boot_DelayMs(uint32_t ms)
+{
+    for (uint32_t i = 0; i < ms; i++)
+    {
+        BOOT_IWDG_FEED();
+        for (volatile uint32_t j = 0; j < 3000; j++)
+        {
+            /* spin */
+        }
+    }
+}
+
+/*
+Inf: Bootloader failure handler. Turns off the front-panel LEDs so
+     the operator sees the device go dark, waits a few seconds for
+     visibility, then issues a software reset. Any persistent state
+     (such as the FotaFlashInfo upgrade flag) is left untouched so
+     the next boot can retry the failed operation. Does not return.
+Inp: None
+Ret: None (resets the chip)
+*/
+static void Boot_FailAndReset(void)
+{
+    Boot_LedsAllOff();
+    Boot_DelayMs(3000);          /* ~3-second pause for operator visibility */
+    NVIC_SystemReset();
+
+    /* Unreachable. If NVIC_SystemReset somehow fails to take effect,
+       stop feeding the IWDG and let it reset us within ~3 seconds. */
+    while (1) {}
+}
+
+/* ------------------------------------------------------------------ */
 /* Jump to application                                                 */
 /* ------------------------------------------------------------------ */
 
@@ -365,24 +435,43 @@ static void Boot_JumpToApp(void)
     /* Validate stack pointer is in SRAM */
     if (sp < 0x20000000 || sp > BOOT_SRAM_TOP)
     {
-        /* Invalid app — hang and let watchdog reset */
-        while (1) {}
+        /* Invalid app vector. Signal failure on the LEDs and reset.
+           If the FOTA flag is still set we retry the upgrade; if it
+           was cleared we loop here forever until the device is
+           recovered via SWD or a fresh FOTA from an external tool. */
+        Boot_FailAndReset();
     }
 
     /* Order matters:
        1. Point VTOR at the app's vector table, with barriers so the
           write is visible before anything else can fault.
-       2. Reset the stack to the app's initial SP.
-       3. Re-enable IRQs only after the vector table is valid.
-       4. Branch to the app's reset handler.                       */
+       2. Re-enable IRQs only after the vector table is valid.
+       3. Switch MSP and branch atomically in inline assembly.
+          Once MSP is moved the bootloader's C stack frame is gone,
+          so we cannot rely on the compiler to keep `pc` in a CPU
+          register across that boundary. Under -Oh (release) the
+          optimizer happens to do so today, but under -On (debug)
+          or a future compiler version it could spill `pc` to the
+          now-invalid old stack frame and read back garbage. Doing
+          MSR + BX in one inline-asm block locks `sp` and `pc` into
+          registers before MSR fires — making the contract explicit
+          regardless of optimization level.                          */
     SCB->VTOR = BOOT_APP_ADDRESS;
-    __DSB();                          /* finish VTOR write         */
-    __ISB();                          /* flush prefetch            */
-    __set_MSP(sp);
+    __DSB();                          /* finish VTOR write           */
+    __ISB();                          /* flush prefetch              */
     __enable_irq();
-    ((void (*)(void))pc)();
 
-    /* Should never reach here */
+    __asm volatile
+    (
+        "MSR  msp, %[sp]   \n"
+        "BX   %[pc]        \n"
+        :
+        : [sp] "r" (sp), [pc] "r" (pc)
+        : "memory"
+    );
+
+    /* Unreachable — BX above jumps to the app's reset handler and
+       never returns. If somehow it did, fall into the IWDG loop. */
     while (1) {}
 }
 
@@ -448,12 +537,37 @@ static void Boot_CheckAndUpgrade(void)
 
         if (crc != expectedCrc)
         {
-            /* EEPROM data is corrupt or unreadable. Clear upgrade   */
-            /* flag to prevent retry loops and boot existing app.    */
-            Boot_FlashUnlock();
-            Boot_FlashErasePage(BOOT_FOTA_FLASH_ADDR);
-            Boot_FlashLock();
-            return;
+            /* EEPROM CRC failed. Decide based on whether the app is
+               still intact:
+                 - App intact (first try, or retry where app was never
+                   erased) → safe to clear the upgrade flag and boot
+                   the existing app. The user retries the FOTA later.
+                 - App already erased (this is a retry after Pass 2
+                   started, e.g. EEPROM degraded mid-upgrade) →
+                   clearing the flag would brick the device because
+                   there is no app to fall back to. Keep the flag set
+                   so a future boot can finish the upgrade once the
+                   EEPROM recovers (or is replaced/reflashed).
+               App validity is judged by the initial SP at 0x08002000:
+               valid SP must lie in SRAM and be 8-byte aligned per the
+               ARMv7-M STKALIGN convention. */
+            uint32_t app_sp = *(volatile uint32_t *)BOOT_APP_ADDRESS;
+            uint8_t  app_intact = (app_sp >= 0x20000000) &&
+                                  (app_sp <= BOOT_SRAM_TOP) &&
+                                  ((app_sp & 0x7) == 0);
+
+            if (app_intact)
+            {
+                /* Recoverable — clear flag, turn off LEDs, boot old app. */
+                Boot_FlashUnlock();
+                Boot_FlashErasePage(BOOT_FOTA_FLASH_ADDR);
+                Boot_FlashLock();
+                Boot_LedsAllOff();
+                return;
+            }
+
+            /* App already erased — keep flag set; retry indefinitely. */
+            Boot_FailAndReset();
         }
     }
 
@@ -502,8 +616,8 @@ static void Boot_CheckAndUpgrade(void)
     if (verifyCrc != expectedCrc)
     {
         /* Flash write failed. Leave upgrade flag set so we retry
-           on next reset. Watchdog will reset us. */
-        while (1) {}
+           on next reset. Signal failure on the LEDs and reset. */
+        Boot_FailAndReset();
     }
 
     /* --- Clear upgrade flag: erase page 62 --- */
