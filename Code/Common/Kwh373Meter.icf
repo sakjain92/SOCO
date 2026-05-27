@@ -35,7 +35,15 @@ do not initialize  { section .noinit };
 
 /* Bootloader: boot_vectors.s places .boot_intvec at absolute 0x08000000
    via ASEGN (no linker placement needed for it).
-   BOOT_SECTION (reset handler from .s) and all of boot_main.o go here. */
+   BOOT_SECTION (reset handler from .s) and all of boot_main.o go here.
+
+   The bootloader is not referenced by the application's entry point
+   (__iar_program_start), so without `keep` the linker strips .boot_intvec
+   (declared NOROOT in boot_vectors.s) and its dependency chain — leaving
+   BOOT_ROM empty and no Reset_Handler at 0x08000000.
+   Keeping .boot_intvec transitively keeps Boot_Reset_Handler
+   (BOOT_SECTION) and Boot_ResetHandler (boot_main.o) via call refs. */
+keep { section .boot_intvec };
 place in BOOT_ROM  { section BOOT_SECTION,
                      ro object boot_main.o };
 
