@@ -460,8 +460,14 @@ static void SetSystemTimer(void)
   TIM2->PSC=0;
   TIM2->ARR=3750;  // DIVIDE BY 12e6/3750=3200
   TIM2->CR1 |=0X01; // STRT TIMER
-  NVIC_EnableIRQ(TIM2_IRQn);  
-  
+  /* Priority 2 (lower than USART2/DMA at 0): the metering ISR runs
+     every ~313 us. At default priority it preempts USART2 RX, which
+     drops bytes to ORE mid-frame on long FC 0x15 FOTA chunks (212
+     bytes / 220 ms wire time at 9600 baud). STM32F37x: 4 priority
+     bits → values 0-15, lower number = higher priority. */
+  NVIC_SetPriority(TIM2_IRQn, 2);
+  NVIC_EnableIRQ(TIM2_IRQn);
+
 }
 
 static void Set1SecTimer(void)
@@ -480,8 +486,10 @@ static void Set1SecTimer(void)
   TIM4->PSC=50000;
   TIM4->ARR=240;  // 1Hz
   TIM4->CR1 |=0X01; // STRT TIMER
-  NVIC_EnableIRQ(TIM4_IRQn);  
-  
+  /* Priority 2: same tier as TIM2, below USART2/DMA. */
+  NVIC_SetPriority(TIM4_IRQn, 2);
+  NVIC_EnableIRQ(TIM4_IRQn);
+
 }
 
 static void FrequencyTimer(void)
@@ -499,8 +507,10 @@ static void FrequencyTimer(void)
   TIM3->PSC=59;//DIVIDE BY 12e6/60=200K
   TIM3->ARR=0xffff;  // always up count DIVIDE BY 12e6/60=200K
   TIM3->CR1 |=0X01; // STRT TIMER
+  /* Priority 2: frequency capture, not more important than Modbus RX. */
+  NVIC_SetPriority(TIM3_IRQn, 2);
   NVIC_EnableIRQ(TIM3_IRQn);  //capture interrupt
-  
+
 }
 
 void SetSDADC(void)
@@ -616,6 +626,14 @@ void InitUart(uint8_t baud,uint8_t parity1,uint8_t Stopbit1)
   USART2->CR1 |= 1;
   DMA1_Channel7->CPAR = (uint32_t)&USART2->TDR;
   DMA1_Channel7->CCR = 0x1092;    // Memory inc, read from memory, tcie
+  /* Priority 0 (highest): USART2 RX must service every byte within
+     ~1 char-time (~1 ms @ 9600 baud) to avoid ORE byte loss. On long
+     FC 0x15 frames (212 bytes / 220 ms wire), the metering TIM2 ISR
+     would otherwise preempt USART2 for the duration of its callback
+     and drop bytes mid-frame. DMA1_Channel7 handles TX-complete;
+     same tier so RS-485 direction flip is prompt. */
+  NVIC_SetPriority(USART2_IRQn, 0);
+  NVIC_SetPriority(DMA1_Channel7_IRQn, 0);
   NVIC_EnableIRQ(USART2_IRQn);
   NVIC_EnableIRQ(DMA1_Channel7_IRQn);
 }
