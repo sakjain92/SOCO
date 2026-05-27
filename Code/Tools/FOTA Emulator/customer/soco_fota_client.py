@@ -65,8 +65,8 @@ from pymodbus import file_message as ModbusFileRequest
 # Protocol constants - SOCO's Modbus FOTA interface.
 # ---------------------------------------------------------------------------
 
-REG_VERSION = 50007         # Int32, /100
-REG_STATUS = 40001          # Int32
+REG_VERSION = 50006         # Int32, /100 (firmware's table is 0-based)
+REG_STATUS = 40000          # Int32
 
 STATUS_TRANSFER = 1
 STATUS_UPGRADE = 2
@@ -85,8 +85,12 @@ UPGRADE_POLL_INTERVAL_SEC = 2
 UPGRADE_TIMEOUT_SEC = 120
 
 CHUNK_RETRIES = 3
+CHUNK_RETRY_DELAY_SEC = 1.0
+COMMAND_RETRIES = 4
+COMMAND_RETRY_DELAY_SEC = 1.0
 
-VERSION_FILENAME_RE = re.compile(r"^(\d+)\.(\d{2})\.bin$")
+# Filenames may be either bare `X.YZ.bin` or `SOCO_T1_X.YZ.bin`.
+VERSION_FILENAME_RE = re.compile(r"^(?:SOCO_T1_)?(\d+)\.(\d{2})\.bin$")
 
 
 # ---------------------------------------------------------------------------
@@ -179,6 +183,28 @@ def write_int32(master, address, value, slave_id):
         raise IOError("Write at %d failed: %s" % (address, result))
 
 
+def retry_modbus(op, what, retries=COMMAND_RETRIES):
+    """
+    Run a Modbus primitive with bounded retries. The SOCO RS-485 link
+    can drop or corrupt occasional frames, so single-shot reads/writes
+    (version check, status transitions) would otherwise abort the whole
+    upgrade on a transient error. Returns whatever `op` returns, or
+    raises IOError after exhausting `retries` attempts.
+    """
+    last_err = None
+    for attempt in range(1, retries + 1):
+        try:
+            return op()
+        except IOError as e:
+            last_err = e
+            if attempt < retries:
+                print("  %s attempt %d/%d failed (%s), retrying"
+                      % (what, attempt, retries, e))
+                time.sleep(COMMAND_RETRY_DELAY_SEC)
+    raise IOError("%s failed after %d attempts: %s"
+                  % (what, retries, last_err))
+
+
 def write_file_record(master, record_no, data, slave_id):
     """Send one 200-byte record via Modbus function 0x15."""
     if len(data) != RECORD_SIZE_BYTES:
@@ -205,7 +231,9 @@ def write_file_record(master, record_no, data, slave_id):
 def phase_version_check(master, slave_id, new_version):
     print("Phase 1: version check")
     try:
-        current = read_int32(master, REG_VERSION, slave_id)
+        current = retry_modbus(
+            lambda: read_int32(master, REG_VERSION, slave_id),
+            "Version read")
     except IOError as e:
         raise SystemExit(
             "Aborting: could not read current version (%s). "
@@ -221,7 +249,12 @@ def phase_version_check(master, slave_id, new_version):
 
 def phase_prepare(master, slave_id):
     print("Phase 2: requesting file transfer")
-    write_int32(master, REG_STATUS, STATUS_TRANSFER, slave_id)
+    try:
+        retry_modbus(
+            lambda: write_int32(master, REG_STATUS, STATUS_TRANSFER, slave_id),
+            "Transfer-request write")
+    except IOError as e:
+        raise SystemExit("Aborting: could not request transfer (%s)" % e)
 
     deadline = time.monotonic() + PREPARE_TIMEOUT_SEC
     print("  Polling status reg until SOCO reports ready (timeout %ds) ..."
@@ -279,6 +312,7 @@ def phase_transfer(master, slave_id, file_bytes):
                 print()
                 print("  Record %d attempt %d/%d failed (%s), retrying"
                       % (record_no, attempt, CHUNK_RETRIES, e))
+                time.sleep(CHUNK_RETRY_DELAY_SEC)
 
         pct = int((record_no + 1) * 100 / num_records)
         if pct != last_pct:
@@ -292,7 +326,14 @@ def phase_transfer(master, slave_id, file_bytes):
 
 def phase_perform(master, slave_id, old_version, new_version):
     print("Phase 4: requesting upgrade and waiting for SOCO to come back")
-    write_int32(master, REG_STATUS, STATUS_UPGRADE, slave_id)
+    try:
+        retry_modbus(
+            lambda: write_int32(master, REG_STATUS, STATUS_UPGRADE, slave_id),
+            "Upgrade-request write")
+    except IOError as e:
+        # Especially painful here — the 80 s transfer is already done.
+        raise SystemExit("Aborting: could not request upgrade after "
+                         "transfer (%s)" % e)
 
     deadline = time.monotonic() + UPGRADE_TIMEOUT_SEC
     print("  Polling version reg until SOCO reports v%s (timeout %ds) ..."
