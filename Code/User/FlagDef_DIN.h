@@ -3,6 +3,7 @@
 
 #include "stm32f37x.h"
 #include <stdio.h>
+#include "boot_defs.h"
 #include "Parameter_DIN.h"
 #include "Model_DIN.h"
 
@@ -17,15 +18,14 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 **************************************/
 #define     NO_OF_SAMPLES                3200
 
-// Board must have 1Mbit (128KB) or larger external EEPROM
-#define     EEPROM_PAGE_LENGTH          64
-#define     EXT_EEPROM                  0xA0
-#define     EEPROM_SIZE                 (128UL * 1024)
+// EEPROM_PAGE_LENGTH, EXT_EEPROM, EEPROM_SIZE, FOTA_STAGING_START,
+// FOTA_MAX_FW_SIZE are defined in Bootloader/boot_defs.h.
+//
 // We keep all metadata in first 32KB of the EEPROM and then rest of firmware
 // for FOTA after it. This way, if only 32KB of EEPROM is put on hardware
 // everything will work except FOTA
 //
-#define     METADATA_EEPROM_SIZE 	(32UL * 1024)
+#define     METADATA_EEPROM_SIZE        FOTA_STAGING_START
 #define     MAX_METADATA_NUM_PAGES      (METADATA_EEPROM_SIZE / EEPROM_PAGE_LENGTH)
 
 // ---- Metadata region: first 32KB (0x0000 - 0x7FFF) ----
@@ -54,24 +54,11 @@ extern char _product_info_fits_in_eeprom[
     (EEPROM_METADATA_END < EEPROM_PAGE_LENGTH * MAX_METADATA_NUM_PAGES) ? 1 : -1];
 
 // ---- FOTA staging region: 32KB to 128KB ----
+// FOTA_STAGING_START, FOTA_MAX_FW_SIZE, FOTA_HEADER_SIZE, FOTA_SECRET_KEY,
+// FOTA_SEED_MIXER, FOTA_PRNG_MUL, FOTA_PRNG_INC are in Bootloader/boot_defs.h
 
-#define  FOTA_STAGING_START             METADATA_EEPROM_SIZE
-#define  FOTA_MAX_FW_SIZE               (EEPROM_SIZE - FOTA_STAGING_START)  // 96KB
 #define  FOTA_CHUNK_SIZE                200
 #define  FOTA_MAX_CHUNKS                ((FOTA_MAX_FW_SIZE) / FOTA_CHUNK_SIZE)
-
-// File header: [totalRecords:2][version:2][crc:2] all little-endian
-#define  FOTA_HEADER_SIZE               6
-
-// XOR PRNG encryption (16-bit LCG, full period 2^16).
-// The PRNG step is: state = (uint16_t)(state * MUL + INC).
-// On ARM the multiply promotes to 32-bit; only the lower 16 bits matter.
-// The bootloader and build script must use the same constants and truncation.
-//
-#define  FOTA_SECRET_KEY                0x4A7B
-#define  FOTA_SEED_MIXER                0x9E37
-#define  FOTA_PRNG_MUL                  25173u
-#define  FOTA_PRNG_INC                  13849u
 
 
 #define  DATA_SAVE_DEBAR_TIME          5

@@ -1346,7 +1346,8 @@ void ModBusCommunication(void)
                   {
                       if (g_fota.status != FOTA_STATUS_READY ||
                           g_fota.chunksReceived != g_fota.totalRecords ||
-                          g_fota.runningCrc != g_fota.expectedCrc)
+                          g_fota.runningCrc != g_fota.expectedCrc ||
+                          g_fota.version == 0)
                       {
                           memset(&g_fota, 0, sizeof(g_fota));
                           Fun_Received |= 0x80;
@@ -1365,8 +1366,10 @@ void ModBusCommunication(void)
                       struct FotaFlashInfo info = {0};
                       info.firmwareSize = g_fota.firmwareSize;
                       info.prngSeed = g_fota.prngSeed;
+                      info.expectedCrc = g_fota.runningCrc;
                       info.upgradePending = 0x01;
 
+                      __disable_irq();
                       FLASH_Unlock();
                       FLASH_ErasePage((uint32_t)&g_fotaFlashInfo);
                       uint16_t *src = (uint16_t *)&info;
@@ -1378,6 +1381,7 @@ void ModBusCommunication(void)
                           FLASH_ProgramHalfWord(base + i * 2, src[i]);
                       }
                       FLASH_Lock();
+                      __enable_irq();
 
                       memcpy(Mod_TransmitFrame.Data_Array, &RecieveArray[2], 4);
                       SendData_UART(CopySetPara[PARA_DEVICE_ID],
@@ -1386,6 +1390,15 @@ void ModBusCommunication(void)
                       // response to be sent
                       //
                       while(1);
+                  }
+                  else
+                  {
+                      Fun_Received |= 0x80;
+                      Mod_TransmitFrame.Data_Array[0] = 0x03;
+                      SendData_UART((uint8_t)CopySetPara[PARA_DEVICE_ID],
+                                    Fun_Received, 1);
+                      Fun_Received &=~ 0x80;
+                      break;
                   }
 
                   memcpy(Mod_TransmitFrame.Data_Array, &RecieveArray[2], 4);
@@ -1721,7 +1734,8 @@ void ModBusCommunication(void)
                 if (refType != 0x06 || fileNo != 1 || recLen != 100 ||
                     dataLen != 207 || g_fota.status != FOTA_STATUS_READY ||
                     recordNo >= FOTA_MAX_CHUNKS ||
-                    recordNo != g_fota.chunksReceived)
+                    recordNo != g_fota.chunksReceived ||
+                    (recordNo > 0 && recordNo >= g_fota.totalRecords))
                 {
                     Fun_Received |= 0x80;
                     Mod_TransmitFrame.Data_Array[0] = 0x02;
@@ -1734,8 +1748,11 @@ void ModBusCommunication(void)
                 // Record 0: [header 6 bytes][encrypted firmware 194 bytes]
                 // Record N: [encrypted firmware 200 bytes]
                 //
-                uint8_t *recordData  = &RecieveArray[10];
-                uint8_t *fwData;
+                // Copy firmware data to local buffer so it's safe from
+                // UART ISR overwriting RecieveArray during EepromWrite
+                //
+                uint8_t fwBuf[FOTA_CHUNK_SIZE];
+                uint8_t *recordData = &RecieveArray[10];
                 uint16_t fwBytes;
 
                 if (recordNo == 0)
@@ -1748,7 +1765,7 @@ void ModBusCommunication(void)
                     if (g_fota.totalRecords == 0 ||
                         g_fota.totalRecords > FOTA_MAX_CHUNKS)
                     {
-			memset(&g_fota, 0, sizeof(g_fota));
+                        memset(&g_fota, 0, sizeof(g_fota));
                         Fun_Received |= 0x80;
                         Mod_TransmitFrame.Data_Array[0] = 0x02;
                         SendData_UART((uint8_t)CopySetPara[PARA_DEVICE_ID],
@@ -1759,17 +1776,17 @@ void ModBusCommunication(void)
 
                     g_fota.firmwareSize = (uint32_t)g_fota.totalRecords
                                           * FOTA_CHUNK_SIZE - FOTA_HEADER_SIZE;
-                    g_fota.prngSeed = FOTA_SECRET_KEY
-                                      ^ (g_fota.version * FOTA_SEED_MIXER);
+                    g_fota.prngSeed = (uint16_t)(FOTA_SECRET_KEY
+                                      ^ (g_fota.version * (uint16_t)FOTA_SEED_MIXER));
                     g_fota.prngState = g_fota.prngSeed;
 
-                    fwData  = &recordData[FOTA_HEADER_SIZE];
                     fwBytes = FOTA_CHUNK_SIZE - FOTA_HEADER_SIZE;
+                    memcpy(fwBuf, &recordData[FOTA_HEADER_SIZE], fwBytes);
                 }
                 else
                 {
-                    fwData  = recordData;
                     fwBytes = FOTA_CHUNK_SIZE;
+                    memcpy(fwBuf, recordData, fwBytes);
                 }
 
                 // Decrypt each word and feed to running CRC.
@@ -1781,7 +1798,7 @@ void ModBusCommunication(void)
                 {
                     g_fota.prngState = g_fota.prngState * FOTA_PRNG_MUL
                                        + FOTA_PRNG_INC;
-                    uint16_t decrypted = *(uint16_t *)&fwData[w * 2]
+                    uint16_t decrypted = *(uint16_t *)&fwBuf[w * 2]
                                          ^ g_fota.prngState;
                     g_fota.runningCrc = CRCCalculationSeeded(
                                             &decrypted, 1, g_fota.runningCrc);
@@ -1789,7 +1806,7 @@ void ModBusCommunication(void)
 
                 // Write encrypted firmware (no header) to EEPROM
                 uint32_t eepromAddr = FOTA_STAGING_START + g_fota.bytesWritten;
-                EepromWrite(eepromAddr, fwBytes, EXT_EEPROM, fwData);
+                EepromWrite(eepromAddr, fwBytes, EXT_EEPROM, fwBuf);
                 g_fota.chunksReceived++;
                 g_fota.bytesWritten += fwBytes;
 

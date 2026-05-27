@@ -3,6 +3,7 @@
 
 #include "stm32f37x.h"
 #include <stdbool.h>
+#include "bootloader.h"
 #include "FlagDef_DIN.h"
 
 #define RUNNING_MODE_IMPORT  0
@@ -986,22 +987,6 @@ struct FotaState
     uint16_t prngSeed;        // initial seed, passed to FotaFlashInfo
     uint16_t prngState;       // current PRNG state (advances per word)
 };
-
-// Written to a dedicated flash page (page 62) when upgrade is triggered.
-// Bootloader reads this to know what to decrypt and flash.
-//
-// WARNING: Do not reorder or resize existing fields — the bootloader reads
-// this struct directly from flash. Use the reserved[] area for new fields.
-//
-#pragma pack(push, 1)
-struct FotaFlashInfo
-{
-    uint32_t firmwareSize;    // offset 0,  4 bytes
-    uint16_t prngSeed;        // offset 4,  2 bytes
-    uint8_t  reserved[121];   // offset 6,  121 bytes — for future use
-    uint8_t  upgradePending;  // offset 127, 1 byte — written last
-};
-#pragma pack(pop)
 
 COMPILE_ASSERT(sizeof(struct FotaFlashInfo) == 128);
 
