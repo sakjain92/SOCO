@@ -369,9 +369,17 @@ static void Boot_JumpToApp(void)
         while (1) {}
     }
 
-    __enable_irq();
+    /* Order matters:
+       1. Point VTOR at the app's vector table, with barriers so the
+          write is visible before anything else can fault.
+       2. Reset the stack to the app's initial SP.
+       3. Re-enable IRQs only after the vector table is valid.
+       4. Branch to the app's reset handler.                       */
     SCB->VTOR = BOOT_APP_ADDRESS;
+    __DSB();                          /* finish VTOR write         */
+    __ISB();                          /* flush prefetch            */
     __set_MSP(sp);
+    __enable_irq();
     ((void (*)(void))pc)();
 
     /* Should never reach here */
@@ -523,6 +531,8 @@ void Boot_ResetHandler(void)
     /* Minimal system init */
     #if (__FPU_PRESENT == 1) && (__FPU_USED == 1)
     SCB->CPACR |= ((3UL << 10*2) | (3UL << 11*2));
+    __DSB();                            /* finish CPACR write       */
+    __ISB();                            /* flush prefetched FP insn */
     #endif
 
     RCC->CR |= 0x00000001;              /* HSI on */

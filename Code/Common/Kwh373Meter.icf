@@ -14,7 +14,13 @@ define symbol __ICFEDIT_size_cstack__ = 0x2000;
 
 define memory mem with size = 4G;
 
-/* Bootloader: pages 0-3 (8KB). Not updated by FOTA. */
+/* Bootloader: pages 0-3 (8KB). Not updated by FOTA.
+   NOTE: The bootloader currently fits in ~1.7 KB, so this region can be
+   reduced to pages 0-1 (4KB, 0x08000000-0x08000FFF) to reclaim 4 KB for
+   the application. If you do this, also update BOOT_FLASH_SIZE and
+   BOOT_APP_ADDRESS in boot_defs.h, BOOTLOADER_SIZE in fota_pack.py, and
+   APP_ROM start below. Re-flashing the smaller bootloader requires SWD
+   since the bootloader cannot self-update via FOTA. */
 define region BOOT_ROM     = mem:[from 0x08000000 to 0x08001FFF];
 
 /* Application: pages 4-61 */

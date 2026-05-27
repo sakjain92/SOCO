@@ -31,7 +31,13 @@ import sys
 # ---------------------------------------------------------------------------
 
 FLASH_BASE          = 0x08000000
-BOOTLOADER_SIZE     = 0x2000        # 8KB (pages 0-3)
+BOOTLOADER_SIZE     = 0x2000        # 8KB (pages 0-3).
+                                    # NOTE: the bootloader currently uses ~1.7 KB
+                                    # so this can be shrunk to 0x1000 (4 KB) to
+                                    # reclaim 4 KB for the app. If you do, keep
+                                    # this in lockstep with BOOT_FLASH_SIZE /
+                                    # BOOT_APP_ADDRESS in boot_defs.h and the
+                                    # APP_ROM start address in Kwh373Meter.icf.
 APP_START           = FLASH_BASE + BOOTLOADER_SIZE  # 0x08002000
 APP_END             = 0x0801F000    # exclusive — page 62 (FOTA) and 63 (cal) excluded
 FOTA_CHUNK_SIZE     = 200
@@ -40,7 +46,15 @@ FOTA_SECRET_KEY     = 0x4A7B
 FOTA_SEED_MIXER     = 0x9E37
 FOTA_PRNG_MUL       = 25173
 FOTA_PRNG_INC       = 13849
-FOTA_MAX_FW_SIZE    = 96 * 1024     # EEPROM staging capacity
+FOTA_MAX_FW_SIZE    = 96 * 1024     # EEPROM staging capacity (0x8000-0x20000).
+                                    # NOTE: if a future firmware exceeds 96 KB we
+                                    # can extend the staging window by reclaiming
+                                    # free EEPROM at the lower end (0x0000-0x7FFF
+                                    # currently holds runtime config/logs — audit
+                                    # usage and lower FOTA_STAGING_START to grow
+                                    # this). The flash app region is 116 KB
+                                    # (0x08002000-0x0801EFFF) so flash is not the
+                                    # bottleneck — EEPROM staging is.
 
 
 # ---------------------------------------------------------------------------
