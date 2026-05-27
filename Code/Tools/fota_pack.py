@@ -186,7 +186,10 @@ def parse_version(version_str):
             "(e.g. 2.16), got '%s'" % version_str)
     major = int(m.group(1))
     minor = int(m.group(2))
-    return major * 100 + minor
+    ver = major * 100 + minor
+    if ver == 0:
+        raise ValueError("Version 0.00 is not allowed")
+    return ver
 
 
 # ---------------------------------------------------------------------------

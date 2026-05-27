@@ -973,6 +973,7 @@ struct TestingStatus
 //
 #define FOTA_STATUS_IDLE     0
 #define FOTA_STATUS_READY    1
+#define FOTA_STATUS_ERROR    127
 
 struct FotaState
 {

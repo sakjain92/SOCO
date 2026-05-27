@@ -1349,7 +1349,7 @@ void ModBusCommunication(void)
                           g_fota.runningCrc != g_fota.expectedCrc ||
                           g_fota.version == 0)
                       {
-                          memset(&g_fota, 0, sizeof(g_fota));
+                          g_fota.status = FOTA_STATUS_ERROR;
                           Fun_Received |= 0x80;
                           Mod_TransmitFrame.Data_Array[0] = 0x04;
                           SendData_UART((uint8_t)CopySetPara[PARA_DEVICE_ID],
@@ -1765,7 +1765,7 @@ void ModBusCommunication(void)
                     if (g_fota.totalRecords == 0 ||
                         g_fota.totalRecords > FOTA_MAX_CHUNKS)
                     {
-                        memset(&g_fota, 0, sizeof(g_fota));
+                        g_fota.status = FOTA_STATUS_ERROR;
                         Fun_Received |= 0x80;
                         Mod_TransmitFrame.Data_Array[0] = 0x02;
                         SendData_UART((uint8_t)CopySetPara[PARA_DEVICE_ID],
