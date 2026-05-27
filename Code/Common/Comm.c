@@ -1728,19 +1728,49 @@ void ModBusCommunication(void)
                 uint16_t recordNo = ((uint16_t)RecieveArray[6] << 8) | RecieveArray[7];
                 uint16_t recLen   = ((uint16_t)RecieveArray[8] << 8) | RecieveArray[9];
 
-                // Some hardcoded values defined in FOTA flowchart
-                // Also, we need records to arrive sequentially
+                // Records must arrive sequentially (recordNo ==
+                // chunksReceived), with one explicit exception:
                 //
+                // On real RS-485 links, a request frame can be committed
+                // by the slave while the response frame is lost in
+                // transit (master sees timeout). The host then retries
+                // the same chunk, sees recordNo < chunksReceived, and
+                // the slave would otherwise reject with IllegalAddress
+                // and abort the entire FOTA. We accept
+                // `recordNo == chunksReceived - 1` as a re-ack of the
+                // most recently committed chunk: echo the response
+                // again without touching CRC, PRNG, EEPROM, or counters.
+                // The end-to-end CRC check at upgrade trigger (case
+                // 0x10, value=2) is still the single source of truth —
+                // if the host resends different bytes than were
+                // committed, the mismatch surfaces there and the FOTA
+                // is rejected before the bootloader ever runs.
+                //
+                uint8_t is_re_ack = (g_fota.chunksReceived > 0) &&
+                                    (recordNo == g_fota.chunksReceived - 1);
+
                 if (refType != 0x06 || fileNo != 1 || recLen != 100 ||
                     dataLen != 207 || g_fota.status != FOTA_STATUS_READY ||
                     recordNo >= FOTA_MAX_CHUNKS ||
-                    recordNo != g_fota.chunksReceived ||
+                    (recordNo != g_fota.chunksReceived && !is_re_ack) ||
                     (recordNo > 0 && recordNo >= g_fota.totalRecords))
                 {
                     Fun_Received |= 0x80;
                     Mod_TransmitFrame.Data_Array[0] = 0x02;
                     SendData_UART((uint8_t)CopySetPara[PARA_DEVICE_ID], Fun_Received, 1);
                     Fun_Received &=~ 0x80;
+                    break;
+                }
+
+                if (is_re_ack)
+                {
+                    // Lost-response retry. Echo the request as the ack
+                    // and skip all side effects — the chunk was
+                    // committed when first received.
+                    uint8_t echoLen = ReceiveLength - 4;
+                    memcpy(Mod_TransmitFrame.Data_Array, &RecieveArray[2], echoLen);
+                    SendData_UART((uint8_t)CopySetPara[PARA_DEVICE_ID],
+                                  Fun_Received, echoLen);
                     break;
                 }
 
