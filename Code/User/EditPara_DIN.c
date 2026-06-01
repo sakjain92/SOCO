@@ -379,15 +379,14 @@ void UpdateEditSettings(void)
    if(k==1)
    {
       RESET_WATCH_DOG;
-      //__disable_interrupt();
-      //__no_operation();
-      SaveOldData();
-      //SaveTripData();
+      // SaveOldData() was previously called here on every settings change.
+      // It was required in other metering code as we had CT Ratio settings there
+      // which if changed required energy reset. For SOCO, we don't need it.
+      //
       DisplaySetup.DisplayScanPage=0;
       DisplaySetup.DisplayScrollStatus=0;
       EepromWrite(SCROLL_LOCK_LOC,2,EXT_EEPROM,(uint8_t *)&DisplaySetup.DisplayScrollStatus );
       DisplayDisabled();
-      // __enable_interrupt();
       ParaSettingUpdate();
     }
 #else
