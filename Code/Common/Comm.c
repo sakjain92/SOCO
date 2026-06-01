@@ -1072,9 +1072,12 @@ void ModBusCommunication(void)
    
    if((Timer.End_Frame)&&(!Timer.ParityError))
    {
-     if ((ReceiveLength < 4) || (ReceiveLength > MAX_BYTE_TO_RECIEVE))
+     if ((ReceiveLength < 8) || (ReceiveLength > MAX_BYTE_TO_RECIEVE))
      {
        // Drop invalid frames to avoid buffer overruns and spurious faults
+       // Every supported PDU (0x01/0x02/0x03/0x05/0x10/0x15) is >= 8 bytes
+       // (addr + func + 4 field bytes + 2 CRC), so a shorter frame can only
+       // be malformed and would otherwise be parsed from stale buffer bytes.
        Timer.End_Frame = 0;
        Timer.ParityError = 0;
        ReceiveLength = 0;
@@ -1160,6 +1163,18 @@ void ModBusCommunication(void)
 
              if(Timer.DoubleData==1)
              {
+               // 8 bytes per register + 1 length byte must fit the TX buffer.
+               // The live path uses 4 bytes/reg (58*4=232<250); this guards
+               // the 8-byte path in case DoubleData is ever re-enabled.
+               //
+               if ((uint16_t)(NoOfBytes*8 + 1) > sizeof(Mod_TransmitFrame.Data_Array))
+               {
+                 Fun_Received |= 0x80;
+                 Mod_TransmitFrame.Data_Array[0] = 0x03;
+                 SendData_UART((uint8_t)CopySetPara[PARA_DEVICE_ID], Fun_Received,1);
+                 Fun_Received &=~ 0x80;
+                 break;
+               }
                for(uint8_t d=0; d<NoOfBytes; d++)
                 {
                   DataLengthRegister = BlockAll[ArrayIndex+d].DataType;
@@ -1223,6 +1238,20 @@ void ModBusCommunication(void)
                }
                else
                {
+                  // 4 bytes per register + 1 length byte must fit the TX buffer.
+                  // NoOfBytes is already bounded by the section size (AvailableByte)
+                  // above; this guards against a future ModbusTableSection growing
+                  // past ~62 entries, which would overrun Data_Array and the 8-bit
+                  // byte-count/length field.
+                  //
+                  if ((uint16_t)(NoOfBytes*4 + 1) > sizeof(Mod_TransmitFrame.Data_Array))
+                  {
+                    Fun_Received |= 0x80;
+                    Mod_TransmitFrame.Data_Array[0] = 0x03;
+                    SendData_UART((uint8_t)CopySetPara[PARA_DEVICE_ID], Fun_Received,1);
+                    Fun_Received &=~ 0x80;
+                    break;
+                  }
                   for(uint8_t d=0; d<NoOfBytes; d++)
                   {
                     DataLengthRegister = BlockAll[ArrayIndex+d].DataType;
@@ -1321,10 +1350,120 @@ void ModBusCommunication(void)
                   SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received,4);
                   break;
               }
+              else if (Start_Add == 45000 && NoOfBytes == 2)
+              {
+                  // Dedicated "Reset Energy" command (customer-facing
+                  // address 45001, 1-based). Writing magic value 1 archives
+                  // the current totals to OLD_DATA_LOC and zeros all
+                  // Wh/VAh/VArh/RunHour/LoadHour/Interruption counters (mains
+                  // and solar), persisting the cleared buffer to the rotating
+                  // data-save slot with a higher save-counter so it wins over
+                  // the pre-reset copies on the next boot. Any other value is
+                  // rejected with Modbus exception 0x03 (Illegal Data Value)
+                  // so a stray master write cannot wipe field totals.
+                  //
+                  // Note: address 45000 is also used by the FC=0x05 (write
+                  // single coil) restart command, but Modbus separates the
+                  // coil and holding-register address spaces, so the two
+                  // do not clash.
+                  //
+                  uint32_t value =
+                      ((uint32_t)RecieveArray[10]) +
+                      ((uint32_t)RecieveArray[9]<<8) +
+                      ((uint32_t)RecieveArray[8]<<16)+
+                      ((uint32_t)RecieveArray[7]<<24);
+
+                  if (value != 1)
+                  {
+                      Fun_Received |= 0x80;
+                      Mod_TransmitFrame.Data_Array[0] = 0x03;
+                      SendData_UART((uint8_t)CopySetPara[PARA_DEVICE_ID],
+                                    Fun_Received, 1);
+                      Fun_Received &=~ 0x80;
+                      break;
+                  }
+
+                  // Ack first so the master sees the response even if the
+                  // EEPROM writes inside SaveOldData() take longer than the
+                  // master's reply timeout.
+                  memcpy(Mod_TransmitFrame.Data_Array, &RecieveArray[2], 4);
+                  SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received, 4);
+#ifdef MODEL_DATA_SAVE
+                  // Run the archive+wipe in a critical section. The power-fail
+                  // ISR fires PowerDownDataSave() -> EepromWrite whenever
+                  // INT_DATA_SAVING_EEPROM is clear, but SaveOldData() guards
+                  // only its internal PowerDownDataSave() - its own EepromWrites
+                  // and the buffer zeroing run exposed. Without this guard a
+                  // power-fail mid-reset could drive the I2C bus from two
+                  // contexts or persist a half-zeroed buffer. Mirrors the
+                  // Metrology overflow caller; EepromRead/Write poll and feed
+                  // the watchdog internally (I2CDriver.c).
+                  __disable_interrupt();
+                  __no_operation();
+		  RESET_WATCH_DOG;
+                  PowerDownDataSave();
+                  SaveOldData();
+                  __enable_interrupt();
+#endif
+                  break;
+              }
+              else if (Start_Add == 45002 && NoOfBytes == 2)
+              {
+                  // Dedicated "Reset All Settings to Default" command
+                  // (customer-facing address 45003, 1-based). Writing
+                  // magic value 1 restores every PARA_* to its
+                  // EditParameters[].DefaultValue, restores the keypad
+                  // password to 123, and re-applies the new comm settings
+                  // (Device ID / Baud / Parity / Stop Bit) - so this WILL
+                  // drop the active Modbus link unless the master is
+                  // already on defaults. Energy counters are NOT touched.
+                  // Any other value is rejected.
+                  //
+                  uint32_t value =
+                      ((uint32_t)RecieveArray[10]) +
+                      ((uint32_t)RecieveArray[9]<<8) +
+                      ((uint32_t)RecieveArray[8]<<16)+
+                      ((uint32_t)RecieveArray[7]<<24);
+
+                  if (value != 1)
+                  {
+                      Fun_Received |= 0x80;
+                      Mod_TransmitFrame.Data_Array[0] = 0x03;
+                      SendData_UART((uint8_t)CopySetPara[PARA_DEVICE_ID],
+                                    Fun_Received, 1);
+                      Fun_Received &=~ 0x80;
+                      break;
+                  }
+
+                  // Ack at the OLD device ID / baud / parity first; the
+                  // master will need to reconnect on defaults afterwards.
+                  memcpy(Mod_TransmitFrame.Data_Array, &RecieveArray[2], 4);
+                  SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received, 4);
+                  Delay1Msec12Mhz(20);
+                  ResetAllSettingsToDefault();
+                  break;
+              }
               else if((Start_Add >= 30000)&&(Start_Add <= 30000+(MAX_PARAM_LIMIT*2))&&(!(Start_Add %2)))
               {
                 Start_Add -= 30000;
                 //Start_Add +=2; // To remove system configuration
+
+                // Reject quantities that would run past the parameter table
+                // or past the bytes actually present in the received frame.
+                // NoOfBytes is the raw quantity field from the master and is
+                // otherwise unbounded, which would let ModbusUpdateParameter
+                // read past RecieveArray and write past ModCopySetPara.
+                //
+                if ((NoOfBytes == 0) ||
+                    (NoOfBytes/2 + Start_Add/2 > MAX_PARAM_LIMIT) ||
+                    ((uint16_t)(NoOfBytes*2 + 9) > ReceiveLength))
+                {
+                    Fun_Received |= 0x80;
+                    Mod_TransmitFrame.Data_Array[0] = 0x03;
+                    SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received, 1);
+                    Fun_Received &=~ 0x80;
+                    break;
+                }
                 ModbusUpdateParameter(Start_Add/2,NoOfBytes);
                 break;
               }

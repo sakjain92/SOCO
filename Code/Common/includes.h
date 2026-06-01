@@ -73,6 +73,7 @@ void ProcessMainInterrupt(void);
 void Metrology(void);
 void CalCtPtRatio(void);
 void SaveOldData(void);
+void ResetAllSettingsToDefault(void);
 void SetMeterParameters(void);
 void FillDefaultValue(void);
 void InterruptDisplayRefresh(void);

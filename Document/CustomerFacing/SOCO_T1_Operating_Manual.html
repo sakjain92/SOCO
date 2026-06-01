@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SOCO-T1 - Solar + Grid Controller - Operating Manual</title>
+<style>
+/* ============================================================
+   SOCO-T1 Operating Manual — editable HTML twin of the PDF.
+   Render to PDF with headless Chrome:
+     google-chrome --headless --no-pdf-header-footer \
+       --print-to-pdf=SOCO_T1_Operating_Manual.pdf SOCO_T1_Operating_Manual.html
+   Tunable sizing lives in :root below.
+   ============================================================ */
+:root{
+  --blue:#0057a7; --hdr-bg:#0057a7;
+  --alt:#eef4fb; --rule:#dfe6ee;
+  --ink:#333333; --ink2:#1a1a1a; --muted:#666666;
+  --logo:36px; --subtitle:14.5px; --metaco:12.7px; --meta:11.3px;
+  --h2:16px; --h3:13.3px; --body:11.7px; --intro:12.7px; --pill:10.7px; --foot:10px;
+}
+*{ box-sizing:border-box; }
+@page{ size:A4; margin:12mm 15mm; }
+html,body{ margin:0; padding:0; }
+body{
+  font-family:Arial,"Liberation Sans","Helvetica Neue",Helvetica,sans-serif;
+  color:var(--ink); font-size:var(--body); line-height:1.45;
+  -webkit-print-color-adjust:exact; print-color-adjust:exact;
+}
+
+/* ---- title block ---- */
+.head{ display:flex; justify-content:space-between; align-items:flex-start; }
+.head .logo{ color:var(--blue); font-size:var(--logo); font-weight:700; line-height:1.0; letter-spacing:.5px; }
+.head .subtitle{ color:#555; font-size:var(--subtitle); margin-top:7px; }
+.head .meta{ text-align:right; font-size:var(--meta); color:var(--muted); line-height:1.5; }
+.head .meta .co{ color:#222; font-weight:700; font-size:var(--metaco); }
+hr.rule{ border:0; border-top:2.2px solid var(--blue); margin:6px 0 0; }
+
+/* ---- headings ---- */
+h2{ color:var(--blue); font-size:var(--h2); font-weight:700; margin:16px 0 8px; }
+h3{ color:var(--ink2); font-size:var(--h3); font-weight:700; margin:8px 0 5px; }
+p{ margin:9px 0; }
+p.intro{ font-size:var(--intro); line-height:1.57; }
+p.body{ margin:9px 0; line-height:1.4; }
+p.cap{ margin:5px 0 3px; }
+
+/* ---- pills ---- */
+.pills{ margin:11px 0 4px; white-space:nowrap; }
+.pill{ display:inline-block; background:#eef0f2; color:#555; border:1px solid #e2e5e8;
+       border-radius:4px; padding:2.5px 8px; font-size:var(--pill); margin-right:6px; }
+
+/* ---- bullet feature / list ---- */
+ul.feat{ list-style:none; margin:8px 0; padding:0; }
+ul.feat li{ position:relative; padding-left:19px; margin:9.5px 0; line-height:1.44; }
+ul.feat li::before{ content:"\25B6"; position:absolute; left:0; top:1px; color:#e1820f; font-size:11px; }
+
+/* ---- numbered list ---- */
+ol.steps{ margin:8px 0; padding-left:18px; }
+ol.steps li{ margin:5px 0; line-height:1.4; }
+
+/* ---- tables ---- */
+table{ width:100%; border-collapse:collapse; margin:5px 0 3px; table-layout:fixed; }
+td{ text-align:left; vertical-align:top; padding:3.5px 7px; border-bottom:1px solid var(--rule);
+    line-height:1.37; word-wrap:break-word; }
+tr:nth-child(odd) td{ background:var(--alt); }
+tr.hd td{ background:var(--hdr-bg); color:#fff; font-weight:700; border-bottom:0; }
+/* fixed column proportions, matching the source PDF */
+tr td:first-child{ width:40%; }                  /* default 2-col (Quick Spec, Modbus) */
+tr.c30 td:first-child{ width:30%; }
+tr.c22 td:first-child{ width:22%; }
+tr.c34 td:first-child{ width:34%; }
+tr.c18 td:first-child{ width:18%; }
+tr.c14 td:first-child{ width:14%; }
+tr.crelay td:first-child{ width:14%; } tr.crelay td:nth-child(2){ width:42%; }
+tr.cbtn td:first-child{ width:22%; } tr.cbtn td:nth-child(2){ width:39%; }
+tr.cv td:first-child{ width:58%; } tr.cv td:nth-child(2){ width:18%; } tr.cv td:nth-child(3){ width:14%; }
+tr.ccomm td:first-child{ width:48%; } tr.ccomm td:nth-child(2){ width:34%; }
+tr.ctrouble td:first-child{ width:32%; } tr.ctrouble td:nth-child(2){ width:30%; }
+tr.cmaint td:first-child{ width:24%; } tr.cmaint td:nth-child(2){ width:18%; }
+em,.it{ font-style:italic; }
+
+/* ---- callout boxes ---- */
+.note,.warn,.caution,.tip{ padding:5px 11px; margin:6px 0; line-height:1.35; font-size:11.3px; }
+.note{ background:#f6f9fc; border-left:3px solid #b9c6d6; color:#555; }
+.note b{ color:#444; }
+.warn{ background:#fdf2f2; border-left:3px solid #c0392b; color:#4a1a1a; }
+.warn b{ color:#c0392b; }
+.caution{ background:#fff8e8; border-left:3px solid #f59e0b; color:#5a3a0c; }
+.caution b{ color:#b45309; }
+.tip{ background:#f0f8f1; border-left:3px solid #2f855a; color:#234d3a; }
+.tip b{ color:#2f855a; }
+
+/* ---- key chip (monospace) ---- */
+.key{ display:inline-block; font-family:"Liberation Mono","Courier New",monospace;
+      font-size:10.3px; background:#f3f3f3; border:1px solid #dddddd; border-radius:3px;
+      padding:0 4px; color:#212121; }
+
+/* ---- LED colour dot ---- */
+.dot{ display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:8px;
+      vertical-align:baseline; position:relative; top:1px; }
+
+/* ---- footer ---- */
+.foot{ display:flex; justify-content:space-between; color:#878787; font-size:var(--foot); margin-top:24px; }
+
+.pagebreak{ break-before:page; margin-top:0; }
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div>
+    <div class="logo">SOCO-T1</div>
+    <div class="subtitle">Solar + Grid Controller — Operating Manual</div>
+  </div>
+  <div class="meta">
+    <div class="co">MRM Procom Pvt. Ltd.</div>
+    <div>Series: SOCO | Model: SOCO-T1</div>
+    <div>Firmware v2.15 | Document v0.1</div>
+    <div>2026-04-01</div>
+  </div>
+</div>
+<hr class="rule">
+
+<h2>1. Introduction</h2>
+<p class="intro">SOCO-T1 is a three-phase <b>Solar + Grid Automatic Changeover</b> controller. It continuously and independently measures both a mains grid source and a solar source, drives external contactors to switch the load between the two sources based on user-configured voltage thresholds and time delays, and exposes all measured data over an isolated Modbus RTU (RS-485) link.</p>
+<p class="intro">This manual describes installation, day-to-day operation, parameter configuration, and basic troubleshooting. For full electrical and environmental specifications, refer to the <b>SOCO-T1 Product Datasheet</b>. For the complete Modbus register list, refer to the <b>SOCO Modbus Register Map</b>.</p>
+<div class="pills">
+  <span class="pill">Telecom tower panels</span>
+  <span class="pill">Solar-grid hybrid systems</span>
+  <span class="pill">Automatic source changeover</span>
+  <span class="pill">Industrial power management</span>
+</div>
+
+<h2>2. Safety</h2>
+<div class="warn"><b>WARNING — Hazardous Voltage.</b> Voltage measurement inputs and the AC auxiliary input connect directly to mains potential. Installation and servicing must be performed only by qualified electrical personnel after isolating all sources.</div>
+<div class="caution"><b>CAUTION.</b> Always de-energise both the grid and solar sources before opening the panel or working on terminals. Verify with a multimeter that no live voltage is present at the controller terminals.</div>
+<div class="caution"><b>CAUTION.</b> Do not exceed the rated voltage (300 V L-N), CT secondary current, or relay contact ratings. Exceeding these limits will damage the controller and void the warranty.</div>
+
+<h2>3. Quick Specifications</h2>
+<table>
+  <tr class="hd"><td>Parameter</td><td>Specification</td></tr>
+  <tr><td>Sources monitored</td><td>Grid + Solar (independent), 3-phase 4-wire each</td></tr>
+  <tr><td>Voltage range (L-N)</td><td>80 – 300 V AC</td></tr>
+  <tr><td>Frequency</td><td>45 – 65 Hz</td></tr>
+  <tr><td>Current input</td><td>External CT, 0.4 – 100 A primary</td></tr>
+  <tr><td>Auxiliary supply</td><td>40 – 60 V DC and/or 100 – 300 V AC</td></tr>
+  <tr><td>Power consumption</td><td>&lt; 5 VA</td></tr>
+  <tr><td>Relay outputs</td><td>6 (SPDT, voltage-free, 8 A @ 250 V AC)</td></tr>
+  <tr><td>Digital inputs</td><td>8 (potential-free, isolated)</td></tr>
+  <tr><td>Communication</td><td>Modbus RTU over isolated RS-485</td></tr>
+  <tr><td>Display</td><td>6-digit alphanumeric LED</td></tr>
+  <tr><td>Buttons</td><td>INC, DEC, ENT</td></tr>
+  <tr><td>Status LEDs</td><td>8</td></tr>
+  <tr><td>Operating temperature</td><td>−20 °C to +70 °C</td></tr>
+</table>
+<div class="note"><b>Note:</b> For full specifications including accuracy classes, EMC, and environmental ratings, refer to the SOCO-T1 Product Datasheet.</div>
+
+<h2 class="pagebreak">4. Terminal Connections</h2>
+<p class="body">Connect each group of terminals exactly as labelled on the device. Tighten all screw terminals to the recommended torque. Refer to the SOCO-T1 Product Datasheet for pin-numbered terminal lists.</p>
+
+<h3>4.1 Auxiliary Power Supply</h3>
+<table>
+  <tr class="hd c30"><td>Terminal</td><td>Description</td></tr>
+  <tr><td>48VDC +</td><td>DC positive input (40 – 60 V DC)</td></tr>
+  <tr><td>48VDC −</td><td>DC negative input (reverse-polarity protected)</td></tr>
+  <tr><td>AC L</td><td>AC line input (100 – 300 V AC)</td></tr>
+  <tr><td>AC N</td><td>AC neutral input</td></tr>
+  <tr><td>EARTH</td><td>Protective earth</td></tr>
+</table>
+<div class="note"><b>Note:</b> Either DC or AC supply, or both, may be connected simultaneously.</div>
+
+<h3>4.2 Voltage Measurement Inputs</h3>
+<table>
+  <tr class="hd c30"><td>Source</td><td>Terminals</td></tr>
+  <tr><td>Grid (Mains)</td><td>R, Y, B, N (Grid voltage block)</td></tr>
+  <tr><td>Solar</td><td>R, Y, B, N (Solar voltage block)</td></tr>
+</table>
+
+<h3>4.3 Current Inputs (via external CT)</h3>
+<table>
+  <tr class="hd c30"><td>Source</td><td>Terminals</td></tr>
+  <tr><td>Grid (Mains)</td><td>R, Y, B, COM (Grid current block)</td></tr>
+  <tr><td>Solar</td><td>R, Y, B, COM (Solar current block)</td></tr>
+</table>
+<div class="caution"><b>CAUTION.</b> Observe CT polarity (P1/P2 or dot mark) so that active power reads positive when the load is drawing energy from the source. A reversed CT will report negative power and reversed energy direction.</div>
+
+<h3>4.4 Relay Outputs (6 × SPDT, voltage-free)</h3>
+<p class="body">Drive the contactor coils with an external supply through the SOCO-T1 relay contacts. Each output has three terminals: COM, NO, NC.</p>
+<table>
+  <tr class="hd crelay"><td>Output</td><td>Function</td><td>Contact in Default State</td></tr>
+  <tr><td>Output 1</td><td>Drives Grid R-phase contactor coil</td><td>NC closed (contactor energised when Grid R is healthy)</td></tr>
+  <tr><td>Output 2</td><td>Drives Grid Y-phase contactor coil</td><td>NC closed</td></tr>
+  <tr><td>Output 3</td><td>Drives Grid B-phase contactor coil</td><td>NC closed</td></tr>
+  <tr><td>Output 4</td><td>Drives Load-on-Solar contactor coil</td><td>NO open (energises only when load is on solar)</td></tr>
+  <tr><td>Output 5</td><td>Drives Load-on-Grid contactor coil</td><td>NC closed</td></tr>
+  <tr><td>Output 6</td><td>Panel fan control</td><td>NC closed (fan ON by default)</td></tr>
+</table>
+<div class="note"><b>Note:</b> The fail-safe wiring of Output 1/2/3 and Output 5 on the Normally-Closed contact ensures the load remains connected to grid even if the SOCO-T1 controller loses power.</div>
+
+<h3>4.5 Digital Inputs (8, potential-free, isolated)</h3>
+<table>
+  <tr class="hd c14"><td>Input</td><td>Assignment</td></tr>
+  <tr><td>DIN 1</td><td>Grid R-phase contactor (Output 1) feedback</td></tr>
+  <tr><td>DIN 2</td><td>Grid Y-phase contactor (Output 2) feedback</td></tr>
+  <tr><td>DIN 3</td><td>Grid B-phase contactor (Output 3) feedback</td></tr>
+  <tr><td>DIN 4</td><td>Load-on-Solar contactor (Output 4) feedback</td></tr>
+  <tr><td>DIN 5</td><td>Load-on-Grid contactor (Output 5) feedback</td></tr>
+  <tr><td>DIN 6</td><td>Solar Neutral-Earth contactor feedback</td></tr>
+  <tr><td>DIN 7</td><td>DG (Diesel Generator) Off signal</td></tr>
+  <tr><td>DIN 8</td><td>Spare</td></tr>
+</table>
+<div class="note"><b>Note:</b> Use the dedicated DIN COM terminal as the return path for the isolated digital-input supply.</div>
+
+<h3>4.6 Fan Current Inputs</h3>
+<table>
+  <tr class="hd c30"><td>Terminal</td><td>Description</td></tr>
+  <tr><td>FAN 1</td><td>Fan 1 current sense input</td></tr>
+  <tr><td>FAN 2</td><td>Fan 2 current sense input</td></tr>
+  <tr><td>FAN COM</td><td>Common return</td></tr>
+</table>
+
+<h3>4.7 RS-485 Communication</h3>
+<table>
+  <tr class="hd c30"><td>Terminal</td><td>Description</td></tr>
+  <tr><td>RS485 +</td><td>RS-485 Data + (A) — non-inverting</td></tr>
+  <tr><td>RS485 −</td><td>RS-485 Data − (B) — inverting</td></tr>
+</table>
+<div class="tip"><b>Tip:</b> Use shielded twisted-pair cable. Terminate the bus with a 120 Ω resistor at the far end if SOCO-T1 is at the end of the line.</div>
+
+<h2>5. Operation</h2>
+<h3>5.1 Power-Up</h3>
+<p class="body">On applying auxiliary power, the LED display briefly shows the firmware version, then begins cycling through measured parameters. The controller starts in Auto mode using the configured voltage thresholds and time delays.</p>
+
+<h3>5.2 Normal Display</h3>
+<p class="body">The 6-digit LED display cycles through measured parameters automatically (or manually with the INC / DEC buttons). The pages shown include, for both Grid and Solar sources:</p>
+<ul class="feat">
+  <li>Phase voltages (Vr, Vy, Vb)</li>
+  <li>Phase currents (Ir, Iy, Ib)</li>
+  <li>Active, Reactive, Apparent power (per phase and total)</li>
+  <li>Power factor (per phase and total)</li>
+  <li>Frequency (per phase)</li>
+  <li>Energy import/export totals</li>
+  <li>Ambient temperature, Fan 1 / Fan 2 currents</li>
+</ul>
+
+<h3>5.3 Buttons</h3>
+<table>
+  <tr class="hd cbtn"><td>Key</td><td>Normal Mode</td><td>Edit Mode</td></tr>
+  <tr><td><span class="key">INC</span></td><td>Scroll forward through display pages</td><td>Increment value</td></tr>
+  <tr><td><span class="key">DEC</span></td><td>Scroll backward through display pages</td><td>Decrement value</td></tr>
+  <tr><td><span class="key">ENT</span></td><td>(idle)</td><td>Move to next parameter / accept value</td></tr>
+  <tr><td><span class="key">INC</span> + <span class="key">DEC</span> (long-press ≈ 2.5 s)</td><td>Enter Edit mode for parameter configuration</td><td></td></tr>
+</table>
+
+<h3>5.4 Entering Edit Mode</h3>
+<ol class="steps">
+  <li>Press and hold <span class="key">INC</span> + <span class="key">DEC</span> simultaneously for about 2.5 seconds.</li>
+  <li>The display shows <span class="key">PASS</span> and prompts for the password. Default password: <span class="key">123</span> .</li>
+  <li>Enter the password using <span class="key">INC</span> / <span class="key">DEC</span> ; confirm with <span class="key">ENT</span> .</li>
+  <li>The first editable parameter is shown. Use <span class="key">INC</span> / <span class="key">DEC</span> to change the value, then <span class="key">ENT</span> to save and advance.</li>
+  <li>After the last parameter, the controller returns to Normal mode automatically.</li>
+</ol>
+<div class="caution"><b>CAUTION.</b> The password can be changed in Edit mode. Record any new password — there is no front-panel recovery procedure; a forgotten password requires factory intervention.</div>
+
+<h2 class="pagebreak">6. Status LEDs</h2>
+<p class="body">Eight status LEDs on the front panel indicate which source is selected on the display, source health, the active load source, and communication activity.</p>
+<table>
+  <tr class="hd c18"><td>LED</td><td>Indication</td></tr>
+  <tr><td><span class="dot" style="background:#d63b3b"></span>R</td><td>R-phase indicator (lit when displayed value relates to R phase)</td></tr>
+  <tr><td><span class="dot" style="background:#2f855a"></span>Y</td><td>Y-phase indicator</td></tr>
+  <tr><td><span class="dot" style="background:#2c5fad"></span>B</td><td>B-phase indicator</td></tr>
+  <tr><td><span class="dot" style="background:#ff8c00"></span>Grid</td><td>Currently displayed value belongs to the Grid source / Grid source is monitored</td></tr>
+  <tr><td><span class="dot" style="background:#ffd400"></span>Solar</td><td>Currently displayed value belongs to the Solar source / Solar source is monitored</td></tr>
+  <tr><td><span class="dot" style="background:#ff8c00"></span>G Load</td><td>Load is connected to Grid</td></tr>
+  <tr><td><span class="dot" style="background:#06b6d4"></span>S Load</td><td>Load is connected to Solar</td></tr>
+  <tr><td><span class="dot" style="background:#0057a8"></span>Comm</td><td>RS-485 communication active (flashes on Modbus traffic)</td></tr>
+</table>
+<div class="note"><b>Note:</b> When all three R/Y/B LEDs are lit together with the Grid or Solar LED, the displayed value is a total / sum across all three phases for that source.</div>
+
+<h2>7. Programmable Parameters</h2>
+<p class="body">All parameters below can be edited from the front panel (Section 5.4) or remotely over Modbus.</p>
+
+<h3>7.1 Grid (Mains) Voltage Protection</h3>
+<table>
+  <tr class="hd cv"><td>Parameter</td><td>Range</td><td>Default</td><td>Unit</td></tr>
+  <tr><td>Mains Under-Voltage Trip</td><td>100 – 300</td><td>180</td><td>V</td></tr>
+  <tr><td>Mains Over-Voltage Trip</td><td>100 – 300</td><td>270</td><td>V</td></tr>
+  <tr><td>Mains Under-Voltage Reset</td><td>100 – 300</td><td>200</td><td>V</td></tr>
+  <tr><td>Mains Over-Voltage Reset</td><td>100 – 300</td><td>250</td><td>V</td></tr>
+  <tr><td>Mains Fail Delay</td><td>1 – 999</td><td>5</td><td>s</td></tr>
+  <tr><td>Mains Return Delay</td><td>1 – 999</td><td>5</td><td>s</td></tr>
+</table>
+
+<h3>7.2 Solar Voltage Protection</h3>
+<table>
+  <tr class="hd cv"><td>Parameter</td><td>Range</td><td>Default</td><td>Unit</td></tr>
+  <tr><td>Solar Under-Voltage Trip</td><td>100 – 300</td><td>160</td><td>V</td></tr>
+  <tr><td>Solar Over-Voltage Trip</td><td>100 – 300</td><td>270</td><td>V</td></tr>
+  <tr><td>Solar Under-Voltage Reset</td><td>100 – 300</td><td>180</td><td>V</td></tr>
+  <tr><td>Solar Over-Voltage Reset</td><td>100 – 300</td><td>250</td><td>V</td></tr>
+  <tr><td>Solar Fail Delay</td><td>1 – 999</td><td>5</td><td>s</td></tr>
+  <tr><td>Solar Return Delay</td><td>1 – 999</td><td>120</td><td>s</td></tr>
+</table>
+
+<h3>7.3 Fan &amp; Temperature</h3>
+<table>
+  <tr class="hd cv"><td>Parameter</td><td>Range</td><td>Default</td><td>Unit</td></tr>
+  <tr><td>Fan Under-Current</td><td>10 – 400</td><td>50</td><td>mA</td></tr>
+  <tr><td>Fan Over-Current</td><td>10 – 400</td><td>200</td><td>mA</td></tr>
+  <tr><td>Over-Temperature Trip (fan ON)</td><td>0 – 99</td><td>40</td><td>°C</td></tr>
+  <tr><td>Under-Temperature Reset (fan OFF)</td><td>0 – 99</td><td>30</td><td>°C</td></tr>
+  <tr><td>Over-Temperature Delay</td><td>1 – 999</td><td>10</td><td>s</td></tr>
+  <tr><td>Under-Temperature Delay</td><td>1 – 999</td><td>10</td><td>s</td></tr>
+  <tr><td>Fan Disabled</td><td>OFF / ON</td><td>OFF</td><td>—</td></tr>
+</table>
+
+<h3>7.4 Communication &amp; Other</h3>
+<table>
+  <tr class="hd ccomm"><td>Parameter</td><td>Range</td><td>Default</td></tr>
+  <tr><td>DG Detect Disabled</td><td>OFF / ON</td><td>OFF</td></tr>
+  <tr><td>Modbus Device ID</td><td>1 – 247</td><td>1</td></tr>
+  <tr><td>Baud Rate</td><td>1200 / 2400 / 4800 / 9600 / 19200</td><td>9600</td></tr>
+  <tr><td>Parity</td><td>None / Even / Odd</td><td>None</td></tr>
+  <tr><td>Stop Bits</td><td>1 / 2</td><td>1</td></tr>
+  <tr><td>Byte Order (Endian)</td><td>Big / Little</td><td>Big</td></tr>
+</table>
+
+<h2>8. Switchover Logic</h2>
+<p class="body">SOCO-T1 continuously evaluates the health of both sources and transfers the load using the rules below.</p>
+
+<h3>8.1 Health Definition</h3>
+<table>
+  <tr class="hd c22"><td>State</td><td>Condition</td></tr>
+  <tr><td>Healthy</td><td>All three phase voltages are between the Under-Voltage <em>Reset</em> and Over-Voltage <em>Reset</em> thresholds.</td></tr>
+  <tr><td>Failed</td><td>Any phase voltage falls outside the Under-Voltage <em>Trip</em> or Over-Voltage <em>Trip</em> thresholds for longer than the Fail Delay.</td></tr>
+</table>
+
+<h3>8.2 Switchover Rules</h3>
+<table>
+  <tr class="hd c34"><td>Event</td><td>Action</td></tr>
+  <tr><td>Grid healthy</td><td>Load is fed from Grid (Output 5 energised; Output 1/2/3 closed for grid path).</td></tr>
+  <tr><td>Grid fails — Solar healthy</td><td>After <em>Mains Fail Delay</em>, controller transfers load to Solar (Output 4 energised).</td></tr>
+  <tr><td>Grid recovers (after a Grid fail)</td><td>After <em>Mains Return Delay</em>, controller transfers load back to Grid.</td></tr>
+  <tr><td>Solar fails while on Solar</td><td>After <em>Solar Fail Delay</em>, controller transfers load back to Grid (if Grid is healthy).</td></tr>
+  <tr><td>Solar recovers</td><td>After <em>Solar Return Delay</em> (default 120 s) — intentionally longer to ensure stable solar generation.</td></tr>
+</table>
+<div class="note"><b>Note:</b> A short break-before-make safety gap is enforced on every transfer to prevent paralleling of the two sources.</div>
+
+<h2>9. Modbus RTU Interface</h2>
+<h3>9.1 Default Settings</h3>
+<table>
+  <tr class="hd"><td>Setting</td><td>Default</td></tr>
+  <tr><td>Slave Address</td><td>1</td></tr>
+  <tr><td>Baud Rate</td><td>9600 bps</td></tr>
+  <tr><td>Parity</td><td>None</td></tr>
+  <tr><td>Stop Bits</td><td>1</td></tr>
+  <tr><td>Byte Order</td><td>Big-endian</td></tr>
+</table>
+
+<h3>9.2 Supported Function Codes</h3>
+<table>
+  <tr class="hd c18"><td>Code</td><td>Function</td></tr>
+  <tr><td>0x03</td><td>Read Holding Registers</td></tr>
+  <tr><td>0x04</td><td>Read Input Registers</td></tr>
+  <tr><td>0x06</td><td>Write Single Register</td></tr>
+  <tr><td>0x10</td><td>Write Multiple Registers</td></tr>
+</table>
+<div class="note"><b>Note:</b> The complete register list with addresses, data types, scaling, and units is provided in the separate document SOCO Modbus Register Map.</div>
+
+<h2>10. Troubleshooting</h2>
+<table>
+  <tr class="hd ctrouble"><td>Symptom</td><td>Probable Cause</td><td>Action</td></tr>
+  <tr><td>Display blank</td><td>Auxiliary supply absent</td><td>Verify 48 V DC or AC supply at the auxiliary terminals.</td></tr>
+  <tr><td>Display shows Err or all dashes</td><td>Internal self-test failure</td><td>Power-cycle the unit. If the error persists, contact support.</td></tr>
+  <tr><td>Voltage reads zero on a phase</td><td>Input fuse blown / wiring fault / loose terminal</td><td>Verify input wiring and fuses; measure voltage at terminal.</td></tr>
+  <tr><td>Power factor sign reversed</td><td>CT polarity swapped on that phase</td><td>Reverse the CT primary direction or swap the secondary leads.</td></tr>
+  <tr><td>Load does not transfer to Solar after grid loss</td><td>Solar source not healthy / Solar Fail Delay not elapsed / contactor stuck</td><td>Check Solar LED, verify solar voltage on display, check Output 4 feedback (DIN 4).</td></tr>
+  <tr><td>Comm LED never flashes</td><td>RS-485 wiring / wrong slave ID / wrong baud rate</td><td>Verify D+/D− not swapped; confirm SOCO-T1 and master use the same baud, parity, stop bits, slave ID.</td></tr>
+  <tr><td>Contactor "Stuck" alarm</td><td>Command and feedback mismatch for &gt; 5 s</td><td>Check contactor coil drive, auxiliary contact wiring, and DIN feedback.</td></tr>
+  <tr><td>Fan does not start at high temperature</td><td>Fan Disabled = ON, or temperature below trip</td><td>Verify Fan Disabled is OFF and Over-Temperature setpoint is reached.</td></tr>
+  <tr><td>Fan over/under-current alarm</td><td>Fan failed, or fan current outside configured limits</td><td>Inspect fan; adjust Fan Under/Over-Current limits if a different fan is fitted.</td></tr>
+</table>
+
+<h2>11. Maintenance</h2>
+<table>
+  <tr class="hd cmaint"><td>Activity</td><td>Interval</td><td>Action</td></tr>
+  <tr><td>Visual inspection</td><td>Every 6 months</td><td>Check terminals for tightness, signs of overheating, dust accumulation. Clean the panel interior with a dry brush or vacuum.</td></tr>
+  <tr><td>Functional check</td><td>Annually</td><td>Manually open the grid breaker to verify automatic transfer to solar; restore grid and verify automatic transfer back.</td></tr>
+  <tr><td>Calibration</td><td>Not required</td><td>Factory calibrated. No field calibration required during normal service life.</td></tr>
+  <tr><td>Storage</td><td>—</td><td>−20 °C to +70 °C, &lt; 95 % RH non-condensing.</td></tr>
+</table>
+<div class="note"><b>Note:</b> The SOCO-T1 controller has no user-replaceable parts inside. Contact MRM Procom for any service requirement.</div>
+
+<h2>12. Support</h2>
+<table>
+  <tr class="hd c30"><td>Item</td><td>Detail</td></tr>
+  <tr><td>Manufacturer</td><td>MRM Procom Pvt. Ltd.</td></tr>
+  <tr><td>Support contact</td><td>[to be filled by manufacturer]</td></tr>
+</table>
+<p class="body">When contacting support, please have the following ready:</p>
+<ul class="feat">
+  <li>Firmware version (shown briefly at power-up)</li>
+  <li>Serial number (label on the rear of the unit)</li>
+  <li>Modbus device ID and baud rate setting</li>
+  <li>A description of the symptom and the LED indications observed</li>
+</ul>
+
+<div class="foot"><span>SOCO-T1 Operating Manual — Document v0.1 — MRM Procom Pvt. Ltd.</span><span>Firmware v2.15</span></div>
+
+</body>
+</html>

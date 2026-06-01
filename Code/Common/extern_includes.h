@@ -66,6 +66,7 @@ extern void SetVersionDisplay(void);
 extern void DisplayCheckEnd(void);
 extern void CalCtPtRatio(void);
 extern void  SaveOldData(void);
+extern void ResetAllSettingsToDefault(void);
 extern void SetMeterParameters(void);
 extern void FillDefaultValue(void);
 extern void InterruptDisplayRefresh(void);

@@ -10,7 +10,7 @@
 // 3 digit version number
 // Shown on display as X.YY
 //
-#define VERSION_NO  217
+#define VERSION_NO  219
 
 #define MODEL_COMM_PROCOM
 #define MODEL_DATA_SAVE  
@@ -605,3 +605,6 @@
 // TODO: Neutral current & Phase-to-Phase voltage needs to be checked as depends on inter-phase calibration
 // TODO: CT wire length might need to be reduced on confirmation of all Panel builders
 // TODO: Check for counterfeit temperature sensors using https://github.com/cpetrich/counterfeit_DS18B20
+
+
+// UNDONE in Firmware: a) Change default values as per Jio b) Load Not on Grid & Load Not on Solar as per Jio requirement c) Contactor chattering blocking

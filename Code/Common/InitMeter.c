@@ -25,8 +25,7 @@ void NewMeterInit(void)
       EepromWrite(i*64,64,EXT_EEPROM,LcdEpromBuffer );
       RESET_WATCH_DOG;
     } 
-    temp=123;
-    //temp=1;
+    temp=DEFAULT_METER_PASSWORD;
     EepromWrite(PASSWORD_SAV_LOC,2,EXT_EEPROM,(uint8_t *)&temp );
     FillDefaultValue();
     temp=CRCCalculation(CopySetPara,MAX_PARAM_LIMIT);
@@ -216,14 +215,14 @@ void StoredDataVerification(void)
 
 void ParaSettingUpdate(void)
 {
-  
-  uint16_t temp; 
+
+  uint16_t temp;
   RESET_WATCH_DOG;
   temp=CRCCalculation(CopySetPara,MAX_PARAM_LIMIT);
   CopySetPara[MAX_PARAM_LIMIT]=temp;
   __disable_interrupt();
   __no_operation();
-  ParaLocUpdate(PROGRAM_DATA_LOC1_START); 
+  ParaLocUpdate(PROGRAM_DATA_LOC1_START);
   ParaLocUpdate(PROGRAM_DATA_LOC2_START);
   SetMeterParameters();
   RESET_WATCH_DOG;
@@ -231,6 +230,43 @@ void ParaSettingUpdate(void)
   DisplaySetup.DisplayScanPage=0;
   DisplayScrollCounter=10;
   __enable_interrupt();
+  RESET_WATCH_DOG;
+}
+
+/*
+Inf: Customer-initiated "reset every persistent setting to factory default"
+     command, dispatched from the Modbus FC=0x10 handler at the dedicated
+     reset-settings address. Rewrites all 24 PARA_* values back to their
+     EditParameters[].DefaultValue, resets the keypad-EDIT password to the
+     factory value (123), and persists both. UART settings (Device ID, Baud
+     Rate, Parity, Stop Bit) re-apply via SetMeterParameters(): the active
+     Modbus link WILL drop unless the master was already using defaults,
+     and the master must reconnect at 9600/8N1/ID=1 to talk to the meter
+     after this command. Energy counters are NOT touched here; use the
+     dedicated reset-energy command for that.
+Inp: None
+Ret: None
+*/
+void ResetAllSettingsToDefault(void)
+{
+  uint16_t defaultPass = DEFAULT_METER_PASSWORD;
+
+  RESET_WATCH_DOG;
+  __disable_interrupt();
+  __no_operation();
+
+  // 1. Password back to factory value, both in RAM and EEPROM.
+  EepromWrite(PASSWORD_SAV_LOC, 2, EXT_EEPROM, (uint8_t *)&defaultPass);
+  MeterPassword = defaultPass;
+
+  // 2. Parameters back to factory defaults, persisted to both program-data
+  //    slots (PROGRAM_DATA_LOC1_START / PROGRAM_DATA_LOC2_START) by
+  //    ParaSettingUpdate() so a torn write to one slot still has a good
+  //    copy in the other.
+  FillDefaultValue();
+
+  __enable_interrupt();
+  ParaSettingUpdate();
   RESET_WATCH_DOG;
 }
 
