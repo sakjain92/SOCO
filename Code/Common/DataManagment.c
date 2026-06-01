@@ -107,5 +107,5 @@ void SaveTripData(void)
   EepromWrite(TRIP_DATA_LOC,sizeof(StorageBuffer),EXT_EEPROM,(uint8_t *)&StorageBuffer );
   TripData= StorageBuffer;
 }*/
-  
+
 #endif //MODEL_DATA_SAVE

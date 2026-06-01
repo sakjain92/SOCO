@@ -46,7 +46,7 @@ extern struct FotaState g_fota;
 #define InstPara_FanTemp        3
 // MAX_PARAM_LIMIT is here
 #define InstPara_FotaStatus     1
-#define InstPara_InternalTesting 11
+#define InstPara_InternalTesting 12
 
 #define DATA_TYPE_16            2
 #define DATA_TYPE_32            4
@@ -1041,6 +1041,11 @@ const struct ModBusParameter BlockAll[]=
   { (uint8_t *)&SwIncPressCounter,                         DATA_TYPE_32,     1       ,       1      },
   { (uint8_t *)&SwDecPressCounter,                         DATA_TYPE_32,     1       ,       1      },
   { (uint8_t *)&SwNextPressCounter,                        DATA_TYPE_32,     1       ,       1      },
+  // Read-only mirror of MeterPassword. Hidden from the customer-facing
+  // Modbus table; documented only in the Internal Modbus Table so service
+  // can recover the keypad EDIT password if a customer forgets it.
+  // 16-bit value (0-999); password reset to default 123 via FC=0x10 at 45003.
+  { (uint8_t *)&MeterPassword,                             DATA_TYPE_16,     1       ,       1      },
 };
 
 // DEVNOTE: Digital inputs are read using read input status

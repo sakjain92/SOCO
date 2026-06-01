@@ -42,6 +42,11 @@ define region CoeffDataLoc = mem:[from 0x0800FF00 to 0x0800FFFF];
 
 #define  PASSWORD_SAV_LOC              (POWER_DN_SAVE_PAGE+MAX_DATA_SAVE_SIZE)
 #define  SCROLL_LOCK_LOC               (PASSWORD_SAV_LOC+EEPROM_PAGE_LENGTH)
+
+// Factory default value seeded into PASSWORD_SAV_LOC at first boot and on
+// the Reset-All-Settings Modbus command. Keypad EDIT password range is
+// 0-999 (3 digits, clamped in EditPara_DIN.c:587).
+#define  DEFAULT_METER_PASSWORD        123
 #define  PRODUCT_INFO_LOC              (SCROLL_LOCK_LOC+EEPROM_PAGE_LENGTH)
 #define  PRODUCT_INFO_SIZE             EEPROM_PAGE_LENGTH
 

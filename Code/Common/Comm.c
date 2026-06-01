@@ -1350,6 +1350,99 @@ void ModBusCommunication(void)
                   SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received,4);
                   break;
               }
+              else if (Start_Add == 45000 && NoOfBytes == 2)
+              {
+                  // Dedicated "Reset Energy" command (customer-facing
+                  // address 45001, 1-based). Writing magic value 1 archives
+                  // the current totals to OLD_DATA_LOC and zeros all
+                  // Wh/VAh/VArh/RunHour/LoadHour/Interruption counters (mains
+                  // and solar), persisting the cleared buffer to the rotating
+                  // data-save slot with a higher save-counter so it wins over
+                  // the pre-reset copies on the next boot. Any other value is
+                  // rejected with Modbus exception 0x03 (Illegal Data Value)
+                  // so a stray master write cannot wipe field totals.
+                  //
+                  // Note: address 45000 is also used by the FC=0x05 (write
+                  // single coil) restart command, but Modbus separates the
+                  // coil and holding-register address spaces, so the two
+                  // do not clash.
+                  //
+                  uint32_t value =
+                      ((uint32_t)RecieveArray[10]) +
+                      ((uint32_t)RecieveArray[9]<<8) +
+                      ((uint32_t)RecieveArray[8]<<16)+
+                      ((uint32_t)RecieveArray[7]<<24);
+
+                  if (value != 1)
+                  {
+                      Fun_Received |= 0x80;
+                      Mod_TransmitFrame.Data_Array[0] = 0x03;
+                      SendData_UART((uint8_t)CopySetPara[PARA_DEVICE_ID],
+                                    Fun_Received, 1);
+                      Fun_Received &=~ 0x80;
+                      break;
+                  }
+
+                  // Ack first so the master sees the response even if the
+                  // EEPROM writes inside SaveOldData() take longer than the
+                  // master's reply timeout.
+                  memcpy(Mod_TransmitFrame.Data_Array, &RecieveArray[2], 4);
+                  SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received, 4);
+#ifdef MODEL_DATA_SAVE
+                  // Run the archive+wipe in a critical section. The power-fail
+                  // ISR fires PowerDownDataSave() -> EepromWrite whenever
+                  // INT_DATA_SAVING_EEPROM is clear, but SaveOldData() guards
+                  // only its internal PowerDownDataSave() - its own EepromWrites
+                  // and the buffer zeroing run exposed. Without this guard a
+                  // power-fail mid-reset could drive the I2C bus from two
+                  // contexts or persist a half-zeroed buffer. Mirrors the
+                  // Metrology overflow caller; EepromRead/Write poll and feed
+                  // the watchdog internally (I2CDriver.c).
+                  __disable_interrupt();
+                  __no_operation();
+		  RESET_WATCH_DOG;
+                  PowerDownDataSave();
+                  SaveOldData();
+                  __enable_interrupt();
+#endif
+                  break;
+              }
+              else if (Start_Add == 45002 && NoOfBytes == 2)
+              {
+                  // Dedicated "Reset All Settings to Default" command
+                  // (customer-facing address 45003, 1-based). Writing
+                  // magic value 1 restores every PARA_* to its
+                  // EditParameters[].DefaultValue, restores the keypad
+                  // password to 123, and re-applies the new comm settings
+                  // (Device ID / Baud / Parity / Stop Bit) - so this WILL
+                  // drop the active Modbus link unless the master is
+                  // already on defaults. Energy counters are NOT touched.
+                  // Any other value is rejected.
+                  //
+                  uint32_t value =
+                      ((uint32_t)RecieveArray[10]) +
+                      ((uint32_t)RecieveArray[9]<<8) +
+                      ((uint32_t)RecieveArray[8]<<16)+
+                      ((uint32_t)RecieveArray[7]<<24);
+
+                  if (value != 1)
+                  {
+                      Fun_Received |= 0x80;
+                      Mod_TransmitFrame.Data_Array[0] = 0x03;
+                      SendData_UART((uint8_t)CopySetPara[PARA_DEVICE_ID],
+                                    Fun_Received, 1);
+                      Fun_Received &=~ 0x80;
+                      break;
+                  }
+
+                  // Ack at the OLD device ID / baud / parity first; the
+                  // master will need to reconnect on defaults afterwards.
+                  memcpy(Mod_TransmitFrame.Data_Array, &RecieveArray[2], 4);
+                  SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received, 4);
+                  Delay1Msec12Mhz(20);
+                  ResetAllSettingsToDefault();
+                  break;
+              }
               else if((Start_Add >= 30000)&&(Start_Add <= 30000+(MAX_PARAM_LIMIT*2))&&(!(Start_Add %2)))
               {
                 Start_Add -= 30000;
