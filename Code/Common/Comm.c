@@ -1072,9 +1072,12 @@ void ModBusCommunication(void)
    
    if((Timer.End_Frame)&&(!Timer.ParityError))
    {
-     if ((ReceiveLength < 4) || (ReceiveLength > MAX_BYTE_TO_RECIEVE))
+     if ((ReceiveLength < 8) || (ReceiveLength > MAX_BYTE_TO_RECIEVE))
      {
        // Drop invalid frames to avoid buffer overruns and spurious faults
+       // Every supported PDU (0x01/0x02/0x03/0x05/0x10/0x15) is >= 8 bytes
+       // (addr + func + 4 field bytes + 2 CRC), so a shorter frame can only
+       // be malformed and would otherwise be parsed from stale buffer bytes.
        Timer.End_Frame = 0;
        Timer.ParityError = 0;
        ReceiveLength = 0;
@@ -1160,6 +1163,18 @@ void ModBusCommunication(void)
 
              if(Timer.DoubleData==1)
              {
+               // 8 bytes per register + 1 length byte must fit the TX buffer.
+               // The live path uses 4 bytes/reg (58*4=232<250); this guards
+               // the 8-byte path in case DoubleData is ever re-enabled.
+               //
+               if ((uint16_t)(NoOfBytes*8 + 1) > sizeof(Mod_TransmitFrame.Data_Array))
+               {
+                 Fun_Received |= 0x80;
+                 Mod_TransmitFrame.Data_Array[0] = 0x03;
+                 SendData_UART((uint8_t)CopySetPara[PARA_DEVICE_ID], Fun_Received,1);
+                 Fun_Received &=~ 0x80;
+                 break;
+               }
                for(uint8_t d=0; d<NoOfBytes; d++)
                 {
                   DataLengthRegister = BlockAll[ArrayIndex+d].DataType;
@@ -1223,6 +1238,20 @@ void ModBusCommunication(void)
                }
                else
                {
+                  // 4 bytes per register + 1 length byte must fit the TX buffer.
+                  // NoOfBytes is already bounded by the section size (AvailableByte)
+                  // above; this guards against a future ModbusTableSection growing
+                  // past ~62 entries, which would overrun Data_Array and the 8-bit
+                  // byte-count/length field.
+                  //
+                  if ((uint16_t)(NoOfBytes*4 + 1) > sizeof(Mod_TransmitFrame.Data_Array))
+                  {
+                    Fun_Received |= 0x80;
+                    Mod_TransmitFrame.Data_Array[0] = 0x03;
+                    SendData_UART((uint8_t)CopySetPara[PARA_DEVICE_ID], Fun_Received,1);
+                    Fun_Received &=~ 0x80;
+                    break;
+                  }
                   for(uint8_t d=0; d<NoOfBytes; d++)
                   {
                     DataLengthRegister = BlockAll[ArrayIndex+d].DataType;
@@ -1325,6 +1354,23 @@ void ModBusCommunication(void)
               {
                 Start_Add -= 30000;
                 //Start_Add +=2; // To remove system configuration
+
+                // Reject quantities that would run past the parameter table
+                // or past the bytes actually present in the received frame.
+                // NoOfBytes is the raw quantity field from the master and is
+                // otherwise unbounded, which would let ModbusUpdateParameter
+                // read past RecieveArray and write past ModCopySetPara.
+                //
+                if ((NoOfBytes == 0) ||
+                    (NoOfBytes/2 + Start_Add/2 > MAX_PARAM_LIMIT) ||
+                    ((uint16_t)(NoOfBytes*2 + 9) > ReceiveLength))
+                {
+                    Fun_Received |= 0x80;
+                    Mod_TransmitFrame.Data_Array[0] = 0x03;
+                    SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received, 1);
+                    Fun_Received &=~ 0x80;
+                    break;
+                }
                 ModbusUpdateParameter(Start_Add/2,NoOfBytes);
                 break;
               }
