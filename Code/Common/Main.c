@@ -922,9 +922,24 @@ COMPILE_ASSERT(STUCK_SECONDS > DRIVE_GAP_SECONDS);
         }
 
         // Stuck detection: command disagrees with feedback for
-        // STUCK_SECONDS -> contactor is stuck
+        // STUCK_SECONDS -> contactor is stuck.
         //
-        if (c[i].wantOn != fb)
+        // Stuck-open guard: a contactor whose phase voltage has fallen below
+        // its under-voltage trip drops out on its own, so an open feedback is
+        // then EXPECTED, not a stuck-open fault. The debounced health state
+        // lags the real voltage by the (user-set) fail-delay, so without this
+        // guard a normal sag is misread as stuck-open whenever the fail-delay
+        // exceeds STUCK_SECONDS. Gate the stuck-OPEN direction on the
+        // instantaneous phase voltage being at/above the under-voltage setting
+        // (installer sets that at/above the contactor drop-out voltage).
+        // Stuck-CLOSED needs no such guard — only a welded contact keeps a
+        // de-energized contactor in.
+        //
+        bool voltagePresent = (*c[i].voltage >= CopySetPara[c[i].underVoltParam]);
+        bool mismatch = (c[i].wantOn != fb) &&
+                        !(c[i].wantOn && !fb && !voltagePresent);
+
+        if (mismatch)
         {
             if (c[i].stuckTimer)
                 c[i].stuckTimer--;

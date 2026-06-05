@@ -607,4 +607,8 @@
 // TODO: Check for counterfeit temperature sensors using https://github.com/cpetrich/counterfeit_DS18B20
 
 
+// TODO: Bug: Fan fault clears on fan stopping. Also, fan fault doesn't stop fans
+
 // UNDONE in Firmware: a) Change default values as per Jio b) Load Not on Grid & Load Not on Solar as per Jio requirement c) Contactor chattering blocking
+// UNDONE SOCO Cost optimization: a) Reduce CT wire length b) Reduce CT turns from 2500 to 1000 (or lower) keeping class 0.5 c) Reduce number of MELF and use 1/2 MELF instead of 1W melf d) Reduce protection in Modbus section e) Don't use metallic body, use plastic body f) Reduce PCB size g) But keep mounting same for new and old SOCO for field replacement h) Don't use BVY, can just use US1M i) Optimize transformer by reducing counts and wire gauge j) Reduce protection levels in DC power supply, digital inputs etc k) Order components in advance i) Use 8kV surge rated relays from OMRON instead of 10kV j) Don't use 2 * 1 ohm melf in current section k) Simplify current and voltage section (right now, second order RC filters are being used) 
+// UNDONE Panel Cost optimization: a) Use 0.5mm control wire or 0.75mm control wire b) Use PVC wire instead of uninyvin (CT ID needs to be increased for this) c) Reduce panel size by putting SOCO & EMS on door d) Remove canopy if possible like trinity e) Remove fan & filters if possible like in trinity and make panel IP65 and also simplify the packing since the shape will be completely cuboid f) Try using plastic gland instead of metal glands for power wires if possible g) Search for PC or alternate material instead of sheet metal h) Use non-branded temperature sensors i) Get zhongbo approved for connectors
