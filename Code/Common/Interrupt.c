@@ -140,75 +140,102 @@ void ProcessMainInterrupt(void)
     if(PowerFailCounter==0)InterruptFlag |= INT_POWER_OK;
   }  
 #endif  
+  // DC offset removal is applied AFTER the gain multiply, not before.
+  // The OffsetX trickle accumulator in Metrology.c is a first-order
+  // recursive update; we want its loop gain = 1 (pole at 0, one-step
+  // convergence). If VIOffset were subtracted BEFORE the gain multiply,
+  // the post-gain sum that feeds the update would carry an extra
+  // factor of G, putting the pole at (1-G). For G > 1 (typical
+  // post-cal CT) that pole goes negative and the tracker rings
+  // sign-alternating each integration cycle, visible as a slow
+  // oscillation in the displayed RMS. Subtracting after gain makes
+  // VIOffset converge to G * delta_true instead of delta_true, which
+  // is equivalent at steady state: the downstream IntXPhase is G * s
+  // either way.
+  //
   TempInt=SdAdcDataInArray[SDADC_VR];
   TempInt=TempInt-0x1000;
-  IntVolRPhase  =(float)TempInt-VIOffset.VolRPhase;
+  IntVolRPhase  =(float)TempInt;
   IntVolRPhase *=WorkingCopyGain.VR_GAIN;
-  
+  IntVolRPhase -=VIOffset.VolRPhase;
+
   TempInt=SdAdcDataInArray[SDADC_VY];
   TempInt=TempInt-0x1000;
-  IntVolYPhase  =(float)TempInt-VIOffset.VolYPhase;
+  IntVolYPhase  =(float)TempInt;
   IntVolYPhase *=WorkingCopyGain.VY_GAIN;
-  
+  IntVolYPhase -=VIOffset.VolYPhase;
+
   TempInt=SdAdcDataInArray[SDADC_VB];
   TempInt=TempInt-0x1000;
-  IntVolBPhase  =(float)TempInt-VIOffset.VolBPhase;
+  IntVolBPhase  =(float)TempInt;
   IntVolBPhase *=WorkingCopyGain.VB_GAIN;
-   
+  IntVolBPhase -=VIOffset.VolBPhase;
+
   TempInt=SdAdcDataInArray[SDADC_IR];
   TempInt=TempInt-0x1000;
-  IntCurRPhase  =(float)TempInt-VIOffset.CurRPhase;
+  IntCurRPhase  =(float)TempInt;
   IntCurRPhase *=WorkingCopyGain.IR_GAIN;
+  IntCurRPhase -=VIOffset.CurRPhase;
 
   TempInt=SdAdcDataInArray[SDADC_IY];
   TempInt=TempInt-0x1000;
-  IntCurYPhase  =(float)TempInt-VIOffset.CurYPhase;
+  IntCurYPhase  =(float)TempInt;
   IntCurYPhase *=WorkingCopyGain.IY_GAIN;
+  IntCurYPhase -=VIOffset.CurYPhase;
 
   TempInt=SdAdcDataInArray[SDADC_IB];
   TempInt=TempInt-0x1000;
-  IntCurBPhase  =(float)TempInt-VIOffset.CurBPhase;
+  IntCurBPhase  =(float)TempInt;
   IntCurBPhase *=WorkingCopyGain.IB_GAIN;
+  IntCurBPhase -=VIOffset.CurBPhase;
 
   TempInt=SdAdcDataInArray[SDADC_VR_SOLAR];
   TempInt=TempInt-0x1000;
-  IntVolRSolarPhase  =(float)TempInt-VIOffset.VolRSolarPhase;
+  IntVolRSolarPhase  =(float)TempInt;
   IntVolRSolarPhase *=WorkingCopyGain.VR_SOLAR_GAIN;
+  IntVolRSolarPhase -=VIOffset.VolRSolarPhase;
 
   TempInt=SdAdcDataInArray[SDADC_VY_SOLAR];
   TempInt=TempInt-0x1000;
-  IntVolYSolarPhase  =(float)TempInt-VIOffset.VolYSolarPhase;
+  IntVolYSolarPhase  =(float)TempInt;
   IntVolYSolarPhase *=WorkingCopyGain.VY_SOLAR_GAIN;
+  IntVolYSolarPhase -=VIOffset.VolYSolarPhase;
 
   TempInt=SdAdcDataInArray[SDADC_VB_SOLAR];
   TempInt=TempInt-0x1000;
-  IntVolBSolarPhase  =(float)TempInt-VIOffset.VolBSolarPhase;
+  IntVolBSolarPhase  =(float)TempInt;
   IntVolBSolarPhase *=WorkingCopyGain.VB_SOLAR_GAIN;
+  IntVolBSolarPhase -=VIOffset.VolBSolarPhase;
 
   TempInt=SdAdcDataInArray[SDADC_IR_SOLAR];
   TempInt=TempInt-0x1000;
-  IntCurRSolarPhase  =(float)TempInt-VIOffset.CurRSolarPhase;
+  IntCurRSolarPhase  =(float)TempInt;
   IntCurRSolarPhase *=WorkingCopyGain.IR_SOLAR_GAIN;
+  IntCurRSolarPhase -=VIOffset.CurRSolarPhase;
 
   TempInt=SdAdcDataInArray[SDADC_IY_SOLAR];
   TempInt=TempInt-0x1000;
-  IntCurYSolarPhase  =(float)TempInt-VIOffset.CurYSolarPhase;
+  IntCurYSolarPhase  =(float)TempInt;
   IntCurYSolarPhase *=WorkingCopyGain.IY_SOLAR_GAIN;
+  IntCurYSolarPhase -=VIOffset.CurYSolarPhase;
 
   TempInt=SdAdcDataInArray[SDADC_IB_SOLAR];
   TempInt=TempInt-0x1000;
-  IntCurBSolarPhase  =(float)TempInt-VIOffset.CurBSolarPhase;
+  IntCurBSolarPhase  =(float)TempInt;
   IntCurBSolarPhase *=WorkingCopyGain.IB_SOLAR_GAIN;
+  IntCurBSolarPhase -=VIOffset.CurBSolarPhase;
 
   TempInt=AdcDataInArray[ADC_FAN_1];
   TempInt=TempInt-0x1000;
-  IntFan1Current  =(float)TempInt-VIOffset.Fan1Current;
+  IntFan1Current  =(float)TempInt;
   IntFan1Current *=WorkingCopyGain.FAN1_GAIN;
+  IntFan1Current -=VIOffset.Fan1Current;
 
   TempInt=AdcDataInArray[ADC_FAN_2];
   TempInt=TempInt-0x1000;
-  IntFan2Current  =(float)TempInt-VIOffset.Fan2Current;
+  IntFan2Current  =(float)TempInt;
   IntFan2Current *=WorkingCopyGain.FAN2_GAIN;
+  IntFan2Current -=VIOffset.Fan2Current;
 
   IntAmbientTemperature=AdcDataInArray[ADC_A_TEMP];
   IntVRefInt=AdcDataInArray[ADC_VREFINT];
