@@ -854,23 +854,53 @@ struct VoltageHealth
     bool SolarRPhaseLoss;
     bool SolarYPhaseLoss;
     bool SolarBPhaseLoss;
+    // Confirmed per-phase health (true = unhealthy), with the same fail /
+    // return delay hysteresis the contactor logic uses. Grid R/Y/B mirror
+    // the contactor health machines; solar R comes straight from the
+    // IDX_SOLAR machine, which is forced UNDER_VOLTAGE while any mains phase
+    // contactor is closed (grid back-feed ties the solar R sense to grid R).
+    // So 322 reads unhealthy throughout grid mode and reflects genuine solar
+    // R health only once the mains contactors are open. Modbus 319-322.
+    //
+    bool GridRPhaseUnhealthy;
+    bool GridYPhaseUnhealthy;
+    bool GridBPhaseUnhealthy;
+    bool SolarRPhaseUnhealthy;
 };
 
-// Reasons why load is not on grid or solar (true = condition active)
+// Load status flags (true = condition active), customer addresses 801-818.
+//
+// Implements the decision trees in
+// Document/CustomerFacing/SOCO_Load_Status_Logic.docx. Exactly one flag of
+// the GRID group {801,803,804,810,811,812,813} and exactly one flag of the
+// SOLAR group {805,807,808,809,814,815,816,817,818} is set at any time.
+// GridDisabledByUser (802) and SolarDisabledByUser (806) are independent of
+// both groups. Group addresses are not contiguous because 801-809 keep
+// their legacy positions for backward compatibility; new flags are
+// appended at 810+.
 //
 // DEVNOTE: This is sent over modbus. Keep them in order.
 //
 struct LoadStatus
 {
-    bool LoadOnGrid;
-    bool LoadOnGridUserDisabled;
-    bool LoadOnGridDisabledGridRPhaseUnhealthy;
-    bool LoadOnGridDisabledSolarHealthy;
-    bool LoadOnSolar;
-    bool LoadOnSolarUserDisabled;
-    bool LoadOnSolarDisabledSolarRPhaseUnhealthy;
-    bool LoadOnSolarDisabledGridHealthy;
-    bool LoadOnSolarDisabledDGRunning;
+    bool LoadOnGridGridRHealthy;                  // 801: G1 on grid, healthy
+    bool GridDisabledByUser;                      // 802: independent, = (HR6001 > 0)
+    bool LoadNotOnGridGridRUnhealthy;             // 803: G4
+    bool LoadNotOnGridSolarContactorStuckClosed;  // 804: G5 K4 stuck closed
+    bool LoadOnSolarSolarRHealthy;                // 805: S1 on solar, healthy
+    bool SolarDisabledByUser;                     // 806: independent, = (HR16001 > 0)
+    bool LoadNotOnSolarSolarRUnhealthy;           // 807: S5
+    bool LoadNotOnSolarGridAvailable;             // 808: S3 grid is available
+    bool LoadNotOnSolarDGRunning;                 // 809: S6
+    bool LoadOnGridContactorStuckClosed;          // 810: G2 K5 stuck closed
+    bool LoadNotOnGridDisabledByUser;             // 811: G3
+    bool LoadNotOnGridContactorStuckOpen;         // 812: G6 K5 stuck open
+    bool LoadNotOnGridTransient;                  // 813: G7 transferring
+    bool LoadOnSolarContactorStuckClosed;         // 814: S2 K4/K6 stuck closed
+    bool LoadNotOnSolarDisabledByUser;            // 815: S4
+    bool LoadNotOnSolarGridContactorStuckClosed;  // 816: S7 K1/K2/K3/K5 stuck closed
+    bool LoadNotOnSolarContactorStuckOpen;        // 817: S8 K4/K6 stuck open
+    bool LoadNotOnSolarTransient;                 // 818: S9 transferring
 };
 
 // Fan fault flags (true = fault condition active)

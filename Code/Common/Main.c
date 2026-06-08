@@ -734,6 +734,19 @@ COMPILE_ASSERT(STUCK_SECONDS > DRIVE_GAP_SECONDS);
     g_voltageHealth.SolarYPhaseLoss = (InstantPara.VolYSolar == 0);
     g_voltageHealth.SolarBPhaseLoss = (InstantPara.VolBSolar == 0);
 
+    // Confirmed per-phase health (true = unhealthy) with fail / return
+    // delay hysteresis (modbus 319-322): grid R/Y/B mirror the contactor
+    // health machines above; solar R comes straight from the IDX_SOLAR
+    // health machine. That machine is forced UNDER_VOLTAGE while any mains
+    // phase contactor is closed (grid back-feed ties the solar R sense to
+    // grid R), so 322 reads unhealthy throughout grid mode and reflects
+    // genuine solar R health only once the mains contactors are open.
+    //
+    g_voltageHealth.GridRPhaseUnhealthy  = (c[IDX_R].health != HS_HEALTHY);
+    g_voltageHealth.GridYPhaseUnhealthy  = (c[IDX_Y].health != HS_HEALTHY);
+    g_voltageHealth.GridBPhaseUnhealthy  = (c[IDX_B].health != HS_HEALTHY);
+    g_voltageHealth.SolarRPhaseUnhealthy = (c[IDX_SOLAR].health != HS_HEALTHY);
+
     // ---- Phase 2: Contactor decision logic ----
     //
     // Grid phase contactors: on when healthy AND solar confirmed off AND
@@ -801,56 +814,6 @@ COMPILE_ASSERT(STUCK_SECONDS > DRIVE_GAP_SECONDS);
         c[IDX_SOLAR].wantOn = false;
         c[IDX_SOLAR_NE].wantOn = false;
     }
-
-    // ---- Load status flags (exposed over modbus) ----
-    //
-    // Indicate reasons why load is not on grid or solar. Each flag is
-    // true when the corresponding condition is actively preventing load
-    // from being on that source.
-    //
-    g_LoadStatus.LoadOnGrid = c[IDX_LOAD_GRID].acknowledgedOn;
-    
-    g_LoadStatus.LoadOnGridUserDisabled =
-        !g_LoadStatus.LoadOnGrid &&
-        (g_DisableLoadOnGridSeconds > 0);
-
-    g_LoadStatus.LoadOnGridDisabledGridRPhaseUnhealthy =
-        !g_LoadStatus.LoadOnGrid &&
-        (c[IDX_R].health != HS_HEALTHY);
-
-    g_LoadStatus.LoadOnGridDisabledSolarHealthy =
-        !g_LoadStatus.LoadOnGrid &&
-        c[IDX_SOLAR].acknowledgedOn;
-    
-    g_LoadStatus.LoadOnSolar = c[IDX_SOLAR].acknowledgedOn &&
-                                c[IDX_SOLAR_NE].acknowledgedOn;
-
-    g_LoadStatus.LoadOnSolarUserDisabled =
-        !g_LoadStatus.LoadOnSolar &&
-        (g_DisableLoadOnSolarSeconds > 0);
-
-    // Only report solar unhealthy when we can actually measure solar
-    // voltage (no mains phase contactor on). Otherwise, solar health is
-    // forced to UNDER_VOLTAGE by the grid-backfeed override above and
-    // does not reflect actual solar voltage state.
-    //
-    g_LoadStatus.LoadOnSolarDisabledSolarRPhaseUnhealthy =
-        !g_LoadStatus.LoadOnSolar &&
-        (c[IDX_SOLAR].health != HS_HEALTHY) &&
-        !c[IDX_R].acknowledgedOn &&
-        !c[IDX_Y].acknowledgedOn &&
-        !c[IDX_B].acknowledgedOn;
-
-    g_LoadStatus.LoadOnSolarDisabledGridHealthy =
-        !g_LoadStatus.LoadOnSolar &&
-        (c[IDX_R].acknowledgedOn ||
-         c[IDX_Y].acknowledgedOn ||
-         c[IDX_B].acknowledgedOn ||
-         c[IDX_LOAD_GRID].acknowledgedOn);
-
-    g_LoadStatus.LoadOnSolarDisabledDGRunning =
-        !g_LoadStatus.LoadOnSolar &&
-        !CopySetPara[PARA_DG_DETECT_DISABLED] && !g_DigInputs.DGOff;
 
     // ---- Phase 3: Drive relays with break-before-make gap ----
     //
@@ -958,6 +921,100 @@ COMPILE_ASSERT(STUCK_SECONDS > DRIVE_GAP_SECONDS);
             *c[i].alarmStuckOpen = false;
             *c[i].alarmStuckClosed = false;
         }
+    }
+
+    // ---- Load status flags (modbus 801-818) ----
+    //
+    // Implements the customer-facing decision trees in
+    // Document/CustomerFacing/SOCO_Load_Status_Logic.docx, evaluated from a
+    // single snapshot of this cycle's inputs: raw debounced feedback, the
+    // stuck alarms computed in Phase 5 above, confirmed phase health, the
+    // user-disable timers and the DG input. Each group is a strict priority
+    // cascade, so exactly one GRID flag and exactly one SOLAR flag is set
+    // at any time. 802/806 mirror the user-disable timers and are
+    // independent of both groups.
+    //
+    {
+        bool k4On = g_DigInputs.LoadOnSolarContactorOn;
+        bool k5On = g_DigInputs.LoadOnGridContactorOn;
+        bool k6On = g_DigInputs.SolarNeutralEarthContactorOn;
+
+        bool gridDisabled    = (g_DisableLoadOnGridSeconds  > 0);
+        bool solarDisabled   = (g_DisableLoadOnSolarSeconds > 0);
+        bool gridRUnhealthy  = g_voltageHealth.GridRPhaseUnhealthy;
+        bool solarRUnhealthy = g_voltageHealth.SolarRPhaseUnhealthy;
+        bool dgRunning       = !CopySetPara[PARA_DG_DETECT_DISABLED] &&
+                               !g_DigInputs.DGOff;
+
+        bool gridContactorStuckClosed =
+            g_Alarms.MainsRPhaseContactorStuckClosed ||
+            g_Alarms.MainsYPhaseContactorStuckClosed ||
+            g_Alarms.MainsBPhaseContactorStuckClosed ||
+            g_Alarms.LoadOnGridContactorStuckClosed;
+        bool solarContactorStuckClosed =
+            g_Alarms.LoadOnSolarContactorStuckClosed ||
+            g_Alarms.SolarNeutralEarthContactorStuckClosed;
+        bool solarContactorStuckOpen =
+            g_Alarms.LoadOnSolarContactorStuckOpen ||
+            g_Alarms.SolarNeutralEarthContactorStuckOpen;
+
+        memset(&g_LoadStatus, 0, sizeof(g_LoadStatus));
+
+        g_LoadStatus.GridDisabledByUser  = gridDisabled;
+        g_LoadStatus.SolarDisabledByUser = solarDisabled;
+
+        // GRID group (one-hot): 801 / 810 / 811 / 803 / 804 / 812 / 813
+        //
+        if (k5On)
+        {
+            if (g_Alarms.LoadOnGridContactorStuckClosed)
+                g_LoadStatus.LoadOnGridContactorStuckClosed = true;     // G2
+            else
+                g_LoadStatus.LoadOnGridGridRHealthy = true;             // G1
+        }
+        else if (gridDisabled)
+            g_LoadStatus.LoadNotOnGridDisabledByUser = true;            // G3
+        else if (gridRUnhealthy)
+            g_LoadStatus.LoadNotOnGridGridRUnhealthy = true;            // G4
+        else if (g_Alarms.LoadOnSolarContactorStuckClosed)
+            g_LoadStatus.LoadNotOnGridSolarContactorStuckClosed = true; // G5
+        else if (g_Alarms.LoadOnGridContactorStuckOpen)
+            g_LoadStatus.LoadNotOnGridContactorStuckOpen = true;        // G6
+        else
+            g_LoadStatus.LoadNotOnGridTransient = true;                 // G7
+
+        // SOLAR group (one-hot): 805 / 814 / 808 / 815 / 807 / 809 / 816 /
+        // 817 / 818
+        //
+        if (k4On && k6On)
+        {
+            if (solarContactorStuckClosed)
+                g_LoadStatus.LoadOnSolarContactorStuckClosed = true;    // S2
+            else
+                g_LoadStatus.LoadOnSolarSolarRHealthy = true;           // S1
+        }
+        else if (gridContactorStuckClosed)
+            g_LoadStatus.LoadNotOnSolarGridContactorStuckClosed = true; // S7
+            // Highest priority after "load on solar": a stuck-closed grid
+            // contactor is the actionable fault, so it is ranked above the
+            // back-fed "solar R unhealthy" (322 is forced while a mains
+            // contactor is on) rather than being masked by it. S5 below
+            // therefore carries no grid-contactor gate; the only residue is
+            // that during a legitimate grid->solar handoff S5 can briefly
+            // report the back-fed 322 until the mains contactors open, which
+            // matches 322's documented "forced in grid mode" semantics.
+        else if (!gridRUnhealthy && !gridDisabled)
+            g_LoadStatus.LoadNotOnSolarGridAvailable = true;            // S3
+        else if (solarDisabled)
+            g_LoadStatus.LoadNotOnSolarDisabledByUser = true;           // S4
+        else if (solarRUnhealthy)
+            g_LoadStatus.LoadNotOnSolarSolarRUnhealthy = true;          // S5
+        else if (dgRunning)
+            g_LoadStatus.LoadNotOnSolarDGRunning = true;                // S6
+        else if (solarContactorStuckOpen)
+            g_LoadStatus.LoadNotOnSolarContactorStuckOpen = true;       // S8
+        else
+            g_LoadStatus.LoadNotOnSolarTransient = true;                // S9
     }
 
 #undef SETTLE_SECONDS
