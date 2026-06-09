@@ -353,71 +353,54 @@ struct OFFSET
   float     Fan2Current;
 };
 
+// One window's worth of FFT sin/cos accumulators (28 channels).
+// Two of these are kept in FFT_STRUCT.bank[] and ping-ponged: the ISR
+// accumulates into one bank while the main loop reads the other. This
+// replaces the old per-window Sum->Save copy + zero (which used to run
+// inside ProcessMainInterrupt and was the single heaviest thing in the
+// ISR, ~10k cycles). The field order here MUST match the old
+// FFT_<name>Sum / FFT_<name>Save ordering so the storage footprint is
+// unchanged (bank[0] overlays the old Sum set, bank[1] the old Save set).
+//
+struct FFT_BANK
+{
+  float    RVolSin[50];
+  float    RVolCos[50];
+  float    YVolSin[50];
+  float    YVolCos[50];
+  float    BVolSin[50];
+  float    BVolCos[50];
+
+  float    RCurSin[50];
+  float    RCurCos[50];
+  float    YCurSin[50];
+  float    YCurCos[50];
+  float    BCurSin[50];
+  float    BCurCos[50];
+  float    NeuCurSin[50];
+  float    NeuCurCos[50];
+
+  float    RSolarVolSin[50];
+  float    RSolarVolCos[50];
+  float    YSolarVolSin[50];
+  float    YSolarVolCos[50];
+  float    BSolarVolSin[50];
+  float    BSolarVolCos[50];
+
+  float    RSolarCurSin[50];
+  float    RSolarCurCos[50];
+  float    YSolarCurSin[50];
+  float    YSolarCurCos[50];
+  float    BSolarCurSin[50];
+  float    BSolarCurCos[50];
+  float    NeuSolarCurSin[50];
+  float    NeuSolarCurCos[50];
+};
+
 struct FFT_STRUCT
 {
-  float    FFT_RVolSinSum[50];
-  float    FFT_RVolCosSum[50];
-  float    FFT_YVolSinSum[50];
-  float    FFT_YVolCosSum[50];
-  float    FFT_BVolSinSum[50];
-  float    FFT_BVolCosSum[50];
-  
-  float    FFT_RCurSinSum[50];
-  float    FFT_RCurCosSum[50];
-  float    FFT_YCurSinSum[50];
-  float    FFT_YCurCosSum[50];
-  float    FFT_BCurSinSum[50];
-  float    FFT_BCurCosSum[50];
-  float    FFT_NeuCurSinSum[50];
-  float    FFT_NeuCurCosSum[50];
-  
-  float    FFT_RVolSinSave[50];
-  float    FFT_RVolCosSave[50];
-  float    FFT_YVolSinSave[50];
-  float    FFT_YVolCosSave[50];
-  float    FFT_BVolSinSave[50];
-  float    FFT_BVolCosSave[50];
-  
-  float    FFT_RCurSinSave[50];
-  float    FFT_RCurCosSave[50];
-  float    FFT_YCurSinSave[50];
-  float    FFT_YCurCosSave[50];
-  float    FFT_BCurSinSave[50];
-  float    FFT_BCurCosSave[50];
-  float    FFT_NeuCurSinSave[50];
-  float    FFT_NeuCurCosSave[50];
-
-  float    FFT_RSolarVolSinSum[50];
-  float    FFT_RSolarVolCosSum[50];
-  float    FFT_YSolarVolSinSum[50];
-  float    FFT_YSolarVolCosSum[50];
-  float    FFT_BSolarVolSinSum[50];
-  float    FFT_BSolarVolCosSum[50];
-  
-  float    FFT_RSolarCurSinSum[50];
-  float    FFT_RSolarCurCosSum[50];
-  float    FFT_YSolarCurSinSum[50];
-  float    FFT_YSolarCurCosSum[50];
-  float    FFT_BSolarCurSinSum[50];
-  float    FFT_BSolarCurCosSum[50];
-  float    FFT_NeuSolarCurSinSum[50];
-  float    FFT_NeuSolarCurCosSum[50];
-  
-  float    FFT_RSolarVolSinSave[50];
-  float    FFT_RSolarVolCosSave[50];
-  float    FFT_YSolarVolSinSave[50];
-  float    FFT_YSolarVolCosSave[50];
-  float    FFT_BSolarVolSinSave[50];
-  float    FFT_BSolarVolCosSave[50];
-  
-  float    FFT_RSolarCurSinSave[50];
-  float    FFT_RSolarCurCosSave[50];
-  float    FFT_YSolarCurSinSave[50];
-  float    FFT_YSolarCurCosSave[50];
-  float    FFT_BSolarCurSinSave[50];
-  float    FFT_BSolarCurCosSave[50];
-  float    FFT_NeuSolarCurSinSave[50];
-  float    FFT_NeuSolarCurCosSave[50];
+  struct FFT_BANK bank[2];   // ping-pong: ISR fills bank[g_FftAccBank],
+                             // main loop reads bank[g_FftSnapBank]
 
   uint16_t FFT_Counter;
   uint16_t FFT_CounterIndex;

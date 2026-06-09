@@ -82,6 +82,10 @@ extern struct INT_DATA_SAVE  IntDataSave;
 extern struct INT_DATA_SUM   IntDataSum;
 extern struct OFFSET         VIOffset;
 extern struct FFT_STRUCT     FftSampleData;
+// FFT accumulator ping-pong state (see ProcessMainInterrupt / ProcessIntCycleOver)
+extern volatile uint8_t g_FftAccBank;    // bank the ISR accumulates into (0/1)
+extern volatile uint8_t g_FftSnapBank;   // completed bank handed to the main loop
+extern volatile uint8_t g_FftSnapReady;  // 1 = a snapshot is waiting to be consumed
 extern struct INT_TIMER_COUNT IntTimerCount;
 extern struct GAIN_WC WorkingCopyGain;
 extern struct STORE TripData;

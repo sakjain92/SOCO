@@ -1296,8 +1296,8 @@ void ProcessIntCycleOver(void)
   InterruptFlag &= ~INT_CYCLE_OVER;
   ProcessFreq();
   ProcessPerPhaseFreq();
-  Metrology();
-  if(FlagDirectCalibration==0)SetWorkingGainBuffer(); 
+  Metrology();   // also drains the FFT snapshot bank it consumes (see CalculateHarmonicComponents)
+  if(FlagDirectCalibration==0)SetWorkingGainBuffer();
 }
    
 const float DefaultFlashCoeffVlaues[]=

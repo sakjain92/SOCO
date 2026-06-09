@@ -11,6 +11,7 @@
 
 
 #include <stdio.h>
+#include <string.h>
 #include "CommFlagDef.h"
 #include "Struct.h"
 #include <Math.h>
@@ -751,71 +752,90 @@ void CalculateHarmonicComponents(void)
   float TempRSolarVr=0,TempYSolarVr=0,TempBSolarVr=0;
   float TempRSolarW=0,TempYSolarW=0,TempBSolarW=0;
 
+  // Read the FFT snapshot bank the ISR last published (ping-pong). The ISR
+  // accumulates into the other bank, so this read never races accumulation.
+  // ProcessIntCycleOver() drains this bank to zero after Metrology() returns.
+  //
+  struct FFT_BANK *pSnap = &FftSampleData.bank[g_FftSnapBank];
+
   for(i=0;i<50;i++)
   {
-      TempRVol +=((FftSampleData.FFT_RVolSinSave[i]*FftSampleData.FFT_RVolSinSave[i])+
-                 (FftSampleData.FFT_RVolCosSave[i]*FftSampleData.FFT_RVolCosSave[i]));
-      TempYVol +=((FftSampleData.FFT_YVolSinSave[i]*FftSampleData.FFT_YVolSinSave[i])+
-                 (FftSampleData.FFT_YVolCosSave[i]*FftSampleData.FFT_YVolCosSave[i]));
-      TempBVol +=((FftSampleData.FFT_BVolSinSave[i]*FftSampleData.FFT_BVolSinSave[i])+
-                 (FftSampleData.FFT_BVolCosSave[i]*FftSampleData.FFT_BVolCosSave[i]));
-      
-      TempRCur +=((FftSampleData.FFT_RCurSinSave[i]*FftSampleData.FFT_RCurSinSave[i])+
-                 (FftSampleData.FFT_RCurCosSave[i]*FftSampleData.FFT_RCurCosSave[i]));
-      TempYCur +=((FftSampleData.FFT_YCurSinSave[i]*FftSampleData.FFT_YCurSinSave[i])+
-                 (FftSampleData.FFT_YCurCosSave[i]*FftSampleData.FFT_YCurCosSave[i]));
-      TempBCur +=((FftSampleData.FFT_BCurSinSave[i]*FftSampleData.FFT_BCurSinSave[i])+
-                 (FftSampleData.FFT_BCurCosSave[i]*FftSampleData.FFT_BCurCosSave[i]));
-      TempNCur +=((FftSampleData.FFT_NeuCurSinSave[i]*FftSampleData.FFT_NeuCurSinSave[i])+
-                 (FftSampleData.FFT_NeuCurCosSave[i]*FftSampleData.FFT_NeuCurCosSave[i]));
-      TempRW+=((FftSampleData.FFT_RVolSinSave[i]*FftSampleData.FFT_RCurSinSave[i])+
-                 (FftSampleData.FFT_RVolCosSave[i]*FftSampleData.FFT_RCurCosSave[i]));
-      
-      TempYW+=((FftSampleData.FFT_YVolSinSave[i]*FftSampleData.FFT_YCurSinSave[i])+
-                 (FftSampleData.FFT_YVolCosSave[i]*FftSampleData.FFT_YCurCosSave[i]));
-      
-      
-      TempBW+=((FftSampleData.FFT_BVolSinSave[i]*FftSampleData.FFT_BCurSinSave[i])+
-                 (FftSampleData.FFT_BVolCosSave[i]*FftSampleData.FFT_BCurCosSave[i]));
-      
-      TempNW+=((FftSampleData.FFT_YVolSinSave[i]*FftSampleData.FFT_NeuCurSinSave[i])+
-                 (FftSampleData.FFT_YVolCosSave[i]*FftSampleData.FFT_NeuCurCosSave[i]));
-      
-      TempRVr+=((FftSampleData.FFT_RVolSinSave[i]*FftSampleData.FFT_RCurCosSave[i])-
-                 (FftSampleData.FFT_RVolCosSave[i]*FftSampleData.FFT_RCurSinSave[i]));
-      TempYVr+=((FftSampleData.FFT_YVolSinSave[i]*FftSampleData.FFT_YCurCosSave[i])-
-                 (FftSampleData.FFT_YVolCosSave[i]*FftSampleData.FFT_YCurSinSave[i]));
-      TempBVr+=((FftSampleData.FFT_BVolSinSave[i]*FftSampleData.FFT_BCurCosSave[i])-
-                 (FftSampleData.FFT_BVolCosSave[i]*FftSampleData.FFT_BCurSinSave[i]));
-      TempNVr+=((FftSampleData.FFT_YVolSinSave[i]*FftSampleData.FFT_NeuCurCosSave[i])- // for 3p3w neutral current mult by Y vol
-                 (FftSampleData.FFT_YVolCosSave[i]*FftSampleData.FFT_NeuCurSinSave[i]));
+      TempRVol +=((pSnap->RVolSin[i]*pSnap->RVolSin[i])+
+                 (pSnap->RVolCos[i]*pSnap->RVolCos[i]));
+      TempYVol +=((pSnap->YVolSin[i]*pSnap->YVolSin[i])+
+                 (pSnap->YVolCos[i]*pSnap->YVolCos[i]));
+      TempBVol +=((pSnap->BVolSin[i]*pSnap->BVolSin[i])+
+                 (pSnap->BVolCos[i]*pSnap->BVolCos[i]));
 
-      TempRSolarCur +=((FftSampleData.FFT_RSolarCurSinSave[i]*FftSampleData.FFT_RSolarCurSinSave[i])+
-                 (FftSampleData.FFT_RSolarCurCosSave[i]*FftSampleData.FFT_RSolarCurCosSave[i]));
-      TempYSolarCur +=((FftSampleData.FFT_YSolarCurSinSave[i]*FftSampleData.FFT_YSolarCurSinSave[i])+
-                 (FftSampleData.FFT_YSolarCurCosSave[i]*FftSampleData.FFT_YSolarCurCosSave[i]));
-      TempBSolarCur +=((FftSampleData.FFT_BSolarCurSinSave[i]*FftSampleData.FFT_BSolarCurSinSave[i])+
-                 (FftSampleData.FFT_BSolarCurCosSave[i]*FftSampleData.FFT_BSolarCurCosSave[i]));
-      TempNSolarCur +=((FftSampleData.FFT_NeuSolarCurSinSave[i]*FftSampleData.FFT_NeuSolarCurSinSave[i])+
-                 (FftSampleData.FFT_NeuSolarCurCosSave[i]*FftSampleData.FFT_NeuSolarCurCosSave[i]));
+      TempRCur +=((pSnap->RCurSin[i]*pSnap->RCurSin[i])+
+                 (pSnap->RCurCos[i]*pSnap->RCurCos[i]));
+      TempYCur +=((pSnap->YCurSin[i]*pSnap->YCurSin[i])+
+                 (pSnap->YCurCos[i]*pSnap->YCurCos[i]));
+      TempBCur +=((pSnap->BCurSin[i]*pSnap->BCurSin[i])+
+                 (pSnap->BCurCos[i]*pSnap->BCurCos[i]));
+      TempNCur +=((pSnap->NeuCurSin[i]*pSnap->NeuCurSin[i])+
+                 (pSnap->NeuCurCos[i]*pSnap->NeuCurCos[i]));
+      TempRW+=((pSnap->RVolSin[i]*pSnap->RCurSin[i])+
+                 (pSnap->RVolCos[i]*pSnap->RCurCos[i]));
 
-      TempRSolarW+=((FftSampleData.FFT_RSolarVolSinSave[i]*FftSampleData.FFT_RSolarCurSinSave[i])+
-                 (FftSampleData.FFT_RSolarVolCosSave[i]*FftSampleData.FFT_RSolarCurCosSave[i]));
-      
-      TempYSolarW+=((FftSampleData.FFT_YSolarVolSinSave[i]*FftSampleData.FFT_YSolarCurSinSave[i])+
-                 (FftSampleData.FFT_YSolarVolCosSave[i]*FftSampleData.FFT_YSolarCurCosSave[i]));
-      
-      TempBSolarW+=((FftSampleData.FFT_BSolarVolSinSave[i]*FftSampleData.FFT_BSolarCurSinSave[i])+
-                 (FftSampleData.FFT_BSolarVolCosSave[i]*FftSampleData.FFT_BSolarCurCosSave[i]));
+      TempYW+=((pSnap->YVolSin[i]*pSnap->YCurSin[i])+
+                 (pSnap->YVolCos[i]*pSnap->YCurCos[i]));
 
-      TempRSolarVr+=((FftSampleData.FFT_RSolarVolSinSave[i]*FftSampleData.FFT_RSolarCurCosSave[i])-
-                 (FftSampleData.FFT_RSolarVolCosSave[i]*FftSampleData.FFT_RSolarCurSinSave[i]));
-      TempYSolarVr+=((FftSampleData.FFT_YSolarVolSinSave[i]*FftSampleData.FFT_YSolarCurCosSave[i])-
-                 (FftSampleData.FFT_YSolarVolCosSave[i]*FftSampleData.FFT_YSolarCurSinSave[i]));
-      TempBSolarVr+=((FftSampleData.FFT_BSolarVolSinSave[i]*FftSampleData.FFT_BSolarCurCosSave[i])-
-                 (FftSampleData.FFT_BSolarVolCosSave[i]*FftSampleData.FFT_BSolarCurSinSave[i]));
+
+      TempBW+=((pSnap->BVolSin[i]*pSnap->BCurSin[i])+
+                 (pSnap->BVolCos[i]*pSnap->BCurCos[i]));
+
+      TempNW+=((pSnap->YVolSin[i]*pSnap->NeuCurSin[i])+
+                 (pSnap->YVolCos[i]*pSnap->NeuCurCos[i]));
+
+      TempRVr+=((pSnap->RVolSin[i]*pSnap->RCurCos[i])-
+                 (pSnap->RVolCos[i]*pSnap->RCurSin[i]));
+      TempYVr+=((pSnap->YVolSin[i]*pSnap->YCurCos[i])-
+                 (pSnap->YVolCos[i]*pSnap->YCurSin[i]));
+      TempBVr+=((pSnap->BVolSin[i]*pSnap->BCurCos[i])-
+                 (pSnap->BVolCos[i]*pSnap->BCurSin[i]));
+      TempNVr+=((pSnap->YVolSin[i]*pSnap->NeuCurCos[i])- // for 3p3w neutral current mult by Y vol
+                 (pSnap->YVolCos[i]*pSnap->NeuCurSin[i]));
+
+      TempRSolarCur +=((pSnap->RSolarCurSin[i]*pSnap->RSolarCurSin[i])+
+                 (pSnap->RSolarCurCos[i]*pSnap->RSolarCurCos[i]));
+      TempYSolarCur +=((pSnap->YSolarCurSin[i]*pSnap->YSolarCurSin[i])+
+                 (pSnap->YSolarCurCos[i]*pSnap->YSolarCurCos[i]));
+      TempBSolarCur +=((pSnap->BSolarCurSin[i]*pSnap->BSolarCurSin[i])+
+                 (pSnap->BSolarCurCos[i]*pSnap->BSolarCurCos[i]));
+      TempNSolarCur +=((pSnap->NeuSolarCurSin[i]*pSnap->NeuSolarCurSin[i])+
+                 (pSnap->NeuSolarCurCos[i]*pSnap->NeuSolarCurCos[i]));
+
+      TempRSolarW+=((pSnap->RSolarVolSin[i]*pSnap->RSolarCurSin[i])+
+                 (pSnap->RSolarVolCos[i]*pSnap->RSolarCurCos[i]));
+
+      TempYSolarW+=((pSnap->YSolarVolSin[i]*pSnap->YSolarCurSin[i])+
+                 (pSnap->YSolarVolCos[i]*pSnap->YSolarCurCos[i]));
+
+      TempBSolarW+=((pSnap->BSolarVolSin[i]*pSnap->BSolarCurSin[i])+
+                 (pSnap->BSolarVolCos[i]*pSnap->BSolarCurCos[i]));
+
+      TempRSolarVr+=((pSnap->RSolarVolSin[i]*pSnap->RSolarCurCos[i])-
+                 (pSnap->RSolarVolCos[i]*pSnap->RSolarCurSin[i]));
+      TempYSolarVr+=((pSnap->YSolarVolSin[i]*pSnap->YSolarCurCos[i])-
+                 (pSnap->YSolarVolCos[i]*pSnap->YSolarCurSin[i]));
+      TempBSolarVr+=((pSnap->BSolarVolSin[i]*pSnap->BSolarCurCos[i])-
+                 (pSnap->BSolarVolCos[i]*pSnap->BSolarCurSin[i]));
 
   }
+
+  // Release the FFT snapshot bank back to the ISR now that it's fully read:
+  // zero it so the producer can reuse it as a fresh accumulator on the next
+  // ping-pong swap, and clear the ready flag. Kept here in the consumer (rather
+  // than in the caller) so the whole snapshot acquire/read/release lives in one
+  // place and the caller needs no knowledge of the FFT bank internals.
+  //
+  if(g_FftSnapReady)
+  {
+    memset(pSnap, 0, sizeof(*pSnap));
+    g_FftSnapReady = 0;
+  }
+
   InstantPara.FunRVol=FUND_VOL_COEFF*SafeSqrtf(TempRVol/50);
   InstantPara.FunYVol=FUND_VOL_COEFF*SafeSqrtf(TempYVol/50);
   InstantPara.FunBVol=FUND_VOL_COEFF*SafeSqrtf(TempBVol/50);

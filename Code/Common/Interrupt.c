@@ -80,6 +80,16 @@ extern volatile uint16_t TimeOutCommTx;
 
 uint16_t OneSecCounter;
 
+// FFT accumulator ping-pong (replaces the old per-window Sum->Save copy that
+// ran inside ProcessMainInterrupt). The ISR accumulates into bank[g_FftAccBank];
+// at each window boundary it publishes that bank to the main loop and switches
+// to the other bank (which the main loop has already drained to zero). The
+// heavy zeroing now happens at thread level in ProcessIntCycleOver().
+//
+volatile uint8_t g_FftAccBank   = 0;   // bank the ISR is filling
+volatile uint8_t g_FftSnapBank  = 0;   // bank exposed to the main loop
+volatile uint8_t g_FftSnapReady = 0;   // 1 = snapshot waiting for the main loop
+
 // Instantaneous sample for checking if AC/DC Aux Power supply is available
 // or not
 //
@@ -108,8 +118,7 @@ void ProcessMainInterrupt(void)
   float IntAmbientTemperature;
   float IntVRefInt;
   float TempGainMult;
-  int16_t TempInt;  
-  uint8_t i;
+  int16_t TempInt;
 
   isDCPowerAvailableSample = AdcDataInArray[ADC_DC_PWR]>POWER_FAIL_SENSE_VALUE;
   isACPowerAvailableSample = AdcDataInArray[ADC_AC_PWR]>POWER_FAIL_SENSE_VALUE;
@@ -461,72 +470,21 @@ void ProcessMainInterrupt(void)
 
     memset(&IntDataSum, 0, sizeof(IntDataSum));
  
-    for(i=0;i<50;i++)
-    {    
-      FftSampleData.FFT_RVolSinSave[i]=FftSampleData.FFT_RVolSinSum[i];
-      FftSampleData.FFT_RVolCosSave[i]=FftSampleData.FFT_RVolCosSum[i];
-      FftSampleData.FFT_YVolSinSave[i]=FftSampleData.FFT_YVolSinSum[i];
-      FftSampleData.FFT_YVolCosSave[i]=FftSampleData.FFT_YVolCosSum[i];
-      FftSampleData.FFT_BVolSinSave[i]=FftSampleData.FFT_BVolSinSum[i];
-      FftSampleData.FFT_BVolCosSave[i]=FftSampleData.FFT_BVolCosSum[i];
-      
-      FftSampleData.FFT_RCurSinSave[i]=FftSampleData.FFT_RCurSinSum[i];
-      FftSampleData.FFT_RCurCosSave[i]=FftSampleData.FFT_RCurCosSum[i];
-      FftSampleData.FFT_YCurSinSave[i]=FftSampleData.FFT_YCurSinSum[i];
-      FftSampleData.FFT_YCurCosSave[i]=FftSampleData.FFT_YCurCosSum[i];
-      FftSampleData.FFT_BCurSinSave[i]=FftSampleData.FFT_BCurSinSum[i];
-      FftSampleData.FFT_BCurCosSave[i]=FftSampleData.FFT_BCurCosSum[i];
-      
-      FftSampleData.FFT_NeuCurSinSave[i]=FftSampleData.FFT_NeuCurSinSum[i];
-      FftSampleData.FFT_NeuCurCosSave[i]=FftSampleData.FFT_NeuCurCosSum[i];
-      
-      FftSampleData.FFT_RVolSinSum[i]=0;
-      FftSampleData.FFT_RVolCosSum[i]=0;
-      FftSampleData.FFT_YVolSinSum[i]=0;
-      FftSampleData.FFT_YVolCosSum[i]=0;
-      FftSampleData.FFT_BVolSinSum[i]=0;
-      FftSampleData.FFT_BVolCosSum[i]=0;
-      FftSampleData.FFT_RCurSinSum[i]=0;
-      FftSampleData.FFT_RCurCosSum[i]=0;
-      FftSampleData.FFT_YCurSinSum[i]=0;
-      FftSampleData.FFT_YCurCosSum[i]=0;
-      FftSampleData.FFT_BCurSinSum[i]=0;
-      FftSampleData.FFT_BCurCosSum[i]=0;
-      FftSampleData.FFT_NeuCurSinSum[i]=0;
-      FftSampleData.FFT_NeuCurCosSum[i]=0;
-
-      FftSampleData.FFT_RSolarVolSinSave[i]=FftSampleData.FFT_RSolarVolSinSum[i];
-      FftSampleData.FFT_RSolarVolCosSave[i]=FftSampleData.FFT_RSolarVolCosSum[i];
-      FftSampleData.FFT_YSolarVolSinSave[i]=FftSampleData.FFT_YSolarVolSinSum[i];
-      FftSampleData.FFT_YSolarVolCosSave[i]=FftSampleData.FFT_YSolarVolCosSum[i];
-      FftSampleData.FFT_BSolarVolSinSave[i]=FftSampleData.FFT_BSolarVolSinSum[i];
-      FftSampleData.FFT_BSolarVolCosSave[i]=FftSampleData.FFT_BSolarVolCosSum[i];
-      
-      FftSampleData.FFT_RSolarCurSinSave[i]=FftSampleData.FFT_RSolarCurSinSum[i];
-      FftSampleData.FFT_RSolarCurCosSave[i]=FftSampleData.FFT_RSolarCurCosSum[i];
-      FftSampleData.FFT_YSolarCurSinSave[i]=FftSampleData.FFT_YSolarCurSinSum[i];
-      FftSampleData.FFT_YSolarCurCosSave[i]=FftSampleData.FFT_YSolarCurCosSum[i];
-      FftSampleData.FFT_BSolarCurSinSave[i]=FftSampleData.FFT_BSolarCurSinSum[i];
-      FftSampleData.FFT_BSolarCurCosSave[i]=FftSampleData.FFT_BSolarCurCosSum[i];
-      
-      FftSampleData.FFT_NeuSolarCurSinSave[i]=FftSampleData.FFT_NeuSolarCurSinSum[i];
-      FftSampleData.FFT_NeuSolarCurCosSave[i]=FftSampleData.FFT_NeuSolarCurCosSum[i];
-      
-      FftSampleData.FFT_RSolarVolSinSum[i]=0;
-      FftSampleData.FFT_RSolarVolCosSum[i]=0;
-      FftSampleData.FFT_YSolarVolSinSum[i]=0;
-      FftSampleData.FFT_YSolarVolCosSum[i]=0;
-      FftSampleData.FFT_BSolarVolSinSum[i]=0;
-      FftSampleData.FFT_BSolarVolCosSum[i]=0;
-      FftSampleData.FFT_RSolarCurSinSum[i]=0;
-      FftSampleData.FFT_RSolarCurCosSum[i]=0;
-      FftSampleData.FFT_YSolarCurSinSum[i]=0;
-      FftSampleData.FFT_YSolarCurCosSum[i]=0;
-      FftSampleData.FFT_BSolarCurSinSum[i]=0;
-      FftSampleData.FFT_BSolarCurCosSum[i]=0;
-      FftSampleData.FFT_NeuSolarCurSinSum[i]=0;
-      FftSampleData.FFT_NeuSolarCurCosSum[i]=0;
-
+    // FFT bank hand-off (ping-pong). Previously this spot copied all 28
+    // Sum[] arrays into Save[] and zeroed Sum[] (50 iterations, ~10k cycles)
+    // which overran the shortened sample period at high input frequency.
+    // Instead, just publish the bank we filled and switch to the other one,
+    // which the main loop has already drained to zero in ProcessIntCycleOver().
+    // Guard: if the main loop has not yet consumed the previous snapshot
+    // (g_FftSnapReady still set), keep filling the current bank rather than
+    // clobber a bank the consumer is still reading. That merges two windows
+    // into one snapshot - a rare, benign glitch, never a torn read.
+    //
+    if(!g_FftSnapReady)
+    {
+      g_FftSnapBank  = g_FftAccBank;   // expose the completed window
+      g_FftAccBank  ^= 1;              // fill the other (already-zeroed) bank
+      g_FftSnapReady = 1;              // tell the main loop a snapshot is ready
     }
     FftSampleData.FFT_Counter=0;
     FftSampleData.FFT_CounterIndex=0;
@@ -947,41 +905,49 @@ void ProcessMainInterrupt(void)
   IntDataSum.VRefInt            += IntVRefInt;
 
   // Summation for FFT Purpose
-  
-  
-  FftSampleData.FFT_RVolSinSum[FftSampleData.FFT_CounterIndex]+=IntVolRPhase*SinTable[FftSampleData.FFT_Counter];
-  FftSampleData.FFT_RVolCosSum[FftSampleData.FFT_CounterIndex]+=IntVolRPhase*CosTable[FftSampleData.FFT_Counter];
-  FftSampleData.FFT_YVolSinSum[FftSampleData.FFT_CounterIndex]+=IntVolYPhase*SinTable[FftSampleData.FFT_Counter];
-  FftSampleData.FFT_YVolCosSum[FftSampleData.FFT_CounterIndex]+=IntVolYPhase*CosTable[FftSampleData.FFT_Counter];
-  FftSampleData.FFT_BVolSinSum[FftSampleData.FFT_CounterIndex]+=IntVolBPhase*SinTable[FftSampleData.FFT_Counter];
-  FftSampleData.FFT_BVolCosSum[FftSampleData.FFT_CounterIndex]+=IntVolBPhase*CosTable[FftSampleData.FFT_Counter];
-  
-  FftSampleData.FFT_RCurSinSum[FftSampleData.FFT_CounterIndex]+=IntCurRPhase*SinTable[FftSampleData.FFT_Counter];
-  FftSampleData.FFT_RCurCosSum[FftSampleData.FFT_CounterIndex]+=IntCurRPhase*CosTable[FftSampleData.FFT_Counter];
-  FftSampleData.FFT_YCurSinSum[FftSampleData.FFT_CounterIndex]+=IntCurYPhase*SinTable[FftSampleData.FFT_Counter];
-  FftSampleData.FFT_YCurCosSum[FftSampleData.FFT_CounterIndex]+=IntCurYPhase*CosTable[FftSampleData.FFT_Counter];
-  FftSampleData.FFT_BCurSinSum[FftSampleData.FFT_CounterIndex]+=IntCurBPhase*SinTable[FftSampleData.FFT_Counter];
-  FftSampleData.FFT_BCurCosSum[FftSampleData.FFT_CounterIndex]+=IntCurBPhase*CosTable[FftSampleData.FFT_Counter];
-  
-  FftSampleData.FFT_NeuCurSinSum[FftSampleData.FFT_CounterIndex]+=IntNeuCurrent*SinTable[FftSampleData.FFT_Counter];
-  FftSampleData.FFT_NeuCurCosSum[FftSampleData.FFT_CounterIndex]+=IntNeuCurrent*CosTable[FftSampleData.FFT_Counter];
+  // Accumulate into the active ping-pong bank (see g_FftAccBank). pAcc is
+  // re-evaluated each ISR; if the window boundary above just switched banks,
+  // this sample lands in the freshly-zeroed new bank as window sample 0.
+  //
+  {
+  struct FFT_BANK *pAcc = &FftSampleData.bank[g_FftAccBank];
+  uint16_t fc  = FftSampleData.FFT_Counter;
+  uint16_t fci = FftSampleData.FFT_CounterIndex;
 
-  FftSampleData.FFT_RSolarVolSinSum[FftSampleData.FFT_CounterIndex]+=IntVolRSolarPhase*SinTable[FftSampleData.FFT_Counter];
-  FftSampleData.FFT_RSolarVolCosSum[FftSampleData.FFT_CounterIndex]+=IntVolRSolarPhase*CosTable[FftSampleData.FFT_Counter];
-  FftSampleData.FFT_YSolarVolSinSum[FftSampleData.FFT_CounterIndex]+=IntVolYSolarPhase*SinTable[FftSampleData.FFT_Counter];
-  FftSampleData.FFT_YSolarVolCosSum[FftSampleData.FFT_CounterIndex]+=IntVolYSolarPhase*CosTable[FftSampleData.FFT_Counter];
-  FftSampleData.FFT_BSolarVolSinSum[FftSampleData.FFT_CounterIndex]+=IntVolBSolarPhase*SinTable[FftSampleData.FFT_Counter];
-  FftSampleData.FFT_BSolarVolCosSum[FftSampleData.FFT_CounterIndex]+=IntVolBSolarPhase*CosTable[FftSampleData.FFT_Counter];
-  
-  FftSampleData.FFT_RSolarCurSinSum[FftSampleData.FFT_CounterIndex]+=IntCurRSolarPhase*SinTable[FftSampleData.FFT_Counter];
-  FftSampleData.FFT_RSolarCurCosSum[FftSampleData.FFT_CounterIndex]+=IntCurRSolarPhase*CosTable[FftSampleData.FFT_Counter];
-  FftSampleData.FFT_YSolarCurSinSum[FftSampleData.FFT_CounterIndex]+=IntCurYSolarPhase*SinTable[FftSampleData.FFT_Counter];
-  FftSampleData.FFT_YSolarCurCosSum[FftSampleData.FFT_CounterIndex]+=IntCurYSolarPhase*CosTable[FftSampleData.FFT_Counter];
-  FftSampleData.FFT_BSolarCurSinSum[FftSampleData.FFT_CounterIndex]+=IntCurBSolarPhase*SinTable[FftSampleData.FFT_Counter];
-  FftSampleData.FFT_BSolarCurCosSum[FftSampleData.FFT_CounterIndex]+=IntCurBSolarPhase*CosTable[FftSampleData.FFT_Counter];
-  
-  FftSampleData.FFT_NeuSolarCurSinSum[FftSampleData.FFT_CounterIndex]+=IntNeuSolarCurrent*SinTable[FftSampleData.FFT_Counter];
-  FftSampleData.FFT_NeuSolarCurCosSum[FftSampleData.FFT_CounterIndex]+=IntNeuSolarCurrent*CosTable[FftSampleData.FFT_Counter];
+  pAcc->RVolSin[fci]+=IntVolRPhase*SinTable[fc];
+  pAcc->RVolCos[fci]+=IntVolRPhase*CosTable[fc];
+  pAcc->YVolSin[fci]+=IntVolYPhase*SinTable[fc];
+  pAcc->YVolCos[fci]+=IntVolYPhase*CosTable[fc];
+  pAcc->BVolSin[fci]+=IntVolBPhase*SinTable[fc];
+  pAcc->BVolCos[fci]+=IntVolBPhase*CosTable[fc];
+
+  pAcc->RCurSin[fci]+=IntCurRPhase*SinTable[fc];
+  pAcc->RCurCos[fci]+=IntCurRPhase*CosTable[fc];
+  pAcc->YCurSin[fci]+=IntCurYPhase*SinTable[fc];
+  pAcc->YCurCos[fci]+=IntCurYPhase*CosTable[fc];
+  pAcc->BCurSin[fci]+=IntCurBPhase*SinTable[fc];
+  pAcc->BCurCos[fci]+=IntCurBPhase*CosTable[fc];
+
+  pAcc->NeuCurSin[fci]+=IntNeuCurrent*SinTable[fc];
+  pAcc->NeuCurCos[fci]+=IntNeuCurrent*CosTable[fc];
+
+  pAcc->RSolarVolSin[fci]+=IntVolRSolarPhase*SinTable[fc];
+  pAcc->RSolarVolCos[fci]+=IntVolRSolarPhase*CosTable[fc];
+  pAcc->YSolarVolSin[fci]+=IntVolYSolarPhase*SinTable[fc];
+  pAcc->YSolarVolCos[fci]+=IntVolYSolarPhase*CosTable[fc];
+  pAcc->BSolarVolSin[fci]+=IntVolBSolarPhase*SinTable[fc];
+  pAcc->BSolarVolCos[fci]+=IntVolBSolarPhase*CosTable[fc];
+
+  pAcc->RSolarCurSin[fci]+=IntCurRSolarPhase*SinTable[fc];
+  pAcc->RSolarCurCos[fci]+=IntCurRSolarPhase*CosTable[fc];
+  pAcc->YSolarCurSin[fci]+=IntCurYSolarPhase*SinTable[fc];
+  pAcc->YSolarCurCos[fci]+=IntCurYSolarPhase*CosTable[fc];
+  pAcc->BSolarCurSin[fci]+=IntCurBSolarPhase*SinTable[fc];
+  pAcc->BSolarCurCos[fci]+=IntCurBSolarPhase*CosTable[fc];
+
+  pAcc->NeuSolarCurSin[fci]+=IntNeuSolarCurrent*SinTable[fc];
+  pAcc->NeuSolarCurCos[fci]+=IntNeuSolarCurrent*CosTable[fc];
+  }
 
   
   FftSampleData.FFT_Counter++;
@@ -1222,38 +1188,17 @@ void CalculateFreqPerPhase(struct FreqMeasState *s, int16_t TempIntFreqVol)
 
 void ClearInterruptVariables(void)
 {
-  uint32_t i;
   SampleCounter=0;
   memset(&IntDataSum, 0, sizeof(IntDataSum));
 
-  for(i=0;i<50;i++)
-  {
-      FftSampleData.FFT_RVolSinSum[i]=0;
-      FftSampleData.FFT_RVolCosSum[i]=0;
-      FftSampleData.FFT_YVolSinSum[i]=0;
-      FftSampleData.FFT_YVolCosSum[i]=0;
-      FftSampleData.FFT_BVolSinSum[i]=0;
-      FftSampleData.FFT_BVolCosSum[i]=0;
-      FftSampleData.FFT_RCurSinSum[i]=0;
-      FftSampleData.FFT_RCurCosSum[i]=0;
-      FftSampleData.FFT_YCurSinSum[i]=0;
-      FftSampleData.FFT_YCurCosSum[i]=0;
-      FftSampleData.FFT_BCurSinSum[i]=0;
-      FftSampleData.FFT_BCurCosSum[i]=0;
-
-      FftSampleData.FFT_RSolarVolSinSum[i]=0;
-      FftSampleData.FFT_RSolarVolCosSum[i]=0;
-      FftSampleData.FFT_YSolarVolSinSum[i]=0;
-      FftSampleData.FFT_YSolarVolCosSum[i]=0;
-      FftSampleData.FFT_BSolarVolSinSum[i]=0;
-      FftSampleData.FFT_BSolarVolCosSum[i]=0;
-      FftSampleData.FFT_RSolarCurSinSum[i]=0;
-      FftSampleData.FFT_RSolarCurCosSum[i]=0;
-      FftSampleData.FFT_YSolarCurSinSum[i]=0;
-      FftSampleData.FFT_YSolarCurCosSum[i]=0;
-      FftSampleData.FFT_BSolarCurSinSum[i]=0;
-      FftSampleData.FFT_BSolarCurCosSum[i]=0;
-  }
+  // Zero both FFT ping-pong banks and reset the hand-off state. (The old
+  // loop here zeroed only the Sum arrays and even skipped the neutral ones;
+  // a single memset over both banks is cheaper and complete.)
+  //
+  memset(FftSampleData.bank, 0, sizeof(FftSampleData.bank));
+  g_FftAccBank   = 0;
+  g_FftSnapBank  = 0;
+  g_FftSnapReady = 0;
   FftSampleData.FFT_Counter=0;
   FftSampleData.FFT_CounterIndex=0;
 }
