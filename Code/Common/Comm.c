@@ -873,6 +873,28 @@ void CalPF(float Error, float * CalGainBufferPointer, float * CalBetaBufferPoint
     PhasenRadian=acos(0.5f*(1+Error))-(3.14159265f/3);
     D=PhasenRadian/W;
 
+    // Saturation: outside the 4-sample FIR budget fall back to identity FIR,
+    // matching CalPhaseLag(). The PH_ERROR_MIN/MAX gate at cal-store time
+    // (|Error| <= 0.735 => D < 4) should already guarantee this, so it is pure
+    // defence-in-depth for corrupt flash - now required because the ISR PF FIR
+    // no longer clamps the integer tap to 3 (unified circular history buffer).
+    //
+    // NOTE: the condition is written !(D < 4) instead of (D >= 4) so it also
+    // traps NaN. Unlike DeriveNeutralFir(), CalPF() does not clamp the acos()
+    // argument, so a corrupt Error outside [-3, 1] pushes 0.5*(1+Error) out of
+    // acos()'s [-1, 1] domain and yields D = NaN. (D >= 4) is false for NaN and
+    // would let NaN alfa/beta coefficients propagate into WorkingCopyGain and
+    // poison the ISR power/RMS math; !(D < 4) is true for NaN (and +inf), so the
+    // corrupt value is routed to the safe identity FIR instead.
+    //
+    if (!(D < 4.0f))
+    {
+        *CalGainBufferPointer = 1.0f;
+        *CalBetaBufferPointer = 0.0f;
+        *CalIntDelayPointer   = 0;
+        return;
+    }
+
     uint8_t intD = (uint8_t)D;
     float fracD = D - (float)intD;
 
@@ -912,7 +934,14 @@ void CalPhaseLag(float SignedPhaseRad, float * CalGainBufferPointer, float * Cal
     // (4 samples ~= 22.5 deg vs the 5% V_LL band ~= 10.8 deg), so this is
     // pure defence-in-depth for corrupt flash values.
     //
-    if (D >= 4.0f)
+    // NOTE: written !(D < 4) rather than (D >= 4) so it also traps NaN. Here
+    // D = |SignedPhaseRad| / W, so D is NaN only if a corrupt flash value makes
+    // SignedPhaseRad itself NaN (CalPhaseLag has no acos() domain issue; that
+    // applies to CalPF). (D >= 4) is false for NaN and would let NaN alfa/beta
+    // propagate into WorkingCopyGain and poison the ISR power/RMS math; !(D < 4)
+    // is true for NaN (and +inf), routing the corrupt value to the identity FIR.
+    //
+    if (!(D < 4.0f))
     {
         *CalGainBufferPointer = 1.0f;
         *CalBetaBufferPointer = 0.0f;
