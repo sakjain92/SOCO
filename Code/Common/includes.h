@@ -110,26 +110,10 @@ uint32_t CaptureValueSum;
 uint32_t InterruptFlag,RYFreqMeasDuration,SaveFreqMeasDuration;
 struct FreqMeasStates g_FreqState;
 uint16_t PreviousCaptureCount,CaptureValueSav,CaptureSumCounter,LastChangeFreq;
-float IntRPrevSample,IntYPrevSample,IntBPrevSample;
-float IntRPrev2Sample,IntYPrev2Sample,IntBPrev2Sample;
-float IntRPrev3Sample,IntYPrev3Sample,IntBPrev3Sample;
-float IntRPrev4Sample,IntYPrev4Sample,IntBPrev4Sample;
-float IntRSolarPrevSample,IntYSolarPrevSample,IntBSolarPrevSample;
-float IntRSolarPrev2Sample,IntYSolarPrev2Sample,IntBSolarPrev2Sample;
-float IntRSolarPrev3Sample,IntYSolarPrev3Sample,IntBSolarPrev3Sample;
-float IntRSolarPrev4Sample,IntYSolarPrev4Sample,IntBSolarPrev4Sample;
-// Current-channel shift register, mirrors the voltage one above. Used
-// only when PX_INT_DELAY < 0 (delay applied to I instead of V, to absorb
-// CT phase errors where displayed PF > actual PF at calibration time).
-//
-float IntCurRPrevSample,IntCurYPrevSample,IntCurBPrevSample;
-float IntCurRPrev2Sample,IntCurYPrev2Sample,IntCurBPrev2Sample;
-float IntCurRPrev3Sample,IntCurYPrev3Sample,IntCurBPrev3Sample;
-float IntCurRPrev4Sample,IntCurYPrev4Sample,IntCurBPrev4Sample;
-float IntCurRSolarPrevSample,IntCurYSolarPrevSample,IntCurBSolarPrevSample;
-float IntCurRSolarPrev2Sample,IntCurYSolarPrev2Sample,IntCurBSolarPrev2Sample;
-float IntCurRSolarPrev3Sample,IntCurYSolarPrev3Sample,IntCurBSolarPrev3Sample;
-float IntCurRSolarPrev4Sample,IntCurYSolarPrev4Sample,IntCurBSolarPrev4Sample;
+// PF-FIR per-channel sample history is now the unified circular buffer in
+// Interrupt.c (VR_Hist / IR_Hist ...); the old Int*PrevSample shift-register
+// globals were removed when the V_LL/I_N and PF FIRs were merged onto a single
+// history buffer per channel.
 uint16_t CopySetPara[MAX_PARAM_LIMIT+1],DataSaveCounter;
 uint16_t AdcDataInArray[24],SampleCounter;
 int16_t SdAdcDataInArray[12];

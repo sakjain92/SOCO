@@ -37,37 +37,44 @@ struct SAMPLE   BSolarVolSample;
 struct SAMPLE   Fan1CurrentSample;
 struct SAMPLE   Fan2CurrentSample;
 
-// Grid V_R / V_Y / V_B history (post-IIR samples) used only for the
-// line-line voltage accumulator's per-pair phase-shift FIR. Slot [0] =
-// current ISR sample, slots [1..4] = older samples. Updated every ISR;
-// per-phase RMS, V*I power, FFT and PR_/PY_/PB_ all continue to use the
-// raw IntVolRPhase / IntVolYPhase / IntVolBPhase locals.
+// Per-channel post-IIR sample history, used by BOTH the line-line / neutral
+// FIRs and the per-phase PF FIR. These two FIRs used to keep separate copies
+// of the same sequence (these *_Hist arrays plus the Int*PrevSample globals),
+// each maintained by an O(depth) shift every ISR. They are provably the same
+// sequence - the working IntVol*/IntCur* locals are written once by the IIR
+// and not touched again until the PF FIR - so a single circular buffer per
+// channel now serves both, eliminating ~100 shift-stores per ISR and 48
+// globals.
 //
-static float VR_Hist[5];
-static float VY_Hist[5];
-static float VB_Hist[5];
+// Implementation: one rolling write index (g_HistHead) shared by every
+// buffer, since all are pushed exactly once per ISR in lockstep. Buffers are
+// HIST_DEPTH (power of two) so the wrap is a mask, not a divide. The newest
+// sample sits at [g_HistHead]; "k samples ago" is HIST_AGO(buf,k). Push order
+// is push-first: each buffer is written near the top of the sample, so
+// HIST_AGO(buf,0) is the current sample - matching the old slot[0]=current /
+// IntVol*Phase(live) convention of both FIRs.
+//
+#define HIST_DEPTH 8                                   /* power of two */
+#define HIST_MASK  (HIST_DEPTH - 1)
+#define HIST_AGO(buf, k)  ((buf)[(g_HistHead - (k)) & HIST_MASK])
 
-// Same for solar V_R / V_Y / V_B (post-IIR) feeding the solar V_LL FIR.
-//
-static float VR_Solar_Hist[5];
-static float VY_Solar_Hist[5];
-static float VB_Solar_Hist[5];
+static uint8_t g_HistHead;        // advanced once per ISR, before any push
 
-// Grid I_R / I_Y / I_B history (post-IIR, post-gain, pre per-phase PF
-// FIR) used only by the I_N accumulator's per-channel phase-alignment
-// FIR. Slot [0] = current ISR sample, slots [1..4] = older samples.
-// Per-phase RMS, V*I power, FFT and PR_/PY_/PB_ all continue to use the
-// raw IntCurRPhase / IntCurYPhase / IntCurBPhase locals.
-//
-static float IR_Hist[5];
-static float IY_Hist[5];
-static float IB_Hist[5];
+static float VR_Hist[HIST_DEPTH];
+static float VY_Hist[HIST_DEPTH];
+static float VB_Hist[HIST_DEPTH];
 
-// Same for solar I_R / I_Y / I_B feeding the solar I_N FIR.
-//
-static float IR_Solar_Hist[5];
-static float IY_Solar_Hist[5];
-static float IB_Solar_Hist[5];
+static float VR_Solar_Hist[HIST_DEPTH];
+static float VY_Solar_Hist[HIST_DEPTH];
+static float VB_Solar_Hist[HIST_DEPTH];
+
+static float IR_Hist[HIST_DEPTH];
+static float IY_Hist[HIST_DEPTH];
+static float IB_Hist[HIST_DEPTH];
+
+static float IR_Solar_Hist[HIST_DEPTH];
+static float IY_Solar_Hist[HIST_DEPTH];
+static float IB_Solar_Hist[HIST_DEPTH];
 
 extern volatile uint16_t TimeOutCommTx;
 
@@ -581,15 +588,14 @@ void ProcessMainInterrupt(void)
   // (per-phase RMS just above, V*I power, FFT, PR_/PY_/PB_) keeps using
   // the raw locals.
   //
-  VR_Hist[4] = VR_Hist[3]; VR_Hist[3] = VR_Hist[2];
-  VR_Hist[2] = VR_Hist[1]; VR_Hist[1] = VR_Hist[0];
-  VR_Hist[0] = IntVolRPhase;
-  VY_Hist[4] = VY_Hist[3]; VY_Hist[3] = VY_Hist[2];
-  VY_Hist[2] = VY_Hist[1]; VY_Hist[1] = VY_Hist[0];
-  VY_Hist[0] = IntVolYPhase;
-  VB_Hist[4] = VB_Hist[3]; VB_Hist[3] = VB_Hist[2];
-  VB_Hist[2] = VB_Hist[1]; VB_Hist[1] = VB_Hist[0];
-  VB_Hist[0] = IntVolBPhase;
+  // Advance the shared circular-history write index once for this ISR, then
+  // push every per-channel history (push-first: HIST_AGO(buf,0) == current).
+  // All 12 buffers below are written against this same g_HistHead.
+  //
+  g_HistHead = (g_HistHead + 1) & HIST_MASK;
+  VR_Hist[g_HistHead] = IntVolRPhase;
+  VY_Hist[g_HistHead] = IntVolYPhase;
+  VB_Hist[g_HistHead] = IntVolBPhase;
 
   // Line-line voltage accumulators with per-pair phase-shift FIR. Same
   // 2-tap fractional-delay structure as PR_/PY_/PB_:
@@ -607,21 +613,15 @@ void ProcessMainInterrupt(void)
       if (WorkingCopyGain.VLL_RY_INT_DELAY >= 0)
       {
           int8_t d = WorkingCopyGain.VLL_RY_INT_DELAY;
-          if      (d == 0) { Cur = VR_Hist[0]; Prev = VR_Hist[1]; }
-          else if (d == 1) { Cur = VR_Hist[1]; Prev = VR_Hist[2]; }
-          else if (d == 2) { Cur = VR_Hist[2]; Prev = VR_Hist[3]; }
-          else             { Cur = VR_Hist[3]; Prev = VR_Hist[4]; }
+          Cur = HIST_AGO(VR_Hist, d); Prev = HIST_AGO(VR_Hist, d + 1);
           A = WorkingCopyGain.VLL_RY_ALFA * (Cur + WorkingCopyGain.VLL_RY_BETA * Prev);
-          B = VY_Hist[0];
+          B = HIST_AGO(VY_Hist, 0);
       }
       else
       {
           int8_t d = -WorkingCopyGain.VLL_RY_INT_DELAY - 1;
-          if      (d == 0) { Cur = VY_Hist[0]; Prev = VY_Hist[1]; }
-          else if (d == 1) { Cur = VY_Hist[1]; Prev = VY_Hist[2]; }
-          else if (d == 2) { Cur = VY_Hist[2]; Prev = VY_Hist[3]; }
-          else             { Cur = VY_Hist[3]; Prev = VY_Hist[4]; }
-          A = VR_Hist[0];
+          Cur = HIST_AGO(VY_Hist, d); Prev = HIST_AGO(VY_Hist, d + 1);
+          A = HIST_AGO(VR_Hist, 0);
           B = WorkingCopyGain.VLL_RY_ALFA * (Cur + WorkingCopyGain.VLL_RY_BETA * Prev);
       }
       TempGainMult = A - B;
@@ -632,21 +632,15 @@ void ProcessMainInterrupt(void)
       if (WorkingCopyGain.VLL_BR_INT_DELAY >= 0)
       {
           int8_t d = WorkingCopyGain.VLL_BR_INT_DELAY;
-          if      (d == 0) { Cur = VB_Hist[0]; Prev = VB_Hist[1]; }
-          else if (d == 1) { Cur = VB_Hist[1]; Prev = VB_Hist[2]; }
-          else if (d == 2) { Cur = VB_Hist[2]; Prev = VB_Hist[3]; }
-          else             { Cur = VB_Hist[3]; Prev = VB_Hist[4]; }
+          Cur = HIST_AGO(VB_Hist, d); Prev = HIST_AGO(VB_Hist, d + 1);
           A = WorkingCopyGain.VLL_BR_ALFA * (Cur + WorkingCopyGain.VLL_BR_BETA * Prev);
-          B = VR_Hist[0];
+          B = HIST_AGO(VR_Hist, 0);
       }
       else
       {
           int8_t d = -WorkingCopyGain.VLL_BR_INT_DELAY - 1;
-          if      (d == 0) { Cur = VR_Hist[0]; Prev = VR_Hist[1]; }
-          else if (d == 1) { Cur = VR_Hist[1]; Prev = VR_Hist[2]; }
-          else if (d == 2) { Cur = VR_Hist[2]; Prev = VR_Hist[3]; }
-          else             { Cur = VR_Hist[3]; Prev = VR_Hist[4]; }
-          A = VB_Hist[0];
+          Cur = HIST_AGO(VR_Hist, d); Prev = HIST_AGO(VR_Hist, d + 1);
+          A = HIST_AGO(VB_Hist, 0);
           B = WorkingCopyGain.VLL_BR_ALFA * (Cur + WorkingCopyGain.VLL_BR_BETA * Prev);
       }
       TempGainMult = A - B;
@@ -660,21 +654,15 @@ void ProcessMainInterrupt(void)
       if (WorkingCopyGain.VLL_YB_INT_DELAY >= 0)
       {
           int8_t d = WorkingCopyGain.VLL_YB_INT_DELAY;
-          if      (d == 0) { Cur = VY_Hist[0]; Prev = VY_Hist[1]; }
-          else if (d == 1) { Cur = VY_Hist[1]; Prev = VY_Hist[2]; }
-          else if (d == 2) { Cur = VY_Hist[2]; Prev = VY_Hist[3]; }
-          else             { Cur = VY_Hist[3]; Prev = VY_Hist[4]; }
+          Cur = HIST_AGO(VY_Hist, d); Prev = HIST_AGO(VY_Hist, d + 1);
           A = WorkingCopyGain.VLL_YB_ALFA * (Cur + WorkingCopyGain.VLL_YB_BETA * Prev);
-          B = VB_Hist[0];
+          B = HIST_AGO(VB_Hist, 0);
       }
       else
       {
           int8_t d = -WorkingCopyGain.VLL_YB_INT_DELAY - 1;
-          if      (d == 0) { Cur = VB_Hist[0]; Prev = VB_Hist[1]; }
-          else if (d == 1) { Cur = VB_Hist[1]; Prev = VB_Hist[2]; }
-          else if (d == 2) { Cur = VB_Hist[2]; Prev = VB_Hist[3]; }
-          else             { Cur = VB_Hist[3]; Prev = VB_Hist[4]; }
-          A = VY_Hist[0];
+          Cur = HIST_AGO(VB_Hist, d); Prev = HIST_AGO(VB_Hist, d + 1);
+          A = HIST_AGO(VY_Hist, 0);
           B = WorkingCopyGain.VLL_YB_ALFA * (Cur + WorkingCopyGain.VLL_YB_BETA * Prev);
       }
       TempGainMult = A - B;
@@ -695,15 +683,9 @@ void ProcessMainInterrupt(void)
   // FIR (which would otherwise overwrite the I locals). Histories are
   // pushed every cycle so the FIR taps are always coherent.
   //
-  IR_Hist[4] = IR_Hist[3]; IR_Hist[3] = IR_Hist[2];
-  IR_Hist[2] = IR_Hist[1]; IR_Hist[1] = IR_Hist[0];
-  IR_Hist[0] = IntCurRPhase;
-  IY_Hist[4] = IY_Hist[3]; IY_Hist[3] = IY_Hist[2];
-  IY_Hist[2] = IY_Hist[1]; IY_Hist[1] = IY_Hist[0];
-  IY_Hist[0] = IntCurYPhase;
-  IB_Hist[4] = IB_Hist[3]; IB_Hist[3] = IB_Hist[2];
-  IB_Hist[2] = IB_Hist[1]; IB_Hist[1] = IB_Hist[0];
-  IB_Hist[0] = IntCurBPhase;
+  IR_Hist[g_HistHead] = IntCurRPhase;
+  IY_Hist[g_HistHead] = IntCurYPhase;
+  IB_Hist[g_HistHead] = IntCurBPhase;
 
   {
       float Cur, Prev;
@@ -711,24 +693,15 @@ void ProcessMainInterrupt(void)
       int8_t d;
 
       d = WorkingCopyGain.I_N_R_INT_DELAY;
-      if      (d == 0) { Cur = IR_Hist[0]; Prev = IR_Hist[1]; }
-      else if (d == 1) { Cur = IR_Hist[1]; Prev = IR_Hist[2]; }
-      else if (d == 2) { Cur = IR_Hist[2]; Prev = IR_Hist[3]; }
-      else             { Cur = IR_Hist[3]; Prev = IR_Hist[4]; }
+      Cur = HIST_AGO(IR_Hist, d); Prev = HIST_AGO(IR_Hist, d + 1);
       Ir_Aligned = WorkingCopyGain.I_N_R_ALFA * (Cur + WorkingCopyGain.I_N_R_BETA * Prev);
 
       d = WorkingCopyGain.I_N_Y_INT_DELAY;
-      if      (d == 0) { Cur = IY_Hist[0]; Prev = IY_Hist[1]; }
-      else if (d == 1) { Cur = IY_Hist[1]; Prev = IY_Hist[2]; }
-      else if (d == 2) { Cur = IY_Hist[2]; Prev = IY_Hist[3]; }
-      else             { Cur = IY_Hist[3]; Prev = IY_Hist[4]; }
+      Cur = HIST_AGO(IY_Hist, d); Prev = HIST_AGO(IY_Hist, d + 1);
       Iy_Aligned = WorkingCopyGain.I_N_Y_ALFA * (Cur + WorkingCopyGain.I_N_Y_BETA * Prev);
 
       d = WorkingCopyGain.I_N_B_INT_DELAY;
-      if      (d == 0) { Cur = IB_Hist[0]; Prev = IB_Hist[1]; }
-      else if (d == 1) { Cur = IB_Hist[1]; Prev = IB_Hist[2]; }
-      else if (d == 2) { Cur = IB_Hist[2]; Prev = IB_Hist[3]; }
-      else             { Cur = IB_Hist[3]; Prev = IB_Hist[4]; }
+      Cur = HIST_AGO(IB_Hist, d); Prev = HIST_AGO(IB_Hist, d + 1);
       Ib_Aligned = WorkingCopyGain.I_N_B_ALFA * (Cur + WorkingCopyGain.I_N_B_BETA * Prev);
 
       IntNeuCurrent = Ir_Aligned + Iy_Aligned + Ib_Aligned;
@@ -748,96 +721,52 @@ void ProcessMainInterrupt(void)
   // through unchanged. Both history registers always shift so either branch
   // can be selected at any time without waking-up artefacts.
   //
+  // History is the unified per-channel circular buffer (VR_Hist / IR_Hist
+  // ...), already pushed at the top of this ISR with the post-IIR sample.
+  // HIST_AGO(buf,0) is therefore the current pre-PF sample (== the old live
+  // IntVol*Phase) and HIST_AGO(buf,k>=1) are the old Int*Prev[k]Sample taps -
+  // no separate shift register and no end-of-block shift needed.
+  //
   float VCur,VPrev,ICur,IPrev;
-  float IntVolRPhaseOrig,IntVolYPhaseOrig,IntVolBPhaseOrig;
-  float IntCurRPhaseOrig,IntCurYPhaseOrig,IntCurBPhaseOrig;
 
-  IntVolRPhaseOrig=IntVolRPhase;
-  IntCurRPhaseOrig=IntCurRPhase;
   if(WorkingCopyGain.PR_INT_DELAY>=0)
   {
     int8_t d=WorkingCopyGain.PR_INT_DELAY;
-    if(d==0)      {VCur=IntVolRPhase;    VPrev=IntRPrevSample;}
-    else if(d==1) {VCur=IntRPrevSample;  VPrev=IntRPrev2Sample;}
-    else if(d==2) {VCur=IntRPrev2Sample; VPrev=IntRPrev3Sample;}
-    else          {VCur=IntRPrev3Sample; VPrev=IntRPrev4Sample;}
+    VCur=HIST_AGO(VR_Hist,d); VPrev=HIST_AGO(VR_Hist,d+1);
     IntVolRPhase=WorkingCopyGain.PR_ALFA*(VCur+WorkingCopyGain.PR_BETA*VPrev);
   }
   else
   {
     int8_t d=-WorkingCopyGain.PR_INT_DELAY-1;
-    if(d==0)      {ICur=IntCurRPhase;       IPrev=IntCurRPrevSample;}
-    else if(d==1) {ICur=IntCurRPrevSample;  IPrev=IntCurRPrev2Sample;}
-    else if(d==2) {ICur=IntCurRPrev2Sample; IPrev=IntCurRPrev3Sample;}
-    else          {ICur=IntCurRPrev3Sample; IPrev=IntCurRPrev4Sample;}
+    ICur=HIST_AGO(IR_Hist,d); IPrev=HIST_AGO(IR_Hist,d+1);
     IntCurRPhase=WorkingCopyGain.PR_ALFA*(ICur+WorkingCopyGain.PR_BETA*IPrev);
   }
-  IntRPrev4Sample=IntRPrev3Sample;
-  IntRPrev3Sample=IntRPrev2Sample;
-  IntRPrev2Sample=IntRPrevSample;
-  IntRPrevSample=IntVolRPhaseOrig;
-  IntCurRPrev4Sample=IntCurRPrev3Sample;
-  IntCurRPrev3Sample=IntCurRPrev2Sample;
-  IntCurRPrev2Sample=IntCurRPrevSample;
-  IntCurRPrevSample=IntCurRPhaseOrig;
 
-  IntVolYPhaseOrig=IntVolYPhase;
-  IntCurYPhaseOrig=IntCurYPhase;
   if(WorkingCopyGain.PY_INT_DELAY>=0)
   {
     int8_t d=WorkingCopyGain.PY_INT_DELAY;
-    if(d==0)      {VCur=IntVolYPhase;    VPrev=IntYPrevSample;}
-    else if(d==1) {VCur=IntYPrevSample;  VPrev=IntYPrev2Sample;}
-    else if(d==2) {VCur=IntYPrev2Sample; VPrev=IntYPrev3Sample;}
-    else          {VCur=IntYPrev3Sample; VPrev=IntYPrev4Sample;}
+    VCur=HIST_AGO(VY_Hist,d); VPrev=HIST_AGO(VY_Hist,d+1);
     IntVolYPhase=WorkingCopyGain.PY_ALFA*(VCur+WorkingCopyGain.PY_BETA*VPrev);
   }
   else
   {
     int8_t d=-WorkingCopyGain.PY_INT_DELAY-1;
-    if(d==0)      {ICur=IntCurYPhase;       IPrev=IntCurYPrevSample;}
-    else if(d==1) {ICur=IntCurYPrevSample;  IPrev=IntCurYPrev2Sample;}
-    else if(d==2) {ICur=IntCurYPrev2Sample; IPrev=IntCurYPrev3Sample;}
-    else          {ICur=IntCurYPrev3Sample; IPrev=IntCurYPrev4Sample;}
+    ICur=HIST_AGO(IY_Hist,d); IPrev=HIST_AGO(IY_Hist,d+1);
     IntCurYPhase=WorkingCopyGain.PY_ALFA*(ICur+WorkingCopyGain.PY_BETA*IPrev);
   }
-  IntYPrev4Sample=IntYPrev3Sample;
-  IntYPrev3Sample=IntYPrev2Sample;
-  IntYPrev2Sample=IntYPrevSample;
-  IntYPrevSample=IntVolYPhaseOrig;
-  IntCurYPrev4Sample=IntCurYPrev3Sample;
-  IntCurYPrev3Sample=IntCurYPrev2Sample;
-  IntCurYPrev2Sample=IntCurYPrevSample;
-  IntCurYPrevSample=IntCurYPhaseOrig;
 
-  IntVolBPhaseOrig=IntVolBPhase;
-  IntCurBPhaseOrig=IntCurBPhase;
   if(WorkingCopyGain.PB_INT_DELAY>=0)
   {
     int8_t d=WorkingCopyGain.PB_INT_DELAY;
-    if(d==0)      {VCur=IntVolBPhase;    VPrev=IntBPrevSample;}
-    else if(d==1) {VCur=IntBPrevSample;  VPrev=IntBPrev2Sample;}
-    else if(d==2) {VCur=IntBPrev2Sample; VPrev=IntBPrev3Sample;}
-    else          {VCur=IntBPrev3Sample; VPrev=IntBPrev4Sample;}
+    VCur=HIST_AGO(VB_Hist,d); VPrev=HIST_AGO(VB_Hist,d+1);
     IntVolBPhase=WorkingCopyGain.PB_ALFA*(VCur+WorkingCopyGain.PB_BETA*VPrev);
   }
   else
   {
     int8_t d=-WorkingCopyGain.PB_INT_DELAY-1;
-    if(d==0)      {ICur=IntCurBPhase;       IPrev=IntCurBPrevSample;}
-    else if(d==1) {ICur=IntCurBPrevSample;  IPrev=IntCurBPrev2Sample;}
-    else if(d==2) {ICur=IntCurBPrev2Sample; IPrev=IntCurBPrev3Sample;}
-    else          {ICur=IntCurBPrev3Sample; IPrev=IntCurBPrev4Sample;}
+    ICur=HIST_AGO(IB_Hist,d); IPrev=HIST_AGO(IB_Hist,d+1);
     IntCurBPhase=WorkingCopyGain.PB_ALFA*(ICur+WorkingCopyGain.PB_BETA*IPrev);
   }
-  IntBPrev4Sample=IntBPrev3Sample;
-  IntBPrev3Sample=IntBPrev2Sample;
-  IntBPrev2Sample=IntBPrevSample;
-  IntBPrevSample=IntVolBPhaseOrig;
-  IntCurBPrev4Sample=IntCurBPrev3Sample;
-  IntCurBPrev3Sample=IntCurBPrev2Sample;
-  IntCurBPrev2Sample=IntCurBPrevSample;
-  IntCurBPrevSample=IntCurBPhaseOrig;
 
   IntDataSum.RPhasePower +=IntVolRPhase*IntCurRPhase;
   IntDataSum.YPhasePower +=IntVolYPhase*IntCurYPhase;
@@ -864,15 +793,9 @@ void ProcessMainInterrupt(void)
   // structure as the grid VR_Hist / VY_Hist / VB_Hist above; consumed only
   // by the solar V_LL accumulator's per-pair phase-shift FIR below.
   //
-  VR_Solar_Hist[4] = VR_Solar_Hist[3]; VR_Solar_Hist[3] = VR_Solar_Hist[2];
-  VR_Solar_Hist[2] = VR_Solar_Hist[1]; VR_Solar_Hist[1] = VR_Solar_Hist[0];
-  VR_Solar_Hist[0] = IntVolRSolarPhase;
-  VY_Solar_Hist[4] = VY_Solar_Hist[3]; VY_Solar_Hist[3] = VY_Solar_Hist[2];
-  VY_Solar_Hist[2] = VY_Solar_Hist[1]; VY_Solar_Hist[1] = VY_Solar_Hist[0];
-  VY_Solar_Hist[0] = IntVolYSolarPhase;
-  VB_Solar_Hist[4] = VB_Solar_Hist[3]; VB_Solar_Hist[3] = VB_Solar_Hist[2];
-  VB_Solar_Hist[2] = VB_Solar_Hist[1]; VB_Solar_Hist[1] = VB_Solar_Hist[0];
-  VB_Solar_Hist[0] = IntVolBSolarPhase;
+  VR_Solar_Hist[g_HistHead] = IntVolRSolarPhase;
+  VY_Solar_Hist[g_HistHead] = IntVolYSolarPhase;
+  VB_Solar_Hist[g_HistHead] = IntVolBSolarPhase;
 
   // Solar line-line voltage accumulators with per-pair phase-shift FIR.
   // Same 2-tap fractional-delay structure as the grid V_LL block above.
@@ -886,21 +809,15 @@ void ProcessMainInterrupt(void)
       if (WorkingCopyGain.VLL_RY_SOLAR_INT_DELAY >= 0)
       {
           int8_t d = WorkingCopyGain.VLL_RY_SOLAR_INT_DELAY;
-          if      (d == 0) { Cur = VR_Solar_Hist[0]; Prev = VR_Solar_Hist[1]; }
-          else if (d == 1) { Cur = VR_Solar_Hist[1]; Prev = VR_Solar_Hist[2]; }
-          else if (d == 2) { Cur = VR_Solar_Hist[2]; Prev = VR_Solar_Hist[3]; }
-          else             { Cur = VR_Solar_Hist[3]; Prev = VR_Solar_Hist[4]; }
+          Cur = HIST_AGO(VR_Solar_Hist, d); Prev = HIST_AGO(VR_Solar_Hist, d + 1);
           A = WorkingCopyGain.VLL_RY_SOLAR_ALFA * (Cur + WorkingCopyGain.VLL_RY_SOLAR_BETA * Prev);
-          B = VY_Solar_Hist[0];
+          B = HIST_AGO(VY_Solar_Hist, 0);
       }
       else
       {
           int8_t d = -WorkingCopyGain.VLL_RY_SOLAR_INT_DELAY - 1;
-          if      (d == 0) { Cur = VY_Solar_Hist[0]; Prev = VY_Solar_Hist[1]; }
-          else if (d == 1) { Cur = VY_Solar_Hist[1]; Prev = VY_Solar_Hist[2]; }
-          else if (d == 2) { Cur = VY_Solar_Hist[2]; Prev = VY_Solar_Hist[3]; }
-          else             { Cur = VY_Solar_Hist[3]; Prev = VY_Solar_Hist[4]; }
-          A = VR_Solar_Hist[0];
+          Cur = HIST_AGO(VY_Solar_Hist, d); Prev = HIST_AGO(VY_Solar_Hist, d + 1);
+          A = HIST_AGO(VR_Solar_Hist, 0);
           B = WorkingCopyGain.VLL_RY_SOLAR_ALFA * (Cur + WorkingCopyGain.VLL_RY_SOLAR_BETA * Prev);
       }
       TempGainMult = A - B;
@@ -911,21 +828,15 @@ void ProcessMainInterrupt(void)
       if (WorkingCopyGain.VLL_BR_SOLAR_INT_DELAY >= 0)
       {
           int8_t d = WorkingCopyGain.VLL_BR_SOLAR_INT_DELAY;
-          if      (d == 0) { Cur = VB_Solar_Hist[0]; Prev = VB_Solar_Hist[1]; }
-          else if (d == 1) { Cur = VB_Solar_Hist[1]; Prev = VB_Solar_Hist[2]; }
-          else if (d == 2) { Cur = VB_Solar_Hist[2]; Prev = VB_Solar_Hist[3]; }
-          else             { Cur = VB_Solar_Hist[3]; Prev = VB_Solar_Hist[4]; }
+          Cur = HIST_AGO(VB_Solar_Hist, d); Prev = HIST_AGO(VB_Solar_Hist, d + 1);
           A = WorkingCopyGain.VLL_BR_SOLAR_ALFA * (Cur + WorkingCopyGain.VLL_BR_SOLAR_BETA * Prev);
-          B = VR_Solar_Hist[0];
+          B = HIST_AGO(VR_Solar_Hist, 0);
       }
       else
       {
           int8_t d = -WorkingCopyGain.VLL_BR_SOLAR_INT_DELAY - 1;
-          if      (d == 0) { Cur = VR_Solar_Hist[0]; Prev = VR_Solar_Hist[1]; }
-          else if (d == 1) { Cur = VR_Solar_Hist[1]; Prev = VR_Solar_Hist[2]; }
-          else if (d == 2) { Cur = VR_Solar_Hist[2]; Prev = VR_Solar_Hist[3]; }
-          else             { Cur = VR_Solar_Hist[3]; Prev = VR_Solar_Hist[4]; }
-          A = VB_Solar_Hist[0];
+          Cur = HIST_AGO(VR_Solar_Hist, d); Prev = HIST_AGO(VR_Solar_Hist, d + 1);
+          A = HIST_AGO(VB_Solar_Hist, 0);
           B = WorkingCopyGain.VLL_BR_SOLAR_ALFA * (Cur + WorkingCopyGain.VLL_BR_SOLAR_BETA * Prev);
       }
       TempGainMult = A - B;
@@ -938,21 +849,15 @@ void ProcessMainInterrupt(void)
       if (WorkingCopyGain.VLL_YB_SOLAR_INT_DELAY >= 0)
       {
           int8_t d = WorkingCopyGain.VLL_YB_SOLAR_INT_DELAY;
-          if      (d == 0) { Cur = VY_Solar_Hist[0]; Prev = VY_Solar_Hist[1]; }
-          else if (d == 1) { Cur = VY_Solar_Hist[1]; Prev = VY_Solar_Hist[2]; }
-          else if (d == 2) { Cur = VY_Solar_Hist[2]; Prev = VY_Solar_Hist[3]; }
-          else             { Cur = VY_Solar_Hist[3]; Prev = VY_Solar_Hist[4]; }
+          Cur = HIST_AGO(VY_Solar_Hist, d); Prev = HIST_AGO(VY_Solar_Hist, d + 1);
           A = WorkingCopyGain.VLL_YB_SOLAR_ALFA * (Cur + WorkingCopyGain.VLL_YB_SOLAR_BETA * Prev);
-          B = VB_Solar_Hist[0];
+          B = HIST_AGO(VB_Solar_Hist, 0);
       }
       else
       {
           int8_t d = -WorkingCopyGain.VLL_YB_SOLAR_INT_DELAY - 1;
-          if      (d == 0) { Cur = VB_Solar_Hist[0]; Prev = VB_Solar_Hist[1]; }
-          else if (d == 1) { Cur = VB_Solar_Hist[1]; Prev = VB_Solar_Hist[2]; }
-          else if (d == 2) { Cur = VB_Solar_Hist[2]; Prev = VB_Solar_Hist[3]; }
-          else             { Cur = VB_Solar_Hist[3]; Prev = VB_Solar_Hist[4]; }
-          A = VY_Solar_Hist[0];
+          Cur = HIST_AGO(VB_Solar_Hist, d); Prev = HIST_AGO(VB_Solar_Hist, d + 1);
+          A = HIST_AGO(VY_Solar_Hist, 0);
           B = WorkingCopyGain.VLL_YB_SOLAR_ALFA * (Cur + WorkingCopyGain.VLL_YB_SOLAR_BETA * Prev);
       }
       TempGainMult = A - B;
@@ -962,15 +867,9 @@ void ProcessMainInterrupt(void)
   // Solar neutral current with per-channel phase-alignment FIR. Same
   // structure as the grid I_N block above.
   //
-  IR_Solar_Hist[4] = IR_Solar_Hist[3]; IR_Solar_Hist[3] = IR_Solar_Hist[2];
-  IR_Solar_Hist[2] = IR_Solar_Hist[1]; IR_Solar_Hist[1] = IR_Solar_Hist[0];
-  IR_Solar_Hist[0] = IntCurRSolarPhase;
-  IY_Solar_Hist[4] = IY_Solar_Hist[3]; IY_Solar_Hist[3] = IY_Solar_Hist[2];
-  IY_Solar_Hist[2] = IY_Solar_Hist[1]; IY_Solar_Hist[1] = IY_Solar_Hist[0];
-  IY_Solar_Hist[0] = IntCurYSolarPhase;
-  IB_Solar_Hist[4] = IB_Solar_Hist[3]; IB_Solar_Hist[3] = IB_Solar_Hist[2];
-  IB_Solar_Hist[2] = IB_Solar_Hist[1]; IB_Solar_Hist[1] = IB_Solar_Hist[0];
-  IB_Solar_Hist[0] = IntCurBSolarPhase;
+  IR_Solar_Hist[g_HistHead] = IntCurRSolarPhase;
+  IY_Solar_Hist[g_HistHead] = IntCurYSolarPhase;
+  IB_Solar_Hist[g_HistHead] = IntCurBSolarPhase;
 
   {
       float Cur, Prev;
@@ -978,24 +877,15 @@ void ProcessMainInterrupt(void)
       int8_t d;
 
       d = WorkingCopyGain.I_N_R_SOLAR_INT_DELAY;
-      if      (d == 0) { Cur = IR_Solar_Hist[0]; Prev = IR_Solar_Hist[1]; }
-      else if (d == 1) { Cur = IR_Solar_Hist[1]; Prev = IR_Solar_Hist[2]; }
-      else if (d == 2) { Cur = IR_Solar_Hist[2]; Prev = IR_Solar_Hist[3]; }
-      else             { Cur = IR_Solar_Hist[3]; Prev = IR_Solar_Hist[4]; }
+      Cur = HIST_AGO(IR_Solar_Hist, d); Prev = HIST_AGO(IR_Solar_Hist, d + 1);
       Ir_Aligned = WorkingCopyGain.I_N_R_SOLAR_ALFA * (Cur + WorkingCopyGain.I_N_R_SOLAR_BETA * Prev);
 
       d = WorkingCopyGain.I_N_Y_SOLAR_INT_DELAY;
-      if      (d == 0) { Cur = IY_Solar_Hist[0]; Prev = IY_Solar_Hist[1]; }
-      else if (d == 1) { Cur = IY_Solar_Hist[1]; Prev = IY_Solar_Hist[2]; }
-      else if (d == 2) { Cur = IY_Solar_Hist[2]; Prev = IY_Solar_Hist[3]; }
-      else             { Cur = IY_Solar_Hist[3]; Prev = IY_Solar_Hist[4]; }
+      Cur = HIST_AGO(IY_Solar_Hist, d); Prev = HIST_AGO(IY_Solar_Hist, d + 1);
       Iy_Aligned = WorkingCopyGain.I_N_Y_SOLAR_ALFA * (Cur + WorkingCopyGain.I_N_Y_SOLAR_BETA * Prev);
 
       d = WorkingCopyGain.I_N_B_SOLAR_INT_DELAY;
-      if      (d == 0) { Cur = IB_Solar_Hist[0]; Prev = IB_Solar_Hist[1]; }
-      else if (d == 1) { Cur = IB_Solar_Hist[1]; Prev = IB_Solar_Hist[2]; }
-      else if (d == 2) { Cur = IB_Solar_Hist[2]; Prev = IB_Solar_Hist[3]; }
-      else             { Cur = IB_Solar_Hist[3]; Prev = IB_Solar_Hist[4]; }
+      Cur = HIST_AGO(IB_Solar_Hist, d); Prev = HIST_AGO(IB_Solar_Hist, d + 1);
       Ib_Aligned = WorkingCopyGain.I_N_B_SOLAR_ALFA * (Cur + WorkingCopyGain.I_N_B_SOLAR_BETA * Prev);
 
       IntNeuSolarCurrent = Ir_Aligned + Iy_Aligned + Ib_Aligned;
@@ -1003,95 +893,46 @@ void ProcessMainInterrupt(void)
 
   IntDataSum.CurNeutralSolar +=IntNeuSolarCurrent*IntNeuSolarCurrent;
 
-  float IntVolRSolarPhaseOrig,IntVolYSolarPhaseOrig,IntVolBSolarPhaseOrig;
-  float IntCurRSolarPhaseOrig,IntCurYSolarPhaseOrig,IntCurBSolarPhaseOrig;
-
-  IntVolRSolarPhaseOrig=IntVolRSolarPhase;
-  IntCurRSolarPhaseOrig=IntCurRSolarPhase;
+  // Solar PF FIR: same unified-circular-buffer scheme as the grid PF FIR.
+  //
   if(WorkingCopyGain.PR_SOLAR_INT_DELAY>=0)
   {
     int8_t d=WorkingCopyGain.PR_SOLAR_INT_DELAY;
-    if(d==0)      {VCur=IntVolRSolarPhase;    VPrev=IntRSolarPrevSample;}
-    else if(d==1) {VCur=IntRSolarPrevSample;  VPrev=IntRSolarPrev2Sample;}
-    else if(d==2) {VCur=IntRSolarPrev2Sample; VPrev=IntRSolarPrev3Sample;}
-    else          {VCur=IntRSolarPrev3Sample; VPrev=IntRSolarPrev4Sample;}
+    VCur=HIST_AGO(VR_Solar_Hist,d); VPrev=HIST_AGO(VR_Solar_Hist,d+1);
     IntVolRSolarPhase=WorkingCopyGain.PR_SOLAR_ALFA*(VCur+WorkingCopyGain.PR_SOLAR_BETA*VPrev);
   }
   else
   {
     int8_t d=-WorkingCopyGain.PR_SOLAR_INT_DELAY-1;
-    if(d==0)      {ICur=IntCurRSolarPhase;       IPrev=IntCurRSolarPrevSample;}
-    else if(d==1) {ICur=IntCurRSolarPrevSample;  IPrev=IntCurRSolarPrev2Sample;}
-    else if(d==2) {ICur=IntCurRSolarPrev2Sample; IPrev=IntCurRSolarPrev3Sample;}
-    else          {ICur=IntCurRSolarPrev3Sample; IPrev=IntCurRSolarPrev4Sample;}
+    ICur=HIST_AGO(IR_Solar_Hist,d); IPrev=HIST_AGO(IR_Solar_Hist,d+1);
     IntCurRSolarPhase=WorkingCopyGain.PR_SOLAR_ALFA*(ICur+WorkingCopyGain.PR_SOLAR_BETA*IPrev);
   }
-  IntRSolarPrev4Sample=IntRSolarPrev3Sample;
-  IntRSolarPrev3Sample=IntRSolarPrev2Sample;
-  IntRSolarPrev2Sample=IntRSolarPrevSample;
-  IntRSolarPrevSample=IntVolRSolarPhaseOrig;
-  IntCurRSolarPrev4Sample=IntCurRSolarPrev3Sample;
-  IntCurRSolarPrev3Sample=IntCurRSolarPrev2Sample;
-  IntCurRSolarPrev2Sample=IntCurRSolarPrevSample;
-  IntCurRSolarPrevSample=IntCurRSolarPhaseOrig;
 
-  IntVolYSolarPhaseOrig=IntVolYSolarPhase;
-  IntCurYSolarPhaseOrig=IntCurYSolarPhase;
   if(WorkingCopyGain.PY_SOLAR_INT_DELAY>=0)
   {
     int8_t d=WorkingCopyGain.PY_SOLAR_INT_DELAY;
-    if(d==0)      {VCur=IntVolYSolarPhase;    VPrev=IntYSolarPrevSample;}
-    else if(d==1) {VCur=IntYSolarPrevSample;  VPrev=IntYSolarPrev2Sample;}
-    else if(d==2) {VCur=IntYSolarPrev2Sample; VPrev=IntYSolarPrev3Sample;}
-    else          {VCur=IntYSolarPrev3Sample; VPrev=IntYSolarPrev4Sample;}
+    VCur=HIST_AGO(VY_Solar_Hist,d); VPrev=HIST_AGO(VY_Solar_Hist,d+1);
     IntVolYSolarPhase=WorkingCopyGain.PY_SOLAR_ALFA*(VCur+WorkingCopyGain.PY_SOLAR_BETA*VPrev);
   }
   else
   {
     int8_t d=-WorkingCopyGain.PY_SOLAR_INT_DELAY-1;
-    if(d==0)      {ICur=IntCurYSolarPhase;       IPrev=IntCurYSolarPrevSample;}
-    else if(d==1) {ICur=IntCurYSolarPrevSample;  IPrev=IntCurYSolarPrev2Sample;}
-    else if(d==2) {ICur=IntCurYSolarPrev2Sample; IPrev=IntCurYSolarPrev3Sample;}
-    else          {ICur=IntCurYSolarPrev3Sample; IPrev=IntCurYSolarPrev4Sample;}
+    ICur=HIST_AGO(IY_Solar_Hist,d); IPrev=HIST_AGO(IY_Solar_Hist,d+1);
     IntCurYSolarPhase=WorkingCopyGain.PY_SOLAR_ALFA*(ICur+WorkingCopyGain.PY_SOLAR_BETA*IPrev);
   }
-  IntYSolarPrev4Sample=IntYSolarPrev3Sample;
-  IntYSolarPrev3Sample=IntYSolarPrev2Sample;
-  IntYSolarPrev2Sample=IntYSolarPrevSample;
-  IntYSolarPrevSample=IntVolYSolarPhaseOrig;
-  IntCurYSolarPrev4Sample=IntCurYSolarPrev3Sample;
-  IntCurYSolarPrev3Sample=IntCurYSolarPrev2Sample;
-  IntCurYSolarPrev2Sample=IntCurYSolarPrevSample;
-  IntCurYSolarPrevSample=IntCurYSolarPhaseOrig;
 
-  IntVolBSolarPhaseOrig=IntVolBSolarPhase;
-  IntCurBSolarPhaseOrig=IntCurBSolarPhase;
   if(WorkingCopyGain.PB_SOLAR_INT_DELAY>=0)
   {
     int8_t d=WorkingCopyGain.PB_SOLAR_INT_DELAY;
-    if(d==0)      {VCur=IntVolBSolarPhase;    VPrev=IntBSolarPrevSample;}
-    else if(d==1) {VCur=IntBSolarPrevSample;  VPrev=IntBSolarPrev2Sample;}
-    else if(d==2) {VCur=IntBSolarPrev2Sample; VPrev=IntBSolarPrev3Sample;}
-    else          {VCur=IntBSolarPrev3Sample; VPrev=IntBSolarPrev4Sample;}
+    VCur=HIST_AGO(VB_Solar_Hist,d); VPrev=HIST_AGO(VB_Solar_Hist,d+1);
     IntVolBSolarPhase=WorkingCopyGain.PB_SOLAR_ALFA*(VCur+WorkingCopyGain.PB_SOLAR_BETA*VPrev);
   }
   else
   {
     int8_t d=-WorkingCopyGain.PB_SOLAR_INT_DELAY-1;
-    if(d==0)      {ICur=IntCurBSolarPhase;       IPrev=IntCurBSolarPrevSample;}
-    else if(d==1) {ICur=IntCurBSolarPrevSample;  IPrev=IntCurBSolarPrev2Sample;}
-    else if(d==2) {ICur=IntCurBSolarPrev2Sample; IPrev=IntCurBSolarPrev3Sample;}
-    else          {ICur=IntCurBSolarPrev3Sample; IPrev=IntCurBSolarPrev4Sample;}
+    ICur=HIST_AGO(IB_Solar_Hist,d); IPrev=HIST_AGO(IB_Solar_Hist,d+1);
     IntCurBSolarPhase=WorkingCopyGain.PB_SOLAR_ALFA*(ICur+WorkingCopyGain.PB_SOLAR_BETA*IPrev);
   }
-  IntBSolarPrev4Sample=IntBSolarPrev3Sample;
-  IntBSolarPrev3Sample=IntBSolarPrev2Sample;
-  IntBSolarPrev2Sample=IntBSolarPrevSample;
-  IntBSolarPrevSample=IntVolBSolarPhaseOrig;
-  IntCurBSolarPrev4Sample=IntCurBSolarPrev3Sample;
-  IntCurBSolarPrev3Sample=IntCurBSolarPrev2Sample;
-  IntCurBSolarPrev2Sample=IntCurBSolarPrevSample;
-  IntCurBSolarPrevSample=IntCurBSolarPhaseOrig;
 
   IntDataSum.RSolarPhasePower +=IntVolRSolarPhase*IntCurRSolarPhase;
   IntDataSum.YSolarPhasePower +=IntVolYSolarPhase*IntCurYSolarPhase;
