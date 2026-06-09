@@ -1152,9 +1152,6 @@ void ProcessMainInterrupt(void)
   
   SampleCounter++;
 
-  if(SampleCounter & 0x02)InterruptDisplayRefresh();
-
-
   if((Timer.transfercomplete)||(Timer.TransmissionFailed))
   {
     TempInt=TimeOutCommTx;

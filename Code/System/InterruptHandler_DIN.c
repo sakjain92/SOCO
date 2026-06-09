@@ -94,7 +94,11 @@ void PendSV_Handler(void)
   */
 void SysTick_Handler(void)
 {
-  
+  // Fixed 1600 Hz LCD multiplex refresh, moved here from the metering ISR
+  // (see SetDisplayTimer). Lowest configured priority (3) so metering/comms
+  // always preempt it; mid-refresh preemption is harmless for the shift reg.
+  //
+  InterruptDisplayRefresh();
 }
 
 

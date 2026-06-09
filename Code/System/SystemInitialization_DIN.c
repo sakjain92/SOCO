@@ -20,6 +20,7 @@ void InitI2C(void);
 void SystemInit (void);
 static void SetSystemTimer(void);
 static void Set1SecTimer(void);
+static void SetDisplayTimer(void);
 static void InitPort(void);
 static void SetPwrRegisters(void);
 void InitializeHardware(void);
@@ -393,9 +394,10 @@ void InitializeHardware(void)
   InitI2C();
   FrequencyTimer();
   Set1SecTimer();
+  SetDisplayTimer();   // SysTick-driven LCD refresh (InitPort above set the pins)
   SetDmaRegisters();
   SetSDADC();
-  
+
 }
 
 
@@ -490,6 +492,28 @@ static void Set1SecTimer(void)
   NVIC_SetPriority(TIM4_IRQn, 2);
   NVIC_EnableIRQ(TIM4_IRQn);
 
+}
+
+static void SetDisplayTimer(void)
+{
+  // LCD multiplex refresh runs from SysTick instead of the metering ISR. Its
+  // ~700-cycle GPIO bit-bang (48 shift-register writes) used to run on ~half
+  // of every metering interrupt; since the metering ISR rate scales with input
+  // frequency (64 * f), at 65 Hz the period is only ~240 us and the refresh
+  // ate a large slice of it. SysTick gives a fixed rate, independent of input
+  // frequency (also fixes the old "brightness scales with f" behaviour).
+  //
+  // SysTick clock = HCLK = 12 MHz; reload 7500 -> 1600 Hz -> 320 Hz per COM
+  // line (5-way mux), matching the old refresh rate at 50 Hz input.
+  //
+  // Priority 3: strictly below USART2/DMA (0) and metering/freq/1sec (2), so
+  // the refresh can never delay real-time work. The reverse - metering
+  // preempting the refresh mid-bit-bang - is harmless: the shift register
+  // holds its lines across the gap and just resumes clocking afterwards.
+  // (SysTick_Config sets priority to the lowest value (15); override to 3.)
+  //
+  SysTick_Config(7500);
+  NVIC_SetPriority(SysTick_IRQn, 3);
 }
 
 static void FrequencyTimer(void)
