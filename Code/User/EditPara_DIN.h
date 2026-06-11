@@ -159,7 +159,7 @@ const struct Parameter EditParameters[MAX_PARAM_LIMIT]=
          3,                                       //ParaMeterLength
          0,                                       //DisableType
          0,                                       //DataWithDecUnit
-         180,                                     //Default Value
+         160,                                     //Default Value
     },
 
     {
@@ -172,7 +172,7 @@ const struct Parameter EditParameters[MAX_PARAM_LIMIT]=
          3,                                       //ParaMeterLength
          0,                                       //DisableType
          0,                                       //DataWithDecUnit
-         270,                                     //Default Value
+         275,                                     //Default Value
     },
 
     {
@@ -185,7 +185,7 @@ const struct Parameter EditParameters[MAX_PARAM_LIMIT]=
          3,                                       //ParaMeterLength
          0,                                       //DisableType
          0,                                       //DataWithDecUnit
-         200,                                     //Default Value
+         165,                                     //Default Value
     },
 
     {
@@ -198,7 +198,7 @@ const struct Parameter EditParameters[MAX_PARAM_LIMIT]=
          3,                                       //ParaMeterLength
          0,                                       //DisableType
          0,                                       //DataWithDecUnit
-         250,                                     //Default Value
+         270,                                     //Default Value
     },
     {
          PARA_MAINS_FAIL_DELAY,                   // VariableIndex
@@ -249,7 +249,7 @@ const struct Parameter EditParameters[MAX_PARAM_LIMIT]=
          3,                                       //ParaMeterLength
          0,                                       //DisableType
          0,                                       //DataWithDecUnit
-         270,                                     //Default Value
+         275,                                     //Default Value
     },
 
     {
@@ -262,7 +262,7 @@ const struct Parameter EditParameters[MAX_PARAM_LIMIT]=
          3,                                       //ParaMeterLength
          0,                                       //DisableType
          0,                                       //DataWithDecUnit
-         180,                                     //Default Value
+         165,                                     //Default Value
     },
 
     {
@@ -275,7 +275,7 @@ const struct Parameter EditParameters[MAX_PARAM_LIMIT]=
          3,                                       //ParaMeterLength
          0,                                       //DisableType
          0,                                       //DataWithDecUnit
-         250,                                     //Default Value
+         270,                                     //Default Value
     },
     {
          PARA_SOLAR_FAIL_DELAY,                   // VariableIndex
@@ -300,7 +300,7 @@ const struct Parameter EditParameters[MAX_PARAM_LIMIT]=
          3,                                       //ParaMeterLength
          0,                                       //DisableType
          0,                                       //DataWithDecUnit
-         120,                                     //Default Value
+         300,                                     //Default Value
     },
 
     // In milli-ampere
