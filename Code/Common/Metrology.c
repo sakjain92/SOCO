@@ -11,7 +11,6 @@
 
 
 #include <stdio.h>
-#include <string.h>
 #include "CommFlagDef.h"
 #include "Struct.h"
 #include <Math.h>
@@ -754,7 +753,7 @@ void CalculateHarmonicComponents(void)
 
   // Read the FFT snapshot bank the ISR last published (ping-pong). The ISR
   // accumulates into the other bank, so this read never races accumulation.
-  // ProcessIntCycleOver() drains this bank to zero after Metrology() returns.
+  // The ISR self-seeds this bank when it next refills it, so no zeroing here.
   //
   struct FFT_BANK *pSnap = &FftSampleData.bank[g_FftSnapBank];
 
@@ -824,15 +823,12 @@ void CalculateHarmonicComponents(void)
 
   }
 
-  // Release the FFT snapshot bank back to the ISR now that it's fully read:
-  // zero it so the producer can reuse it as a fresh accumulator on the next
-  // ping-pong swap, and clear the ready flag. Kept here in the consumer (rather
-  // than in the caller) so the whole snapshot acquire/read/release lives in one
-  // place and the caller needs no knowledge of the FFT bank internals.
+  // Release the snapshot back to the ISR by clearing the ready flag. No zeroing:
+  // the ISR self-seeds each bin with '=' on its first sample when it refills
+  // this bank (see ProcessMainInterrupt), overwriting whatever this read left.
   //
   if(g_FftSnapReady)
   {
-    memset(pSnap, 0, sizeof(*pSnap));
     g_FftSnapReady = 0;
   }
 

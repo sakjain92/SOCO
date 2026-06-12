@@ -83,12 +83,18 @@ uint16_t OneSecCounter;
 // FFT accumulator ping-pong (replaces the old per-window Sum->Save copy that
 // ran inside ProcessMainInterrupt). The ISR accumulates into bank[g_FftAccBank];
 // at each window boundary it publishes that bank to the main loop and switches
-// to the other bank (which the main loop has already drained to zero). The
-// heavy zeroing now happens at thread level in ProcessIntCycleOver().
+// to the other bank. The bank is self-seeded as it refills (each bin stores
+// its first sample with '=', the rest with '+='), so no bank zeroing is needed.
 //
 volatile uint8_t g_FftAccBank   = 0;   // bank the ISR is filling
 volatile uint8_t g_FftSnapBank  = 0;   // bank exposed to the main loop
 volatile uint8_t g_FftSnapReady = 0;   // 1 = snapshot waiting for the main loop
+
+// Self-seeding overwrites only the bins a window actually fills, so it is
+// correct ONLY if every window fills all 50 bins; a short window would leave
+// stale bins (the old per-bank memset scrubbed those). Lock the invariant:
+// NO_OF_SAMPLES / 64-samples-per-bin must equal the 50-element bin arrays.
+COMPILE_ASSERT(NO_OF_SAMPLES == 50 * 64);
 
 // Instantaneous sample for checking if AC/DC Aux Power supply is available
 // or not
@@ -474,7 +480,7 @@ void ProcessMainInterrupt(void)
     // Sum[] arrays into Save[] and zeroed Sum[] (50 iterations, ~10k cycles)
     // which overran the shortened sample period at high input frequency.
     // Instead, just publish the bank we filled and switch to the other one,
-    // which the main loop has already drained to zero in ProcessIntCycleOver().
+    // which the ISR self-seeds as it refills it (no pre-zeroing needed).
     // Guard: if the main loop has not yet consumed the previous snapshot
     // (g_FftSnapReady still set), keep filling the current bank rather than
     // clobber a bank the consumer is still reading. That merges two windows
@@ -483,7 +489,7 @@ void ProcessMainInterrupt(void)
     if(!g_FftSnapReady)
     {
       g_FftSnapBank  = g_FftAccBank;   // expose the completed window
-      g_FftAccBank  ^= 1;              // fill the other (already-zeroed) bank
+      g_FftAccBank  ^= 1;              // fill the other bank (self-seeded on refill)
       g_FftSnapReady = 1;              // tell the main loop a snapshot is ready
     }
     FftSampleData.FFT_Counter=0;
@@ -905,48 +911,87 @@ void ProcessMainInterrupt(void)
   IntDataSum.VRefInt            += IntVRefInt;
 
   // Summation for FFT Purpose
-  // Accumulate into the active ping-pong bank (see g_FftAccBank). pAcc is
-  // re-evaluated each ISR; if the window boundary above just switched banks,
-  // this sample lands in the freshly-zeroed new bank as window sample 0.
+  // Accumulate into the active ping-pong bank (see g_FftAccBank). Self-seeding:
+  // the first sample of each bin (fc==0) is stored with '=' (overwriting the
+  // bank's stale data from its previous window); the other 63 use '+='.
   //
   {
   struct FFT_BANK *pAcc = &FftSampleData.bank[g_FftAccBank];
   uint16_t fc  = FftSampleData.FFT_Counter;
   uint16_t fci = FftSampleData.FFT_CounterIndex;
 
-  pAcc->RVolSin[fci]+=IntVolRPhase*SinTable[fc];
-  pAcc->RVolCos[fci]+=IntVolRPhase*CosTable[fc];
-  pAcc->YVolSin[fci]+=IntVolYPhase*SinTable[fc];
-  pAcc->YVolCos[fci]+=IntVolYPhase*CosTable[fc];
-  pAcc->BVolSin[fci]+=IntVolBPhase*SinTable[fc];
-  pAcc->BVolCos[fci]+=IntVolBPhase*CosTable[fc];
+  if (fc == 0)
+  {
+    pAcc->RVolSin[fci]=IntVolRPhase*SinTable[fc];
+    pAcc->RVolCos[fci]=IntVolRPhase*CosTable[fc];
+    pAcc->YVolSin[fci]=IntVolYPhase*SinTable[fc];
+    pAcc->YVolCos[fci]=IntVolYPhase*CosTable[fc];
+    pAcc->BVolSin[fci]=IntVolBPhase*SinTable[fc];
+    pAcc->BVolCos[fci]=IntVolBPhase*CosTable[fc];
 
-  pAcc->RCurSin[fci]+=IntCurRPhase*SinTable[fc];
-  pAcc->RCurCos[fci]+=IntCurRPhase*CosTable[fc];
-  pAcc->YCurSin[fci]+=IntCurYPhase*SinTable[fc];
-  pAcc->YCurCos[fci]+=IntCurYPhase*CosTable[fc];
-  pAcc->BCurSin[fci]+=IntCurBPhase*SinTable[fc];
-  pAcc->BCurCos[fci]+=IntCurBPhase*CosTable[fc];
+    pAcc->RCurSin[fci]=IntCurRPhase*SinTable[fc];
+    pAcc->RCurCos[fci]=IntCurRPhase*CosTable[fc];
+    pAcc->YCurSin[fci]=IntCurYPhase*SinTable[fc];
+    pAcc->YCurCos[fci]=IntCurYPhase*CosTable[fc];
+    pAcc->BCurSin[fci]=IntCurBPhase*SinTable[fc];
+    pAcc->BCurCos[fci]=IntCurBPhase*CosTable[fc];
 
-  pAcc->NeuCurSin[fci]+=IntNeuCurrent*SinTable[fc];
-  pAcc->NeuCurCos[fci]+=IntNeuCurrent*CosTable[fc];
+    pAcc->NeuCurSin[fci]=IntNeuCurrent*SinTable[fc];
+    pAcc->NeuCurCos[fci]=IntNeuCurrent*CosTable[fc];
 
-  pAcc->RSolarVolSin[fci]+=IntVolRSolarPhase*SinTable[fc];
-  pAcc->RSolarVolCos[fci]+=IntVolRSolarPhase*CosTable[fc];
-  pAcc->YSolarVolSin[fci]+=IntVolYSolarPhase*SinTable[fc];
-  pAcc->YSolarVolCos[fci]+=IntVolYSolarPhase*CosTable[fc];
-  pAcc->BSolarVolSin[fci]+=IntVolBSolarPhase*SinTable[fc];
-  pAcc->BSolarVolCos[fci]+=IntVolBSolarPhase*CosTable[fc];
+    pAcc->RSolarVolSin[fci]=IntVolRSolarPhase*SinTable[fc];
+    pAcc->RSolarVolCos[fci]=IntVolRSolarPhase*CosTable[fc];
+    pAcc->YSolarVolSin[fci]=IntVolYSolarPhase*SinTable[fc];
+    pAcc->YSolarVolCos[fci]=IntVolYSolarPhase*CosTable[fc];
+    pAcc->BSolarVolSin[fci]=IntVolBSolarPhase*SinTable[fc];
+    pAcc->BSolarVolCos[fci]=IntVolBSolarPhase*CosTable[fc];
 
-  pAcc->RSolarCurSin[fci]+=IntCurRSolarPhase*SinTable[fc];
-  pAcc->RSolarCurCos[fci]+=IntCurRSolarPhase*CosTable[fc];
-  pAcc->YSolarCurSin[fci]+=IntCurYSolarPhase*SinTable[fc];
-  pAcc->YSolarCurCos[fci]+=IntCurYSolarPhase*CosTable[fc];
-  pAcc->BSolarCurSin[fci]+=IntCurBSolarPhase*SinTable[fc];
-  pAcc->BSolarCurCos[fci]+=IntCurBSolarPhase*CosTable[fc];
+    pAcc->RSolarCurSin[fci]=IntCurRSolarPhase*SinTable[fc];
+    pAcc->RSolarCurCos[fci]=IntCurRSolarPhase*CosTable[fc];
+    pAcc->YSolarCurSin[fci]=IntCurYSolarPhase*SinTable[fc];
+    pAcc->YSolarCurCos[fci]=IntCurYSolarPhase*CosTable[fc];
+    pAcc->BSolarCurSin[fci]=IntCurBSolarPhase*SinTable[fc];
+    pAcc->BSolarCurCos[fci]=IntCurBSolarPhase*CosTable[fc];
 
-  pAcc->NeuSolarCurSin[fci]+=IntNeuSolarCurrent*SinTable[fc];
-  pAcc->NeuSolarCurCos[fci]+=IntNeuSolarCurrent*CosTable[fc];
+    pAcc->NeuSolarCurSin[fci]=IntNeuSolarCurrent*SinTable[fc];
+    pAcc->NeuSolarCurCos[fci]=IntNeuSolarCurrent*CosTable[fc];
+  }
+  else
+  {
+    pAcc->RVolSin[fci]+=IntVolRPhase*SinTable[fc];
+    pAcc->RVolCos[fci]+=IntVolRPhase*CosTable[fc];
+    pAcc->YVolSin[fci]+=IntVolYPhase*SinTable[fc];
+    pAcc->YVolCos[fci]+=IntVolYPhase*CosTable[fc];
+    pAcc->BVolSin[fci]+=IntVolBPhase*SinTable[fc];
+    pAcc->BVolCos[fci]+=IntVolBPhase*CosTable[fc];
+
+    pAcc->RCurSin[fci]+=IntCurRPhase*SinTable[fc];
+    pAcc->RCurCos[fci]+=IntCurRPhase*CosTable[fc];
+    pAcc->YCurSin[fci]+=IntCurYPhase*SinTable[fc];
+    pAcc->YCurCos[fci]+=IntCurYPhase*CosTable[fc];
+    pAcc->BCurSin[fci]+=IntCurBPhase*SinTable[fc];
+    pAcc->BCurCos[fci]+=IntCurBPhase*CosTable[fc];
+
+    pAcc->NeuCurSin[fci]+=IntNeuCurrent*SinTable[fc];
+    pAcc->NeuCurCos[fci]+=IntNeuCurrent*CosTable[fc];
+
+    pAcc->RSolarVolSin[fci]+=IntVolRSolarPhase*SinTable[fc];
+    pAcc->RSolarVolCos[fci]+=IntVolRSolarPhase*CosTable[fc];
+    pAcc->YSolarVolSin[fci]+=IntVolYSolarPhase*SinTable[fc];
+    pAcc->YSolarVolCos[fci]+=IntVolYSolarPhase*CosTable[fc];
+    pAcc->BSolarVolSin[fci]+=IntVolBSolarPhase*SinTable[fc];
+    pAcc->BSolarVolCos[fci]+=IntVolBSolarPhase*CosTable[fc];
+
+    pAcc->RSolarCurSin[fci]+=IntCurRSolarPhase*SinTable[fc];
+    pAcc->RSolarCurCos[fci]+=IntCurRSolarPhase*CosTable[fc];
+    pAcc->YSolarCurSin[fci]+=IntCurYSolarPhase*SinTable[fc];
+    pAcc->YSolarCurCos[fci]+=IntCurYSolarPhase*CosTable[fc];
+    pAcc->BSolarCurSin[fci]+=IntCurBSolarPhase*SinTable[fc];
+    pAcc->BSolarCurCos[fci]+=IntCurBSolarPhase*CosTable[fc];
+
+    pAcc->NeuSolarCurSin[fci]+=IntNeuSolarCurrent*SinTable[fc];
+    pAcc->NeuSolarCurCos[fci]+=IntNeuSolarCurrent*CosTable[fc];
+  }
   }
 
   
