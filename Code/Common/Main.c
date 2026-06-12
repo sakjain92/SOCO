@@ -942,6 +942,8 @@ COMPILE_ASSERT(STUCK_SECONDS > DRIVE_GAP_SECONDS);
         bool gridDisabled    = (g_DisableLoadOnGridSeconds  > 0);
         bool solarDisabled   = (g_DisableLoadOnSolarSeconds > 0);
         bool gridRUnhealthy  = g_voltageHealth.GridRPhaseUnhealthy;
+        bool gridYUnhealthy  = g_voltageHealth.GridYPhaseUnhealthy;
+        bool gridBUnhealthy  = g_voltageHealth.GridBPhaseUnhealthy;
         bool solarRUnhealthy = g_voltageHealth.SolarRPhaseUnhealthy;
         bool dgRunning       = !CopySetPara[PARA_DG_DETECT_DISABLED] &&
                                !g_DigInputs.DGOff;
@@ -963,7 +965,7 @@ COMPILE_ASSERT(STUCK_SECONDS > DRIVE_GAP_SECONDS);
         g_LoadStatus.GridDisabledByUser  = gridDisabled;
         g_LoadStatus.SolarDisabledByUser = solarDisabled;
 
-        // GRID group (one-hot): 801 / 810 / 811 / 803 / 804 / 812 / 813
+        // GRID group (one-hot): 801 / 810 / 811 / 803 / 819 / 804 / 812 / 813
         //
         if (k5On)
         {
@@ -975,7 +977,12 @@ COMPILE_ASSERT(STUCK_SECONDS > DRIVE_GAP_SECONDS);
         else if (gridDisabled)
             g_LoadStatus.LoadNotOnGridDisabledByUser = true;            // G3
         else if (gridRUnhealthy)
-            g_LoadStatus.LoadNotOnGridGridRUnhealthy = true;            // G4
+        {
+            if (gridYUnhealthy && gridBUnhealthy)
+                g_LoadStatus.LoadNotOnGridAllPhasesUnhealthy = true;    // G4a (819) R+Y+B all unhealthy
+            else
+                g_LoadStatus.LoadNotOnGridGridRUnhealthy = true;        // G4b (803) R unhealthy, Y or B healthy
+        }
         else if (g_Alarms.LoadOnSolarContactorStuckClosed)
             g_LoadStatus.LoadNotOnGridSolarContactorStuckClosed = true; // G5
         else if (g_Alarms.LoadOnGridContactorStuckOpen)

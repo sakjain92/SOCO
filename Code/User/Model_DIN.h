@@ -10,7 +10,7 @@
 // 3 digit version number
 // Shown on display as X.YY
 //
-#define VERSION_NO  219
+#define VERSION_NO  221
 
 #define MODEL_COMM_PROCOM
 #define MODEL_DATA_SAVE  
@@ -613,7 +613,7 @@
 //
 // UNDONE SOCO Cost optimization: a) Reduce CT wire length b) Reduce CT turns from 2500 to 1000 (or lower) keeping class 0.5 c) Reduce number of MELF and use 1/2 MELF instead of 1W melf d) Reduce protection in Modbus section e) Don't use metallic body, use plastic body f) Reduce PCB size g) But keep mounting same for new and old SOCO for field replacement h) Don't use BVY, can just use US1M i) Optimize transformer by reducing counts and wire gauge j) Reduce protection levels in DC power supply, digital inputs etc k) Order components in advance i) Use 8kV surge rated relays from OMRON instead of 10kV j) Don't use 2 * 1 ohm melf in current section k) Simplify current and voltage section (right now, second order RC filters are being used) 
 //
-// UNDONE Panel Cost optimization: a) Use 0.5mm control wire or 0.75mm control wire b) Use PVC wire instead of uninyvin (CT ID needs to be increased for this) c) Reduce panel size by putting SOCO & EMS on door d) Remove canopy if possible like trinity e) Remove fan & filters if possible like in trinity and make panel IP65 and also simplify the packing since the shape will be completely cuboid f) Try using plastic gland instead of metal glands for power wires if possible g) Search for PC or alternate material instead of sheet metal h) Use non-branded temperature sensors i) Get zhongbo approved for connectors
+// UNDONE Panel Cost optimization: a) Use 0.5mm control wire or 0.75mm control wire b) Use PVC wire instead of uninyvin (CT ID needs to be increased for this) c) Reduce panel size by putting SOCO & EMS on door d) Remove canopy if possible like trinity e) Remove fan & filters if possible like in trinity and make panel IP65 and also simplify the packing since the shape will be completely cuboid f) Try using plastic gland instead of metal glands for power wires if possible g) Search for PC or alternate material instead of sheet metal h) Use non-branded temperature sensors i) Get zhongbo approved for connectors j) Evalta has temperature sensor. Check price k) 0.5mm control wire approced by Jio l) Use platic glands instead of metal glands m) Can use IP65 vents instead of louvers/filters/fans, same as trinity n) Can use shorting links in contactors o) SOCO and EMS mounting on door allowed maybe. Check antenna mounting. p) Use Sintex's SMC Junction boxes, cost only around 3k
 //
 // UNDONE: If RTC (battery + crystal) is cheap enough, we can add it in PCB for future history addition
 // UNDONE: Jio mentioned going into 0.5seconda refresh metrology. But it depends if Spark Microinverter can respond within 0.5 seconds commands.

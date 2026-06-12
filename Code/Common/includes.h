@@ -110,10 +110,6 @@ uint32_t CaptureValueSum;
 uint32_t InterruptFlag,RYFreqMeasDuration,SaveFreqMeasDuration;
 struct FreqMeasStates g_FreqState;
 uint16_t PreviousCaptureCount,CaptureValueSav,CaptureSumCounter,LastChangeFreq;
-// PF-FIR per-channel sample history is now the unified circular buffer in
-// Interrupt.c (VR_Hist / IR_Hist ...); the old Int*PrevSample shift-register
-// globals were removed when the V_LL/I_N and PF FIRs were merged onto a single
-// history buffer per channel.
 uint16_t CopySetPara[MAX_PARAM_LIMIT+1],DataSaveCounter;
 uint16_t AdcDataInArray[24],SampleCounter;
 int16_t SdAdcDataInArray[12];

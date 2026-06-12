@@ -851,11 +851,11 @@ struct VoltageHealth
     bool SolarRPhaseUnhealthy;
 };
 
-// Load status flags (true = condition active), customer addresses 801-818.
+// Load status flags (true = condition active), customer addresses 801-819.
 //
 // Implements the decision trees in
 // Document/CustomerFacing/SOCO_Load_Status_Logic.docx. Exactly one flag of
-// the GRID group {801,803,804,810,811,812,813} and exactly one flag of the
+// the GRID group {801,803,804,810,811,812,813,819} and exactly one flag of the
 // SOLAR group {805,807,808,809,814,815,816,817,818} is set at any time.
 // GridDisabledByUser (802) and SolarDisabledByUser (806) are independent of
 // both groups. Group addresses are not contiguous because 801-809 keep
@@ -868,7 +868,7 @@ struct LoadStatus
 {
     bool LoadOnGridGridRHealthy;                  // 801: G1 on grid, healthy
     bool GridDisabledByUser;                      // 802: independent, = (HR6001 > 0)
-    bool LoadNotOnGridGridRUnhealthy;             // 803: G4
+    bool LoadNotOnGridGridRUnhealthy;             // 803: G4b R unhealthy, Y or B healthy
     bool LoadNotOnGridSolarContactorStuckClosed;  // 804: G5 K4 stuck closed
     bool LoadOnSolarSolarRHealthy;                // 805: S1 on solar, healthy
     bool SolarDisabledByUser;                     // 806: independent, = (HR16001 > 0)
@@ -884,6 +884,7 @@ struct LoadStatus
     bool LoadNotOnSolarGridContactorStuckClosed;  // 816: S7 K1/K2/K3/K5 stuck closed
     bool LoadNotOnSolarContactorStuckOpen;        // 817: S8 K4/K6 stuck open
     bool LoadNotOnSolarTransient;                 // 818: S9 transferring
+    bool LoadNotOnGridAllPhasesUnhealthy;         // 819: G4a R+Y+B all unhealthy
 };
 
 // Fan fault flags (true = fault condition active)
