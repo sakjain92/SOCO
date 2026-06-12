@@ -92,7 +92,7 @@ sub,sup{ font-size:75%; }
   <div class="meta">
     <div class="co">MRM Procom Pvt. Ltd.</div>
     <div>Series: SOCO | Model: SOCO-T1</div>
-    <div>Revision v0.4 | 2026-04-01</div>
+    <div>Revision v0.5 | 2026-06-09</div>
   </div>
 </div>
 <hr class="rule">
@@ -130,7 +130,7 @@ sub,sup{ font-size:75%; }
   <tr><td>Input terminals</td><td>Vr, Vy, Vb, Vn (Grid and Solar individually)</td></tr>
   <tr><td>Measurement range (L-N)</td><td>80 – 300 V AC</td></tr>
   <tr><td>Nominal voltage (L-N)</td><td>240 V</td></tr>
-  <tr><td>Input frequency</td><td>45 – 65 Hz</td></tr>
+  <tr><td>Input frequency</td><td>45 – 55 Hz</td></tr>
   <tr><td>Burden</td><td>&lt; 0.2 VA per phase</td></tr>
 </table>
 
@@ -141,7 +141,7 @@ sub,sup{ font-size:75%; }
   <tr><td>Input terminals</td><td>Ir, Iy, Ib, Icomm (Grid and Solar individually; via external CT)</td></tr>
   <tr><td>CT burden</td><td>&lt; 0.2 VA per phase</td></tr>
   <tr><td>Starting current</td><td>0.4 A</td></tr>
-  <tr><td>Maximum primary current</td><td>120 A</td></tr>
+  <tr><td>Maximum primary current</td><td>100 A</td></tr>
   <tr><td>Basic Current</td><td>10 A</td></tr>
 </table>
 <div class="note"><b>Note:</b> Current measurement is via external current transformers (CTs). 6 External CTs (100A) available on request with SOCO-T1</div>
@@ -152,7 +152,7 @@ sub,sup{ font-size:75%; }
   <tr><td>DC input</td><td>40 – 60 V DC (reverse-polarity protected; positive-ground compatible)</td></tr>
   <tr><td>AC input</td><td>100 – 300 V AC</td></tr>
   <tr><td>Simultaneous use</td><td>Yes</td></tr>
-  <tr><td>Power consumption</td><td>&lt; 5 VA</td></tr>
+  <tr><td>Power consumption</td><td>&lt; 10 VA</td></tr>
 </table>
 
 <h3>3.4 Relay Outputs</h3>
@@ -162,8 +162,6 @@ sub,sup{ font-size:75%; }
   <tr><td>Rated contact voltage</td><td>250 V AC</td></tr>
   <tr><td>Maximum switching voltage</td><td>250 V AC</td></tr>
   <tr><td>Continuous current (at 250 V AC)</td><td>8 A</td></tr>
-  <tr><td>Electrical life</td><td>10<sup>6</sup> operations</td></tr>
-  <tr><td>Contact resistance</td><td>≤ 100 mΩ</td></tr>
 </table>
 <p class="cap">Relay output assignments (factory default):</p>
 <table>
@@ -228,23 +226,23 @@ sub,sup{ font-size:75%; }
   <tr><td>Byte order</td><td>Big-endian</td></tr>
 </table>
 
-<h2 class="pagebreak">3. Measured Parameters</h2>
+<h2 class="pagebreak">4. Measured Parameters</h2>
 <p class="intro">All parameters below are measured independently for Grid and Solar sources unless noted.</p>
 
-<h3>3.1 Voltage</h3>
+<h3>4.1 Voltage</h3>
 <table>
   <tr class="hd"><td>Parameter</td><td>Symbol</td></tr>
   <tr><td>Phase-to-Neutral (each)</td><td>Vr, Vy, Vb</td></tr>
 </table>
 
-<h3>3.2 Current</h3>
+<h3>4.2 Current</h3>
 <table>
   <tr class="hd"><td>Parameter</td><td>Symbol</td></tr>
   <tr><td>Phase current (each)</td><td>Ir, Iy, Ib</td></tr>
   <tr><td>Calculated neutral current</td><td>In</td></tr>
 </table>
 
-<h3>3.3 Power</h3>
+<h3>4.3 Power</h3>
 <table>
   <tr class="hd"><td>Parameter</td><td>Symbol</td></tr>
   <tr><td>Active power per phase</td><td>Wr, Wy, Wb</td></tr>
@@ -257,7 +255,7 @@ sub,sup{ font-size:75%; }
   <tr><td>Total power factor</td><td>PF<sub>total</sub></td></tr>
 </table>
 
-<h3>3.4 Energy (4-quadrant)</h3>
+<h3>4.4 Energy (4-quadrant)</h3>
 <table>
   <tr class="hd"><td>Parameter</td><td>Symbol</td></tr>
   <tr><td>Active energy import</td><td>Wh<sub>import</sub></td></tr>
@@ -270,13 +268,13 @@ sub,sup{ font-size:75%; }
   <tr><td>Apparent energy export</td><td>VAh<sub>export</sub></td></tr>
 </table>
 
-<h3>3.5 Frequency</h3>
+<h3>4.5 Frequency</h3>
 <table>
   <tr class="hd"><td>Parameter</td><td>Symbol</td></tr>
   <tr><td>Frequency per phase</td><td>Hz<sub>r</sub>, Hz<sub>y</sub>, Hz<sub>b</sub></td></tr>
 </table>
 
-<h3>3.6 Other Parameters</h3>
+<h3>4.6 Other Parameters</h3>
 <table>
   <tr class="hd"><td>Parameter</td><td>Unit</td></tr>
   <tr><td>Ambient temperature</td><td>°C</td></tr>
@@ -284,7 +282,7 @@ sub,sup{ font-size:75%; }
   <tr><td>Fan 2 current</td><td>A</td></tr>
 </table>
 
-<h3>3.7 Accuracy</h3>
+<h3>4.7 Accuracy</h3>
 <table>
   <tr class="hd"><td>Parameter</td><td>Accuracy</td></tr>
   <tr><td>Active / reactive / apparent energy</td><td>Class 1.0 (IEC 62053-21)</td></tr>
@@ -294,16 +292,16 @@ sub,sup{ font-size:75%; }
   <tr><td>Fan current</td><td>± 5% (range 0 – 0.4 A)</td></tr>
 </table>
 
-<h2>4. User Interface</h2>
+<h2>5. User Interface</h2>
 
-<h3>4.1 Display</h3>
+<h3>5.1 Display</h3>
 <table>
   <tr class="hd"><td>Parameter</td><td>Specification</td></tr>
   <tr><td>Type</td><td>6-digit, single-row alphanumeric LED display</td></tr>
   <tr><td>Scroll mode</td><td>Automatic or manual (user-selectable)</td></tr>
 </table>
 
-<h3>4.2 Navigation Keys</h3>
+<h3>5.2 Navigation Keys</h3>
 <table>
   <tr class="hd"><td>Key</td><td>Function</td></tr>
   <tr><td>INC</td><td>Increment value / scroll forward</td></tr>
@@ -315,7 +313,7 @@ sub,sup{ font-size:75%; }
   <tr><td>INC + DEC</td><td>Enter edit mode for parameter configuration</td></tr>
 </table>
 
-<h3>4.3 Status LEDs</h3>
+<h3>5.3 Status LEDs</h3>
 <table>
   <tr class="hd"><td>LED</td><td>Indication</td></tr>
   <tr><td>RYB</td><td>Phase On Display Indicator (Red (R Phase) / Yellow (Y Phase) / Blue (B Phase) / White (Total))</td></tr>
@@ -326,31 +324,32 @@ sub,sup{ font-size:75%; }
   <tr><td>Comm.</td><td>RS-485 communication active</td></tr>
 </table>
 
-<h2>5. Environmental Specifications</h2>
+<h2>6. Environmental Specifications</h2>
 <table>
   <tr class="hd"><td>Parameter</td><td>Specification</td></tr>
   <tr><td>Operating temperature</td><td>−20 °C to +70 °C</td></tr>
   <tr><td>Storage temperature</td><td>−20 °C to +70 °C</td></tr>
-  <tr><td>Damp heat (cyclic)</td><td>55 °C, 95% RH, 48 hours — per IEC 60068-2-30</td></tr>
-  <tr><td>Damp heat (static)</td><td>40 °C, 93% RH, 48 hours — per IEC 60068-2-78</td></tr>
+  <tr><td>Cold</td><td>−30 °C, 24 hours — per IEC 60068-2-1</td></tr>
+  <tr><td>Dry heat</td><td>+72 °C, 72 hours — per IEC 60068-2-2</td></tr>
+  <tr><td>Damp heat (cyclic)</td><td>55 °C, 93% RH, 6 cycles — per IEC 60068-2-30</td></tr>
   <tr><td>Vibration</td><td>5–8 Hz: ±7.5 mm displacement; 8–500 Hz: 2g — per IEC 60068-2-6 (10 sweeps/axis)</td></tr>
-  <tr><td>Shock</td><td>15g for 11 ms, three shocks per axis — per IEC 60068-2-27</td></tr>
 </table>
 
-<h2>6. EMC Specifications</h2>
+<h2>7. EMC Specifications</h2>
 <table>
   <tr class="hd t3emc"><td>Test</td><td>Standard</td><td>Level</td></tr>
-  <tr><td>Surge immunity (voltage inputs)</td><td>IEC 61000-4-5</td><td>9 kV, 1.2/50 µs</td></tr>
-  <tr><td>Surge immunity (RS-485)</td><td>IEC 61000-4-5</td><td>9 kV, 1.2/50 µs</td></tr>
-  <tr><td>ESD</td><td>IEC 61000-4-2</td><td>8 kV air discharge; 8 kV contact discharge</td></tr>
-  <tr><td>Electrical fast transient</td><td>IEC 61000-4-4</td><td>±1 kV at 5 kHz</td></tr>
-  <tr><td>Magnetic field immunity</td><td>IEC 61000-4-8</td><td>30 A/m at 50 Hz</td></tr>
-  <tr><td>Conducted immunity</td><td>IEC 61000-4-6</td><td>10 V, 150 kHz – 80 MHz (80% AM, 1 kHz)</td></tr>
+  <tr><td>ESD</td><td>IEC 61000-4-2</td><td>8 kV air discharge; 4 kV contact discharge</td></tr>
+  <tr><td>Electrical fast transient</td><td>IEC 61000-4-4</td><td>±1 kV at 2.5 kHz</td></tr>
+  <tr><td>Surge immunity (AC inputs)</td><td>IEC 61000-4-5</td><td>±9 kV, 1.2/50 µs</td></tr>
+  <tr><td>Surge immunity (DC I/O)</td><td>IEC 61000-4-5</td><td>±4 kV, 1.2/50 µs</td></tr>
+  <tr><td>Conducted RF immunity</td><td>IEC 61000-4-6</td><td>10 V, 150 kHz – 80 MHz (80% AM, 1 kHz)</td></tr>
+  <tr><td>Radiated RF immunity</td><td>IEC 61000-4-3</td><td>10 V/m, 80 MHz – 1 GHz (80% AM, 1 kHz)</td></tr>
+  <tr><td>Conducted emission</td><td>CISPR 32</td><td>Class B (AC mains port)</td></tr>
 </table>
 
-<h2>7. Terminal / Connection Description</h2>
+<h2>8. Terminal / Connection Description</h2>
 
-<h3>7.1 Grid Voltage Inputs</h3>
+<h3>8.1 Grid Voltage Inputs</h3>
 <table>
   <tr class="hd t3pin"><td>Pin #</td><td>Terminal</td><td>Function</td></tr>
   <tr><td>33</td><td>R</td><td>Grid voltage — R phase</td></tr>
@@ -359,7 +358,7 @@ sub,sup{ font-size:75%; }
   <tr><td>30</td><td>N</td><td>Grid voltage — Neutral</td></tr>
 </table>
 
-<h3>7.2 Solar Voltage Inputs</h3>
+<h3>8.2 Solar Voltage Inputs</h3>
 <table>
   <tr class="hd t3pin"><td>Pin #</td><td>Terminal</td><td>Function</td></tr>
   <tr><td>37</td><td>R</td><td>Solar voltage — R phase</td></tr>
@@ -368,7 +367,7 @@ sub,sup{ font-size:75%; }
   <tr><td>34</td><td>N</td><td>Solar voltage — Neutral</td></tr>
 </table>
 
-<h3>7.3 Grid Current Inputs (via external CT)</h3>
+<h3>8.3 Grid Current Inputs (via external CT)</h3>
 <table>
   <tr class="hd t3pin"><td>Pin #</td><td>Terminal</td><td>Function</td></tr>
   <tr><td>46</td><td>R</td><td>Grid current — R phase CT secondary</td></tr>
@@ -377,7 +376,7 @@ sub,sup{ font-size:75%; }
   <tr><td>49</td><td>COM</td><td>Grid current — CT common return</td></tr>
 </table>
 
-<h3>7.4 Solar Current Inputs (via external CT)</h3>
+<h3>8.4 Solar Current Inputs (via external CT)</h3>
 <table>
   <tr class="hd t3pin"><td>Pin #</td><td>Terminal</td><td>Function</td></tr>
   <tr><td>50</td><td>R</td><td>Solar current — R phase CT secondary</td></tr>
@@ -386,7 +385,7 @@ sub,sup{ font-size:75%; }
   <tr><td>53</td><td>COM</td><td>Solar current — CT common return</td></tr>
 </table>
 
-<h3>7.5 Potential-Free Digital Inputs</h3>
+<h3>8.5 Potential-Free Digital Inputs</h3>
 <table>
   <tr class="hd t3pin"><td>Pin #</td><td>Terminal</td><td>Function</td></tr>
   <tr><td>45</td><td>DIN 1</td><td>Digital input 1</td></tr>
@@ -400,7 +399,7 @@ sub,sup{ font-size:75%; }
   <tr><td>6</td><td>DIN COM</td><td>Digital input common (isolated DC output)</td></tr>
 </table>
 
-<h3 class="pagebreak">7.6 Relay Outputs</h3>
+<h3 class="pagebreak">8.6 Relay Outputs</h3>
 <p class="cap">Each relay has three terminals: COM (common), NO (normally open), NC (normally closed).</p>
 <table>
   <tr class="hd t3pin"><td>Pin #</td><td>Terminal</td><td>Function</td></tr>
@@ -424,7 +423,7 @@ sub,sup{ font-size:75%; }
   <tr><td>7</td><td>COM 6</td><td>Output 6 — Common</td></tr>
 </table>
 
-<h3>7.7 Fan Current Measurement</h3>
+<h3>8.7 Fan Current Measurement</h3>
 <table>
   <tr class="hd t3pin"><td>Pin #</td><td>Terminal</td><td>Function</td></tr>
   <tr><td>29</td><td>FAN 1</td><td>Fan 1 current input</td></tr>
@@ -432,14 +431,14 @@ sub,sup{ font-size:75%; }
   <tr><td>27</td><td>FAN COM</td><td>Fan current common return</td></tr>
 </table>
 
-<h3>7.8 RS-485 Communication</h3>
+<h3>8.8 RS-485 Communication</h3>
 <table>
   <tr class="hd t3pin"><td>Pin #</td><td>Terminal</td><td>Function</td></tr>
   <tr><td>26</td><td>RS485 −</td><td>RS-485 Data − (B)</td></tr>
   <tr><td>25</td><td>RS485 +</td><td>RS-485 Data + (A)</td></tr>
 </table>
 
-<h3>7.9 Auxiliary Power Supply</h3>
+<h3>8.9 Auxiliary Power Supply</h3>
 <table>
   <tr class="hd t3pin"><td>Pin #</td><td>Terminal</td><td>Function</td></tr>
   <tr><td>1</td><td>48VDC +</td><td>DC positive input</td></tr>
@@ -449,7 +448,7 @@ sub,sup{ font-size:75%; }
   <tr><td>5</td><td>EARTH</td><td>Protective earth</td></tr>
 </table>
 
-<div class="foot">SOCO-T1 Product Datasheet — Version v0.4 — MRM Procom Pvt. Ltd.</div>
+<div class="foot">SOCO-T1 Product Datasheet — Version v0.5 — MRM Procom Pvt. Ltd.</div>
 
 </body>
 </html>
