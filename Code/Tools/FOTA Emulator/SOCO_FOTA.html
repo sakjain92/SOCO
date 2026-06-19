@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>SOCO FOTA Flowchart — editable source for SOCO_FOTA.png</title>
+<style>
+  body   { margin:0; background:#ffffff; font-family:Georgia,"Times New Roman",serif; }
+  #toolbar{ position:fixed; top:8px; right:8px; z-index:10; }
+  #toolbar button{ font:14px sans-serif; padding:6px 10px; margin-left:6px; cursor:pointer; }
+  #diagram{ display:flex; justify-content:center; padding:24px; }
+  #diagram svg{ height:auto; }
+  #err    { color:#c03c30; font:14px monospace; padding:24px; white-space:pre-wrap; }
+</style>
+</head>
+<body>
+<div id="toolbar">
+  <button id="dlSvg" title="Save the rendered flowchart as SVG">Download SVG</button>
+</div>
+<div id="diagram">Rendering… (this page needs internet access for the Mermaid CDN)</div>
+
+<!-- ================================================================= -->
+<!--  EDIT THE FLOWCHART HERE.                                          -->
+<!--  The `graph` template literal below is the single source of truth  -->
+<!--  for SOCO_FOTA.png. To regenerate the PNG:                         -->
+<!--    1. Edit node text / edges below.                                -->
+<!--    2. Open this file in a browser to preview.                      -->
+<!--    3. "Download SVG" and convert to PNG, OR paste the graph text   -->
+<!--       into https://mermaid.live (Export PNG) or render via         -->
+<!--       https://kroki.io/mermaid/png/<encoded>.                      -->
+<!--  Node shapes:  ([stadium])=start/end   [rect]=process              -->
+<!--                {diamond}=decision    :::class sets the colour.     -->
+<!-- ================================================================= -->
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+
+const graph = `%%{init: {"theme":"base","themeVariables":{"fontFamily":"Georgia, 'Times New Roman', serif","fontSize":"16px","lineColor":"#333333"},"flowchart":{"htmlLabels":true,"curve":"basis","nodeSpacing":45,"rankSpacing":50}}}%%
+flowchart TD
+  start(["New SOCO Firmware<br/>Uploaded to Jio's Server"]):::startEnd
+  fetch["TEMS fetches SOCO<br/>firmware from<br/>Jio's server over network<br/>(e.g. via SFTP).<br/><br/>The file name encodes the<br/>version<br/>number, with a .bin suffix.<br/>E.g. <b>2.02.bin</b> is the firmware<br/>file for v2.02.<br/><br/>Maximum firmware file size:<br/>256 KB.<br/>File name format is X.YZ.bin<br/>or SOCO_T1_X.YZ.bin"]:::process
+  addrNote["Register addresses shown are 1-based.<br/>Code might need to use 0-based addresses."]:::note
+  dlOk{"Firmware Download from<br/>server<br/>successful?"}:::decision
+  readVer["Fetch Current SOCO Version<br/>of Firmware<br/>over Modbus<br/><b>Command: Read Holding<br/>Registers (0x03)</b><br/>Address: 50007 (1-based)<br/>No. Of. Registers: 2<br/>Value Type: Int32<br/>Division Factor: 100"]:::process
+  verReadOk{"Modbus command<br/>successful?"}:::decision
+  verCmdRetry{"Command attempted<br/>4 times?"}:::decision
+  verCmdWait["Wait 1 second"]:::process
+  verGreater{"New Version &gt; Current<br/>Version?"}:::decision
+  initXfer["Initiate File Transfer on SOCO<br/><b>Command: Write Multiple<br/>Registers (0x10)</b><br/>Address: 40001 (1-based)<br/>No. Of. Registers: 2<br/>Value Type: Int32<br/>Value: 1"]:::process
+  xferOk{"Modbus command<br/>successful?"}:::decision
+  xferCmdRetry{"Command attempted<br/>4 times?"}:::decision
+  xferCmdWait["Wait 1 second"]:::process
+  readyTime["readyStartTime = getTime()"]:::process
+  wait1["Wait 2 seconds"]:::process
+  readStatus["Read Firmware Upgrade<br/>Status<br/>from SOCO over Modbus<br/><b>Command: Read Holding<br/>Registers (0x03)</b><br/>Address: 40001 (1-based)<br/>No. Of. Registers: 2<br/>Value Type: Int32"]:::process
+  statusOk{"Modbus command successful<br/>&amp;<br/>Firmware Upgrade Status<br/>== 1?"}:::decision
+  readyTimeout{"getTime() - readyStartTime<br/>&gt; 10 seconds?"}:::decision
+  initLoop["i = 0<br/>retryCount = 0<br/>size = len(Firmware)<br/>left = ROUNDUP(size, 200)<br/><br/>Load firmware into buf#91;#93; which is<br/>an array in memory of TEMS<br/><br/>Pad buf#91;#93; with 0x00 at the end<br/>to<br/>make sure it is rounded up to a<br/>size of 200"]:::process
+  sendRec["Send single firmware record<br/>over<br/>Modbus<br/><b>Command: Write File<br/>Record (0x15)</b><br/>File No.: 1<br/>Record No.: i<br/>Reference Type: 0x6<br/>Num Regs: 100<br/>Data: buf#91;i * 200 : (i+1) * 200#93;"]:::process
+  sendOk{"Modbus command<br/>successful?"}:::decision
+  incI["i = i + 1<br/>left = left - 200"]:::process
+  incRetry["retryCount = retryCount + 1"]:::process
+  leftZero{"left == 0?"}:::decision
+  retryMax{"retryCount &gt;= 3?"}:::decision
+  chunkWait["Wait 1 second"]:::process
+  resetRetry["retryCount = 0"]:::process
+  initUpg["Initiate Firmware Upgrade on<br/>SOCO<br/><b>Command: Write Multiple<br/>Registers (0x10)</b><br/>Address: 40001 (1-based)<br/>No. Of. Registers: 2<br/>Value Type: Int32<br/>Value: 2"]:::process
+  upgOk{"Modbus command<br/>successful?"}:::decision
+  upgCmdRetry{"Command attempted<br/>4 times?"}:::decision
+  upgCmdWait["Wait 1 second"]:::process
+  upgTime["upgradeStartTime = getTime()"]:::process
+  wait2["Wait 2 seconds"]:::process
+  readVer2["Fetch Current SOCO Version<br/>of Firmware<br/>over Modbus<br/><b>Command: Read Holding<br/>Registers (0x03)</b><br/>Address: 50007 (1-based)<br/>No. Of. Registers: 2<br/>Value Type: Int32<br/>Division Factor: 100"]:::process
+  verMatch{"Modbus command successful<br/>&amp;<br/>New Version == Current<br/>Version?"}:::decision
+  wrongVer{"Modbus read successful<br/>&amp;<br/>Current Version != Old<br/>(previous) Version?"}:::decision
+  upgTimeout{"getTime() -<br/>upgradeStartTime &gt; 120<br/>seconds?"}:::decision
+  success(["SOCO Firmware Upgrade<br/>Successful"]):::startEnd
+  fail(["SOCO Firmware Upgrade<br/>unsuccessful"]):::failEnd
+
+  start --> fetch
+  fetch --> dlOk
+  addrNote -.- readVer
+  dlOk -->|Yes| readVer
+  dlOk -->|No| fail
+  readVer --> verReadOk
+  verReadOk -->|No| verCmdRetry
+  verCmdRetry -->|No| verCmdWait
+  verCmdWait --> readVer
+  verCmdRetry -->|Yes| fail
+  verReadOk -->|Yes| verGreater
+  verGreater -->|No| fail
+  verGreater -->|Yes| initXfer
+  initXfer --> xferOk
+  xferOk -->|No| xferCmdRetry
+  xferCmdRetry -->|No| xferCmdWait
+  xferCmdWait --> initXfer
+  xferCmdRetry -->|Yes| fail
+  xferOk -->|Yes| readyTime
+  readyTime --> wait1
+  wait1 --> readStatus
+  readStatus --> statusOk
+  statusOk -->|Yes| initLoop
+  statusOk -->|No| readyTimeout
+  readyTimeout -->|Yes| fail
+  readyTimeout -->|No| wait1
+  initLoop --> sendRec
+  sendRec --> sendOk
+  sendOk -->|Yes| incI
+  sendOk -->|No| incRetry
+  incI --> leftZero
+  incRetry --> retryMax
+  leftZero -->|Yes| initUpg
+  leftZero -->|No| resetRetry
+  resetRetry --> sendRec
+  retryMax -->|Yes| fail
+  retryMax -->|No| chunkWait
+  chunkWait --> sendRec
+  initUpg --> upgOk
+  upgOk -->|No| upgCmdRetry
+  upgCmdRetry -->|No| upgCmdWait
+  upgCmdWait --> initUpg
+  upgCmdRetry -->|Yes| fail
+  upgOk -->|Yes| upgTime
+  upgTime --> wait2
+  wait2 --> readVer2
+  readVer2 --> verMatch
+  verMatch -->|Yes| success
+  verMatch -->|No| wrongVer
+  wrongVer -->|Yes| fail
+  wrongVer -->|No| upgTimeout
+  upgTimeout -->|Yes| fail
+  upgTimeout -->|No| wait2
+
+  classDef startEnd fill:#48ccc0,stroke:#2c9c94,stroke-width:2px,color:#ffffff,font-weight:bold
+  classDef process  fill:#d8e4f0,stroke:#78909c,stroke-width:1px,color:#1a2a3a
+  classDef decision fill:#f09c18,stroke:#b4780c,stroke-width:1px,color:#ffffff,font-weight:bold
+  classDef failEnd  fill:#c03c30,stroke:#902c24,stroke-width:2px,color:#ffffff,font-weight:bold
+  classDef note     fill:#fff6d5,stroke:#d9c96a,stroke-width:1px,color:#5a4a00
+`;
+
+// Theme / font / layout travel with the graph via the %%{init}%% directive
+// at the top of `graph`, so the same text renders identically in a browser,
+// mermaid.live, or kroki.io. Only securityLevel (which the directive cannot
+// set, by design) is configured here so that <b> bold tags render.
+mermaid.initialize({ startOnLoad: false, securityLevel: 'loose' });
+
+try {
+  const { svg } = await mermaid.render('socoFotaSvg', graph);
+  document.getElementById('diagram').innerHTML = svg;
+} catch (e) {
+  document.getElementById('diagram').outerHTML =
+    '<pre id="err">Mermaid render error:\n' + (e && e.message ? e.message : e) + '</pre>';
+}
+
+const btn = document.getElementById('dlSvg');
+if (btn) btn.addEventListener('click', () => {
+  const svgEl = document.querySelector('#diagram svg');
+  if (!svgEl) return;
+  const data = new XMLSerializer().serializeToString(svgEl);
+  const blob = new Blob([data], { type: 'image/svg+xml;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'SOCO_FOTA.svg';
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+</script>
+</body>
+</html>

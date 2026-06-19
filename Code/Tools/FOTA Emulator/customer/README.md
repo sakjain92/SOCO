@@ -3,7 +3,7 @@
 Tools for developing and testing TEMS-side firmware over-the-air (FOTA)
 upgrade code without needing a physical SOCO controller. Includes a
 ready-to-run SOCO emulator (binary), a reference TEMS-side client
-(Python), a sample firmware file, and a software loopback helper for
+(Python), sample firmware files, and a software loopback helper for
 hardware-free testing.
 
 ## What's in this directory
@@ -12,7 +12,8 @@ hardware-free testing.
 |-----------------------|-----------------------------------------------------|
 | `soco_fota_server`    | SOCO emulator. A self-contained Linux x86_64 binary that pretends to be a SOCO controller during a FOTA upgrade. |
 | `soco_fota_client.py` | Reference TEMS-side client (Python). Drives a complete upgrade against `soco_fota_server` (or a real SOCO). |
-| `2.14.bin`            | Sample firmware file ready to flash. |
+| `SOCO_T1_2.17.bin`, `SOCO_T1_2.21.bin` | Sample packed firmware files ready to flash. |
+| `SOCO_FOTA.png`       | Flowchart of the end-to-end FOTA upgrade sequence. |
 | `softwareLoopback.sh` | Optional helper that creates a pair of linked virtual serial ports so the client and server can talk without RS-485 hardware. |
 
 ## How it fits in
@@ -25,8 +26,8 @@ The SOCO FOTA upgrade flow is a 3-tier system:
 
 `soco_fota_server` plays the **right-hand box** — a SOCO controller. It
 speaks Modbus RTU as a slave: reports its current firmware version,
-receives a new firmware file in chunks, validates it, simulates
-flashing, and reports the new version after a brief delay.
+receives a firmware file in chunks, simulates flashing, and reports
+the configured upgrade version after a brief delay.
 
 `soco_fota_client.py` plays the **middle box** — TEMS. It reads the
 current version, requests a transfer, sends the firmware file
@@ -44,7 +45,7 @@ RS-485) to exercise the full upgrade flow end-to-end.
 - `socat`, only if you want to use the software loopback helper
 
 ```
-sudo apt install python3 python3-pip socat
+sudo apt install python3 python3-pip python3-venv socat
 ```
 
 For the client, install pinned dependencies. A virtualenv is
@@ -86,10 +87,13 @@ them without sudo themselves.
     --baud 19200                       \
     --parity N                         \
     --stopbits one                     \
-    --version 2.13
+    --version 2.13                     \
+    --upgrade-version 2.21
 ```
 
-The slave starts at v2.13 and listens for Modbus requests.
+The slave starts at v2.13 and listens for Modbus requests. After a
+successful upgrade it reports `--upgrade-version` — set it to the
+version of the firmware file you are flashing (here, `SOCO_T1_2.21.bin`).
 
 ### Terminal 3 — run the upgrade
 
@@ -97,7 +101,7 @@ The slave starts at v2.13 and listens for Modbus requests.
 
 ```
 python3 soco_fota_client.py            \
-    --file 2.14.bin                    \
+    --file SOCO_T1_2.21.bin            \
     --port /dev/ttyS10                 \
     --id 1                             \
     --baud 19200                       \
@@ -134,26 +138,29 @@ the emulator binary instead of the reference client.
     --stopbits one          \    # one | two, default one
     --timeout 2             \    # seconds, default 2
     --version 2.13          \    # initial firmware version, default 2.13
+    --upgrade-version 2.21  \    # version reported after a successful upgrade
     [--debug]                    # verbose protocol logging
 ```
 
 Behaviour:
 
-- Reports the current firmware version on holding register `50007`
-  (Int32, scaled by ×100). v2.13 is reported as `213`.
+- Reports the firmware version on holding register `50007` (Int32,
+  scaled by ×100; v2.13 is reported as `213`). It reports `--version`
+  until an upgrade completes, then `--upgrade-version`.
 - Hosts an upgrade-status state machine on holding register `40001`
-  (Int32): `0` idle → `1` ready → `2` upgrading.
-- On a write of `1` to `40001`: drops the register to `0` immediately
-  (acknowledging receipt) and only flips it to `1` after a ~2 s
-  prepare delay. Clients must poll for `1` rather than assume it's
-  there straight after the write.
+  (Int32): `0` idle, `1` ready, `127` error.
+- On a write of `1` to `40001`: resets the transfer state and sets
+  the status to `1` (ready). The client still polls `40001` for `1`
+  (its first read happens a couple of seconds after the write).
 - Accepts firmware in 200-byte chunks via Modbus function `0x15`
   (Write File Record), file number `1`, reference type `0x06`,
   exactly 100 registers per record, sequential record numbers from
-  `0`. Out-of-order or oversized records are rejected.
-- On a write of `2` to `40001`: validates the staged file, simulates
-  flash erase + program (~5 s) and reboot (~2 s), then reports the
-  new firmware's version on `50007`.
+  `0`. Out-of-order or oversized records are rejected. The emulator
+  does not inspect, decrypt, or checksum the record payload — image
+  validation is the real device's job.
+- On a write of `2` to `40001`: accepts the transfer, simulates a
+  brief flash + reboot during which it still reports the old version,
+  then reports `--upgrade-version` on `50007`.
 
 ### `soco_fota_client.py`
 
@@ -194,9 +201,10 @@ as opaque binaries — read the bytes, send them as described under
 "Modbus protocol summary" below, and don't try to interpret or modify
 the contents.
 
-The filename always follows the pattern `<version>.bin` (e.g.
-`2.14.bin`). The reference client uses this to derive the expected
-version after the upgrade. If you need a firmware build for a new
+The filename always follows the pattern `X.YZ.bin` or
+`SOCO_T1_X.YZ.bin` (e.g. `SOCO_T1_2.21.bin`). The reference client uses
+this to derive the expected version after the upgrade. If you need a
+firmware build for a new
 version, contact the Procom team.
 
 ## Modbus protocol summary
@@ -209,17 +217,19 @@ version, contact the Procom team.
 | Send firmware chunk     | `0x15`   | n/a     | record | file=1, ref=0x06, 100 regs  |
 | Request upgrade         | `0x10`   | 40001   | Int32  | write `2`                   |
 
-Addresses are wire-level register addresses with no Modicon 1-based
-offset adjustment.
+The register addresses in this document are **1-based** (matching the
+SOCO Modbus table). On the wire, a Modbus master must use the **0-based**
+equivalents: version `50007` → `50006`, status `40001` → `40000`. The
+reference `soco_fota_client.py` and `soco_fota_server` already use these
+0-based wire addresses.
 
 The full upgrade flow:
 
 1. **Version check.** TEMS reads register `50007`. Confirms the new
    firmware version is greater than the slave's current version.
-2. **Prepare.** TEMS writes `1` to register `40001`. Polls `40001`
+2. **Prepare.** TEMS writes `1` to register `40001`, then polls `40001`
    every ~2 s for up to 10 s, waiting for the value to read back as
-   `1`. (The first read after the write returns `0` — the slave is
-   still preparing.)
+   `1` (ready).
 3. **Transfer.** TEMS pads the firmware file to a multiple of 200
    bytes with `0x00` and sends it record-by-record via function
    `0x15`. File number `1`, reference type `0x06`, 100 registers per
@@ -248,8 +258,8 @@ The server is not responding to the status-register write. Check:
 - Both ends of the loopback are linked (`ls -l /dev/ttyS10
   /dev/ttyS11` should show two distinct PTYs).
 - Both sides agree on baud / parity / stop bits / slave ID.
-- The server is running and shows `Listening for Modbus requests`
-  before the client starts.
+- The server is running and printed its `SOCO FOTA emulator on ...`
+  startup line before the client starts.
 
 **Client gets stuck during chunked transfer**
 
@@ -268,8 +278,8 @@ if it looks tampered with.
 **`Filename '...' is not in X.YZ.bin form`**
 
 The reference client extracts the new version from the filename. Pass
-a file named exactly like `2.14.bin` — one or more digits, dot, two
-digits, `.bin`.
+a file named like `2.21.bin` or `SOCO_T1_2.21.bin` — an optional
+`SOCO_T1_` prefix, one or more digits, dot, two digits, `.bin`.
 
 **Binary won't run: `cannot execute binary file: Exec format error`**
 
