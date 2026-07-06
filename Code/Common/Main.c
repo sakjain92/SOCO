@@ -923,7 +923,7 @@ COMPILE_ASSERT(STUCK_SECONDS > DRIVE_GAP_SECONDS);
         }
     }
 
-    // ---- Load status flags (modbus 801-818) ----
+    // ---- Load status flags (modbus 801-819) ----
     //
     // Implements the customer-facing decision trees in
     // Document/CustomerFacing/SOCO_Load_Status_Logic.docx, evaluated from a
