@@ -1472,6 +1472,42 @@ void ModBusCommunication(void)
                   ResetAllSettingsToDefault();
                   break;
               }
+              else if (Start_Add == 50024 && NoOfBytes == 2)
+              {
+                  // Clear the Persistent-Storage-Error flag. SAME address as the
+                  // read register (customer-facing 50025, wire 50024): read gives
+                  // the 0/1 status via FC=0x03, writing 1 here via FC=0x10 clears
+                  // it. Clears ProductInfo.EepromFaultFlag (set at boot when an
+                  // EEPROM corruption forced a settings/energy reset) and persists
+                  // it. Any other value is rejected with exception 0x03.
+                  //
+                  uint32_t value =
+                      ((uint32_t)RecieveArray[10]) +
+                      ((uint32_t)RecieveArray[9]<<8) +
+                      ((uint32_t)RecieveArray[8]<<16)+
+                      ((uint32_t)RecieveArray[7]<<24);
+
+                  if (value != 1)
+                  {
+                      Fun_Received |= 0x80;
+                      Mod_TransmitFrame.Data_Array[0] = 0x03;
+                      SendData_UART((uint8_t)CopySetPara[PARA_DEVICE_ID],
+                                    Fun_Received, 1);
+                      Fun_Received &=~ 0x80;
+                      break;
+                  }
+
+                  memcpy(Mod_TransmitFrame.Data_Array, &RecieveArray[2], 4);
+                  SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received, 4);
+                  g_ProductInfo.EepromFaultFlag = 0;
+                  
+                  InterruptFlag |= INT_DATA_SAVING_EEPROM;
+                  EepromWrite(PRODUCT_INFO_LOC + offsetof(struct ProductInfo, EepromFaultFlag),
+                              sizeof(g_ProductInfo.EepromFaultFlag),
+                              EXT_EEPROM, (uint8_t *)&g_ProductInfo.EepromFaultFlag);
+                  InterruptFlag &=~ INT_DATA_SAVING_EEPROM;
+                  break;
+              }
               else if((Start_Add >= 30000)&&(Start_Add <= 30000+(MAX_PARAM_LIMIT*2))&&(!(Start_Add %2)))
               {
                 Start_Add -= 30000;
@@ -1596,9 +1632,12 @@ void ModBusCommunication(void)
                       ((uint32_t)RecieveArray[13]<<8) +
                       ((uint32_t)RecieveArray[12]<<16)+
                       ((uint32_t)RecieveArray[11]<<24);
+                  // Guard against the power-fail ISR driving I2C concurrently.
+                  InterruptFlag |= INT_DATA_SAVING_EEPROM;
                   EepromWrite(PRODUCT_INFO_LOC,
                               sizeof(struct ProductInfo), EXT_EEPROM,
                               (uint8_t *)&g_ProductInfo);
+                  InterruptFlag &=~ INT_DATA_SAVING_EEPROM;
                   memcpy(Mod_TransmitFrame.Data_Array, &RecieveArray[2], 4);
                   SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received,4);
                   break;
@@ -1620,9 +1659,12 @@ void ModBusCommunication(void)
                       ((uint32_t)RecieveArray[9]<<8) +
                       ((uint32_t)RecieveArray[8]<<16)+
                       ((uint32_t)RecieveArray[7]<<24);
+                  // Guard against the power-fail ISR driving I2C concurrently.
+                  InterruptFlag |= INT_DATA_SAVING_EEPROM;
                   EepromWrite(PRODUCT_INFO_LOC,
                               sizeof(struct ProductInfo), EXT_EEPROM,
                               (uint8_t *)&g_ProductInfo);
+                  InterruptFlag &=~ INT_DATA_SAVING_EEPROM;
                   memcpy(Mod_TransmitFrame.Data_Array, &RecieveArray[2], 4);
                   SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received,4);
                   break;
@@ -1646,9 +1688,12 @@ void ModBusCommunication(void)
                       ((uint32_t)RecieveArray[9]<<8) +
                       ((uint32_t)RecieveArray[8]<<16)+
                       ((uint32_t)RecieveArray[7]<<24);
+                  // Guard against the power-fail ISR driving I2C concurrently.
+                  InterruptFlag |= INT_DATA_SAVING_EEPROM;
                   EepromWrite(PRODUCT_INFO_LOC,
                               sizeof(struct ProductInfo), EXT_EEPROM,
                               (uint8_t *)&g_ProductInfo);
+                  InterruptFlag &=~ INT_DATA_SAVING_EEPROM;
                   memcpy(Mod_TransmitFrame.Data_Array, &RecieveArray[2], 4);
                   SendData_UART(CopySetPara[PARA_DEVICE_ID], Fun_Received,4);
                   break;
@@ -2004,7 +2049,14 @@ void ModBusCommunication(void)
 
                 // Write encrypted firmware (no header) to EEPROM
                 uint32_t eepromAddr = FOTA_STAGING_START + g_fota.bytesWritten;
+                // Guard: a power-fail mid-write must not let the power-fail ISR
+                // (Interrupt.c) launch its own PowerDownDataSave()->EepromWrite()
+                // and drive I2C from two contexts. A bus wedge HERE would brick
+                // the unit in the middle of a firmware update - the one moment
+                // FOTA must stay reliable.
+                InterruptFlag |= INT_DATA_SAVING_EEPROM;
                 EepromWrite(eepromAddr, fwBytes, EXT_EEPROM, fwBuf);
+                InterruptFlag &=~ INT_DATA_SAVING_EEPROM;
                 g_fota.chunksReceived++;
                 g_fota.bytesWritten += fwBytes;
 

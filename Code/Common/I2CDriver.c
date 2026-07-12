@@ -241,7 +241,7 @@ void CheckEpromFree(uint8_t DeviceAddress)
     }
 
     Temp++;
-    if (Temp > 10000)
+    if (Temp > 256)
     {
         break;
     }

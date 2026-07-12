@@ -10,7 +10,7 @@
 // 3 digit version number
 // Shown on display as X.YY
 //
-#define VERSION_NO  221
+#define VERSION_NO  223
 
 #define MODEL_COMM_PROCOM
 #define MODEL_DATA_SAVE  

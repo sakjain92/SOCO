@@ -7,13 +7,30 @@
 
 void ParaLocUpdate(uint16_t WriteAddress);
 void StoredDataVerification(void);
-void InitilisationError(void);
+
+// ---- EEPROM corruption recovery (boot) --------------------------------------
+// On a settings/energy CRC failure we first RESTART up to 3 times. Only if
+// the CRC still fails after 3 restarts do we treat it as real corruption and
+// reset the affected part to defaults, recording it in ProductInfo (exposed and
+// clearable over Modbus). This replaces the old InitilisationError() while(1)
+// brick - the unit now always boots.
+#define FAULT_SETTINGS       0x01u          // ProductInfo.EepromFaultFlag: settings reset
+#define FAULT_DATA           0x02u          // ProductInfo.EepromFaultFlag: energy/data reset
+#define EEPROM_RETRY_MAGIC   0x52545259u    // 'RTRY'
+#define EEPROM_RETRY_STEP    0u
+#define EEPROM_RETRY_CLEAR   1u
+
+static void WriteDefaultSettings(void);
+static void EepromRetry(uint8_t action);
+static void SetEepromFaultFlag(uint8_t part);
+#ifdef MODEL_DATA_SAVE
+static void WriteDefaultEnergyData(void);
+#endif
 
 void NewMeterInit(void)
 {
   uint16_t i;
-  uint16_t temp; 
-  uint16_t Tempointer;
+  uint16_t temp;
   RESET_WATCH_DOG;
 
   if((CalibrationCoeff.INIT_DATA1!=METER_INIT_VALUE)||(CalibrationCoeff.INIT_DATA2!=METER_INIT_VALUE))
@@ -27,31 +44,13 @@ void NewMeterInit(void)
     } 
     temp=DEFAULT_METER_PASSWORD;
     EepromWrite(PASSWORD_SAV_LOC,2,EXT_EEPROM,(uint8_t *)&temp );
-    FillDefaultValue();
-    temp=CRCCalculation(CopySetPara,MAX_PARAM_LIMIT);
-    CopySetPara[MAX_PARAM_LIMIT]=temp;
-    ParaLocUpdate(PROGRAM_DATA_LOC1_START);
-    ParaLocUpdate(PROGRAM_DATA_LOC2_START);   
+    WriteDefaultSettings();
     SaveFlashData();
     CalBuffer.INIT_DATA1=METER_INIT_VALUE;
     CalBuffer.INIT_DATA2=METER_INIT_VALUE;
     WriteFlashData();    
-#ifdef  MODEL_DATA_SAVE     
-    for(i=0;i<sizeof(StorageBuffer);i++)*((uint8_t *)&StorageBuffer+i)=0;
-    StorageBuffer.ImportVarhNeg=0.00001;
-    StorageBuffer.ExportVarhNeg=0.00001;
-    StorageBuffer.SolarImportVarhNeg=0.00001;
-    StorageBuffer.SolarExportVarhNeg=0.00001;
-    i=sizeof(StorageBuffer);
-    StorageBuffer.StorageCounter=1;
-    StorageBuffer.StorageLocation=DATA_SAVE_START_LOC;
-    Tempointer=offsetof(struct STORE,StoreCRC);
-    StorageBuffer.StoreCRC=CRCCalculation((uint16_t *)&StorageBuffer,Tempointer/2);
-    EepromWrite(StorageBuffer.StorageLocation,sizeof(StorageBuffer),EXT_EEPROM,(uint8_t *)&StorageBuffer );
-    
-    PowerDownDataSave();
-    //SaveTripData();
-    SaveOldData();
+#ifdef  MODEL_DATA_SAVE
+    WriteDefaultEnergyData();
 #endif
     
 #ifdef MODEL_RELEASED 
@@ -81,6 +80,75 @@ void ParaLocUpdate(uint16_t WriteAddress)
     if(k>64)k=k-64;
     else k=0;
   }
+}
+
+// Reset the user parameter block (both program-data copies) to factory
+// defaults. Reused by NewMeterInit (fresh unit) and the corruption recovery.
+// Does NOT touch calibration (flash) or the keypad password.
+static void WriteDefaultSettings(void)
+{
+  uint16_t temp;
+  FillDefaultValue();
+  temp = CRCCalculation(CopySetPara, MAX_PARAM_LIMIT);
+  CopySetPara[MAX_PARAM_LIMIT] = temp;
+  ParaLocUpdate(PROGRAM_DATA_LOC1_START);
+  ParaLocUpdate(PROGRAM_DATA_LOC2_START);
+}
+
+#ifdef MODEL_DATA_SAVE
+// Zero all energy/storage counters and persist. Reused by NewMeterInit (fresh
+// unit) and the corruption recovery.
+static void WriteDefaultEnergyData(void)
+{
+  uint16_t i, Tempointer;
+  for(i=0;i<sizeof(StorageBuffer);i++)*((uint8_t *)&StorageBuffer+i)=0;
+  StorageBuffer.ImportVarhNeg=0.00001;
+  StorageBuffer.ExportVarhNeg=0.00001;
+  StorageBuffer.SolarImportVarhNeg=0.00001;
+  StorageBuffer.SolarExportVarhNeg=0.00001;
+  StorageBuffer.StorageCounter=1;
+  StorageBuffer.StorageLocation=DATA_SAVE_START_LOC;
+  Tempointer=offsetof(struct STORE,StoreCRC);
+  StorageBuffer.StoreCRC=CRCCalculation((uint16_t *)&StorageBuffer,Tempointer/2);
+  EepromWrite(StorageBuffer.StorageLocation,sizeof(StorageBuffer),EXT_EEPROM,(uint8_t *)&StorageBuffer );
+  PowerDownDataSave();
+  SaveOldData();
+}
+#endif
+
+// Boot EEPROM-retry counter. Survives our NVIC_SystemReset (a warm reset keeps
+// __no_init RAM) but starts fresh on a true power-on (garbage RAM -> magic
+// mismatch). All access goes through here so the statics stay function-local.
+//   EEPROM_RETRY_STEP  : CRC failed -> restart (up to 3x) to free a wedged
+//                        EEPROM; only returns once the 3 restarts are spent, so
+//                        the caller then applies defaults.
+//   EEPROM_RETRY_CLEAR : data read valid, or defaults written -> reset counter.
+static void EepromRetry(uint8_t action)
+{
+  __no_init static volatile uint32_t magic;
+  __no_init static volatile uint8_t  count;
+
+  if (magic != EEPROM_RETRY_MAGIC) { magic = EEPROM_RETRY_MAGIC; count = 0; }
+
+  if (action == EEPROM_RETRY_CLEAR) { count = 0; return; }
+
+  if (count < 3u) { count++; NVIC_SystemReset(); }   // restart (does not return)
+  /* count == 3: fall through -> caller writes defaults */
+}
+
+// Record + persist that an EEPROM corruption forced a reset. Writes ONLY the
+// 4-byte EepromFaultFlag field (accumulated in RAM across this boot), never the
+// whole struct - so a flaky EEPROM read can never land garbage over the
+// (CRC-less) SerialNumber / Calibrated fields. The M24256 partial-page write
+// touches just those 4 bytes; the rest of the ProductInfo page is untouched.
+static void SetEepromFaultFlag(uint8_t part)
+{
+  static uint32_t accum = 0;               // faults this boot: settings | energy
+  accum |= part;
+  g_ProductInfo.EepromFaultFlag = accum;   // RAM copy so Modbus reflects it this session
+  EepromWrite(PRODUCT_INFO_LOC + offsetof(struct ProductInfo, EepromFaultFlag),
+              sizeof(g_ProductInfo.EepromFaultFlag), EXT_EEPROM,
+              (uint8_t *)&g_ProductInfo.EepromFaultFlag);
 }
 
 
@@ -161,7 +229,14 @@ void StoredDataVerification(void)
         ParaLocUpdate(PROGRAM_DATA_LOC2_START);
          RESET_WATCH_DOG;
       }  
-      else  InitilisationError(); 
+      else
+      {
+        // Both program-data copies failed CRC. Restart up to 3x to free a
+        // wedged EEPROM; if still bad after that, reset settings to default.
+        EepromRetry(EEPROM_RETRY_STEP);
+        WriteDefaultSettings();
+        SetEepromFaultFlag(FAULT_SETTINGS);
+      } 
   }
   else EepromRead(PROGRAM_DATA_LOC2_START,k,EXT_EEPROM,(uint8_t *)CopySetPara );
 #ifdef MODEL_DATA_SAVE  
@@ -198,17 +273,34 @@ void StoredDataVerification(void)
     }
     else
     {
-      if(k==0)InitilisationError(); 
+      if(k==0)
+      {
+        // No valid stored energy copy. Restart up to 3x to free a wedged
+        // EEPROM; if still bad after that, reset energy data to default.
+        EepromRetry(EEPROM_RETRY_STEP);
+        WriteDefaultEnergyData();
+        SetEepromFaultFlag(FAULT_DATA);
+      } 
       else EepromRead(TempStorageLoc,sizeof(StorageBuffer),EXT_EEPROM,(uint8_t*)&StorageBuffer);
     }
   }
   else
   {
-    if(k==0)InitilisationError(); 
+    if(k==0)
+      {
+        // No valid stored energy copy. Restart up to 3x to free a wedged
+        // EEPROM; if still bad after that, reset energy data to default.
+        EepromRetry(EEPROM_RETRY_STEP);
+        WriteDefaultEnergyData();
+        SetEepromFaultFlag(FAULT_DATA);
+      } 
     else EepromRead(TempStorageLoc,sizeof(StorageBuffer),EXT_EEPROM,(uint8_t*)&StorageBuffer);
   }
 #endif // MODEL_DATA_SAVE
   RESET_WATCH_DOG;;
+  // Valid data reached (read OK, recovered from the 2nd copy, or defaults
+  // written) -> clear the boot retry counter.
+  EepromRetry(EEPROM_RETRY_CLEAR);
   DisplayParameterUpdate();
   
 } 
@@ -269,22 +361,3 @@ void ResetAllSettingsToDefault(void)
   ParaSettingUpdate();
   RESET_WATCH_DOG;
 }
-
- 
-
-
-// UNDONE: This is dangerous. If we ever hit this, the controller will be
-// bricked. We need FOTA over modbus to always work. Atleast provide a provision
-// for the board to go into bootloader mode and provide provision for boot
-// loader to reset EEPROM to default setting on such an error.
-// But make sure to give an error to user in such a failure case also
-// so that it can be found during testing
-//
-void InitilisationError(void)
-{  
-  while(1)
-  {
-      RESET_WATCH_DOG;
-  }
-}  
-

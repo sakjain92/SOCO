@@ -385,7 +385,9 @@ void UpdateEditSettings(void)
       //
       DisplaySetup.DisplayScanPage=0;
       DisplaySetup.DisplayScrollStatus=0;
+      InterruptFlag |=INT_DATA_SAVING_EEPROM;
       EepromWrite(SCROLL_LOCK_LOC,2,EXT_EEPROM,(uint8_t *)&DisplaySetup.DisplayScrollStatus );
+      InterruptFlag &=~INT_DATA_SAVING_EEPROM;
       DisplayDisabled();
       ParaSettingUpdate();
     }

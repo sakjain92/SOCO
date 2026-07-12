@@ -961,7 +961,8 @@ struct ProductInfo
     uint32_t SerialNumber[2];          // 8 bytes: lower and upper halves
     uint32_t FunctionallyTestedFlag;   // 4 bytes: non-zero = product has been tested
     uint32_t CalibratedFlag;           // 4 bytes: non-zero = product has been calibrated
-    uint8_t  Reserved[48];             // 48 bytes: reserved for future use
+    uint32_t EepromFaultFlag;          // 4 bytes: bit0 = settings reset, bit1 = energy reset (EEPROM corruption recovery)
+    uint8_t  Reserved[44];             // 44 bytes: reserved for future use
 };
 COMPILE_ASSERT(sizeof(struct ProductInfo) == PRODUCT_INFO_SIZE);
 
