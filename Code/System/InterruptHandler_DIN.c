@@ -192,6 +192,17 @@ void DMA1_Channel7_IRQHandler(void)
   {
     Timer.TransmissionFailed = 1;
   }
+  else
+  {
+    // Defensive: only TCIE/TEIE are enabled, so a real event is always TCIF7 or
+    // TEIF7. If we ever enter with NEITHER set (a spurious / late-cleared re-
+    // entered IRQ), still mark the transfer done so the TIM2 poll releases RS485
+    // back to RX - otherwise TCIE/TEIE get disabled below with no flag set and
+    // the line is stranded in TX until a power cycle. Use transfercomplete (not
+    // TransmissionFailed) so the poll still waits for the USART TC flag and
+    // cannot truncate a last byte still shifting out on a benign re-entry.
+    Timer.transfercomplete = 1;
+  }
   DMA1_Channel7->CCR &=~ 0x0A;
   DMA1->IFCR |= (1 << (4 * (7-1)));
   if (!g_testingStatus.TestingModeEnabled)

@@ -2142,6 +2142,11 @@ void SendData_UART(uint8_t Add, uint8_t Func,  uint8_t Send_Length)
       DMA1_Channel7->CCR &=~ 0x01;
       DMA1_Channel7->CMAR = (unsigned int) &Mod_TransmitFrame.Slave_Address;
       DMA1_Channel7->CNDTR = (uint32_t)(Send_Length+4);
+      // Clear any stale channel-7 flags BEFORE enabling TCIE below. A leftover
+      // TCIF7 would otherwise re-pend the ch7 IRQ the instant TCIE is set,
+      // servicing the PREVIOUS transfer (setting transfercomplete early and
+      // disabling TCIE), so this transfer would never raise its own IRQ.
+      DMA1->IFCR |= (1 << (4 * (7-1)));
       DMA1_Channel7->CCR |= 0x0A;
       DMA1_Channel7->CCR |= 0x01;
       
