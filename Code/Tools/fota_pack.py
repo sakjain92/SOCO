@@ -234,6 +234,16 @@ def main():
     if not os.path.isdir(args.output_dir):
         sys.exit("Error: output directory does not exist: %s" % args.output_dir)
 
+    # Output path is fixed by version. Remove any stale same-named file up
+    # front so a failed or oversized build never leaves an ambiguous binary
+    # behind for this version (e.g. a previous build's file masquerading as
+    # the current one).
+    output_name = "SOCO_T1_%s.bin" % args.version
+    output_path = os.path.join(args.output_dir, output_name)
+    if os.path.exists(output_path):
+        os.remove(output_path)
+        print("Removed existing output: %s" % output_path)
+
     # --- Parse HEX ---
 
     print("Parsing %s ..." % args.file)
@@ -294,9 +304,31 @@ def main():
     total_records = total_data // FOTA_CHUNK_SIZE
     assert total_data % FOTA_CHUNK_SIZE == 0
 
-    if len(firmware) > FOTA_MAX_FW_SIZE:
-        sys.exit("Error: firmware (%d bytes) exceeds EEPROM staging capacity "
-                 "(%d bytes)" % (len(firmware), FOTA_MAX_FW_SIZE))
+    # --- Enforce the EEPROM staging capacity ---
+    # The image is staged in external EEPROM (0x8000..0x20000, 96 KB) before
+    # the bootloader flashes it, and the bootloader rejects anything larger.
+    # This ceiling is FIXED for already-fielded units (the bootloader that
+    # defines it is not itself updatable over FOTA), so an oversized image can
+    # never be delivered -- refuse to emit one, and warn earlier at 90% of the
+    # limit so growth toward the wall is visible on every release.
+    staged = len(firmware)          # bytes staged in EEPROM (== g_fota.firmwareSize)
+    warn_threshold = (FOTA_MAX_FW_SIZE * 9) // 10
+
+    if staged > FOTA_MAX_FW_SIZE:
+        sys.exit("Error: firmware is %d bytes (%.1f KB) -- EXCEEDS the %d KB "
+                 "EEPROM staging capacity by %d bytes. FOTA cannot deliver this "
+                 "image; no output file was written."
+                 % (staged, staged / 1024.0, FOTA_MAX_FW_SIZE // 1024,
+                    staged - FOTA_MAX_FW_SIZE))
+
+    if staged > warn_threshold:
+        sys.stderr.write(
+            "WARNING: firmware is %d bytes = %.1f%% of the %d KB FOTA staging "
+            "limit; only %.1f KB of headroom remains. This ceiling CANNOT be "
+            "raised on fielded units -- audit code size before adding more.\n"
+            % (staged, 100.0 * staged / FOTA_MAX_FW_SIZE,
+               FOTA_MAX_FW_SIZE // 1024,
+               (FOTA_MAX_FW_SIZE - staged) / 1024.0))
 
     # --- Compute CRC of plaintext firmware ---
 
@@ -314,9 +346,6 @@ def main():
 
     # --- Write output ---
 
-    output_name = "SOCO_T1_%s.bin" % args.version
-    output_path = os.path.join(args.output_dir, output_name)
-
     with open(output_path, 'wb') as f:
         f.write(header)
         f.write(encrypted)
@@ -331,6 +360,11 @@ def main():
     print("  Plaintext CRC: 0x%04X" % plaintext_crc)
     print("  PRNG seed:     0x%04X" % seed)
     print("  File size:     %d bytes" % output_size)
+    print("  Staging use:   %d / %d bytes (%.1f%%, %.1f KB free of the %d KB limit)"
+          % (len(firmware), FOTA_MAX_FW_SIZE,
+             100.0 * len(firmware) / FOTA_MAX_FW_SIZE,
+             (FOTA_MAX_FW_SIZE - len(firmware)) / 1024.0,
+             FOTA_MAX_FW_SIZE // 1024))
 
 
 if __name__ == "__main__":

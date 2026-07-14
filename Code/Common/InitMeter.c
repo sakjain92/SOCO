@@ -27,6 +27,69 @@ static void SetEepromFaultFlag(uint8_t part);
 static void WriteDefaultEnergyData(void);
 #endif
 
+
+// Verify the external EEPROM is at least EEPROM_SIZE bytes and correctly
+// addressable. I2C EEPROMs report no size; a part smaller than required folds
+// high addresses onto low ones (address wrap), so we write a distinct marker to
+// the last page of each 32KB block up to EEPROM_SIZE and read them all back. On
+// a too-small chip the markers collide; on an absent / mis-soldered chip the
+// reads NAK and return 0xFF - either way a readback mismatches. Goes through the
+// normal EepromWrite/Read path, so a pass means FOTA's staging addresses (which
+// use the same A16/A17 device-select addressing) are real and distinct.
+// Non-destructive on a good board: the first-block marker (just below 32KB)
+// sits in the unused metadata gap (zeroed moments later by NewMeterInit) and
+// the rest in FOTA staging scratch.
+// Returns true if the EEPROM is at least the required size, false otherwise.
+static bool CheckEepromSize(void)
+{
+  // EEPROM parts step in size as 32 / 64 / 128 / 256 KB, so putting one marker
+  // in every 32KB block up to the required size catches any too-small part.
+  const uint32_t BLOCK_32KB = 32u * 1024u;
+  const uint32_t numBlocks  = EEPROM_SIZE / BLOCK_32KB;   // e.g. 128KB -> 4 blocks
+  uint32_t block, addr, marker, readback;
+
+  // Marker in the last page of each 32KB block: 1*32KB, 2*32KB, ... numBlocks*32KB.
+  for(block = 1u; block <= numBlocks; block++)
+  {
+    addr   = block * BLOCK_32KB - EEPROM_PAGE_LENGTH;   // last page of this 32KB block
+    marker = addr ^ 0xA5A5A5A5u;                        // distinct per block, never 0x00 / 0xFF
+    EepromWrite(addr, 4, EXT_EEPROM, (uint8_t *)&marker);
+    RESET_WATCH_DOG;
+  }
+  for(block = 1u; block <= numBlocks; block++)
+  {
+    addr     = block * BLOCK_32KB - EEPROM_PAGE_LENGTH;
+    marker   = addr ^ 0xA5A5A5A5u;
+    readback = 0;
+    EepromRead(addr, 4, EXT_EEPROM, (uint8_t *)&readback);
+    RESET_WATCH_DOG;
+    if(readback != marker) return false;
+  }
+  return true;
+}
+
+// Never returns: blink all front-panel LEDs together (~2.5 Hz) forever, feeding
+// the watchdog so the unit stays in this visible fault state instead of
+// resetting. Used when CheckEepromSize() fails at first boot - a clear "pull
+// this board" signal on the production line. Runs with interrupts still off (the
+// SysTick display refresh is not up yet), so it drives the LED GPIOs directly
+// and busy-waits with Delay1Msec12Mhz.
+static void EepromSizeErrorBlink(void)
+{
+  for(;;)
+  {
+    SWITCH_ON_LED1; SWITCH_ON_LED2; SWITCH_ON_LED3; SWITCH_ON_LED4; SWITCH_ON_LED5;
+    SWITCH_ON_LED6; SWITCH_ON_LED7; SWITCH_ON_LED8; SWITCH_ON_LED9;
+    RESET_WATCH_DOG;
+    Delay1Msec12Mhz(200);
+
+    SWITCH_OFF_LED1; SWITCH_OFF_LED2; SWITCH_OFF_LED3; SWITCH_OFF_LED4; SWITCH_OFF_LED5;
+    SWITCH_OFF_LED6; SWITCH_OFF_LED7; SWITCH_OFF_LED8; SWITCH_OFF_LED9;
+    RESET_WATCH_DOG;
+    Delay1Msec12Mhz(200);
+  }
+}
+
 void NewMeterInit(void)
 {
   uint16_t i;
@@ -35,7 +98,18 @@ void NewMeterInit(void)
 
   if((CalibrationCoeff.INIT_DATA1!=METER_INIT_VALUE)||(CalibrationCoeff.INIT_DATA2!=METER_INIT_VALUE))
   {
-    ProtectionReset(); 
+    // Fresh / uncalibrated unit (first-ever boot): confirm the external EEPROM
+    // is the required size and addressable before initialising it. A too-small
+    // or absent part (BOM / soldering error) makes FOTA staging wrap and corrupt
+    // calibration, yet passes a normal functional test since all live data fits
+    // in the first 32KB. Halt on failure so the defect is caught in production.
+    // Runs ONLY on fresh units, so a transient EEPROM glitch in the field can
+    // never brick a calibrated unit (the CRC retry / de-brick handles that).
+    if(!CheckEepromSize())
+    {
+      EepromSizeErrorBlink();      // blinks all LEDs forever; never returns
+    }
+    ProtectionReset();
     for(i=0;i<64;i++)LcdEpromBuffer[i]=0; 
     for(i=0;i<MAX_METADATA_NUM_PAGES;i++) 
     {

@@ -604,7 +604,8 @@
 // TODO: Test SOCO software version in testing jig
 // TODO: Neutral current & Phase-to-Phase voltage needs to be checked as depends on inter-phase calibration
 // TODO: CT wire length might need to be reduced on confirmation of all Panel builders
-// TODO: Check for counterfeit temperature sensors using https://github.com/cpetrich/counterfeit_DS18B20
+// TODO: Check for counterfeit temperature sensors using https://github.com/cpetrich/counterfeit_DS18B20. We can buy the sensors from 
+// some place apart from Invendis to save on cost
 
 
 // TODO: Bug: Fan fault clears on fan stopping. Also, fan fault doesn't stop fans
@@ -620,3 +621,4 @@
 
 // UNDONE: In SOCO, X cap in AC voltage is rated for 310VAC whereas it should be 440V or higher for phase to phase voltage. We should also get this type tested for 440VAC continous application. ALso need to check temperature ratin gof all electrolytic capacitors.
 // UNDONE: Display slightly flickers as it's ISR has lower priority as compared to others
+// UNDONE: We can use a 1Mb EEPROM instead of 2Mb EEPROM to save on cost
