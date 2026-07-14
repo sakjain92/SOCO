@@ -123,8 +123,16 @@ void ProcessFreq(void)
     if(FreqFlag & FF_MEAS_OVER)
     {
       FreqFlag &=~FF_MEAS_OVER;
-      Frequency=(6e10/((float)SaveFreqMeasDuration));
-      InstantPara.Frequency=Frequency/100;
+      // Guard a timed-out measurement (SaveFreqMeasDuration==0 -> 6e10/0 = +Inf).
+      if(SaveFreqMeasDuration > 0)
+      {
+        Frequency=(6e10/((float)SaveFreqMeasDuration));
+        // Clamp only the high side: an over-range reading is capped to
+        // MAX_FREQ_ALLOWED on the LCD / Modbus; low readings are shown as-is.
+        float fHz = Frequency/100.0f;
+        if(fHz > MAX_FREQ_ALLOWED) fHz = MAX_FREQ_ALLOWED;
+        InstantPara.Frequency = fHz;
+      }
     }
     
   }
@@ -139,11 +147,16 @@ void ProcessFreq(void)
   }
   else
   {
-    // Too high frequency can cause interrupts to fire too fast
-    //
+  	// Too high frequency can cause interrupts to fire too fast
+  	//
+    // NaN-safe clamp: written as !(<=) / !(>=) so a NaN (which fails every
+    // ordered comparison) is forced into range instead of slipping through to
+    // (uint32_t)(K/NaN) = 0 -> ARR = 0 -> TIM2 free-runs -> the metering ISR
+    // starves the main loop and the watchdog -> hang. Behaviour is identical to
+    // >/< for all finite values.
     float newFrequency = Frequency;
-    if (newFrequency > MAX_FREQ_ALLOWED * 100) newFrequency = MAX_FREQ_ALLOWED * 100;
-    if (newFrequency < MIN_FREQ_ALLOWED * 100) newFrequency = MIN_FREQ_ALLOWED * 100;
+    if (!(newFrequency <= MAX_FREQ_ALLOWED * 100)) newFrequency = MAX_FREQ_ALLOWED * 100;
+    if (!(newFrequency >= MIN_FREQ_ALLOWED * 100)) newFrequency = MIN_FREQ_ALLOWED * 100;
     IntTimerCount.TimerNewValue = (uint32_t)((5000*3750.0)/newFrequency);
   }
 }
@@ -158,7 +171,13 @@ static float ComputeFreqFromState(struct FreqMeasState *s)
   if(s->Flag & FF_MEAS_OVER)
   {
     s->Flag &=~FF_MEAS_OVER;
-    return (6e10/((float)s->SaveMeasDuration))/100;
+    // Guard a timed-out measurement (SaveMeasDuration==0 -> 6e10/0 = +Inf).
+    if(s->SaveMeasDuration > 0)
+    {
+      float f = (6e10/((float)s->SaveMeasDuration))/100;
+      if(f > MAX_FREQ_ALLOWED) f = MAX_FREQ_ALLOWED;   // clamp high only
+      return f;
+    }
   }
   return -1.0f;
 }

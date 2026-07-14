@@ -619,3 +619,4 @@
 // UNDONE: Jio mentioned going into 0.5seconda refresh metrology. But it depends if Spark Microinverter can respond within 0.5 seconds commands.
 
 // UNDONE: In SOCO, X cap in AC voltage is rated for 310VAC whereas it should be 440V or higher for phase to phase voltage. We should also get this type tested for 440VAC continous application. ALso need to check temperature ratin gof all electrolytic capacitors.
+// UNDONE: Display slightly flickers as it's ISR has lower priority as compared to others
