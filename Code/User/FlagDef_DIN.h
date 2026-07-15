@@ -575,7 +575,12 @@ extern char _phase_lookup_max_index_below_calpf_count[
 #define DISPLAY_SCROLL_ON    0
 #define DISPLAY_SCROLL_OFF   1
 
-#define ENERGY_OVER_FLOW_LIMIT 999999.999999999 
+// Raised 10x (was 999999.999999999). EnergyOverflowLimit = this * 1000 = ~1e10 Wh
+// (10 GWh) rollover. At that ceiling the energy registers cannot overflow within
+// SOCO's rated 10-year life for typical loads. Display auto-scales kWh->MWh above
+// 1 GWh (DisplayEnergy); Modbus double keeps full precision; the 4-byte float
+// Modbus view loses ~1.2 kWh of resolution at 10 GWh (negligible, ~1e-7 relative).
+#define ENERGY_OVER_FLOW_LIMIT 9999999.99999999
 
 #define FILT_600_COEFF_X1   0.18669433f
 #define FILT_600_COEFF_X2   0.37338867f

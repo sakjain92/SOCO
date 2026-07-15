@@ -702,13 +702,13 @@ void DisplayEnergy(double Data,uint8_t ScrIndex, uint8_t DisIndex, uint8_t led )
     Data=-1*Data;
     TempFlag |=0x01;
   }
-  if(Data>1e12)
+  if(Data>=1e12)
   {
     Data=Data/1e6;
     TempFlag |=0x04; //  display  M 
     TempFlag |=0x02; // display k    
   }
-  if(Data>1e9)
+  else if(Data>=1e9)
   {
     Data=Data/1e3;
     TempFlag |=0x04; //  display  M 
@@ -748,13 +748,13 @@ void DisplayOldEnergy(double Data,uint8_t ScrIndex, uint8_t DisIndex,uint8_t led
     TempFlag |=0x01;
   }
 
-  if(Data>1e12)
+  if(Data>=1e12)
   {
     Data=Data/1e6;
     TempFlag |=0x04; //  display  M 
     TempFlag |=0x02; // display k  
   }
-  if(Data>1e9)
+  else if(Data>=1e9)
   {
     Data=Data/1e3;
     TempFlag |=0x04; //  display  M 
